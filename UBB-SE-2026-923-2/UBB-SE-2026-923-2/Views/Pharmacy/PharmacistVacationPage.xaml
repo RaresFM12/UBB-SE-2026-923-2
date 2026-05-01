@@ -1,0 +1,59 @@
+<Page
+    x:Class="UBB_SE_2026_923_2.Views.Pharmacy.PharmacistVacationPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <SolidColorBrush x:Key="BgBrush" Color="#FF0B120D"/>
+        <SolidColorBrush x:Key="CardBrush" Color="#FF0F1711"/>
+        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#FFB7C2BA"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#FF166534"/>
+    </Page.Resources>
+
+    <Grid Background="{StaticResource BgBrush}" Padding="24">
+        <Border Background="{StaticResource CardBrush}"
+                BorderBrush="{StaticResource AccentBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="20"
+                Width="460"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top">
+            <StackPanel Spacing="14">
+                <TextBlock Text="Pharmacist Vacation Window"
+                           Foreground="{StaticResource TextBrush}"
+                           FontSize="28"
+                           FontWeight="SemiBold"/>
+
+                <TextBlock Text="Select a pharmacist and date range to add a VACATION shift."
+                           Foreground="{StaticResource MutedBrush}"
+                           TextWrapping="Wrap"/>
+
+                <ComboBox x:Name="PharmacistComboBox"
+                          Header="Pharmacist"
+                          PlaceholderText="Select pharmacist"
+                          DisplayMemberPath="displayName"/>
+
+                <CalendarDatePicker x:Name="StartDatePicker"
+                                    Header="Start date"/>
+
+                <CalendarDatePicker x:Name="EndDatePicker"
+                                    Header="End date"/>
+
+                <Button Content="Add Vacation Shift"
+                        Click="AddVacationShift_Click"
+                        Background="{StaticResource AccentBrush}"
+                        Foreground="White"
+                        Padding="10"/>
+
+                <InfoBar x:Name="StatusInfoBar"
+                         IsOpen="False"
+                         IsClosable="True"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>

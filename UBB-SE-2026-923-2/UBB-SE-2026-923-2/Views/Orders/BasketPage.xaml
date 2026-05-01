@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UBB_SE_2026_923_2.Views.Orders.BasketPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UBB_SE_2026_923_2.Views.Orders"
+    xmlns:localModel="using:UBB_SE_2026_923_2.ViewModels.Orders"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Name="PageRoot">
+
+    <Grid Padding="20"
+          ColumnDefinitions="3*, *">
+
+        <ListView Grid.Row="0"
+                  Grid.Column="0"
+                  ItemsSource="{Binding BasketItems}">
+
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="localModel:BasketItemViewModel">
+                    <Grid RowDefinitions="Auto, Auto"
+                          ColumnDefinitions="Auto, *, Auto">
+
+                        <Image Grid.Row="0"
+                               Grid.RowSpan="2"
+                               Grid.Column="0"
+                               Source="{x:Bind ItemThumbnailImagePath, Mode=OneTime}"
+                               Width="150"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                        <Grid Grid.Row="0"
+                              Grid.Column="1"
+                              Grid.ColumnDefinitions="*, Auto">
+
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{x:Bind ItemDescription, Mode=OneTime}"
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold"
+                                       FontSize="15"/>
+
+                            <Button Grid.Row="0"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Content="🗑"
+                                    Command="{Binding DataContext.RemoveItemCommand, ElementName=PageRoot}"
+                                    CommandParameter="{Binding}"/>
+                        </Grid>
+
+                        <Grid Grid.Row="1"
+                              Grid.Column="1"
+                              RowDefinitions="Auto"
+                              ColumnDefinitions="*, 2*">
+
+                            <NumberBox Grid.Row="0"
+                                       Grid.Column="0"
+                                       Value="{x:Bind ItemQuantityInBasket, Mode=TwoWay}"
+                                       SpinButtonPlacementMode="Inline"
+                                       AcceptsExpression="False"
+                                       ValidationMode="InvalidInputOverwritten"/>
+
+                            <StackPanel Grid.Row="0"
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Spacing="10">
+
+                                <TextBlock Text="{x:Bind ItemDiscountString, Mode=OneWay}"
+                                           VerticalAlignment="Center"
+                                           FontStyle="Italic"/>
+
+                                <TextBlock Text="{x:Bind ItemUserDiscountString, Mode=OneWay}"
+                                           VerticalAlignment="Center"
+                                           FontStyle="Italic"/>
+
+                                <StackPanel Orientation="Vertical"
+                                            Spacing="5">
+
+                                    <TextBlock Text="{x:Bind ItemFinalPriceString, Mode=OneWay}"
+                                               TextDecorations="Strikethrough"/>
+
+                                    <TextBlock Text="{x:Bind ItemFinalDiscountedPriceString, Mode=OneWay}"
+                                               FontWeight="Bold"
+                                               Foreground="Red"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <ListView Grid.Row="0"
+                  Grid.Column="1">
+
+            <StackPanel Grid.Row="0"
+                        Grid.Column="0"
+                        Spacing="15"
+                        Padding="12">
+
+                <TextBlock Text="If you have a valid prescription on your name, you can automatically put in your medicine"
+                           TextWrapping="WrapWholeWords"/>
+
+                <TextBox Name="PrescriptionInputBox"
+                         PlaceholderText="Enter prescription ID"/>
+
+                <Button Content="Add Products"
+                        Click="EnterPrescriptionID"/>
+
+                <TextBlock Name="PrescriptionWarning"
+                           Foreground="Red"
+                           Visibility="Collapsed"
+                           TextWrapping="WrapWholeWords"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1"
+                        Grid.Column="0"
+                        Spacing="10"
+                        Padding="12">
+
+                <TextBlock Text="{Binding TotalPriceString}"
+                           FontSize="15"
+                           Foreground="Gray"
+                           TextDecorations="Strikethrough"/>
+
+                <TextBlock Text="after discounts:"/>
+
+                <TextBlock Text="{Binding TotalDiscountedPriceString}"
+                           FontSize="30"
+                           Foreground="Red"
+                           FontWeight="Bold"/>
+
+                <Button Content="Checkout"
+                        Name="CheckoutButton"
+                        Click="NavigateToCheckout"/>
+            </StackPanel>
+        </ListView>
+    </Grid>
+</Page>

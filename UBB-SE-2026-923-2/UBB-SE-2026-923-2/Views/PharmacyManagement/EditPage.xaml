@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UBB_SE_2026_923_2.Views.PharmacyManagement.EditPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UBB_SE_2026_923_2.Views.PharmacyManagement"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:UBB_SE_2026_923_2.Models"
+    mc:Ignorable="d"
+    RequestedTheme="Light"
+    Background="White">
+
+    <Page.Resources>
+
+        <!-- TextBlocks -->
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        <!-- TextBoxes --><!--
+        <Style TargetType="TextBox">
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        --><!-- Buttons -->
+        <!--<Style TargetType="Button">
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>-->
+
+
+    </Page.Resources>
+
+
+    <ScrollViewer VerticalScrollMode="Enabled" HorizontalScrollMode="Enabled" Width="Auto" Height="Auto">
+        <Grid>
+
+            <Grid>
+                <Button Content="Statistics"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="10"
+                        Click="GoToStatisticsClick"
+                />
+                <StackPanel x:Name="ShowExpiredItemsToggle"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Margin="0,10,0,0"
+                            Spacing="10">
+
+                    <TextBlock Text="Show expired items"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold"/>
+
+                    <ToggleSwitch x:Name="ShowExpiredToggle"
+                                  OnContent="On"
+                                  OffContent="Off"
+                                  Toggled="ShowExpiredToggle_Toggled"/>
+                </StackPanel>
+                
+                <TextBlock x:Name="RemoveItemError" Visibility="Collapsed" Foreground="Red" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10">Select an Item first!</TextBlock>
+                <TextBlock x:Name="RemoveSubstanceError" Visibility="Collapsed" Foreground="Red" HorizontalAlignment="Center" VerticalAlignment="top" Margin="10">Select a substance first!</TextBlock>
+            </Grid>
+
+
+
+            <StackPanel  x:Name="ItemListButtons"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Spacing="10"
+                  >
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                    <Button Content="Items"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Click="OnItemClick"
+                            Background="#66d4af"></Button>  
+
+                    <Button Content="Substance"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Click="OnSubstancesClick"
+                            Background="#66d4af"></Button>
+
+                    <Button Content="Orders"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Click="OnOrdersClick"
+                            Background="#66d4af"></Button>
+                </StackPanel>
+                
+
+                <!--search by-->
+                <TextBlock Text="Search by name"
+                           FontSize="16"
+                           FontWeight="SemiBold"/>
+
+
+                <TextBox x:Name="SearchBox"
+                         PlaceholderText="Enter name..."
+                         TextChanged="SearchBox_TextChanged"/>
+
+                <!--list of items-->
+                <Grid Width="1300"
+      Height="400"
+      BorderBrush="Gray"
+      BorderThickness="1">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Header -->
+                        <RowDefinition Height="*"/>
+                        <!-- List -->
+                    </Grid.RowDefinitions>
+
+                    <!-- HEADER -->
+                    <Grid Grid.Row="0" Background="#EEE" Padding="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <!-- ID -->
+                            <ColumnDefinition Width="150"/>
+                            <!-- Name -->
+                            <ColumnDefinition Width="150"/>
+                            <!-- Producer -->
+                            <ColumnDefinition Width="70"/>
+                            <!-- Price -->
+                            <ColumnDefinition Width="150"/>
+                            <!-- Category -->
+                            <ColumnDefinition Width="300"/>
+                            <!-- Description -->
+                            <ColumnDefinition Width="70"/>
+                            <!-- Pills -->
+                            <ColumnDefinition Width="80"/>
+                            <!-- Quantity -->
+                            
+                            <ColumnDefinition Width="150"/>
+                            <!-- Label -->
+                            <ColumnDefinition Width="70"/>
+                            <!-- Discount -->
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="ID" Grid.Column="0" FontWeight="Bold"/>
+                        <TextBlock Text="Name" Grid.Column="1" FontWeight="Bold"/>
+                        <TextBlock Text="Producer" Grid.Column="2" FontWeight="Bold"/>
+                        <TextBlock Text="Price" Grid.Column="3" FontWeight="Bold"/>
+                        <TextBlock Text="Category" Grid.Column="4" FontWeight="Bold"/>
+                        <TextBlock Text="Description" Grid.Column="5" FontWeight="Bold"/>
+                        <TextBlock Text="Pills" Grid.Column="6" FontWeight="Bold"/>
+                        <TextBlock Text="Quantity" Grid.Column="7" FontWeight="Bold"/>
+                        <TextBlock Text="Label" Grid.Column="8" FontWeight="Bold"/>
+                        <TextBlock Text="Discount" Grid.Column="9" FontWeight="Bold"/>
+                        
+                    </Grid>
+
+                    <!-- LIST -->
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto">
+                        <ListView x:Name="ItemList"
+                  ItemsSource="{x:Bind ViewModel.Items}">
+
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Item">
+
+                                    <Border BorderBrush="Gray"
+                                        BorderThickness="0,0,0,1"
+                                        >
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50"/>
+                                                <!-- ID -->
+                                                <ColumnDefinition Width="150"/>
+                                                <!-- Name -->
+                                                <ColumnDefinition Width="150"/>
+                                                <!-- Producer -->
+                                                <ColumnDefinition Width="70"/>
+                                                <!-- Price -->
+                                                <ColumnDefinition Width="150"/>
+                                                <!-- Category -->
+                                                <ColumnDefinition Width="300"/>
+                                                <!-- Description -->
+                                                <ColumnDefinition Width="70"/>
+                                                <!-- Pills -->
+                                                <ColumnDefinition Width="80"/>
+                                                <!-- Quantity -->
+                                               
+                                                <ColumnDefinition Width="150"/>
+                                                <!-- Label -->
+                                                <ColumnDefinition Width="70"/>
+                                                <!-- Discount -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- NUMERICAL -->
+                                            <TextBlock Grid.Column="0" Text="{x:Bind Id}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="3" Text="{x:Bind Price}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="6" Text="{x:Bind NumberOfPills}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="7" Text="{x:Bind Quantity}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="9" Text="{x:Bind DiscountPercentage}" VerticalAlignment="Center"/>
+
+                                            <!-- TEXT -->
+                                            <TextBlock Grid.Column="1" Text="{x:Bind Name}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="{x:Bind Producer}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="4" Text="{x:Bind Category}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="5" Text="{x:Bind Description}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="8" Text="{x:Bind Label}" VerticalAlignment="Center"/>
+
+                                        </Grid>
+                                    </Border>
+
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+
+                        </ListView>
+                    </ScrollViewer>
+
+                </Grid>
+                <!--</Grid>-->
+
+
+            </StackPanel>
+           
+
+            <!--bottom buttons-->
+            <Grid x:Name="ItemBottomButtons"
+          Height="500"
+          Width="1000"
+          VerticalAlignment="Bottom">
+                <Button Content="Add"
+                Click="OnItemAddClick"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="10"
+                        Background="#66d4af"/>
+
+                <Button Content="Update"
+                Click="OnItemUpdateClick"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="10"
+                        Background="#66d4af"/>
+
+
+                <Button Content="Remove"
+                Click="OnItemRemoveClick"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="10"
+                Background="#66d4af"/>
+
+                
+            </Grid>
+
+            <!--ADD GRID-->
+            <Grid x:Name="AddItemGrid"
+          Visibility="Collapsed"
+          Background="White">
+
+                <StackPanel Padding="20" Spacing="10">
+                    <Button Content="Cancel" Click="OnItemCancelClick"/>
+                    <TextBox x:Name="NameBox" Header="Name" PlaceholderText="Enter product name"/>
+
+                    <TextBox x:Name="ProducerBox" Header="Producer" PlaceholderText="Enter producer"/>
+
+                    <TextBox x:Name="PriceBox" Header="Price" PlaceholderText="Enter price"/>
+
+                    <TextBox x:Name="CategoryBox" Header="Category" PlaceholderText="Enter category"/>
+
+                    <TextBox x:Name="ImagePathBox" Header="Image Path" PlaceholderText="Enter image path"/>
+
+                    <TextBox x:Name="NumberOfPillsBox" Header="Number of Pills" PlaceholderText="Enter number"/>
+
+                    <!--<TextBox x:Name="QuantityBox" Header="Quantity" PlaceholderText="Enter quantity"/>-->
+
+                    <TextBox x:Name="LabelBox" Header="Label" PlaceholderText="Enter label"/>
+
+                    <TextBox x:Name="DescriptionBox" Header="Description"
+             PlaceholderText="Enter description"
+             Height="100"
+             TextWrapping="Wrap"/>
+
+                    <TextBox x:Name="DiscountBox" Header="Discount (%)" PlaceholderText="Enter discount"/>
+
+                    <!--active substance table-->
+                    <TextBlock Text="Active Substances"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Margin="0,20,0,5"/>
+
+                    <ListView x:Name="ActiveSubstancesList"
+                      Height="150"
+                      BorderThickness="1">
+
+                        <ListView.Header>
+                            <Grid ColumnDefinitions="*,*">
+                                <TextBlock Text="Name" FontWeight="Bold"/>
+                                <TextBlock Text="Concentration" Grid.Column="1" FontWeight="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*,*">
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding Concentration}" Grid.Column="1"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                    </ListView>
+
+                    <!-- Input fields -->
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+
+                        <TextBox x:Name="SubstanceNameBox"
+                         Header="Name"
+                         Width="200"/>
+
+                        <TextBox x:Name="ConcentrationBox"
+                         Header="Concentration"
+                         Width="150"/>
+
+                        <Button Content="Add Substance"
+                        Click="AddSubstance_Click"/>
+
+
+                        <!--needs to have name input-->
+                        <Button Content="Remove Substance"
+                        Click="RemoveSubstance_Click"/>
+
+                        <TextBlock x:Name="AddActiveSubstanceToItemInvalidError" Visibility="Collapsed" Foreground="Red">Invalid input!</TextBlock>
+                        <TextBlock x:Name="AddActiveSubstanceToItemFormatError" Visibility="Collapsed" Foreground="Red">Wrong Format!</TextBlock>
+                        <TextBlock x:Name="AddActiveSubstanceToItemMandatoryError" Visibility="Collapsed" Foreground="Red">Mandatory fields are empty!</TextBlock>
+                        <TextBlock x:Name="RemoveActiveSubstanceFromItemError" Visibility="Collapsed" Foreground="Red">Insert the name of a valid substance to remove it!</TextBlock>
+                    </StackPanel>
+
+                    <!--batch table-->
+                    <TextBlock Text="Batches"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Margin="0,20,0,5"/>
+
+                    <ListView x:Name="BatchesList"
+                      Height="150"
+                      BorderThickness="1">
+
+                        <ListView.Header>
+                            <Grid ColumnDefinitions="*,*">
+                                <TextBlock Text="Date" FontWeight="Bold"/>
+                                <TextBlock Text="Packs" Grid.Column="1" FontWeight="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*,*">
+                                    <TextBlock Text="{Binding Date}"/>
+                                    <TextBlock Text="{Binding Packs}" Grid.Column="1"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                    </ListView>
+
+                    <!-- Inputs -->
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+
+                        <DatePicker x:Name="BatchDatePicker"
+                            Header="Date"
+                            Width="200"/>
+
+                        <TextBox x:Name="PacksBox"
+                         Header="Number of Packs"
+                         Width="150"/>
+
+                        <TextBlock x:Name="AddBatchFormatError" Visibility="Collapsed" Foreground="Red">Wrong Format!</TextBlock>
+                        <TextBlock x:Name="AddBatchMandatoryError" Visibility="Collapsed" Foreground="Red">Mandatory fields are empty!</TextBlock>
+                        <Button Content="Add Batch"
+                        Click="AddBatch_Click"/>
+
+                        <Button Content="Remove Batch"
+                        Click="RemoveBatchFromItem_Click"/>
+                        <TextBlock x:Name="RemoveBatchFromItemError" Visibility="Collapsed" Foreground="Red">Select a batch first!</TextBlock>
+                    </StackPanel>
+
+                    <TextBlock x:Name="AddItemFormatError" Visibility="Collapsed" Foreground="Red">Wrong Format!</TextBlock>
+                    <TextBlock x:Name="AddItemMandatoryError" Visibility="Collapsed" Foreground="Red">Mandatory fields are empty!</TextBlock>
+
+                    <Button Content="Add Item" Click="OnAddItemClick" Background="#66d4af"/>
+                </StackPanel>
+            </Grid>
+
+            <!--UPDATE ITEM GRID-->
+            <Grid x:Name="UpdateItemGrid"
+          Visibility="Collapsed"
+          Background="White">
+
+                <StackPanel Padding="20" Spacing="10">
+                    <Button Content="Cancel" Click="OnItemCancelClick"/>
+                    <Button Content="Get Item Data" Click="OnGetItemDataClick" VerticalAlignment="Top" HorizontalAlignment="Right"></Button>
+                    <TextBlock x:Name="UpdateInvalidIdError" Visibility="Collapsed" Foreground="Red">id doesn’t exist</TextBlock>
+                    <TextBox x:Name="IdBox" Header="Id" PlaceholderText="Enter product id"/>
+
+                    <TextBox x:Name="NameBoxUpdate" Header="Name" PlaceholderText="Enter product name"/>
+
+                    <TextBox x:Name="ProducerBoxUpdate" Header="Producer" PlaceholderText="Enter producer"/>
+
+                    <TextBox x:Name="PriceBoxUpdate" Header="Price" PlaceholderText="Enter price"/>
+
+                    <TextBox x:Name="CategoryBoxUpdate" Header="Category" PlaceholderText="Enter category"/>
+
+                    <TextBox x:Name="ImagePathBoxUpdate" Header="Image Path" PlaceholderText="Enter image path"/>
+
+                    <TextBox x:Name="NumberOfPillsBoxUpdate" Header="Number of Pills" PlaceholderText="Enter number"/>
+
+                    <!--<TextBox x:Name="QuantityBoxUpdate" Header="Quantity" PlaceholderText="Enter quantity"/>-->
+
+                    <TextBox x:Name="LabelBoxUpdate" Header="Label" PlaceholderText="Enter label"/>
+
+                    <TextBox x:Name="DescriptionBoxUpdate" Header="Description"
+     PlaceholderText="Enter description"
+     Height="100"
+     TextWrapping="Wrap"/>
+
+                    <TextBox x:Name="DiscountBoxUpdate" Header="Discount (%)" PlaceholderText="Enter discount"/>
+
+                    <!--active substance table-->
+                    <TextBlock Text="Active Substances"
+               FontSize="18"
+               FontWeight="SemiBold"
+               Margin="0,20,0,5"/>
+
+                    <ListView x:Name="ActiveSubstancesListUpdate"
+              Height="150"
+              BorderThickness="1">
+
+                        <ListView.Header>
+                            <Grid ColumnDefinitions="*,*">
+                                <TextBlock Text="Name" FontWeight="Bold"/>
+                                <TextBlock Text="Concentration" Grid.Column="1" FontWeight="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*,*">
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding Concentration}" Grid.Column="1"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                    </ListView>
+
+                    <!-- Input fields -->
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+
+                        <TextBox x:Name="SubstanceNameBoxUpdate"
+                 Header="Name"
+                 Width="200"/>
+
+                        <TextBox x:Name="ConcentrationBoxUpdate"
+                 Header="Concentration"
+                 Width="150"/>
+
+                        <Button Content="Add Substance"
+                Click="AddSubstanceUpdate_Click"/>
+
+                        <Button Content="Remove Substance"
+                Click="RemoveSubstanceUpdate_Click"/>
+
+                        <TextBlock x:Name="UpdateActiveSubstanceInvalidError" Visibility="Collapsed" Foreground="Red">Invalid input!</TextBlock>
+                        <TextBlock x:Name="UpdateActiveSubstanceFormatError" Visibility="Collapsed" Foreground="Red">Wrong Format!</TextBlock>
+                        <TextBlock x:Name="UpdateActiveSubstanceMandatoryError" Visibility="Collapsed" Foreground="Red">Mandatory fields are empty!</TextBlock>
+                        <TextBlock x:Name="RemoveUpdateActiveSubstanceError" Visibility="Collapsed" Foreground="Red">Insert the name of a valid substance to remove it!</TextBlock>
+                    </StackPanel>
+
+                    <!--batch table-->
+                    <TextBlock Text="Batches"
+               FontSize="18"
+               FontWeight="SemiBold"
+               Margin="0,20,0,5"/>
+
+                    <ListView x:Name="BatchesListUpdate"
+              Height="150"
+              BorderThickness="1">
+
+                        <ListView.Header>
+                            <Grid ColumnDefinitions="*,*">
+                                <TextBlock Text="Date" FontWeight="Bold"/>
+                                <TextBlock Text="Packs" Grid.Column="1" FontWeight="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*,*">
+                                    <TextBlock Text="{Binding Date}"/>
+                                    <TextBlock Text="{Binding Packs}" Grid.Column="1"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                    </ListView>
+
+                    <!-- Inputs -->
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+
+                        <DatePicker x:Name="BatchDatePickerUpdate"
+                    Header="Date"
+                    Width="200"/>
+
+                        <TextBox x:Name="PacksBoxUpdate"
+                 Header="Number of Packs"
+                 Width="150"/>
+
+                        <TextBlock x:Name="UpdateBatchFormatError" Visibility="Collapsed" Foreground="Red">Wrong Format!</TextBlock>
+                        <TextBlock x:Name="UpdateBatchMandatoryError" Visibility="Collapsed" Foreground="Red">Mandatory fields are empty!</TextBlock>
+                        <Button Content="Add Batch"
+                Click="AddBatchUpdate_Click"/>
+
+                        <Button Content="Remove Batch"
+                Click="RemoveBatchFromItemUpdate_Click"/>
+                        <TextBlock x:Name="RemoveUpdateBatchError" Visibility="Collapsed" Foreground="Red">Select a batch first!</TextBlock>
+                    </StackPanel>
+
+                    <!--<TextBlock x:Name="UpdateItemFormatError" Visibility="Collapsed" Foreground="Red">In</TextBlock>-->
+                    <TextBlock x:Name="UpdateItemGetDataError" Visibility="Collapsed" Foreground="Red">Please click "Get Item Data" before changing anything!</TextBlock>
+                    <TextBlock x:Name="UpdateItemFormatError" Visibility="Collapsed" Foreground="Red">Wrong Format!</TextBlock>
+                    <TextBlock x:Name="UpdateItemMandatoryError" Visibility="Collapsed" Foreground="Red">Mandatory fields are empty!</TextBlock>
+                    <Button Content="Update Item" Click="OnUpdateItemClick"/>
+                </StackPanel>
+            </Grid>
+
+            <!--SUBSTANCES GRID-->
+
+            <StackPanel  x:Name="SubstanceListButtons"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Spacing="10"
+                  >
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                    <Button Content="Items"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Click="OnItemClick"
+                        Background="#66d4af"></Button>
+
+                    <Button Content="Substance"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Click="OnSubstancesClick"
+                        Background="#66d4af"></Button>
+
+                    <Button Content="Orders"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Click="OnOrdersClick"
+                            Background="#66d4af"></Button>
+                    
+                </StackPanel>
+
+                <!--search by-->
+                <!--<TextBlock Text="Search by name"
+           FontSize="16"
+           FontWeight="SemiBold"/>
+
+
+            <TextBox x:Name="SearchBoxSubstance"
+         PlaceholderText="Enter name..."
+         TextChanged="SearchBox_TextChangedSubstance"/>
+            <Grid x:Name="SubstancesGrid"
+              Height="500"
+              Width="1000">-->
+
+                <Grid x:Name="SubstanceGrid"
+                      Width="1000"
+                      Height="475"
+                      BorderBrush="Gray"
+                      BorderThickness="1">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Header -->
+                        <RowDefinition Height="*"/>
+                        <!-- List -->
+                    </Grid.RowDefinitions>
+
+                    <!-- HEADER -->
+                    <Grid Grid.Row="0" Background="#EEE" Padding="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <!-- Name -->
+                            <ColumnDefinition Width="100"/>
+                            <!-- Lethal Dose -->
+                            <ColumnDefinition Width="2*"/>
+                            <!-- Description -->
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Name" Grid.Column="0" FontWeight="Bold"/>
+                        <TextBlock Text="Lethal Dose" Grid.Column="1" FontWeight="Bold"/>
+                        <TextBlock Text="Description" Grid.Column="2" FontWeight="Bold"/>
+                    </Grid>
+
+                    <!-- LIST -->
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto">
+                        <ListView x:Name="SubstanceList"
+                  ItemsSource="{x:Bind ViewModel.Substances}">
+
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Substance">
+
+                                    <Border BorderBrush="Gray"
+                            BorderThickness="0,0,0,1"
+                            Padding="5">
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <!-- Name -->
+                                                <ColumnDefinition Width="100"/>
+                                                <!-- Lethal Dose -->
+                                                <ColumnDefinition Width="2*"/>
+                                                <!-- Description -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- TEXT / NUMERICAL -->
+                                            <TextBlock Grid.Column="0" Text="{x:Bind Name}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="{x:Bind LethalDose}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="{x:Bind Description}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+
+                        </ListView>
+                    </ScrollViewer>
+
+                </Grid>
+
+            </StackPanel>
+
+            <!--bottom buttons-->
+            <Grid x:Name="SubstanceBottomButtons"
+              Height="500"
+              Width="1000"
+              VerticalAlignment="Bottom">
+                <Button Content="Add"
+                        Click="OnSubstanceAddClick"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Margin="10"
+                        Background="#66d4af"/>
+
+                <Button Content="Update"
+                        Click="OnSubstanceUpdateClick"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Margin="10"
+                        Background="#66d4af"/>
+
+
+                <Button Content="Remove"
+                        Click="OnSubstanceRemoveClick"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="10"
+                        Background="#66d4af" 
+                        />
+
+                
+                
+            </Grid>
+
+            <!--ADD GRID-->
+            <Grid x:Name="AddSubstanceGrid"
+          Visibility="Collapsed"
+          Background="White">
+
+                <StackPanel Padding="20" Spacing="10">
+                    <Button Content="Cancel" Click="OnSubstanceCancelClick"/>
+
+                    <TextBox x:Name="NameBoxSubstance" Header="Name" PlaceholderText="Enter product name"/>
+
+                    <TextBox x:Name="LethalDoseBoxSubstance" Header="Lethal Dose" PlaceholderText="Enter Lethal Dose"/>
+
+                    <TextBox x:Name="DescriptionBoxSubstance" Header="Description"
+                     PlaceholderText="Enter description"
+                     Height="100"
+                     TextWrapping="Wrap"/>
+    
+                    
+                    <TextBlock x:Name="AddSubstanceFormatError" Visibility="Collapsed" Foreground="Red">Wrong Format!</TextBlock>
+                    <TextBlock x:Name="AddSubstanceMandatoryError" Visibility="Collapsed" Foreground="Red">Mandatory fields are empty!</TextBlock>
+
+                    <Button Content="Add Substance" Click="OnAddSubstanceClick" Background="#66d4af"/>
+                </StackPanel>
+            </Grid>
+
+            <!--UPDATE GRID-->
+            <Grid x:Name="UpdateSubstanceGrid"
+          Visibility="Collapsed"
+          Background="White">
+
+                <StackPanel Padding="20" Spacing="10">
+                    <Button Content="Cancel" Click="OnSubstanceCancelClick"/>
+
+                    <TextBox x:Name="NameBoxSubstanceUpdate" Header="Name" PlaceholderText="Enter product name"/>
+
+                    <TextBox x:Name="LethalDoseBoxSubstanceUpdate" Header="Lethal Dose" PlaceholderText="Enter Lethal Dose"/>
+
+                    <TextBox x:Name="DescriptionBoxSubstanceUpdate" Header="Description"
+                     PlaceholderText="Enter description"
+                     Height="100"
+                     TextWrapping="Wrap"/>
+
+                    <TextBlock x:Name="UpdateSubstanceInvalidError" Visibility="Collapsed" Foreground="Red">name doesn’t exist</TextBlock>
+                    <TextBlock x:Name="UpdateSubstanceFormatError" Visibility="Collapsed" Foreground="Red">Wrong Format!</TextBlock>
+                    <TextBlock x:Name="UpdateSubstanceMandatoryError" Visibility="Collapsed" Foreground="Red">Mandatory fields are empty!</TextBlock>
+                    <Button Content="Update Substance" Click="OnUpdateSubstanceClick" Background="#66d4af"/>
+                </StackPanel>
+            </Grid>
+
+        </Grid>
+    </ScrollViewer>
+</Page>
+
+
+    
+

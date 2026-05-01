@@ -1,0 +1,58 @@
+﻿using System;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
+using UBB_SE_2026_923_2.Models;
+using UBB_SE_2026_923_2.Services;
+using UBB_SE_2026_923_2.ViewModels.ProductsCatalogue;
+
+namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
+{
+    public sealed partial class CatalogPage : Page
+    {
+        public ICatalogPageViewModel ViewModel { get; }
+
+        public CatalogPage()
+        {
+            InitializeComponent();
+
+            ViewModel = new CatalogPageViewModel();
+
+            DataContext = ViewModel;
+            ViewModel.NavigateRequested += OnViewModelNavigateRequested;
+        }
+
+        private void OnViewModelNavigateRequested(object sender, Type pageType)
+        {
+            Frame.Navigate(pageType);
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            if (e.Parameter is ValueTuple<ProductCatalogueService, User, IOrderService> tuple)
+            {
+                ViewModel.Initialize(tuple.Item1, tuple.Item2, tuple.Item3);
+            }
+            else if (e.Parameter is ValueTuple<IProductCatalogueService, User, IOrderService> interfaceTuple)
+            {
+                ViewModel.Initialize(interfaceTuple.Item1, interfaceTuple.Item2, interfaceTuple.Item3);
+            }
+        }
+
+        private void OnProductClicked(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var uiItem = button?.DataContext as UIItem;
+            if (uiItem?.OriginalItem == null)
+            {
+                return;
+            }
+
+            Frame.Navigate(
+                typeof(ProductDetailsPage),
+                (uiItem.OriginalItem, ViewModel.CurrentUser, ViewModel.OrderService));
+        }
+    }
+}

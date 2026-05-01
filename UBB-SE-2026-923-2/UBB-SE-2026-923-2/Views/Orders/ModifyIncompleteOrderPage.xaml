@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UBB_SE_2026_923_2.Views.Orders.ModifyIncompleteOrderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UBB_SE_2026_923_2.Views.Orders"
+    xmlns:model="using:UBB_SE_2026_923_2.ViewModels.Orders"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Name="PageRoot">
+
+    <Grid Padding="20"
+          ColumnDefinitions="*, Auto">
+
+        <ListView Grid.Row="1"
+                  Grid.Column="0"
+                  ItemsSource="{x:Bind ViewModel.OrderItems}">
+
+            <ListView.ItemTemplate>
+
+                <!-- defining the way items are presented 
+            in the list view of the bucket -->
+                <DataTemplate x:DataType="model:ItemDetail">
+
+                    <Grid RowDefinitions="Auto, Auto"
+                          ColumnDefinitions="Auto, *, Auto">
+
+                        <!-- Thumbnail image (occupies the left half of the item view) -->
+                        <Image Grid.Row="0"
+                               Grid.RowSpan="2"
+                               Grid.Column="0"
+                               Source="{x:Bind ItemThumbnailImagePath, Mode=OneTime}"
+                               Width="150"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                        <!-- Item description and delete button (upper row after image) -->
+                        <Grid Grid.Row="0"
+                                Grid.Column="1"
+                                Grid.ColumnDefinitions="*, Auto">
+
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{x:Bind ItemDescription, Mode=OneTime}"
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold"
+                                       FontSize="15"/>
+                            <Button Grid.Row="0"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Content="🗑"
+                                    Command="{Binding DataContext.RemoveItemCommand, ElementName=PageRoot}"
+                                    CommandParameter="{Binding}"/>
+
+                        </Grid>
+
+                        <StackPanel Grid.Row="1"
+                                    Grid.Column="1"
+                                    Orientation="Vertical"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Spacing="10">
+
+                            <TextBlock Text="{x:Bind ItemQuantityString, Mode=OneTime}"/>
+                            <TextBlock Text="{x:Bind ItemFinalPriceString, Mode=OneTime}"
+                                       FontWeight="Bold" Foreground="Red"/>
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </DataTemplate>
+
+            </ListView.ItemTemplate>
+
+        </ListView>
+
+
+        <ListView Grid.Row="0"
+                  Grid.Column="1">
+
+            <TextBlock Text="Total price:"/>
+            <TextBlock Text="{x:Bind ViewModel.TotalPriceString, Mode=OneWay}"
+                       FontSize="30"
+                       Foreground="Red"
+                       FontWeight="Bold"
+                       Padding="15"/>
+
+            <CalendarView Name="PickUpDateSelector"
+                          SelectionMode="Single"
+                          IsGroupLabelVisible="True"
+                          Language="en"
+                          CalendarIdentifier="GregorianCalendar"
+                          Loaded="SetPickUpDate"
+                          SelectedDatesChanged="CheckUnselectedDate"/>
+
+            <StackPanel Orientation="Horizontal"
+                        Padding="15">
+
+                <Button Content="Go back"
+                        Click="CancelChanges"/>
+                <Button Content="Save changes"
+                        Click="ModifyOrder"/>
+
+            </StackPanel>
+
+        </ListView>
+
+    </Grid>
+</Page>

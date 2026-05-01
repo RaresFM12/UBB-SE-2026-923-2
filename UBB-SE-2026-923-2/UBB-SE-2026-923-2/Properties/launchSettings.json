@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "UBB-SE-2026-923-2 (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "UBB-SE-2026-923-2 (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
