@@ -4,12 +4,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:UBB_SE_2026_923_2.Views.Accounts"
+    xmlns:converters="using:UBB_SE_2026_923_2.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
     <Page.Resources>
-
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
         <!--for the box-->
         <SolidColorBrush x:Key="TextControlBackground" Color="White"/>
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#389e7c"/>

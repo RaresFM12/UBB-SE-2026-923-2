@@ -108,6 +108,8 @@ namespace UBB_SE_2026_923_2.Views
                     break;
             }
 
+            Add("Profile", "profile-management", typeof(ProfileManagementView));
+
             var first = items.FirstOrDefault();
             if (first != null)
             {
