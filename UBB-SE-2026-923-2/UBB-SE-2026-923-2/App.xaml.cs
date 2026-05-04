@@ -21,6 +21,7 @@ namespace UBB_SE_2026_923_2
         public App()
         {
             InitializeComponent();
+            ServiceWrapper.Initialize();
             Services = ConfigureServices().BuildServiceProvider();
         }
 
@@ -45,6 +46,7 @@ namespace UBB_SE_2026_923_2
         private static void RegisterInfrastructure(IServiceCollection services)
         {
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddSingleton<RaresICurrentUserService, CurrentUserServiceAdapter>();
             services.AddSingleton<DialogPresenter>();
         }
 

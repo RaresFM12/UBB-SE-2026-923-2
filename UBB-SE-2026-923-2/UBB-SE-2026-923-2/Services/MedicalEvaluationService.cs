@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Configuration;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
 
@@ -24,19 +23,22 @@ namespace UBB_SE_2026_923_2.Services
         private readonly IAppointmentRepository appointmentRepository;
         private readonly IStaffRepository staffRepository;
         private readonly IShiftRepository shiftRepository;
+        private readonly ICurrentUserService currentUserService;
 
         public MedicalEvaluationService(
             IEvaluationsRepository evaluationsRepository,
             IHighRiskMedicineRepository highRiskMedicineRepository,
             IAppointmentRepository appointmentRepository,
             IStaffRepository staffRepository,
-            IShiftRepository shiftRepository)
+            IShiftRepository shiftRepository,
+            ICurrentUserService currentUserService)
         {
             this.evaluationsRepository = evaluationsRepository;
             this.highRiskMedicineRepository = highRiskMedicineRepository;
             this.appointmentRepository = appointmentRepository;
             this.staffRepository = staffRepository;
             this.shiftRepository = shiftRepository;
+            this.currentUserService = currentUserService;
         }
 
         public List<Doctor> GetAllDoctors() =>
@@ -86,7 +88,7 @@ namespace UBB_SE_2026_923_2.Services
 
             int patientId = int.TryParse(record.PatientId, out var parsedPatientId) ? parsedPatientId : DefaultPatientId;
             bool assumedRisk = ContainsRiskMarker(record.Symptoms);
-            int doctorId = record.Evaluator?.StaffID ?? AppSettings.DefaultDoctorId;
+            int doctorId = record.Evaluator?.StaffID ?? currentUserService.UserId;
 
             evaluationsRepository.AddEvaluation(
                 doctorId,

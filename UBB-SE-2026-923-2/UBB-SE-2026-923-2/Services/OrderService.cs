@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UBB_SE_2026_923_2.Configuration;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
 using UBB_SE_2026_923_2.ViewModels.Orders;
@@ -25,6 +26,8 @@ namespace UBB_SE_2026_923_2.Services
 
         public IOrdersRepository OrdersRepository { get; private set; }
 
+        public IEvaluationsRepository EvaluationsRepository { get; private set; }
+
         public IPrescriptionService PrescriptionService { get; private set; }
 
         private User injectedActiveUser;
@@ -40,7 +43,8 @@ namespace UBB_SE_2026_923_2.Services
             ItemsRepository = new SQLItemsRepository();
             UsersRepository = new SQLUsersRepository();
             OrdersRepository = new SQLOrdersRepository();
-            PrescriptionService = new PrescriptionService(ItemsRepository);
+            EvaluationsRepository = new EvaluationsRepository(AppSettings.ConnectionString);
+            PrescriptionService = new PrescriptionService(ItemsRepository, EvaluationsRepository);
         }
 
         public OrderService(
@@ -48,13 +52,15 @@ namespace UBB_SE_2026_923_2.Services
             IItemsRepository itemsRepository,
             IUsersRepository usersRepository,
             IOrdersRepository ordersRepository,
-            User activeUser)
+            User activeUser,
+            IEvaluationsRepository? evaluationsRepository = null)
         {
             SubstancesRepository = substancesRepository;
             ItemsRepository = itemsRepository;
             UsersRepository = usersRepository;
             OrdersRepository = ordersRepository;
-            PrescriptionService = new PrescriptionService(itemsRepository);
+            EvaluationsRepository = evaluationsRepository ?? new EvaluationsRepository(AppSettings.ConnectionString);
+            PrescriptionService = new PrescriptionService(itemsRepository, EvaluationsRepository);
             injectedActiveUser = activeUser;
         }
 

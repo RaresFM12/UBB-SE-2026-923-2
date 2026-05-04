@@ -11,19 +11,21 @@ namespace UBB_SE_2026_923_2.Services
         private const float MinimumDiscount = 0f;
         private const float MaximumDiscount = 1f;
         private const float PercentageDivisor = 100f;
-        private const string TestPrescriptionId = "testPrescription";
-        private const string DefaultPrescriptionItemName = "Nurofen Express";
-        private const int DefaultPrescriptionPills = 40;
         private const int SingleBoxQuantity = 1;
         private const int NoCandidateItemId = -1;
         private const int NoCandidateQuantity = -1;
         private const int EmptyQuantity = 0;
+        private const int FallbackRequiredPills = 1;
+
+        private static readonly char[] MedicineSeparators = new[] { ',', ';', '\n', '\r' };
 
         private readonly IItemsRepository itemsRepository;
+        private readonly IEvaluationsRepository evaluationsRepository;
 
-        public PrescriptionService(IItemsRepository itemsRepository)
+        public PrescriptionService(IItemsRepository itemsRepository, IEvaluationsRepository evaluationsRepository)
         {
             this.itemsRepository = itemsRepository;
+            this.evaluationsRepository = evaluationsRepository;
         }
 
         private static float NormalizeDiscount(float discount)
@@ -70,29 +72,76 @@ namespace UBB_SE_2026_923_2.Services
 
         public Dictionary<int, int> GetItemsFromPrescription(string prescriptionId, Dictionary<int, float> userDiscounts)
         {
-            Dictionary<int, int> items = new Dictionary<int, int>();
-
-            if (string.IsNullOrWhiteSpace(prescriptionId) || !prescriptionId.Equals(TestPrescriptionId))
+            if (string.IsNullOrWhiteSpace(prescriptionId) || !int.TryParse(prescriptionId.Trim(), out int evaluationId))
             {
                 throw new ArgumentException("Invalid prescription ID");
             }
 
-            string itemName = DefaultPrescriptionItemName;
-            int nrOfRequiredPills = DefaultPrescriptionPills;
-            userDiscounts ??= new Dictionary<int, float>();
+            MedicalEvaluation? evaluation = evaluationsRepository
+                .GetAllEvaluations()
+                .FirstOrDefault(record => record.EvaluationID == evaluationId);
 
-            List<Item> preferredItems = itemsRepository.GetItemsByName(itemName);
-            if (preferredItems.Count == 0)
+            if (evaluation == null || string.IsNullOrWhiteSpace(evaluation.MedicationsList))
+            {
+                throw new ArgumentException("Invalid prescription ID");
+            }
+
+            userDiscounts ??= new Dictionary<int, float>();
+            List<string> medicineNames = ParseMedicineNames(evaluation.MedicationsList);
+            List<Item> allItems = itemsRepository.GetAllItems();
+            Dictionary<int, int> mergedItems = new Dictionary<int, int>();
+
+            foreach (string medicineName in medicineNames)
+            {
+                Dictionary<int, int> filledItems = FillSingleMedicine(medicineName, allItems, userDiscounts);
+                foreach (KeyValuePair<int, int> entry in filledItems)
+                {
+                    if (mergedItems.ContainsKey(entry.Key))
+                    {
+                        mergedItems[entry.Key] += entry.Value;
+                    }
+                    else
+                    {
+                        mergedItems[entry.Key] = entry.Value;
+                    }
+                }
+            }
+
+            if (mergedItems.Count == 0)
             {
                 throw new ArgumentException("Medicine couldn't be retrieved");
             }
-            Item preferredItem = preferredItems[0];
-            int numberOfRequiredSubstances = preferredItem.ActiveSubstances.Count;
 
-            List<Item> allItems = itemsRepository.GetAllItems();
+            return mergedItems;
+        }
+
+        private static List<string> ParseMedicineNames(string medicationsList)
+        {
+            return medicationsList
+                .Split(MedicineSeparators, StringSplitOptions.RemoveEmptyEntries)
+                .Select(part => part.Trim())
+                .Where(part => part.Length > 0)
+                .ToList();
+        }
+
+        private Dictionary<int, int> FillSingleMedicine(
+            string medicineName,
+            List<Item> allItems,
+            Dictionary<int, float> userDiscounts)
+        {
+            Dictionary<int, int> result = new Dictionary<int, int>();
+
+            List<Item> preferredItems = itemsRepository.GetItemsByName(medicineName);
+            if (preferredItems.Count == 0)
+            {
+                return result;
+            }
+
+            Item preferredItem = preferredItems[0];
+            int requiredPills = preferredItem.NumberOfPills > 0 ? preferredItem.NumberOfPills : FallbackRequiredPills;
 
             var exactMatches = allItems
-                .Where(item => item.Name == itemName && item.NumberOfPills == nrOfRequiredPills)
+                .Where(item => item.Name == medicineName && item.NumberOfPills == requiredPills)
                 .OrderBy(item => item.Price)
                 .ToList();
 
@@ -100,13 +149,13 @@ namespace UBB_SE_2026_923_2.Services
             {
                 if (exactMatch.Quantity != EmptyQuantity)
                 {
-                    items.Add(exactMatch.Id, SingleBoxQuantity);
-                    return items;
+                    result.Add(exactMatch.Id, SingleBoxQuantity);
+                    return result;
                 }
             }
 
             var exactSubstitutes = allItems
-                .Where(item => item.NumberOfPills == nrOfRequiredPills && SubstancesMatch(preferredItem, item))
+                .Where(item => item.NumberOfPills == requiredPills && SubstancesMatch(preferredItem, item))
                 .OrderBy(item => item.Price)
                 .ToList();
 
@@ -133,13 +182,13 @@ namespace UBB_SE_2026_923_2.Services
 
                 if (cheapestItemID != NoCandidateItemId)
                 {
-                    items.Add(cheapestItemID, SingleBoxQuantity);
-                    return items;
+                    result.Add(cheapestItemID, SingleBoxQuantity);
+                    return result;
                 }
             }
 
             var multipliedSubstitutes = allItems
-                .Where(item => item.NumberOfPills < nrOfRequiredPills && SubstancesMatch(preferredItem, item))
+                .Where(item => item.NumberOfPills < requiredPills && SubstancesMatch(preferredItem, item))
                 .OrderBy(item => item.Price)
                 .ToList();
 
@@ -153,7 +202,7 @@ namespace UBB_SE_2026_923_2.Services
                 {
                     if (currItem.Quantity != EmptyQuantity)
                     {
-                        int multiplier = (int)Math.Ceiling((double)nrOfRequiredPills / currItem.NumberOfPills);
+                        int multiplier = (int)Math.Ceiling((double)requiredPills / currItem.NumberOfPills);
 
                         if (currItem.Quantity >= multiplier)
                         {
@@ -173,12 +222,12 @@ namespace UBB_SE_2026_923_2.Services
 
                 if (cheapestItemId != NoCandidateItemId && cheapestItemQuantity != NoCandidateQuantity)
                 {
-                    items.Add(cheapestItemId, cheapestItemQuantity);
-                    return items;
+                    result.Add(cheapestItemId, cheapestItemQuantity);
+                    return result;
                 }
             }
 
-            throw new ArgumentException("Medicine couldn't be retrieved");
+            return result;
         }
 
         public Dictionary<int, int> GetCheapestPrescriptionItems(string prescriptionName, int requiredPills)
@@ -208,7 +257,6 @@ namespace UBB_SE_2026_923_2.Services
             }
             Item preferredItem = preferredItems[0];
 
-            // 2. Exact Substitutes
             var exactSubstitutes = allItems
                 .Where(i => i.NumberOfPills == requiredPills && SubstancesMatch(preferredItem, i))
                 .OrderBy(item => item.Price)

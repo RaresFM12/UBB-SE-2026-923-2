@@ -121,7 +121,7 @@
                     Visibility="{Binding IsAccessDenied, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock TextWrapping="Wrap"
                            Foreground="#FFFFB4B4"
-                           Text="Pharmacy Schedule is available to pharmacist accounts. Set Role to Pharmacist in CurrentUserService (or MockCurrentUserService) to view your roster."/>
+                           Text="Pharmacy Schedule is available to pharmacist accounts. Set Role to Pharmacist in CurrentUserService to view your roster."/>
             </Border>
 
             <Border Background="#332A1204"

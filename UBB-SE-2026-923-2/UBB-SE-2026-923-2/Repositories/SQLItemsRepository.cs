@@ -12,9 +12,6 @@ namespace UBB_SE_2026_923_2.Repositories
         private const float MinDiscount = 0f;
         private const float MaxDiscount = 1f;
         private const float PercentageDivisor = 100f;
-        private const string TestPrescriptionId = "testPrescription";
-        private const string DefaultPrescriptionItemName = "Nurofen Express";
-        private const int DefaultPrescriptionPills = 40;
         private const int SingleBoxQuantity = 1;
         private const int NoCandidateItemId = -1;
         private const int NoCandidateQuantity = -1;
