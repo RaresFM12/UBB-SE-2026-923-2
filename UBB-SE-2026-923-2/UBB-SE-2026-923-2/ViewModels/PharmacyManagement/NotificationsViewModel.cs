@@ -32,6 +32,10 @@ namespace UBB_SE_2026_923_2.ViewModels.PharmacyManagement
         public void PopulateNotifications()
         {
             User currentUser = ServiceWrapper.UserAccountService.CurrentUser;
+            if (currentUser == null)
+            {
+                return;
+            }
             List<Notification> notificationData = adminService.GetNotificationsForUser(currentUser);
 
             Notifications.Clear();
