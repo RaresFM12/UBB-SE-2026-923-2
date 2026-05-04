@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using UBB_SE_2026_923_2.Repositories;
 using UBB_SE_2026_923_2.Models;
 
@@ -24,8 +25,11 @@ namespace UBB_SE_2026_923_2.Services
 
         public AdminService()
         {
-            this.itemRepository = new SQLItemsRepository();
-            this.substanceRepository = new SQLSubstancesRepository();
+            // Parameterless overload kept for legacy call sites that don't go
+            // through DI yet. Repositories are resolved from the application
+            // service provider so the EF Core implementations are used.
+            this.itemRepository = App.Services.GetRequiredService<IItemsRepository>();
+            this.substanceRepository = App.Services.GetRequiredService<ISubstancesRepository>();
         }
 
         public List<Item> GetAllItems()

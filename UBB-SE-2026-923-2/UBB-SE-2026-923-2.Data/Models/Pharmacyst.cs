@@ -1,17 +1,16 @@
-﻿namespace UBB_SE_2026_923_2.Models
+namespace UBB_SE_2026_923_2.Models
 {
-    public class Pharmacyst : IStaff
+    /// <summary>
+    /// Pharmacist staff. Stored in the same table as <see cref="Staff"/> via TPH
+    /// inheritance; the discriminator is <see cref="Staff.Role"/> = "Pharmacist".
+    /// All persisted fields (including <see cref="Staff.Certification"/>) live
+    /// on the base class.
+    /// </summary>
+    public class Pharmacyst : Staff
     {
-        public int StaffID { get; set; }
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string ContactInfo { get; set; } = string.Empty;
-        public bool Available { get; set; }
-        public string Certification { get; set; } = string.Empty;
-        public int YearsOfExperience { get; set; }
-
         public Pharmacyst()
         {
+            Role = "Pharmacist";
         }
 
         public Pharmacyst(int staffID, string firstName, string lastName, string contactInfo, bool available, string certification, int yearsOfExp)
@@ -23,6 +22,7 @@
             this.Available = available;
             this.Certification = certification;
             this.YearsOfExperience = yearsOfExp;
+            this.Role = "Pharmacist";
         }
     }
 }

@@ -20,5 +20,8 @@ namespace UBB_SE_2026_923_2.Models
         public string Location { get; set; } = string.Empty;
 
         public string Notes { get; set; } = string.Empty;
+
+        // ---- EF Core navigation property (persisted) ----
+        public Doctor? Doctor { get; set; }
     }
 }

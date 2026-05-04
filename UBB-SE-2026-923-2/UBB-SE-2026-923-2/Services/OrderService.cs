@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UBB_SE_2026_923_2.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
 using UBB_SE_2026_923_2.ViewModels.Orders;
@@ -39,11 +39,15 @@ namespace UBB_SE_2026_923_2.Services
 
         public OrderService()
         {
-            SubstancesRepository = new SQLSubstancesRepository();
-            ItemsRepository = new SQLItemsRepository();
-            UsersRepository = new SQLUsersRepository();
-            OrdersRepository = new SQLOrdersRepository();
-            EvaluationsRepository = new EvaluationsRepository(AppSettings.ConnectionString);
+            // Parameterless overload kept for legacy call sites. Pull EF Core
+            // repositories from the application service provider; the
+            // evaluations repository still uses the legacy ADO.NET connection
+            // string until it is migrated in Phase 2.
+            SubstancesRepository = App.Services.GetRequiredService<ISubstancesRepository>();
+            ItemsRepository = App.Services.GetRequiredService<IItemsRepository>();
+            UsersRepository = App.Services.GetRequiredService<IUsersRepository>();
+            OrdersRepository = App.Services.GetRequiredService<IOrdersRepository>();
+            EvaluationsRepository = App.Services.GetRequiredService<IEvaluationsRepository>();
             PrescriptionService = new PrescriptionService(ItemsRepository, EvaluationsRepository);
         }
 
@@ -59,7 +63,7 @@ namespace UBB_SE_2026_923_2.Services
             ItemsRepository = itemsRepository;
             UsersRepository = usersRepository;
             OrdersRepository = ordersRepository;
-            EvaluationsRepository = evaluationsRepository ?? new EvaluationsRepository(AppSettings.ConnectionString);
+            EvaluationsRepository = evaluationsRepository ?? App.Services.GetRequiredService<IEvaluationsRepository>();
             PrescriptionService = new PrescriptionService(itemsRepository, EvaluationsRepository);
             injectedActiveUser = activeUser;
         }

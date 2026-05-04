@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -85,7 +86,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
             Frame.Navigate(
                 typeof(ProductsCatalogue.HomePage),
-                new ProductCatalogueService(new SQLItemsRepository()));
+                new ProductCatalogueService(App.Services.GetRequiredService<IItemsRepository>()));
 
             await confirmationMessage.ShowAsync();
         }

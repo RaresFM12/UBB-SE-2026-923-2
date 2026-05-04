@@ -2,181 +2,131 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Models;
-using Microsoft.Data.SqlClient;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="IStaffRepository"/>,
+    /// <see cref="IShiftManagementStaffRepository"/> and
+    /// <see cref="IPharmacyStaffRepository"/>. Reads pull from the TPH-mapped
+    /// <c>Staff</c> table — EF Core materializes <see cref="Doctor"/> or
+    /// <see cref="Pharmacyst"/> instances based on the <c>Role</c> discriminator.
+    /// </summary>
     public class StaffRepository : IShiftManagementStaffRepository, IStaffRepository, IPharmacyStaffRepository
     {
         private const string DoctorRoleLabel = "Doctor";
-        private const string PharmacistRoleLabel = "Pharmacist";
-        private const string DefaultDoctorStatusLabel = "Available";
 
-        private readonly string connectionString;
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
-        public StaffRepository(string connectionString)
+        public StaffRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
-            this.connectionString = connectionString;
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public List<IStaff> LoadAllStaff()
         {
-            var allStaff = new List<IStaff>();
-
-            using SqlConnection connection = GetConnection();
-            connection.Open();
-            using SqlCommand command = new SqlCommand(@"
-                SELECT staff_id, role, first_name, last_name, contact_info,
-                       is_available, license_number, specialization, status,
-                       certification, years_of_experience
-                FROM Staff;", connection);
-
-            using SqlDataReader reader = command.ExecuteReader();
-            int staffIdOrdinal = reader.GetOrdinal("staff_id");
-            int roleOrdinal = reader.GetOrdinal("role");
-            int firstNameOrdinal = reader.GetOrdinal("first_name");
-            int lastNameOrdinal = reader.GetOrdinal("last_name");
-            int contactInfoOrdinal = reader.GetOrdinal("contact_info");
-            int isAvailableOrdinal = reader.GetOrdinal("is_available");
-            int licenseNumberOrdinal = reader.GetOrdinal("license_number");
-            int specializationOrdinal = reader.GetOrdinal("specialization");
-            int statusOrdinal = reader.GetOrdinal("status");
-            int certificationOrdinal = reader.GetOrdinal("certification");
-            int yearsOfExperienceOrdinal = reader.GetOrdinal("years_of_experience");
-
-            while (reader.Read())
-            {
-                int staffId = reader.GetInt32(staffIdOrdinal);
-                string role = reader.GetString(roleOrdinal);
-                string firstName = reader.GetString(firstNameOrdinal);
-                string lastName = reader.GetString(lastNameOrdinal);
-                string contactInfo = reader.IsDBNull(contactInfoOrdinal) ? string.Empty : reader.GetString(contactInfoOrdinal);
-                bool isAvailable = reader.GetBoolean(isAvailableOrdinal);
-                string licenseNumber = reader.IsDBNull(licenseNumberOrdinal) ? string.Empty : reader.GetString(licenseNumberOrdinal);
-                string specialization = reader.IsDBNull(specializationOrdinal) ? string.Empty : reader.GetString(specializationOrdinal);
-                string statusText = reader.IsDBNull(statusOrdinal) ? DefaultDoctorStatusLabel : reader.GetString(statusOrdinal);
-                string certification = reader.IsDBNull(certificationOrdinal) ? string.Empty : reader.GetString(certificationOrdinal);
-                int yearsOfExperience = reader.IsDBNull(yearsOfExperienceOrdinal) ? 0 : reader.GetInt32(yearsOfExperienceOrdinal);
-
-                Enum.TryParse<DoctorStatus>(statusText, true, out DoctorStatus doctorStatus);
-
-                if (role == DoctorRoleLabel)
-                {
-                    allStaff.Add(new Doctor(staffId, firstName, lastName, contactInfo,
-                        isAvailable, specialization, licenseNumber, doctorStatus, yearsOfExperience));
-                }
-                else if (role == PharmacistRoleLabel)
-                {
-                    allStaff.Add(new Pharmacyst(staffId, firstName, lastName, contactInfo,
-                        isAvailable, certification, yearsOfExperience));
-                }
-            }
-            return allStaff;
+            using var db = dbContextFactory.CreateDbContext();
+            // TPH: query the base set, return only the concrete subtypes the
+            // legacy code surfaced (Doctor / Pharmacyst). EF picks the right
+            // .NET type based on the Role discriminator.
+            return db.StaffMembers
+                .AsNoTracking()
+                .Where(s => s is Doctor || s is Pharmacyst)
+                .ToList()
+                .Cast<IStaff>()
+                .ToList();
         }
 
         public IStaff? GetStaffById(int staffId)
         {
-            bool HasMatchingId(IStaff staffMember) => staffMember.StaffID == staffId;
-            return LoadAllStaff().FirstOrDefault(HasMatchingId);
+            using var db = dbContextFactory.CreateDbContext();
+            return db.StaffMembers
+                .AsNoTracking()
+                .Where(s => s.StaffID == staffId && (s is Doctor || s is Pharmacyst))
+                .FirstOrDefault() as IStaff;
         }
 
-        public List<Pharmacyst> GetPharmacists() => LoadAllStaff().OfType<Pharmacyst>().ToList();
+        public List<Pharmacyst> GetPharmacists()
+        {
+            using var db = dbContextFactory.CreateDbContext();
+            return db.Pharmacysts.AsNoTracking().ToList();
+        }
 
         public async Task<IReadOnlyList<(int DoctorId, string FirstName, string LastName)>> GetAllDoctorsAsync()
         {
-            var doctors = new List<(int, string, string)>();
-            using SqlConnection connection = GetConnection();
-            await connection.OpenAsync();
-            using SqlCommand command = new SqlCommand(@"
-                SELECT staff_id, first_name, last_name
-                FROM Staff
-                WHERE role = @DoctorRole;", connection);
-            AddParameter(command, "@DoctorRole", DoctorRoleLabel);
-            using SqlDataReader reader = await command.ExecuteReaderAsync();
-            int staffIdOrdinal = reader.GetOrdinal("staff_id");
-            int firstNameOrdinal = reader.GetOrdinal("first_name");
-            int lastNameOrdinal = reader.GetOrdinal("last_name");
-            while (await reader.ReadAsync())
-            {
-                doctors.Add((
-                    reader.GetInt32(staffIdOrdinal),
-                    reader.IsDBNull(firstNameOrdinal) ? string.Empty : reader.GetString(firstNameOrdinal),
-                    reader.IsDBNull(lastNameOrdinal) ? string.Empty : reader.GetString(lastNameOrdinal)));
-            }
-            return doctors;
+            await using var db = await dbContextFactory.CreateDbContextAsync();
+            var rows = await db.Doctors
+                .AsNoTracking()
+                .Select(d => new { d.StaffID, d.FirstName, d.LastName })
+                .ToListAsync();
+
+            return rows
+                .Select(row => (row.StaffID, row.FirstName, row.LastName))
+                .ToList();
         }
 
         public async Task UpdateStatusAsync(int staffId, string status)
         {
-            using SqlConnection connection = GetConnection();
-            await connection.OpenAsync();
-            using SqlCommand command = new SqlCommand(
-                "UPDATE Staff SET status = @Status WHERE staff_id = @StaffId;", connection);
-            AddParameter(command, "@Status", status);
-            AddParameter(command, "@StaffId", staffId);
-            await command.ExecuteNonQueryAsync();
+            await using var db = await dbContextFactory.CreateDbContextAsync();
+            var staff = await db.StaffMembers.FirstOrDefaultAsync(s => s.StaffID == staffId);
+            if (staff is null)
+            {
+                return;
+            }
+
+            staff.Status = status;
+            await db.SaveChangesAsync();
         }
 
         public void UpdateStaffAvailability(int staffId, bool isAvailable, DoctorStatus status = DoctorStatus.OFF_DUTY)
         {
-            using SqlConnection connection = GetConnection();
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "UPDATE Staff SET is_available = @IsAvailable, status = @Status WHERE staff_id = @StaffId;", connection);
-            AddParameter(command, "@IsAvailable", isAvailable);
-            AddParameter(command, "@Status", status.ToString());
-            AddParameter(command, "@StaffId", staffId);
-            command.ExecuteNonQuery();
+            using var db = dbContextFactory.CreateDbContext();
+            var staff = db.StaffMembers.FirstOrDefault(s => s.StaffID == staffId);
+            if (staff is null)
+            {
+                return;
+            }
+
+            staff.Available = isAvailable;
+            staff.Status = status.ToString();
+            if (staff is Doctor doctor)
+            {
+                doctor.DoctorStatus = status;
+            }
+
+            db.SaveChanges();
         }
 
         public void UpdateStaff(IStaff staff)
         {
-            using SqlConnection connection = GetConnection();
-            connection.Open();
-            using SqlCommand command = new SqlCommand(@"
-                UPDATE Staff SET
-                    first_name = @FirstName, last_name = @LastName,
-                    contact_info = @ContactInfo, is_available = @IsAvailable,
-                    license_number = @License, specialization = @Specialization,
-                    status = @Status, certification = @Certification
-                WHERE staff_id = @StaffId;", connection);
-            AddParameter(command, "@FirstName", staff.FirstName);
-            AddParameter(command, "@LastName", staff.LastName);
-            AddParameter(command, "@ContactInfo", staff.ContactInfo);
-            AddParameter(command, "@IsAvailable", staff.Available);
-            AddParameter(command, "@StaffId", staff.StaffID);
-
-            if (staff is Doctor doctor)
+            using var db = dbContextFactory.CreateDbContext();
+            var existing = db.StaffMembers.FirstOrDefault(s => s.StaffID == staff.StaffID);
+            if (existing is null)
             {
-                AddParameter(command, "@License", doctor.LicenseNumber);
-                AddParameter(command, "@Specialization", doctor.Specialization);
-                AddParameter(command, "@Status", doctor.DoctorStatus.ToString());
-                AddParameter(command, "@Certification", DBNull.Value);
-            }
-            else if (staff is Pharmacyst pharmacist)
-            {
-                AddParameter(command, "@License", DBNull.Value);
-                AddParameter(command, "@Specialization", DBNull.Value);
-                AddParameter(command, "@Status", DBNull.Value);
-                AddParameter(command, "@Certification", pharmacist.Certification);
-            }
-            else
-            {
-                AddParameter(command, "@License", DBNull.Value);
-                AddParameter(command, "@Specialization", DBNull.Value);
-                AddParameter(command, "@Status", DBNull.Value);
-                AddParameter(command, "@Certification", DBNull.Value);
+                return;
             }
 
-            command.ExecuteNonQuery();
-        }
+            existing.FirstName = staff.FirstName;
+            existing.LastName = staff.LastName;
+            existing.ContactInfo = staff.ContactInfo;
+            existing.Available = staff.Available;
 
-        private SqlConnection GetConnection() => new SqlConnection(connectionString);
+            if (existing is Doctor existingDoctor && staff is Doctor incomingDoctor)
+            {
+                existingDoctor.LicenseNumber = incomingDoctor.LicenseNumber;
+                existingDoctor.Specialization = incomingDoctor.Specialization;
+                existingDoctor.DoctorStatus = incomingDoctor.DoctorStatus;
+                existingDoctor.Status = incomingDoctor.DoctorStatus.ToString();
+            }
+            else if (existing is Pharmacyst existingPharmacist && staff is Pharmacyst incomingPharmacist)
+            {
+                existingPharmacist.Certification = incomingPharmacist.Certification;
+            }
 
-        private static void AddParameter(SqlCommand command, string name, object? value)
-        {
-            command.Parameters.Add(new SqlParameter(name, value ?? DBNull.Value));
+            db.SaveChanges();
         }
     }
 }
