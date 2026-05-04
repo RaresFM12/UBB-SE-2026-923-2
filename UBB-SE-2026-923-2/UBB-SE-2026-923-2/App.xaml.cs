@@ -68,36 +68,39 @@ namespace UBB_SE_2026_923_2
 
         private static void RegisterRepositories(IServiceCollection services)
         {
-            // Pharmacy-side repositories already migrated off raw SQL paths.
+            // Every repository now takes IDbContextFactory<AppDbContext>, which
+            // is resolved automatically by the DI container — no more explicit
+            // connection-string factory delegates.
+
+            // Pharmacy-side repositories.
             services.AddScoped<IUsersRepository, SQLUsersRepository>();
             services.AddScoped<IItemsRepository, SQLItemsRepository>();
             services.AddScoped<IOrdersRepository, SQLOrdersRepository>();
             services.AddScoped<ISubstancesRepository, SQLSubstancesRepository>();
 
-            // Legacy repositories: their constructors still take a raw connection
-            // string, so they MUST be created through explicit factories until
-            // Phase 2 rewires them onto IDbContextFactory<AppDbContext>.
-            // StaffRepository implements three interfaces — register the concrete
-            // type once and forward the interfaces to the same singleton instance.
-            services.AddSingleton<StaffRepository>(_ => new StaffRepository(AppSettings.ConnectionString));
+            // StaffRepository implements three interfaces — register the
+            // concrete type once and forward the interfaces to the same
+            // singleton instance.
+            services.AddSingleton<StaffRepository>();
             services.AddSingleton<IStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
             services.AddSingleton<IShiftManagementStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
             services.AddSingleton<IPharmacyStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
 
-            services.AddSingleton<ShiftRepository>(_ => new ShiftRepository(AppSettings.ConnectionString));
+            services.AddSingleton<ShiftRepository>();
             services.AddSingleton<IShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
             services.AddSingleton<IShiftManagementShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
             services.AddSingleton<IPharmacyShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
 
-            services.AddSingleton<IPharmacyHandoverRepository>(_ => new PharmacyHandoverRepository(AppSettings.ConnectionString));
-            services.AddSingleton<IShiftSwapRepository>(_ => new ShiftSwapRepository(AppSettings.ConnectionString));
-            services.AddSingleton<INotificationRepository>(_ => new NotificationRepository(AppSettings.ConnectionString));
-            services.AddSingleton<IAppointmentRepository>(_ => new AppointmentRepository(AppSettings.ConnectionString));
+            // Hospital-side single-interface repositories.
+            services.AddSingleton<IPharmacyHandoverRepository, PharmacyHandoverRepository>();
+            services.AddSingleton<IShiftSwapRepository, ShiftSwapRepository>();
+            services.AddSingleton<INotificationRepository, NotificationRepository>();
+            services.AddSingleton<IAppointmentRepository, AppointmentRepository>();
             services.AddSingleton<IHangoutRepository, HangoutRepository>();
-            services.AddSingleton<IHangoutParticipantRepository>(_ => new HangoutParticipantRepository(AppSettings.ConnectionString));
-            services.AddSingleton<IEvaluationsRepository>(_ => new EvaluationsRepository(AppSettings.ConnectionString));
-            services.AddSingleton<IERDispatchRepository>(_ => new ERDispatchRepository(AppSettings.ConnectionString));
-            services.AddSingleton<IHighRiskMedicineRepository>(_ => new HighRiskMedicineRepository(AppSettings.ConnectionString));
+            services.AddSingleton<IHangoutParticipantRepository, HangoutParticipantRepository>();
+            services.AddSingleton<IEvaluationsRepository, EvaluationsRepository>();
+            services.AddSingleton<IERDispatchRepository, ERDispatchRepository>();
+            services.AddSingleton<IHighRiskMedicineRepository, HighRiskMedicineRepository>();
         }
 
         private static void RegisterServices(IServiceCollection services)

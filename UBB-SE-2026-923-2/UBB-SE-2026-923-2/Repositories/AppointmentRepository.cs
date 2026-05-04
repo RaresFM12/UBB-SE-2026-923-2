@@ -1,89 +1,92 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Models;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="IAppointmentRepository"/>.
+    /// </summary>
     public class AppointmentRepository : IAppointmentRepository
     {
-        private readonly string connectionString;
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
-        public AppointmentRepository(string connectionString)
+        public AppointmentRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
-            this.connectionString = connectionString;
-        }
-
-        private SqlConnection GetConnection() => new SqlConnection(connectionString);
-
-        private static void AddParameter(SqlCommand command, string name, object? value)
-        {
-            command.Parameters.Add(new SqlParameter(name, value ?? DBNull.Value));
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public async Task<IReadOnlyList<Appointment>> GetAllAppointmentsAsync()
         {
-            var appointments = new List<Appointment>();
-
-            using var connection = GetConnection();
-            await connection.OpenAsync();
-            using var command = new SqlCommand(
-                "SELECT appointment_id, doctor_id, patient_id, start_time, end_time, status FROM Appointments;",
-                connection);
-
-            using var reader = await command.ExecuteReaderAsync();
-            int idOrdinal = reader.GetOrdinal("appointment_id");
-            int doctorIdOrdinal = reader.GetOrdinal("doctor_id");
-            int patientIdOrdinal = reader.GetOrdinal("patient_id");
-            int startOrdinal = reader.GetOrdinal("start_time");
-            int endOrdinal = reader.GetOrdinal("end_time");
-            int statusOrdinal = reader.GetOrdinal("status");
-
-            while (await reader.ReadAsync())
-            {
-                DateTime startDateTime = reader.GetDateTime(startOrdinal);
-                DateTime endDateTime = reader.GetDateTime(endOrdinal);
-                appointments.Add(new Appointment
+            await using var db = await dbContextFactory.CreateDbContextAsync();
+            var rows = await db.Appointments
+                .AsNoTracking()
+                .Select(a => new
                 {
-                    Id = reader.GetInt32(idOrdinal),
-                    DoctorId = reader.GetInt32(doctorIdOrdinal),
+                    a.Id,
+                    a.DoctorId,
+                    a.PatientName,
+                    a.Date,
+                    a.StartTime,
+                    a.EndTime,
+                    a.Status,
+                    a.Type,
+                    a.Location,
+                    a.Notes,
+                })
+                .ToListAsync();
+
+            return rows
+                .Select(row => new Appointment
+                {
+                    Id = row.Id,
+                    DoctorId = row.DoctorId,
                     DoctorName = string.Empty,
-                    PatientName = reader.GetInt32(patientIdOrdinal).ToString(),
-                    Date = startDateTime.Date,
-                    StartTime = startDateTime.TimeOfDay,
-                    EndTime = endDateTime.TimeOfDay,
-                    Status = reader.GetString(statusOrdinal),
-                });
-            }
-            return appointments;
+                    PatientName = row.PatientName,
+                    Date = row.Date,
+                    StartTime = row.StartTime,
+                    EndTime = row.EndTime,
+                    Status = row.Status,
+                    Type = row.Type,
+                    Location = row.Location,
+                    Notes = row.Notes,
+                })
+                .ToList();
         }
 
         public async Task AddAppointmentAsync(int patientId, int doctorId, DateTime startTime, DateTime endTime, string status)
         {
-            using var connection = GetConnection();
-            await connection.OpenAsync();
-            using var command = new SqlCommand(
-                "INSERT INTO Appointments (patient_id, doctor_id, start_time, end_time, status) VALUES (@PatId, @DocId, @Start, @End, @Status);",
-                connection);
-            AddParameter(command, "@PatId", patientId);
-            AddParameter(command, "@DocId", doctorId);
-            AddParameter(command, "@Start", startTime);
-            AddParameter(command, "@End", endTime);
-            AddParameter(command, "@Status", status);
-            await command.ExecuteNonQueryAsync();
+            await using var db = await dbContextFactory.CreateDbContextAsync();
+
+            var appointment = new Appointment
+            {
+                DoctorId = doctorId,
+                PatientName = patientId.ToString(),
+                Date = startTime.Date,
+                StartTime = startTime.TimeOfDay,
+                EndTime = endTime.TimeOfDay,
+                Status = status,
+            };
+
+            db.Appointments.Add(appointment);
+            await db.SaveChangesAsync();
         }
 
         public async Task UpdateAppointmentStatusAsync(int id, string status)
         {
-            using var connection = GetConnection();
-            await connection.OpenAsync();
-            using var command = new SqlCommand(
-                "UPDATE Appointments SET status = @Status WHERE appointment_id = @Id;",
-                connection);
-            AddParameter(command, "@Status", status);
-            AddParameter(command, "@Id", id);
-            await command.ExecuteNonQueryAsync();
+            await using var db = await dbContextFactory.CreateDbContextAsync();
+            var appointment = await db.Appointments.FirstOrDefaultAsync(a => a.Id == id);
+            if (appointment is null)
+            {
+                return;
+            }
+
+            appointment.Status = status;
+            await db.SaveChangesAsync();
         }
     }
 }

@@ -1,40 +1,28 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Models;
-using Microsoft.Data.SqlClient;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="IPharmacyHandoverRepository"/>.
+    /// </summary>
     public class PharmacyHandoverRepository : IPharmacyHandoverRepository
     {
-        private readonly string connectionString;
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
-        public PharmacyHandoverRepository(string connectionString)
+        public PharmacyHandoverRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
-            this.connectionString = connectionString;
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public IReadOnlyList<PharmacyHandover> GetAllPharmacyHandovers()
         {
-            var handovers = new List<PharmacyHandover>();
-
-            using SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "SELECT PharmacistID, HandoverDate FROM PharmacyHandover;",
-                connection);
-
-            using SqlDataReader reader = command.ExecuteReader();
-            int pharmacistOrdinal = reader.GetOrdinal("PharmacistID");
-            int dateOrdinal = reader.GetOrdinal("HandoverDate");
-            while (reader.Read())
-            {
-                handovers.Add(new PharmacyHandover
-                {
-                    PharmacistId = reader.GetInt32(pharmacistOrdinal),
-                    HandoverDate = reader.GetDateTime(dateOrdinal),
-                });
-            }
-            return handovers;
+            using var db = dbContextFactory.CreateDbContext();
+            return db.PharmacyHandovers.AsNoTracking().ToList();
         }
     }
 }

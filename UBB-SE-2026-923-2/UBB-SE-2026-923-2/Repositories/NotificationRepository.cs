@@ -1,29 +1,36 @@
 using System;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
+using UBB_SE_2026_923_2.Models;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="INotificationRepository"/>.
+    /// </summary>
     public class NotificationRepository : INotificationRepository
     {
-        private readonly string connectionString;
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
-        public NotificationRepository(string connectionString)
+        public NotificationRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
-            this.connectionString = connectionString;
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public void AddNotification(int recipientStaffId, string title, string message)
         {
-            using SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            using SqlCommand command = new SqlCommand(@"
-                INSERT INTO Notifications (recipient_staff_id, title, message, created_at, is_read)
-                VALUES (@RecipientStaffId, @Title, @Message, @CreatedAt, 0);", connection);
-            command.Parameters.Add(new SqlParameter("@RecipientStaffId", recipientStaffId));
-            command.Parameters.Add(new SqlParameter("@Title", title));
-            command.Parameters.Add(new SqlParameter("@Message", message));
-            command.Parameters.Add(new SqlParameter("@CreatedAt", DateTime.UtcNow));
-            command.ExecuteNonQuery();
+            using var db = dbContextFactory.CreateDbContext();
+
+            db.Notifications.Add(new Notification
+            {
+                RecipientStaffId = recipientStaffId,
+                Title = title,
+                Message = message,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false,
+            });
+
+            db.SaveChanges();
         }
     }
 }

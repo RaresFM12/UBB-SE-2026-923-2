@@ -64,7 +64,7 @@ namespace UBB_SE_2026_923_2.Services
             ItemsRepository = itemsRepository;
             UsersRepository = usersRepository;
             OrdersRepository = ordersRepository;
-            EvaluationsRepository = evaluationsRepository ?? new EvaluationsRepository(AppSettings.ConnectionString);
+            EvaluationsRepository = evaluationsRepository ?? App.Services.GetRequiredService<IEvaluationsRepository>();
             PrescriptionService = new PrescriptionService(itemsRepository, EvaluationsRepository);
             injectedActiveUser = activeUser;
         }
