@@ -1,7 +1,9 @@
 using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using UBB_SE_2026_923_2.Services;
+using UBB_SE_2026_923_2.Views;
 using UBB_SE_2026_923_2.ViewModels.Accounts;
 
 namespace UBB_SE_2026_923_2.Views.Accounts
@@ -28,10 +30,15 @@ namespace UBB_SE_2026_923_2.Views.Accounts
         {
             (this.Parent as Frame)?.Navigate(typeof(RegisterView));
         }
+
         private void OnLoginSucceeded()
         {
+            var currentUser = ServiceWrapper.UserAccountService.CurrentUser;
+            var currentUserService = App.Services.GetRequiredService<ICurrentUserService>();
+            currentUserService.SetFromUser(currentUser);
+
             UserLoggedIn?.Invoke();
-            (this.Parent as Frame)?.Navigate(typeof(Views.Accounts.ProfileManagementView));
+            (this.Parent as Frame)?.Navigate(typeof(RoleDashboardPage));
         }
     }
 }

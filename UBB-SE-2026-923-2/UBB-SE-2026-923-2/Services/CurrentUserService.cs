@@ -1,3 +1,4 @@
+using System;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Services;
 
@@ -5,11 +6,14 @@ namespace UBB_SE_2026_923_2.Services
 {
     public sealed class CurrentUserService : ICurrentUserService
     {
-        private const int DefaultLoggedInUserId = 1;
+        private static UserRole roleType = UserRole.Client;
+        private static int userId = 0;
 
-        private static UserRole roleType = UserRole.Doctor;
-
-        public int UserId { get; } = DefaultLoggedInUserId;
+        public int UserId
+        {
+            get => userId;
+            set => userId = value;
+        }
 
         public UserRole RoleType
         {
@@ -18,5 +22,19 @@ namespace UBB_SE_2026_923_2.Services
         }
 
         public string Role => RoleType.ToString();
+
+        public void SetFromUser(User user)
+        {
+            if (user == null) return;
+            userId = user.Id;
+            if (Enum.TryParse<UserRole>(user.Role, ignoreCase: true, out var parsed))
+            {
+                roleType = parsed;
+            }
+            else
+            {
+                roleType = user.IsAdmin ? UserRole.Admin : UserRole.Client;
+            }
+        }
     }
 }

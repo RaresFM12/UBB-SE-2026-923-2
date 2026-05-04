@@ -86,7 +86,7 @@
                 </ListView>
 
                 <Button Grid.Row="2"
-                        Content="Change Role"
+                        Content="Logout"
                         Click="ChangeRole_Click"
                         Background="{StaticResource AccentBrush}"
                         Foreground="White"

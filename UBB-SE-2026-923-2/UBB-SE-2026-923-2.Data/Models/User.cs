@@ -25,6 +25,7 @@ namespace UBB_SE_2026_923_2.Models
         public bool IsAdmin { get; set; }
         public string Username { get; set; }
         public bool IsDisabled { get; set; }
+        public string Role { get; set; }
 
         public DateOnly StartPeriodDate { get; set; }
         public int CycleDays { get; set; }
@@ -68,6 +69,7 @@ namespace UBB_SE_2026_923_2.Models
             PhoneNumber = string.Empty;
             PasswordHash = string.Empty;
             Username = string.Empty;
+            Role = nameof(UserRole.Client);
             PeriodNotes = new Dictionary<int, Tuple<string, bool>>();
             StockAlerts = new List<int>();
             FavoriteItems = new List<int>();

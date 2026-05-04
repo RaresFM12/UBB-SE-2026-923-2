@@ -94,6 +94,14 @@ namespace UBB_SE_2026_923_2.Views
                     Add("Order History", "doctor-orders", typeof(OrderHistoryPage), orderService);
                     Add("Period Tracker", "doctor-period-tracker", typeof(PeriodTrackerPage), periodTrackerViewModel);
                     break;
+
+                case UserRole.Client:
+                    Add("Product Catalogue", "client-catalogue", typeof(HomePage), ServiceWrapper.UserAccountService.CurrentUser);
+                    Add("Shopping Cart", "client-cart", typeof(BasketPage), orderService);
+                    Add("Order History", "client-orders", typeof(OrderHistoryPage), orderService);
+                    Add("Period Tracker", "client-period-tracker", typeof(PeriodTrackerPage), periodTrackerViewModel);
+                    Add("Notifications", "client-notifications", typeof(Notifications));
+                    break;
             }
 
             var first = items.FirstOrDefault();
@@ -139,7 +147,8 @@ namespace UBB_SE_2026_923_2.Views
 
         private void ChangeRole_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(RoleSelectionPage));
+            ServiceWrapper.UserAccountService.Logout();
+            Frame.Navigate(typeof(LoginView));
         }
 
         private sealed class MenuEntry

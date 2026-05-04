@@ -104,6 +104,7 @@ public class AppDbContext : DbContext
             entity.Property(u => u.PhoneNumber).HasMaxLength(50).IsRequired();
             entity.Property(u => u.PasswordHash).HasMaxLength(512).IsRequired();
             entity.Property(u => u.Username).HasMaxLength(100).IsRequired();
+            entity.Property(u => u.Role).HasMaxLength(20).HasDefaultValue("Client");
             entity.HasIndex(u => u.Email).IsUnique();
 
             entity.HasMany(u => u.Orders)

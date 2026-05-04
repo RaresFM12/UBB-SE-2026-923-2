@@ -80,6 +80,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 Username = username,
                 IsAdmin = isAdmin,
                 IsDisabled = isDisabled,
+                Role = nameof(UserRole.Client),
                 DiscountNotifications = discountNotifications,
                 LoyaltyPoints = loyaltyPoints,
             };
@@ -111,6 +112,7 @@ namespace UBB_SE_2026_923_2.Repositories
             existing.Username = newUser.Username;
             existing.IsAdmin = newUser.IsAdmin;
             existing.IsDisabled = newUser.IsDisabled;
+            existing.Role = newUser.Role;
             existing.DiscountNotifications = newUser.DiscountNotifications;
             existing.LoyaltyPoints = newUser.LoyaltyPoints;
             existing.StartPeriodDate = newUser.StartPeriodDate;

@@ -4,6 +4,7 @@
     {
         Admin,
         Doctor,
-        Pharmacist
+        Pharmacist,
+        Client
     }
 }
