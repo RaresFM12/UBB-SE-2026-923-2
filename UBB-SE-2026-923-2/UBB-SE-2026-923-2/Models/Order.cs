@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -24,7 +25,15 @@ namespace UBB_SE_2026_923_2.Models
         }
         public bool IsCompleted { get; set; }
         public bool IsExpired { get; set; }
+
+        // Legacy in-memory view — not persisted. Phase 2 will migrate callers
+        // onto OrderItemEntries below.
+        [NotMapped]
         public Dictionary<int, Tuple<int, float>> ItemQuantitiesWithFinalPrice { get; private set; }
+
+        // ---- EF Core navigation properties (persisted) ----
+        public User? Client { get; set; }
+        public ICollection<OrderItem> OrderItemEntries { get; set; } = new List<OrderItem>();
 
         public Order()
         {

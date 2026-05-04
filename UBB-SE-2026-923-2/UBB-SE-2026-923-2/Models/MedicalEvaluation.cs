@@ -8,11 +8,14 @@ namespace UBB_SE_2026_923_2.Models
         private const string TimeFormat = "HH:mm";
 
         public int EvaluationID { get; set; }
-        public string PatientId { get; set; } = string.Empty;
+        public int PatientId { get; set; }
         public string Symptoms { get; set; } = string.Empty;
         public string MedicationsList { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
         public DateTime EvaluationDate { get; set; }
+
+        // ---- EF Core foreign key + navigation to Doctor (TPH subtype of Staff) ----
+        public int? DoctorId { get; set; }
         public Doctor? Evaluator { get; set; }
 
         public string FormattedDate => EvaluationDate.ToString(DateFormat);

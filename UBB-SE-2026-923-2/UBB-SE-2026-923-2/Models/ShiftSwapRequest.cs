@@ -19,6 +19,11 @@ namespace UBB_SE_2026_923_2.Models
         public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
         public ShiftSwapRequestStatus Status { get; set; } = ShiftSwapRequestStatus.PENDING;
 
+        // ---- EF Core navigation properties (persisted) ----
+        public Shift? Shift { get; set; }
+        public Staff? Requester { get; set; }
+        public Staff? Colleague { get; set; }
+
         public ShiftSwapRequest()
         {
         }

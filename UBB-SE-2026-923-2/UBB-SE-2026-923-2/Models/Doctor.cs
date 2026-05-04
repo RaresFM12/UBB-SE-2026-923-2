@@ -1,19 +1,22 @@
-﻿namespace UBB_SE_2026_923_2.Models
+using System.Collections.Generic;
+
+namespace UBB_SE_2026_923_2.Models
 {
-    public class Doctor : IStaff
+    /// <summary>
+    /// Doctor staff. Stored in the same table as <see cref="Staff"/> via TPH
+    /// inheritance; the discriminator is <see cref="Staff.Role"/> = "Doctor".
+    /// </summary>
+    public class Doctor : Staff
     {
-        public int StaffID { get; set; }
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string ContactInfo { get; set; } = string.Empty;
-        public bool Available { get; set; }
-        public string Specialization { get; set; } = string.Empty;
-        public string LicenseNumber { get; set; } = string.Empty;
-        public int YearsOfExperience { get; set; }
         public DoctorStatus DoctorStatus { get; set; }
+
+        // ---- EF Core navigation collections (persisted) ----
+        public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public ICollection<MedicalEvaluation> MedicalEvaluations { get; set; } = new List<MedicalEvaluation>();
 
         public Doctor()
         {
+            Role = "Doctor";
         }
 
         public Doctor(int staffID, string firstName, string lastName, string contactInfo, bool available,
@@ -28,6 +31,7 @@
             this.LicenseNumber = licenseNumber;
             this.DoctorStatus = doctorStatus;
             this.YearsOfExperience = yearsOfExperience;
+            this.Role = "Doctor";
         }
     }
 }

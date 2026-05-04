@@ -49,6 +49,15 @@ namespace UBB_SE_2026_923_2.Models
         public bool DiscountNotifications { get; set; }
         public int LoyaltyPoints { get; set; }
 
+        // ---- EF Core navigation collections (persisted) ----
+        // The legacy [NotMapped] dictionaries above remain as the in-memory API
+        // for existing callers; Phase 2 rewires repositories to populate these
+        // collections instead, then the dictionary adapters can be removed.
+        public ICollection<PeriodNote> PeriodNoteEntries { get; set; } = new List<PeriodNote>();
+        public ICollection<UserDiscount> UserDiscountEntries { get; set; } = new List<UserDiscount>();
+        public ICollection<UserNotification> UserNotificationEntries { get; set; } = new List<UserNotification>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
+
         private const int CycleDaysDefault = 28;
         private const int PeriodLastsDefault = 5;
         private const int PremenstrualSyndromeOptionDefault = 0;

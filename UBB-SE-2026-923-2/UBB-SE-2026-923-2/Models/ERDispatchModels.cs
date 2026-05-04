@@ -13,6 +13,9 @@ namespace UBB_SE_2026_923_2.Models
         public string Status { get; set; } = PendingStatus;
         public int? AssignedDoctorId { get; set; }
         public string? AssignedDoctorName { get; set; }
+
+        // ---- EF Core navigation property (persisted) ----
+        public Doctor? AssignedDoctor { get; set; }
     }
 
     public sealed class ERDispatchResult

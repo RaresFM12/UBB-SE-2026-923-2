@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace UBB_SE_2026_923_2.Models
@@ -19,8 +20,17 @@ namespace UBB_SE_2026_923_2.Models
         public float DiscountPercentage { get; set; }
 
         private const string ImagePathDefault = "..\\..\\Assets\\placeholder.png";
+
+        // Legacy in-memory views — not persisted. Phase 2 will migrate callers
+        // onto the navigation collections below.
+        [NotMapped]
         public Dictionary<string, float> ActiveSubstances { get; set; }
+        [NotMapped]
         public Dictionary<DateOnly, int> Batches { get; set; }
+
+        // ---- EF Core navigation collections (persisted) ----
+        public ICollection<ItemSubstance> ItemSubstanceEntries { get; set; } = new List<ItemSubstance>();
+        public ICollection<ItemBatch> ItemBatchEntries { get; set; } = new List<ItemBatch>();
 
         public Item()
         {
