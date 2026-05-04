@@ -22,7 +22,11 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             base.OnNavigatedTo(e);
 
-            currentOrderService = (IOrderService)e.Parameter;
+            if (e.Parameter is not IOrderService service)
+            {
+                return;
+            }
+            currentOrderService = service;
             ViewModel = new OrderHistoryViewModel(currentOrderService);
             DataContext = ViewModel;
 

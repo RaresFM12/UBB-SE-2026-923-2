@@ -18,7 +18,11 @@ public sealed partial class OrderManagementPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        orderService = (OrderService)e.Parameter;
+        if (e.Parameter is not IOrderService service)
+        {
+            return;
+        }
+        orderService = service;
         ViewModel = new (orderService);
         DataContext = ViewModel;
 
