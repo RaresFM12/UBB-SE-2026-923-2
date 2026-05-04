@@ -38,9 +38,10 @@ namespace UBB_SE_2026_923_2.Views
 
             currentUser = App.Services.GetRequiredService<ICurrentUserService>();
             orderService = new OrderService();
+            var dbContextFactory = App.Services.GetRequiredService<Microsoft.EntityFrameworkCore.IDbContextFactory<UBB_SE_2026_923_2.Data.AppDbContext>>();
             var ptFactory = new PeriodTrackerServiceFactory(
-                new SQLUsersRepository(),
-                new SQLItemsRepository(),
+                new SQLUsersRepository(dbContextFactory),
+                new SQLItemsRepository(dbContextFactory),
                 App.Services.GetRequiredService<RaresICurrentUserService>(),
                 orderService);
             periodTrackerViewModel = new PeriodTrackerViewModel(
