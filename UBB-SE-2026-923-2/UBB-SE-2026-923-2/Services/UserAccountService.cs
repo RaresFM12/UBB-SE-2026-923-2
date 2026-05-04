@@ -102,7 +102,8 @@ namespace UBB_SE_2026_923_2.Services
 
             string hashedPassword = securityService.HashPassword(password);
             bool discountNotificationsSetting = false;
-            UsersRepository.AddUser(email, phoneNumber, hashedPassword, username, discountNotificationsSetting, role: role);
+            bool isAdmin = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase);
+            UsersRepository.AddUser(email, phoneNumber, hashedPassword, username, discountNotificationsSetting, isAdmin: isAdmin, role: role);
             CurrentUser = UsersRepository.GetUserByEmail(email);
         }
 
@@ -149,9 +150,9 @@ namespace UBB_SE_2026_923_2.Services
                 throw new Exception("Incorrect password");
             }
 
-            if (!userValidationService.IsCorrectPasswordFormat(newPassword))
+            if (string.IsNullOrWhiteSpace(newPassword))
             {
-                throw new Exception("New password must comply with the rules");
+                throw new Exception("New password cannot be empty.");
             }
 
             if (newPassword != confirmNewPassword)
