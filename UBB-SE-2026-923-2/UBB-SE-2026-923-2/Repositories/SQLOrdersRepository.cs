@@ -1,183 +1,149 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Models;
-using Windows.UI.WebUI;
-using Microsoft.Data.SqlClient;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="IOrdersRepository"/>. Order line
+    /// items are loaded through the <see cref="Order.OrderItemEntries"/>
+    /// navigation collection and projected back into the legacy
+    /// <see cref="Order.ItemQuantitiesWithFinalPrice"/> dictionary so existing
+    /// services and view models keep working unchanged.
+    /// </summary>
     public class SQLOrdersRepository : IOrdersRepository
     {
-        private const int FirstElementIndex = 0;
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
-        public SQLOrdersRepository()
+        public SQLOrdersRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public int AddOrder(int clientId, DateOnly pickUpDate, bool isCompleted = false, bool isExpired = false)
         {
-            string connectionString = SQLUtility.GetConnectionString();
-            string pickUpDateString = $"{pickUpDate.Year}-{pickUpDate.Month}-{pickUpDate.Day}";
-            string insertCommandString = "INSERT INTO Orders (clientId, isCompleted, isExpired, pickUpDate) " +
-                                        $"OUTPUT INSERTED.orderId " +
-                                        $"VALUES ({clientId}, '{isCompleted}', '{isExpired}', '{pickUpDateString}')";
+            using var db = dbContextFactory.CreateDbContext();
 
-            using SqlConnection sqlConnection = new SqlConnection(connectionString);
-
-            SqlCommand insertOrderCommand = new SqlCommand(insertCommandString, sqlConnection);
-            sqlConnection.Open();
-            int insertedId = (int)insertOrderCommand.ExecuteScalar();
-            return insertedId;
+            var order = new Order(0, clientId, pickUpDate, isCompleted, isExpired);
+            db.Orders.Add(order);
+            db.SaveChanges();
+            return order.Id;
         }
 
         public void RemoveOrder(int orderIdToBeRemoved)
         {
-            string connectionString = SQLUtility.GetConnectionString();
-            string deleteItemsInOrderString = $"DELETE FROM OrderItems WHERE orderId = {orderIdToBeRemoved}";
-            string deleteCommandString = $"DELETE FROM Orders WHERE orderId = {orderIdToBeRemoved}";
+            using var db = dbContextFactory.CreateDbContext();
+            var order = db.Orders.FirstOrDefault(o => o.Id == orderIdToBeRemoved);
+            if (order is null)
+            {
+                return;
+            }
 
-            using SqlConnection sqlConnection = new (connectionString);
-
-            SqlCommand deleteItemsInOrderCommand = new (deleteItemsInOrderString, sqlConnection);
-            SqlCommand deleteOrderCommand = new (deleteCommandString, sqlConnection);
-
-            sqlConnection.Open();
-            deleteItemsInOrderCommand.ExecuteNonQuery();
-            deleteOrderCommand.ExecuteNonQuery();
+            // Cascade is configured Order → OrderItem; just remove the parent.
+            db.Orders.Remove(order);
+            db.SaveChanges();
         }
 
         public void UpdateOrder(Order newOrder)
         {
-            string connectionString = SQLUtility.GetConnectionString();
-            string pickUpDateString = $"{newOrder.PickUpDate.Year}-{newOrder.PickUpDate.Month}-{newOrder.PickUpDate.Day}";
-            string updateCommandString = $"UPDATE Orders " +
-                                        $"SET clientId = {newOrder.ClientId}, " +
-                                        $"isCompleted = '{newOrder.IsCompleted}', " +
-                                        $"isExpired = '{newOrder.IsExpired}', " +
-                                        $"pickUpDate = '{pickUpDateString}' " +
-                                        $"WHERE orderId = {newOrder.Id}";
+            using var db = dbContextFactory.CreateDbContext();
+            var existing = db.Orders
+                .Include(o => o.OrderItemEntries)
+                .FirstOrDefault(o => o.Id == newOrder.Id);
 
-            using SqlConnection sqlConnection = new SqlConnection(connectionString);
-
-            SqlCommand updateOrderCommand = new SqlCommand(updateCommandString, sqlConnection);
-            sqlConnection.Open();
-            updateOrderCommand.ExecuteNonQuery();
-
-            string deleteItemsInOrderCommandString = $"DELETE FROM OrderItems WHERE orderId = {newOrder.Id}";
-            SqlCommand deleteItemsInOrderCommand = new SqlCommand(deleteItemsInOrderCommandString, sqlConnection);
-            deleteItemsInOrderCommand.ExecuteNonQuery();
-
-            foreach (KeyValuePair<int, Tuple<int, float>> itemInOrder in newOrder.ItemQuantitiesWithFinalPrice)
+            if (existing is null)
             {
-                int itemId = itemInOrder.Key;
-                int itemQuantity = itemInOrder.Value.Item1;
-                float finalPrice = itemInOrder.Value.Item2;
-
-                string insertItemsInOrderCommandString =
-                    $"INSERT INTO OrderItems (orderId, itemId, orderQuantity, price) " +
-                    $"VALUES ({newOrder.Id}, {itemId}, {itemQuantity}, {finalPrice})";
-                SqlCommand insertItemsInOrderCommand = new SqlCommand(insertItemsInOrderCommandString, sqlConnection);
-                insertItemsInOrderCommand.ExecuteNonQuery();
+                return;
             }
+
+            existing.ClientId = newOrder.ClientId;
+            existing.PickUpDate = newOrder.PickUpDate;
+            existing.IsCompleted = newOrder.IsCompleted;
+            existing.IsExpired = newOrder.IsExpired;
+
+            // Replace the line items from the legacy dictionary on the
+            // incoming Order. Phase 3 will switch callers to mutate
+            // OrderItemEntries directly.
+            db.OrderItems.RemoveRange(existing.OrderItemEntries);
+            existing.OrderItemEntries.Clear();
+            foreach (var pair in newOrder.ItemQuantitiesWithFinalPrice)
+            {
+                existing.OrderItemEntries.Add(new OrderItem
+                {
+                    OrderId = existing.Id,
+                    ItemId = pair.Key,
+                    OrderQuantity = pair.Value.Item1,
+                    Price = pair.Value.Item2,
+                });
+            }
+
+            db.SaveChanges();
         }
 
         public Order GetOrder(int orderId)
         {
-            string connString = SQLUtility.GetConnectionString();
-            string selectOrderCommandString = $"SELECT * FROM Orders WHERE orderId = {orderId}";
-            string selectItemsInOrderCommandString = $"SELECT itemId, orderQuantity, price FROM OrderItems WHERE orderId = {orderId}";
+            using var db = dbContextFactory.CreateDbContext();
+            var order = db.Orders
+                .AsNoTracking()
+                .Include(o => o.OrderItemEntries)
+                .FirstOrDefault(o => o.Id == orderId);
 
-            using SqlConnection sqlConnection = new SqlConnection(connString);
-
-            SqlDataAdapter orderAdapter = new SqlDataAdapter(selectOrderCommandString, sqlConnection);
-            SqlDataAdapter itemsInOrderAdapter = new SqlDataAdapter(selectItemsInOrderCommandString, sqlConnection);
-            DataSet orderDataFromDb = new DataSet();
-
-            sqlConnection.Open();
-            orderAdapter.Fill(orderDataFromDb, "Orders");
-            itemsInOrderAdapter.Fill(orderDataFromDb, "OrderItems");
-
-            DataRow resultingRow = orderDataFromDb.Tables["Orders"].Rows[0];
-
-            int resultingOrderId = (int)resultingRow["orderId"];
-            int resultingClientId = (int)resultingRow["clientId"];
-            bool resultingCompletedStatus = (bool)resultingRow["isCompleted"];
-            bool resultingExpiredStatus = (bool)resultingRow["isExpired"];
-            DateOnly resultingPickUpDate = DateOnly.FromDateTime((DateTime)resultingRow["pickUpDate"]);
-
-            Order resultingOrder = new Order(resultingOrderId, resultingClientId, resultingPickUpDate, resultingCompletedStatus, resultingExpiredStatus);
-
-            foreach (DataRow itemInOrderRow in orderDataFromDb.Tables["OrderItems"].Rows)
-            {
-                int itemId = (int)itemInOrderRow["itemId"];
-                int itemQuantity = (int)itemInOrderRow["orderQuantity"];
-                float finalPrice = (float)(decimal)itemInOrderRow["price"];
-                resultingOrder.AddItemToOrder(itemId, itemQuantity, finalPrice);
-            }
-
-            return resultingOrder;
-        }
-
-        private List<Order> GetOrdersFromSelectCommand(string selectOrdersCommandString)
-        {
-            List<Order> orders = new ();
-            List<int> orderIds = new ();
-
-            string connectionString = SQLUtility.GetConnectionString();
-
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                SqlDataAdapter orderAdapter = new SqlDataAdapter(selectOrdersCommandString, sqlConnection);
-                DataSet orderInfoFromDb = new DataSet();
-
-                sqlConnection.Open();
-                orderAdapter.Fill(orderInfoFromDb, "Orders");
-
-                foreach (DataRow orderRow in orderInfoFromDb.Tables["Orders"].Rows)
-                {
-                    orderIds.Add((int)orderRow["orderId"]);
-                }
-            }
-
-            foreach (int orderId in orderIds)
-            {
-                orders.Add(GetOrder(orderId));
-            }
-            return orders;
+            return order is null ? null! : ProjectIntoLegacyDictionary(order);
         }
 
         public List<Order> GetAllOrders()
         {
-            string selectAllOrdersCommandString = $"SELECT * FROM Orders";
-            return GetOrdersFromSelectCommand(selectAllOrdersCommandString);
+            using var db = dbContextFactory.CreateDbContext();
+            var orders = db.Orders
+                .AsNoTracking()
+                .Include(o => o.OrderItemEntries)
+                .ToList();
+
+            foreach (var order in orders)
+            {
+                ProjectIntoLegacyDictionary(order);
+            }
+
+            return orders;
         }
 
         public List<Order> GetOrdersOfClient(int clientId)
         {
-            string selectOrdersCommandString = $"SELECT * FROM Orders WHERE clientId = {clientId}";
-            return GetOrdersFromSelectCommand(selectOrdersCommandString);
+            using var db = dbContextFactory.CreateDbContext();
+            var orders = db.Orders
+                .AsNoTracking()
+                .Include(o => o.OrderItemEntries)
+                .Where(o => o.ClientId == clientId)
+                .ToList();
+
+            foreach (var order in orders)
+            {
+                ProjectIntoLegacyDictionary(order);
+            }
+
+            return orders;
         }
 
         public bool OrderExists(int orderId)
         {
-            string connectionString = SQLUtility.GetConnectionString();
-            string selectCommandString = $"SELECT * FROM Orders WHERE orderId = {orderId}";
+            using var db = dbContextFactory.CreateDbContext();
+            return db.Orders.AsNoTracking().Any(o => o.Id == orderId);
+        }
 
-            using SqlConnection sqlConnection = new SqlConnection(connectionString);
-
-            SqlDataAdapter ordersAdapter = new SqlDataAdapter(selectCommandString, sqlConnection);
-            DataSet orders = new DataSet();
-
-            sqlConnection.Open();
-            ordersAdapter.Fill(orders, "Orders");
-            if (orders.Tables["Orders"].Rows.Count > 0)
+        private static Order ProjectIntoLegacyDictionary(Order order)
+        {
+            foreach (var line in order.OrderItemEntries)
             {
-                return true;
+                if (!order.ItemQuantitiesWithFinalPrice.ContainsKey(line.ItemId))
+                {
+                    order.AddItemToOrder(line.ItemId, line.OrderQuantity, line.Price);
+                }
             }
 
-            return false;
+            return order;
         }
     }
 }

@@ -23,8 +23,11 @@ namespace UBB_SE_2026_923_2
         public App()
         {
             InitializeComponent();
-            ServiceWrapper.Initialize();
+            // Build the DI container first so that ServiceWrapper.Initialize
+            // (and any other static-style entry points) can resolve EF Core
+            // repositories rather than falling back to the legacy ADO.NET ones.
             Services = ConfigureServices().BuildServiceProvider();
+            ServiceWrapper.Initialize();
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs eventArgs)
