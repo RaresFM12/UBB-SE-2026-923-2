@@ -48,6 +48,10 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
         private void LoadOrders()
         {
+            if (orderService.ActiveUser == null)
+            {
+                return;
+            }
             int clientId = orderService.ActiveUser.Id;
             List<Order> userOrders = orderService.OrdersRepository.GetOrdersOfClient(clientId);
             foreach (Order currentOrder in userOrders)
