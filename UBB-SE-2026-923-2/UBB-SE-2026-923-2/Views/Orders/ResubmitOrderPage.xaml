@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UBB_SE_2026_923_2.Views.Orders.ResubmitOrderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UBB_SE_2026_923_2.Views.Orders"
+    xmlns:localModel="using:UBB_SE_2026_923_2.ViewModels.Orders"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="20"
+          ColumnDefinitions="*, Auto">
+
+        <ListView Grid.Row="0"
+                  Grid.Column="0"
+                  ItemsSource="{x:Bind viewModel.OrderItems}">
+
+            <ListView.ItemTemplate>
+
+                <!-- defining the way items are presented 
+        in the list view of the bucket -->
+                <DataTemplate x:DataType="localModel:ItemDetail">
+
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+
+                        <!-- Thumbnail image (occupies the left half of the item view) -->
+                        <Image Grid.Row="0"
+                               Grid.Column="0"
+                               Source="{x:Bind ItemThumbnailImagePath, Mode=OneTime}"
+                               Width="150"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Text="{x:Bind ItemDescription, Mode=OneTime}"
+                                   VerticalAlignment="Center"
+                                   FontWeight="Bold"
+                                   FontSize="15"/>
+
+                        <StackPanel Grid.Row="0"
+                                    Grid.Column="2"
+                                    Orientation="Vertical"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Spacing="10">
+
+                            <TextBlock Text="{x:Bind ItemQuantityString, Mode=OneTime}"/>
+                            <TextBlock Text="{x:Bind ItemFinalPriceString, Mode=OneTime}"
+                                       FontWeight="Bold" Foreground="Red"/>
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </DataTemplate>
+
+            </ListView.ItemTemplate>
+
+        </ListView>
+
+
+        <ListView Grid.Row="0"
+          Grid.Column="1">
+
+            <TextBlock Text="Total price:"
+                       FontSize="15"/>
+            <TextBlock Text="{x:Bind viewModel.TotalPriceString}"
+                       FontSize="30"
+                       FontWeight="Bold"
+                       Padding="15"/>
+
+            <CalendarView Name="PickUpDateSelector"
+                          SelectionMode="Single"
+                          IsGroupLabelVisible="True"
+                          Language="en"
+                          CalendarIdentifier="GregorianCalendar"
+                          Loaded="SetDefaultPickUpDate"
+                          SelectedDatesChanged="CheckUnselectedDate"/>
+
+            <StackPanel Orientation="Horizontal"
+                        Padding="15">
+
+                <Button Content="Resubmit order"
+                        Click="ResubmitOrder"/>
+                <Button Content="Go back"
+                        Click="NavigateToOrderHistory"/>
+
+            </StackPanel>
+
+        </ListView>
+
+    </Grid>
+</Page>

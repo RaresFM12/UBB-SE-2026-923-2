@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="UBB_SE_2026_923_2.Views.Accounts.LoginView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UBB_SE_2026_923_2.Views.Accounts"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+
+        <!--for the box-->
+        <SolidColorBrush x:Key="TextControlBackground" Color="White"/>
+        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#389e7c"/>
+        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="White"/>
+        
+        
+        <!--for the text-->
+        <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#389e7c"></SolidColorBrush>
+        <SolidColorBrush x:Key="TextControlForeground" Color="#389e7c"></SolidColorBrush>
+        <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="White"></SolidColorBrush>
+        <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#389e7c"></SolidColorBrush>
+        <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#389e7c"></SolidColorBrush>
+        
+        <!--button stuff-->
+        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C8E6C9"/>
+        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#C8E6C9"/>
+
+    </Page.Resources>
+
+    <Grid Background="White">
+
+        <Border
+            Width="300"
+            Padding="20"
+            Background="#E8F5E9"
+            CornerRadius="10"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+
+            <StackPanel Spacing="10">
+
+                <TextBlock 
+                    FontSize="24"
+                    Foreground="#389e7c"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,10">Login
+                    
+                </TextBlock>
+
+                <TextBox 
+                    PlaceholderText="Email"
+                    PlaceholderForeground="#389e7c"
+                    BorderBrush="#389e7c"
+                    Text="{Binding Email, Mode=TwoWay}"
+                    >
+                    <TextBox.Resources>
+                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#389e7c"/>
+                    </TextBox.Resources>
+                </TextBox>
+
+                <PasswordBox 
+                    x:Name="PasswordBox"
+                    PlaceholderText="Password"
+                    PasswordChanged="PasswordBox_PasswordChanged">
+                    <PasswordBox.Resources>
+                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#389e7c"/>
+                    </PasswordBox.Resources>
+                </PasswordBox>
+
+                <Border Background="#FFEAEA"
+                        Padding="10"
+                        CornerRadius="6"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
+
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               Foreground="Red"/>
+                </Border>
+                
+                <Button 
+                    
+                    Background="#389e7c"
+                    Foreground="White"
+                    BorderBrush="Gray"
+                    
+                    HorizontalAlignment="Center"
+                    Command="{Binding LoginCommand}"
+                    Margin="0,0,0,0">
+                    <TextBlock FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center">Login</TextBlock>
+                </Button>
+
+                <TextBlock HorizontalAlignment="Center">
+                    <Run Text="Don't have an account?" Foreground="Black"></Run>
+                    <Hyperlink Click="Register_Click">
+                        <Run Foreground="#389e7c">Register</Run>
+                    </Hyperlink>
+                </TextBlock>
+
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</Page>

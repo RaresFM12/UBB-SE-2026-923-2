@@ -1,0 +1,31 @@
+using System;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
+using UBB_SE_2026_923_2.Services;
+using UBB_SE_2026_923_2.ViewModels.Orders;
+
+namespace UBB_SE_2026_923_2.Views.Orders
+{
+    public sealed partial class NonEditableOrderDetailPage : Page
+    {
+        private OrderService orderService;
+        private NonEditDetailViewModel ViewModel { get; set; }
+
+        public NonEditableOrderDetailPage()
+        {
+            InitializeComponent();
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            var extractedArgs = (Tuple<OrderService, int>)e.Parameter;
+
+            orderService = extractedArgs.Item1;
+            int orderID = extractedArgs.Item2;
+            ViewModel = new (orderService, orderID);
+            DataContext = ViewModel;
+
+            base.OnNavigatedTo(e);
+        }
+    }
+}

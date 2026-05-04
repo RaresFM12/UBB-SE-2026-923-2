@@ -1,0 +1,28 @@
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
+using UBB_SE_2026_923_2.ViewModels.PeriodTracker;
+
+namespace UBB_SE_2026_923_2.Views.PeriodTracker
+{
+    public sealed partial class PeriodTrackerPage : Page
+    {
+        public PeriodTrackerViewModel ViewModel { get; private set; }
+
+        public PeriodTrackerPage()
+        {
+            InitializeComponent();
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs navigationEventArguments)
+        {
+            base.OnNavigatedTo(navigationEventArguments);
+
+            if (navigationEventArguments.Parameter is PeriodTrackerViewModel periodTrackerViewModel)
+            {
+                ViewModel = periodTrackerViewModel;
+                DataContext = ViewModel;
+                Bindings.Update();
+            }
+        }
+    }
+}

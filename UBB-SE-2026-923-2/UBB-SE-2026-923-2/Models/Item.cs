@@ -1,0 +1,218 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace UBB_SE_2026_923_2.Models
+{
+    public class Item
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Producer { get; set; }
+        public float Price { get; set; }
+        public string Category { get; set; }
+        public string ImagePath { get; set; }
+        public int NumberOfPills { get; set; }
+        public int Quantity { get; private set; }
+        public string Label { get; set; }
+        public string Description { get; set; }
+        public float DiscountPercentage { get; set; }
+
+        private const string ImagePathDefault = "..\\..\\Assets\\placeholder.png";
+        public Dictionary<string, float> ActiveSubstances { get; set; }
+        public Dictionary<DateOnly, int> Batches { get; set; }
+        public Item(int id, string name, string producer, string category,
+                    float price, int numberOfPills,
+                    string label = "", string description = "", string imagePath = ImagePathDefault,
+                    float discount = 0f)
+        {
+            Id = id;
+            Name = name;
+            Producer = producer;
+            Price = price;
+            NumberOfPills = numberOfPills;
+            Category = category;
+            ImagePath = imagePath;
+            Quantity = 0;
+            Label = label;
+            Description = description;
+            DiscountPercentage = discount;
+            ActiveSubstances = new Dictionary<string, float>();
+            Batches = new Dictionary<DateOnly, int>();
+        }
+        public Item(int id, string name, string producer, string category,
+                    float price, int numberOfPills,
+                    string label = "", string description = "", string imagePath = ImagePathDefault,
+                    float discount = 0f, int quantity = 0)
+        {
+            Id = id;
+            Name = name;
+            Producer = producer;
+            Price = price;
+            NumberOfPills = numberOfPills;
+            Category = category;
+            ImagePath = imagePath;
+            Quantity = quantity;
+            Label = label;
+            Description = description;
+            DiscountPercentage = discount;
+            ActiveSubstances = new Dictionary<string, float>();
+            Batches = new Dictionary<DateOnly, int>();
+        }
+
+        public Item(string name, string producer, string category,
+            float price, int numberOfPills,
+            int quantity = 0,
+            string label = "", string description = "", string imagePath = ImagePathDefault,
+            float discount = 0f)
+        {
+            Name = name;
+            Producer = producer;
+            Price = price;
+            NumberOfPills = numberOfPills;
+            Category = category;
+            ImagePath = imagePath;
+            Quantity = quantity;
+            Label = label;
+            Description = description;
+            DiscountPercentage = discount;
+            ActiveSubstances = new Dictionary<string, float>();
+            Batches = new Dictionary<DateOnly, int>();
+        }
+
+        public Item(string name, string producer, string category,
+                    float price, int numberOfPills,
+                    Dictionary<string, float> activeSubstances, Dictionary<DateOnly, int> batches,
+                    int quantity = 0,
+                    string label = "", string description = "", string imagePath = ImagePathDefault,
+                    float discount = 0f)
+        {
+            Name = name;
+            Producer = producer;
+            Price = price;
+            NumberOfPills = numberOfPills;
+            Category = category;
+            ImagePath = imagePath;
+            Quantity = quantity;
+            Label = label;
+            Description = description;
+            DiscountPercentage = discount;
+            ActiveSubstances = activeSubstances;
+            Batches = batches;
+        }
+
+        public void AddActiveSubstanceToItem(string newSubstanceName, float concentration)
+        {
+            if (ActiveSubstances.ContainsKey(newSubstanceName))
+            {
+                throw new ArgumentException(newSubstanceName + "is already inside the medication");
+            }
+
+            ActiveSubstances[newSubstanceName] = concentration;
+        }
+
+        public void ChangeActiveSubstanceConcentration(string newSubstanceName, float newConcentration)
+        {
+            if (!ActiveSubstances.ContainsKey(newSubstanceName))
+            {
+                throw new ArgumentException(newSubstanceName + "is not inside the medication");
+            }
+
+            ActiveSubstances[newSubstanceName] = newConcentration;
+        }
+
+        public void RemoveActiveSubstanceFromItem(string substanceName)
+        {
+            if (!ActiveSubstances.ContainsKey(substanceName))
+            {
+                throw new ArgumentException(substanceName + "is not inside the medication");
+            }
+
+            ActiveSubstances.Remove(substanceName);
+        }
+
+        public void AddNewBatchToItem(DateOnly newExpirationDate, int numberOfPacks)
+        {
+            if (Batches.ContainsKey(newExpirationDate))
+            {
+                Batches[newExpirationDate] += numberOfPacks;
+                Quantity += numberOfPacks;
+                return;
+            }
+
+            Batches[newExpirationDate] = numberOfPacks;
+            this.Quantity += numberOfPacks;
+        }
+
+        public void ChangeNumberOfPacksForBatch(DateOnly expirationDate, int newNumberOfPacks)
+        {
+            int oldNumberOfPacks = Batches[expirationDate];
+
+            if (!Batches.ContainsKey(expirationDate))
+            {
+                throw new ArgumentException("A batch with expiration date " + expirationDate.ToString() + " doesn't exist");
+            }
+
+            Batches[expirationDate] = newNumberOfPacks;
+            Quantity += newNumberOfPacks - oldNumberOfPacks;
+        }
+
+        public void RemoveBatchFromItem(DateOnly expirationDate)
+        {
+            if (!Batches.ContainsKey(expirationDate))
+            {
+                throw new ArgumentException("A batch with expiration date " + expirationDate.ToString() + " doesn't exist");
+            }
+
+            Quantity -= Batches[expirationDate];
+            Batches.Remove(expirationDate);
+        }
+        public void RemoveQuantityFromItem(int quantityToRemove, DateOnly dateAfter)
+        {
+            List<DateOnly> sortedExpirationDates = Batches.Keys.ToList<DateOnly>();
+            sortedExpirationDates.Sort();
+
+            int indexForDate = 0;
+            int remainingQuantity = quantityToRemove;
+            while (remainingQuantity > 0)
+            {
+                if (sortedExpirationDates[indexForDate] < dateAfter)
+                {
+                    indexForDate++;
+                    continue;
+                }
+
+                if (remainingQuantity > Batches[sortedExpirationDates[indexForDate]])
+                {
+                    remainingQuantity -= Batches[sortedExpirationDates[indexForDate]];
+                    RemoveBatchFromItem(sortedExpirationDates[indexForDate]);
+                    indexForDate++;
+                    continue;
+                }
+
+                int newBatchQuantity = Batches[sortedExpirationDates[indexForDate]] - remainingQuantity;
+                ChangeNumberOfPacksForBatch(sortedExpirationDates[indexForDate], newBatchQuantity);
+                remainingQuantity = 0;
+                indexForDate++;
+            }
+        }
+
+        public int GetQuantityAtSpecifiedDate(DateOnly date)
+        {
+            int validatedQuantity = 0;
+
+            foreach (KeyValuePair<DateOnly, int> batchEntry in Batches)
+            {
+                DateOnly currentBatchExpirationDate = batchEntry.Key;
+                int currentBatchQuantity = batchEntry.Value;
+
+                if (date < currentBatchExpirationDate)
+                {
+                    validatedQuantity += currentBatchQuantity;
+                }
+            }
+
+            return validatedQuantity;
+        }
+    }
+}
