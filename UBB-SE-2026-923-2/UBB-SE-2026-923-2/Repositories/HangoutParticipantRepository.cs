@@ -1,46 +1,44 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
+using UBB_SE_2026_923_2.Models;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="IHangoutParticipantRepository"/>.
+    /// </summary>
     public class HangoutParticipantRepository : IHangoutParticipantRepository
     {
-        private readonly string connectionString;
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
-        public HangoutParticipantRepository(string connectionString)
+        public HangoutParticipantRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
-            this.connectionString = connectionString;
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public IReadOnlyList<(int HangoutId, int StaffId)> GetAllParticipants()
         {
-            var participants = new List<(int HangoutId, int StaffId)>();
-            using SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "SELECT hangout_id, staff_id FROM Hangout_Participants;",
-                connection);
-            using SqlDataReader reader = command.ExecuteReader();
-            int hangoutOrdinal = reader.GetOrdinal("hangout_id");
-            int staffOrdinal = reader.GetOrdinal("staff_id");
-            while (reader.Read())
-            {
-                participants.Add((reader.GetInt32(hangoutOrdinal), reader.GetInt32(staffOrdinal)));
-            }
-            return participants;
+            using var db = dbContextFactory.CreateDbContext();
+            return db.HangoutParticipants
+                .AsNoTracking()
+                .Select(p => new { p.HangoutId, p.StaffId })
+                .AsEnumerable()
+                .Select(row => (row.HangoutId, row.StaffId))
+                .ToList();
         }
 
         public void AddParticipant(int hangoutId, int staffId)
         {
-            using SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "INSERT INTO Hangout_Participants (hangout_id, staff_id) VALUES (@HangoutId, @StaffId);",
-                connection);
-            command.Parameters.Add(new SqlParameter("@HangoutId", hangoutId));
-            command.Parameters.Add(new SqlParameter("@StaffId", staffId));
-            command.ExecuteNonQuery();
+            using var db = dbContextFactory.CreateDbContext();
+            db.HangoutParticipants.Add(new HangoutParticipant
+            {
+                HangoutId = hangoutId,
+                StaffId = staffId,
+            });
+            db.SaveChanges();
         }
     }
 }

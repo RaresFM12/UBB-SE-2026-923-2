@@ -1,336 +1,230 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Models;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="IUsersRepository"/>. Period notes,
+    /// user discounts and per-item notification flags are loaded through
+    /// navigation collections on <see cref="User"/> and projected back into
+    /// the legacy in-memory dictionaries / lists so existing services and
+    /// view models keep working unchanged.
+    /// <para>
+    /// In the EF-Core schema the period-tracker fields live directly on the
+    /// <see cref="User"/> row instead of in a separate <c>PeriodTrackers</c>
+    /// table, so <see cref="UserHasPeriodTracker"/> now answers based on
+    /// whether <see cref="User.StartPeriodDate"/> has been set.
+    /// </para>
+    /// </summary>
     public class SQLUsersRepository : IUsersRepository
     {
-        public SQLUsersRepository()
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+
+        public SQLUsersRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
-        private void LoadUserData(User user, SqlConnection connectionString)
+        public bool UserExists(string email)
         {
-            DataSet userDataFromDB = new DataSet();
-            int userID = user.Id;
-
-            SqlDataAdapter selectPeriodTrackersAdapter = new SqlDataAdapter($"SELECT * FROM PeriodTrackers WHERE userId={userID}", connectionString);
-            SqlDataAdapter selectUserNotificationsAdapter = new SqlDataAdapter($"SELECT * FROM UserNotifications WHERE userId={userID}", connectionString);
-            SqlDataAdapter selectUserDiscountsAdapter = new SqlDataAdapter($"SELECT * FROM UserDiscounts WHERE userId={userID}", connectionString);
-            SqlDataAdapter selectPeriodNotesAdapter = new SqlDataAdapter($"SELECT * FROM PeriodNotes WHERE userId={userID}", connectionString);
-
-            selectPeriodTrackersAdapter.Fill(userDataFromDB, "PeriodTrackers");
-            selectUserNotificationsAdapter.Fill(userDataFromDB, "UserNotifications");
-            selectUserDiscountsAdapter.Fill(userDataFromDB, "UserDiscounts");
-            selectPeriodNotesAdapter.Fill(userDataFromDB, "PeriodNotes");
-
-            if (userDataFromDB.Tables["PeriodTrackers"].Rows.Count > 0)
-            {
-                DataRow trackerRow = userDataFromDB.Tables["PeriodTrackers"].Rows[0];
-                user.SetPeriodTracker(
-                    DateOnly.FromDateTime((DateTime)trackerRow["startPeriodDate"]),
-                    (int)trackerRow["cycleDays"],
-                    (int)trackerRow["periodLasts"],
-                    (int)trackerRow["PMSOption"]);
-            }
-
-            foreach (DataRow row in userDataFromDB.Tables["UserNotifications"].Rows)
-            {
-                if ((bool)row["favouriteItem"])
-                {
-                    user.AddItemToFavoriteItems((int)row["itemId"]);
-                }
-                if ((bool)row["stockAlert"])
-                {
-                    user.AddStockAlertToUser((int)row["itemId"]);
-                }
-            }
-
-            foreach (DataRow row in userDataFromDB.Tables["UserDiscounts"].Rows)
-            {
-                user.AddUserDiscount((int)row["itemId"], (float)(decimal)row["itemDiscountPercentage"]);
-            }
-
-            foreach (DataRow row in userDataFromDB.Tables["PeriodNotes"].Rows)
-            {
-                user.AddPeriodNoteToUser((int)row["noteId"], (string)row["noteBody"], (bool)row["isDone"]);
-            }
+            using var db = dbContextFactory.CreateDbContext();
+            return db.Users.AsNoTracking().Any(u => u.Email == email);
         }
 
-        private User MapUserFromRow(DataRow userRow)
+        public bool UserExists(int id)
         {
-            return new User(
-                (int)userRow["userId"],
-                (string)userRow["email"],
-                (string)userRow["phoneNumber"],
-                (string)userRow["passwordHash"],
-                (bool)userRow["isAdmin"],
-                (bool)userRow["isDisabled"],
-                (string)userRow["username"],
-                (bool)userRow["discountNotifications"],
-                (int)userRow["loyaltyPoints"]);
+            using var db = dbContextFactory.CreateDbContext();
+            return db.Users.AsNoTracking().Any(u => u.Id == id);
+        }
+
+        public User GetUserById(int id)
+        {
+            using var db = dbContextFactory.CreateDbContext();
+            var user = db.Users
+                .AsNoTracking()
+                .Include(u => u.PeriodNoteEntries)
+                .Include(u => u.UserDiscountEntries)
+                .Include(u => u.UserNotificationEntries)
+                .FirstOrDefault(u => u.Id == id);
+
+            return user is null ? null! : ProjectIntoLegacyCollections(user);
+        }
+
+        public User GetUserByEmail(string email)
+        {
+            using var db = dbContextFactory.CreateDbContext();
+            var user = db.Users
+                .AsNoTracking()
+                .Include(u => u.PeriodNoteEntries)
+                .Include(u => u.UserDiscountEntries)
+                .Include(u => u.UserNotificationEntries)
+                .FirstOrDefault(u => u.Email == email);
+
+            return user is null ? null! : ProjectIntoLegacyCollections(user);
         }
 
         public void AddUser(string email, string phoneNumber, string passwordHash, string username,
             bool discountNotifications, bool isDisabled = false, bool isAdmin = false, int loyaltyPoints = 0)
         {
-            string connectionString = SQLUtility.GetConnectionString();
-            string insertNewUserString =
-                "INSERT INTO Users VALUES " +
-                $"('{email}', '{phoneNumber}', '{passwordHash}', '{isDisabled}', '{isAdmin}', '{username}', '{discountNotifications}', {loyaltyPoints})";
+            using var db = dbContextFactory.CreateDbContext();
 
-            using SqlConnection sqlConnection = new (connectionString);
-
-            SqlCommand insertNewUserCommand = new (insertNewUserString, sqlConnection);
-
-            sqlConnection.Open();
-            insertNewUserCommand.ExecuteNonQuery();
-        }
-        public List<User> GetAllUsers()
-        {
-            string connectionString = SQLUtility.GetConnectionString();
-            string selectUsersString = $"SELECT * FROM Users";
-            using SqlConnection sqlConnection = new (connectionString);
-
-            SqlDataAdapter selectUsersAdapter = new (selectUsersString, sqlConnection);
-            DataSet usersDataFromDB = new ();
-            sqlConnection.Open();
-            selectUsersAdapter.Fill(usersDataFromDB, "Users");
-
-            if (usersDataFromDB.Tables["Users"].Rows.Count == 0)
+            var user = new User
             {
-                return new List<User>();
+                Email = email,
+                PhoneNumber = phoneNumber,
+                PasswordHash = passwordHash,
+                Username = username,
+                IsAdmin = isAdmin,
+                IsDisabled = isDisabled,
+                DiscountNotifications = discountNotifications,
+                LoyaltyPoints = loyaltyPoints,
+            };
+
+            db.Users.Add(user);
+            db.SaveChanges();
+        }
+
+        public void UpdateUser(User newUser)
+        {
+            using var db = dbContextFactory.CreateDbContext();
+
+            var existing = db.Users
+                .Include(u => u.PeriodNoteEntries)
+                .Include(u => u.UserDiscountEntries)
+                .Include(u => u.UserNotificationEntries)
+                .FirstOrDefault(u => u.Id == newUser.Id);
+
+            if (existing is null)
+            {
+                return;
             }
 
-            List<User> users = new ();
-            foreach (DataRow userRow in usersDataFromDB.Tables["Users"].Rows)
+            // Scalar fields, including period-tracker columns that used to
+            // live in a separate table.
+            existing.Email = newUser.Email;
+            existing.PhoneNumber = newUser.PhoneNumber;
+            existing.PasswordHash = newUser.PasswordHash;
+            existing.Username = newUser.Username;
+            existing.IsAdmin = newUser.IsAdmin;
+            existing.IsDisabled = newUser.IsDisabled;
+            existing.DiscountNotifications = newUser.DiscountNotifications;
+            existing.LoyaltyPoints = newUser.LoyaltyPoints;
+            existing.StartPeriodDate = newUser.StartPeriodDate;
+            existing.CycleDays = newUser.CycleDays;
+            existing.PeriodLasts = newUser.PeriodLasts;
+            existing.PremenstrualSyndromeOption = newUser.PremenstrualSyndromeOption;
+
+            // Replace the related collections from the legacy in-memory views.
+            // Phase 3 will switch callers to mutate the EF nav collections
+            // directly, at which point this projection goes away.
+            db.PeriodNotes.RemoveRange(existing.PeriodNoteEntries);
+            existing.PeriodNoteEntries.Clear();
+            foreach (var pair in newUser.PeriodNotes)
             {
-                User resultUser = MapUserFromRow(userRow);
-                LoadUserData(resultUser, sqlConnection);
-                users.Add(resultUser);
+                existing.PeriodNoteEntries.Add(new PeriodNote
+                {
+                    UserId = existing.Id,
+                    NoteId = pair.Key,
+                    NoteBody = pair.Value.Item1,
+                    IsDone = pair.Value.Item2,
+                });
+            }
+
+            db.UserDiscounts.RemoveRange(existing.UserDiscountEntries);
+            existing.UserDiscountEntries.Clear();
+            foreach (var pair in newUser.UserDiscounts)
+            {
+                existing.UserDiscountEntries.Add(new UserDiscount
+                {
+                    UserId = existing.Id,
+                    ItemId = pair.Key,
+                    DiscountPercentage = pair.Value,
+                });
+            }
+
+            db.UserNotifications.RemoveRange(existing.UserNotificationEntries);
+            existing.UserNotificationEntries.Clear();
+            var notificationItemIds = new HashSet<int>(newUser.FavoriteItems);
+            notificationItemIds.UnionWith(newUser.StockAlerts);
+            foreach (var itemId in notificationItemIds)
+            {
+                existing.UserNotificationEntries.Add(new UserNotification
+                {
+                    UserId = existing.Id,
+                    ItemId = itemId,
+                    IsFavorite = newUser.FavoriteItems.Contains(itemId),
+                    IsStockAlert = newUser.StockAlerts.Contains(itemId),
+                });
+            }
+
+            db.SaveChanges();
+        }
+
+        public List<User> GetAllUsers()
+        {
+            using var db = dbContextFactory.CreateDbContext();
+            var users = db.Users
+                .AsNoTracking()
+                .Include(u => u.PeriodNoteEntries)
+                .Include(u => u.UserDiscountEntries)
+                .Include(u => u.UserNotificationEntries)
+                .ToList();
+
+            foreach (var user in users)
+            {
+                ProjectIntoLegacyCollections(user);
             }
 
             return users;
         }
 
-        public User GetUserByEmail(string email)
-        {
-            string connectionString = SQLUtility.GetConnectionString();
-            string selectUserString = $"SELECT * FROM Users WHERE email='{email}'";
-
-            using SqlConnection sqlConnection = new SqlConnection(connectionString);
-
-            SqlDataAdapter selectUserAdapter = new SqlDataAdapter(selectUserString, sqlConnection);
-
-            DataSet userDataFromDB = new DataSet();
-
-            sqlConnection.Open();
-            selectUserAdapter.Fill(userDataFromDB, "Users");
-
-            if (userDataFromDB.Tables["Users"].Rows.Count == 0)
-            {
-                return null;
-            }
-
-            DataRow userRow = userDataFromDB.Tables["Users"].Rows[0];
-
-            return GetUserById((int)userRow["userId"]);
-        }
-
-        public User GetUserById(int id)
-        {
-            string connectionString = SQLUtility.GetConnectionString();
-            string selectUserString = $"SELECT * FROM Users WHERE userId={id}";
-
-            using SqlConnection sqlConnection = new (connectionString);
-
-            SqlDataAdapter selectUserAdapter = new (selectUserString, sqlConnection);
-
-            DataSet userDataFromDB = new ();
-
-            sqlConnection.Open();
-
-            selectUserAdapter.Fill(userDataFromDB, "Users");
-
-            if (userDataFromDB.Tables["Users"].Rows.Count == 0)
-            {
-                return null;
-            }
-
-            DataRow userRow = userDataFromDB.Tables["Users"].Rows[0];
-            User resultUser = MapUserFromRow(userRow);
-
-            LoadUserData(resultUser, sqlConnection);
-
-            return resultUser;
-        }
-
-        private void UpdateUserBasicInfo(User newUser, SqlConnection connectionString)
-        {
-            string updateUserString = $"UPDATE Users " +
-                                      $"SET email = '{newUser.Email}', " +
-                                      $"phoneNumber = '{newUser.PhoneNumber}', " +
-                                      $"passwordHash = '{newUser.PasswordHash}', " +
-                                      $"isDisabled = '{newUser.IsDisabled}', " +
-                                      $"isAdmin = '{newUser.IsAdmin}', " +
-                                      $"username = '{newUser.Username}', " +
-                                      $"discountNotifications = '{newUser.DiscountNotifications}', " +
-                                      $"loyaltyPoints = {newUser.LoyaltyPoints} " +
-                                      $"WHERE userId={newUser.Id}";
-
-            SqlCommand updateUserCommand = new (updateUserString, connectionString);
-            updateUserCommand.ExecuteNonQuery();
-        }
-
-        private void UpdateUserPeriodTracker(User newUser, SqlConnection connectionString)
-        {
-            string deletePeriodTrackerString = $"DELETE FROM PeriodTrackers WHERE userId = {newUser.Id}";
-            SqlCommand deletePeriodTrackerCommand = new (deletePeriodTrackerString, connectionString);
-            deletePeriodTrackerCommand.ExecuteNonQuery();
-
-            if (newUser.StartPeriodDate != default && newUser.StartPeriodDate != DateOnly.MinValue && newUser.StartPeriodDate != DateOnly.MaxValue)
-            {
-                string periodDate = $"{newUser.StartPeriodDate.Year}-{newUser.StartPeriodDate.Month}-{newUser.StartPeriodDate.Day}";
-                string insertPeriodTrackerString =
-                    $"INSERT INTO PeriodTrackers VALUES ({newUser.Id}, '{periodDate}', {newUser.CycleDays}, {newUser.PeriodLasts}, {newUser.PremenstrualSyndromeOption})";
-                SqlCommand insertPeriodTrackerCommand = new (insertPeriodTrackerString, connectionString);
-                insertPeriodTrackerCommand.ExecuteNonQuery();
-            }
-        }
-
-        private void UpdateUserNotifications(User newUser, SqlConnection connectionString)
-        {
-            string deleteUserNotificationsString = $"DELETE FROM UserNotifications WHERE userId = {newUser.Id}";
-            SqlCommand deleteUserNotificationsCommand = new (deleteUserNotificationsString, connectionString);
-            deleteUserNotificationsCommand.ExecuteNonQuery();
-
-            HashSet<int> allNotificationItems = new HashSet<int>(newUser.FavoriteItems);
-            allNotificationItems.UnionWith(newUser.StockAlerts);
-
-            foreach (int itemId in allNotificationItems)
-            {
-                bool isFavorite = newUser.FavoriteItems.Contains(itemId);
-                bool hasStockAlert = newUser.StockAlerts.Contains(itemId);
-                string insertUserNotificationsString =
-                    $"INSERT INTO UserNotifications VALUES ({newUser.Id}, {itemId}, '{isFavorite}', '{hasStockAlert}')";
-
-                SqlCommand insertUserNotificationsCommand = new (insertUserNotificationsString, connectionString);
-                insertUserNotificationsCommand.ExecuteNonQuery();
-            }
-        }
-
-        private void UpdateUserDiscounts(User newUser, SqlConnection connectionString)
-        {
-            string deleteUserDiscountsString = $"DELETE FROM UserDiscounts WHERE userId = {newUser.Id}";
-            SqlCommand deleteUserDiscountsCommand = new (deleteUserDiscountsString, connectionString);
-            deleteUserDiscountsCommand.ExecuteNonQuery();
-
-            foreach (KeyValuePair<int, float> userDiscount in newUser.UserDiscounts)
-            {
-                string insertUserDiscountString =
-                    $"INSERT INTO UserDiscounts VALUES ({newUser.Id}, {userDiscount.Key}, {userDiscount.Value})";
-                SqlCommand insertUserDiscountsCommand = new (insertUserDiscountString, connectionString);
-                insertUserDiscountsCommand.ExecuteNonQuery();
-            }
-        }
-
-        private void UpdateUserPeriodNotes(User newUser, SqlConnection connectionString)
-        {
-            string deletePeriodNotesString = $"DELETE FROM PeriodNotes WHERE userId = {newUser.Id}";
-            SqlCommand deletePeriodNotesCommand = new (deletePeriodNotesString, connectionString);
-            deletePeriodNotesCommand.ExecuteNonQuery();
-
-            foreach (KeyValuePair<int, Tuple<string, bool>> periodNote in newUser.PeriodNotes)
-            {
-                string insertPeriodNoteString =
-                    $"INSERT INTO PeriodNotes VALUES ({newUser.Id}, {periodNote.Key}, '{periodNote.Value.Item1}', '{periodNote.Value.Item2}')";
-                SqlCommand insertPeriodNoteCommand = new (insertPeriodNoteString, connectionString);
-                insertPeriodNoteCommand.ExecuteNonQuery();
-            }
-        }
-
-        public void UpdateUser(User newUser)
-        {
-            string connectionString = SQLUtility.GetConnectionString();
-            using SqlConnection sqlConnection = new (connectionString);
-            sqlConnection.Open();
-
-            UpdateUserBasicInfo(newUser, sqlConnection);
-            UpdateUserPeriodTracker(newUser, sqlConnection);
-            UpdateUserNotifications(newUser, sqlConnection);
-            UpdateUserDiscounts(newUser, sqlConnection);
-            UpdateUserPeriodNotes(newUser, sqlConnection);
-        }
-
-        public bool UserExists(string email)
-        {
-            string connectionString = SQLUtility.GetConnectionString();
-            string selectUserString = $"SELECT * FROM Users WHERE email='{email}'";
-
-            using SqlConnection sqlConnection = new (connectionString);
-
-            SqlDataAdapter selectUserAdapter = new (selectUserString, sqlConnection);
-
-            DataSet userDataFromDB = new ();
-
-            sqlConnection.Open();
-            selectUserAdapter.Fill(userDataFromDB, "Users");
-
-            if (userDataFromDB.Tables["Users"].Rows.Count > 0)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool UserExists(int id)
-        {
-            string connectionString = SQLUtility.GetConnectionString();
-            string selectUserString = $"SELECT * FROM Users WHERE userId={id}";
-
-            using SqlConnection sqlConnection = new (connectionString);
-            SqlDataAdapter selectUserAdapter = new (selectUserString, sqlConnection);
-            DataSet userDataFromDB = new ();
-
-            sqlConnection.Open();
-            selectUserAdapter.Fill(userDataFromDB, "Users");
-
-            if (userDataFromDB.Tables["Users"].Rows.Count > 0)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         public bool UserHasPeriodTracker(int id)
         {
-            string connectionString = SQLUtility.GetConnectionString();
-            string selectUserString = $"SELECT * FROM PeriodTrackers WHERE userId={id}";
+            using var db = dbContextFactory.CreateDbContext();
+            return db.Users
+                .AsNoTracking()
+                .Any(u => u.Id == id
+                       && u.StartPeriodDate != default
+                       && u.StartPeriodDate != DateOnly.MinValue
+                       && u.StartPeriodDate != DateOnly.MaxValue);
+        }
 
-            using SqlConnection sqlConnection = new (connectionString);
-
-            SqlDataAdapter selectUserAdapter = new (selectUserString, sqlConnection);
-
-            DataSet userDataFromDB = new ();
-
-            sqlConnection.Open();
-            selectUserAdapter.Fill(userDataFromDB, "PeriodTrackers");
-
-            if (userDataFromDB.Tables["PeriodTrackers"].Rows.Count > 0)
+        private static User ProjectIntoLegacyCollections(User user)
+        {
+            foreach (var note in user.PeriodNoteEntries)
             {
-                return true;
+                if (!user.PeriodNotes.ContainsKey(note.NoteId))
+                {
+                    user.AddPeriodNoteToUser(note.NoteId, note.NoteBody, note.IsDone);
+                }
             }
-            return false;
+
+            foreach (var discount in user.UserDiscountEntries)
+            {
+                if (!user.UserDiscounts.ContainsKey(discount.ItemId))
+                {
+                    user.AddUserDiscount(discount.ItemId, discount.DiscountPercentage);
+                }
+            }
+
+            foreach (var notification in user.UserNotificationEntries)
+            {
+                if (notification.IsFavorite && !user.FavoriteItems.Contains(notification.ItemId))
+                {
+                    user.AddItemToFavoriteItems(notification.ItemId);
+                }
+
+                if (notification.IsStockAlert && !user.StockAlerts.Contains(notification.ItemId))
+                {
+                    user.AddStockAlertToUser(notification.ItemId);
+                }
+            }
+
+            return user;
         }
     }
 }

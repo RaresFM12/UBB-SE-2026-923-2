@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -29,20 +30,50 @@ namespace UBB_SE_2026_923_2.Models
         public int CycleDays { get; set; }
         public int PeriodLasts { get; set; }
         public int PremenstrualSyndromeOption { get; set; }
+
+        [NotMapped]
         public Dictionary<int, Tuple<string, bool>> PeriodNotes { get; private set; }
 
+        [NotMapped]
         public List<int> StockAlerts { get; private set; }
+
+        [NotMapped]
         public List<int> FavoriteItems { get; private set; }
+
+        [NotMapped]
         public Dictionary<int, float> UserDiscounts { get; private set; }
 
+        [NotMapped]
         public Dictionary<int, BasketEntry> Basket { get; private set; }
 
         public bool DiscountNotifications { get; set; }
         public int LoyaltyPoints { get; set; }
 
+        // ---- EF Core navigation collections (persisted) ----
+        // The legacy [NotMapped] dictionaries above remain as the in-memory API
+        // for existing callers; Phase 2 rewires repositories to populate these
+        // collections instead, then the dictionary adapters can be removed.
+        public ICollection<PeriodNote> PeriodNoteEntries { get; set; } = new List<PeriodNote>();
+        public ICollection<UserDiscount> UserDiscountEntries { get; set; } = new List<UserDiscount>();
+        public ICollection<UserNotification> UserNotificationEntries { get; set; } = new List<UserNotification>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
+
         private const int CycleDaysDefault = 28;
         private const int PeriodLastsDefault = 5;
         private const int PremenstrualSyndromeOptionDefault = 0;
+
+        public User()
+        {
+            Email = string.Empty;
+            PhoneNumber = string.Empty;
+            PasswordHash = string.Empty;
+            Username = string.Empty;
+            PeriodNotes = new Dictionary<int, Tuple<string, bool>>();
+            StockAlerts = new List<int>();
+            FavoriteItems = new List<int>();
+            UserDiscounts = new Dictionary<int, float>();
+            Basket = new Dictionary<int, BasketEntry>();
+        }
 
         public User(int id, string email, string phoneNumber,
                     string passwordHash, bool isAdmin, bool isDisabled,
@@ -50,6 +81,7 @@ namespace UBB_SE_2026_923_2.Models
                     int loyaltyPoints, DateOnly startPeriodDate = new DateOnly(),
                     int cycleDays = CycleDaysDefault, int periodLasts = PeriodLastsDefault,
                     int premenstrualSyndromeOption = PremenstrualSyndromeOptionDefault)
+            : this()
         {
             Id = id;
             Email = email;
@@ -66,12 +98,6 @@ namespace UBB_SE_2026_923_2.Models
             CycleDays = cycleDays;
             PeriodLasts = periodLasts;
             PremenstrualSyndromeOption = premenstrualSyndromeOption;
-
-            PeriodNotes = new Dictionary<int, Tuple<string, bool>>();
-            StockAlerts = new List<int>();
-            FavoriteItems = new List<int>();
-            UserDiscounts = new Dictionary<int, float>();
-            Basket = new Dictionary<int, BasketEntry>();
         }
 
         public void AddStockAlertToUser(int newItemId)

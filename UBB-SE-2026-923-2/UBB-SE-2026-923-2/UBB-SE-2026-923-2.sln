@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UBB-SE-2026-923-2", "UBB-SE-2026-923-2.csproj", "{98E91C2D-7D3A-A913-1ADD-5AF59E762842}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UBB-SE-2026-923-2.Data", "..\UBB-SE-2026-923-2.Data\UBB-SE-2026-923-2.Data.csproj", "{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -32,6 +34,18 @@ Global
 		{98E91C2D-7D3A-A913-1ADD-5AF59E762842}.Release|x86.ActiveCfg = Release|x86
 		{98E91C2D-7D3A-A913-1ADD-5AF59E762842}.Release|x86.Build.0 = Release|x86
 		{98E91C2D-7D3A-A913-1ADD-5AF59E762842}.Release|x86.Deploy.0 = Release|x86
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Debug|x64.Build.0 = Debug|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Debug|x86.Build.0 = Debug|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Release|ARM64.Build.0 = Release|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Release|x64.ActiveCfg = Release|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Release|x64.Build.0 = Release|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Release|x86.ActiveCfg = Release|Any CPU
+		{B2D74A8E-1F9F-4C7A-9C6E-5D7A6B5F4E3D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

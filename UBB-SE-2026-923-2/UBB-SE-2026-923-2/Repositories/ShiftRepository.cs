@@ -1,106 +1,93 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Models;
-using Microsoft.Data.SqlClient;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="IShiftRepository"/>,
+    /// <see cref="IShiftManagementShiftRepository"/> and
+    /// <see cref="IPharmacyShiftRepository"/>. Shifts are loaded with their
+    /// <see cref="Staff"/> navigation populated; the legacy
+    /// <see cref="Shift.AppointedStaff"/> shim returns the same instance.
+    /// </summary>
     public class ShiftRepository : IShiftRepository, IShiftManagementShiftRepository, IPharmacyShiftRepository
     {
-        private const string DefaultShiftStatusLabel = "Scheduled";
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
-        private readonly string connectionString;
-
-        public ShiftRepository(string connectionString)
+        public ShiftRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
-            this.connectionString = connectionString;
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public IReadOnlyList<Shift> GetAllShifts()
         {
-            var shifts = new List<Shift>();
-
-            using SqlConnection connection = GetConnection();
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "SELECT shift_id, staff_id, location, start_time, end_time, status FROM Shifts;",
-                connection);
-
-            using SqlDataReader reader = command.ExecuteReader();
-            int shiftIdOrdinal = reader.GetOrdinal("shift_id");
-            int staffIdOrdinal = reader.GetOrdinal("staff_id");
-            int locationOrdinal = reader.GetOrdinal("location");
-            int startOrdinal = reader.GetOrdinal("start_time");
-            int endOrdinal = reader.GetOrdinal("end_time");
-            int statusOrdinal = reader.GetOrdinal("status");
-
-            while (reader.Read())
-            {
-                int staffId = reader.GetInt32(staffIdOrdinal);
-                string location = reader.IsDBNull(locationOrdinal) ? string.Empty : reader.GetString(locationOrdinal);
-                DateTime startTime = reader.GetDateTime(startOrdinal);
-                DateTime endTime = reader.GetDateTime(endOrdinal);
-                string statusLabel = reader.IsDBNull(statusOrdinal) ? DefaultShiftStatusLabel : reader.GetString(statusOrdinal);
-                Enum.TryParse<ShiftStatus>(statusLabel, true, out ShiftStatus shiftStatus);
-
-                IStaff staffStub = new Doctor { StaffID = staffId };
-                shifts.Add(new Shift(reader.GetInt32(shiftIdOrdinal), staffStub, location, startTime, endTime, shiftStatus));
-            }
-            return shifts;
+            using var db = dbContextFactory.CreateDbContext();
+            return db.Shifts
+                .AsNoTracking()
+                .Include(s => s.Staff)
+                .ToList();
         }
 
         public void AddShift(Shift newShift)
         {
-            using SqlConnection connection = GetConnection();
-            connection.Open();
-            using SqlCommand command = new SqlCommand(@"
-                INSERT INTO Shifts (staff_id, location, start_time, end_time, status, is_active)
-                VALUES (@StaffId, @Location, @StartTime, @EndTime, @Status, 1);", connection);
-            AddParameter(command, "@StaffId", newShift.AppointedStaff.StaffID);
-            AddParameter(command, "@Location", newShift.Location);
-            AddParameter(command, "@StartTime", newShift.StartTime);
-            AddParameter(command, "@EndTime", newShift.EndTime);
-            AddParameter(command, "@Status", newShift.Status.ToString());
-            command.ExecuteNonQuery();
+            using var db = dbContextFactory.CreateDbContext();
+
+            int staffId = newShift.StaffId != 0 ? newShift.StaffId : newShift.AppointedStaff.StaffID;
+
+            var entity = new Shift
+            {
+                StaffId = staffId,
+                Location = newShift.Location,
+                StartTime = newShift.StartTime,
+                EndTime = newShift.EndTime,
+                Status = newShift.Status,
+            };
+
+            db.Shifts.Add(entity);
+            db.SaveChanges();
         }
 
         public void UpdateShiftStatus(int shiftId, ShiftStatus status)
         {
-            using SqlConnection connection = GetConnection();
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "UPDATE Shifts SET status = @Status WHERE shift_id = @ShiftId;", connection);
-            AddParameter(command, "@Status", status.ToString());
-            AddParameter(command, "@ShiftId", shiftId);
-            command.ExecuteNonQuery();
+            using var db = dbContextFactory.CreateDbContext();
+            var shift = db.Shifts.FirstOrDefault(s => s.Id == shiftId);
+            if (shift is null)
+            {
+                return;
+            }
+
+            shift.Status = status;
+            db.SaveChanges();
         }
 
         public void UpdateShiftStaffId(int shiftId, int newStaffId)
         {
-            using SqlConnection connection = GetConnection();
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "UPDATE Shifts SET staff_id = @NewStaffId WHERE shift_id = @ShiftId;", connection);
-            AddParameter(command, "@NewStaffId", newStaffId);
-            AddParameter(command, "@ShiftId", shiftId);
-            command.ExecuteNonQuery();
+            using var db = dbContextFactory.CreateDbContext();
+            var shift = db.Shifts.FirstOrDefault(s => s.Id == shiftId);
+            if (shift is null)
+            {
+                return;
+            }
+
+            shift.StaffId = newStaffId;
+            db.SaveChanges();
         }
 
         public void DeleteShift(int shiftId)
         {
-            using SqlConnection connection = GetConnection();
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "DELETE FROM Shifts WHERE shift_id = @ShiftId;", connection);
-            AddParameter(command, "@ShiftId", shiftId);
-            command.ExecuteNonQuery();
-        }
+            using var db = dbContextFactory.CreateDbContext();
+            var shift = db.Shifts.FirstOrDefault(s => s.Id == shiftId);
+            if (shift is null)
+            {
+                return;
+            }
 
-        private SqlConnection GetConnection() => new SqlConnection(connectionString);
-
-        private static void AddParameter(SqlCommand command, string name, object? value)
-        {
-            command.Parameters.Add(new SqlParameter(name, value ?? DBNull.Value));
+            db.Shifts.Remove(shift);
+            db.SaveChanges();
         }
     }
 }

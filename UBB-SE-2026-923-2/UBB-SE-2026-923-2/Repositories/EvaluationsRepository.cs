@@ -1,94 +1,68 @@
 using System;
 using System.Collections.Generic;
-using UBB_SE_2026_923_2.Configuration;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Models;
-using Microsoft.Data.SqlClient;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
+    /// <summary>
+    /// EF Core implementation of <see cref="IEvaluationsRepository"/>. The
+    /// legacy SQL schema had <c>diagnosis</c>, <c>doctor_notes</c>,
+    /// <c>medications</c>, <c>source</c> and <c>assumed_risk</c> columns; the
+    /// code-first model only persists <see cref="MedicalEvaluation.Symptoms"/>
+    /// (mapped from <c>diagnosis</c>), <see cref="MedicalEvaluation.Notes"/>
+    /// and <see cref="MedicalEvaluation.MedicationsList"/>. Source/risk fields
+    /// are not part of the domain model and are dropped on write.
+    /// </summary>
     public class EvaluationsRepository : IEvaluationsRepository
     {
-        private const string EvaluationSourcePatient = "PATIENT";
-        private const int UnknownDoctorId = 0;
+        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
-        private readonly string connectionString;
-
-        public EvaluationsRepository(string connectionString)
+        public EvaluationsRepository(IDbContextFactory<AppDbContext> dbContextFactory)
         {
-            this.connectionString = connectionString;
-        }
-
-        public EvaluationsRepository()
-        {
-            this.connectionString = AppSettings.ConnectionString;
+            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
         }
 
         public IReadOnlyList<MedicalEvaluation> GetAllEvaluations()
         {
-            var evaluations = new List<MedicalEvaluation>();
-
-            using SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "SELECT evaluation_id, doctor_id, patient_id, diagnosis, doctor_notes, medications FROM Medical_Evaluations;",
-                connection);
-
-            using SqlDataReader reader = command.ExecuteReader();
-            int evaluationIdOrdinal = reader.GetOrdinal("evaluation_id");
-            int doctorIdOrdinal = reader.GetOrdinal("doctor_id");
-            int patientIdOrdinal = reader.GetOrdinal("patient_id");
-            int diagnosisOrdinal = reader.GetOrdinal("diagnosis");
-            int notesOrdinal = reader.GetOrdinal("doctor_notes");
-            int medicationsOrdinal = reader.GetOrdinal("medications");
-
-            while (reader.Read())
-            {
-                evaluations.Add(new MedicalEvaluation
-                {
-                    EvaluationID = reader.GetInt32(evaluationIdOrdinal),
-                    PatientId = reader.IsDBNull(patientIdOrdinal) ? string.Empty : reader.GetInt32(patientIdOrdinal).ToString(),
-                    Symptoms = reader.IsDBNull(diagnosisOrdinal) ? string.Empty : reader.GetString(diagnosisOrdinal),
-                    Notes = reader.IsDBNull(notesOrdinal) ? string.Empty : reader.GetString(notesOrdinal),
-                    MedicationsList = reader.IsDBNull(medicationsOrdinal) ? string.Empty : reader.GetString(medicationsOrdinal),
-                    Evaluator = new Doctor { StaffID = reader.IsDBNull(doctorIdOrdinal) ? UnknownDoctorId : reader.GetInt32(doctorIdOrdinal) },
-                });
-            }
-            return evaluations;
+            using var db = dbContextFactory.CreateDbContext();
+            return db.MedicalEvaluations
+                .AsNoTracking()
+                .Include(e => e.Evaluator)
+                .ToList();
         }
 
         public void AddEvaluation(int doctorId, int patientId, string diagnosis, string notes, string medications, bool assumedRisk)
         {
-            using SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            using SqlCommand command = new SqlCommand(@"
-                INSERT INTO Medical_Evaluations
-                (doctor_id, patient_id, diagnosis, doctor_notes, medications, source, assumed_risk)
-                VALUES (@DoctorId, @PatientId, @Diagnosis, @Notes, @Medications, @Source, @AssumedRisk);", connection);
+            using var db = dbContextFactory.CreateDbContext();
 
-            AddParameter(command, "@DoctorId", doctorId);
-            AddParameter(command, "@PatientId", patientId);
-            AddParameter(command, "@Diagnosis", diagnosis);
-            AddParameter(command, "@Notes", notes);
-            AddParameter(command, "@Medications", medications);
-            AddParameter(command, "@Source", EvaluationSourcePatient);
-            AddParameter(command, "@AssumedRisk", assumedRisk);
+            var evaluation = new MedicalEvaluation
+            {
+                DoctorId = doctorId == 0 ? null : doctorId,
+                PatientId = patientId.ToString(),
+                Symptoms = diagnosis,
+                Notes = notes,
+                MedicationsList = medications,
+                EvaluationDate = DateTime.UtcNow,
+            };
 
-            command.ExecuteNonQuery();
+            db.MedicalEvaluations.Add(evaluation);
+            db.SaveChanges();
         }
 
         public void DeleteEvaluation(int evaluationId)
         {
-            using SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            using SqlCommand command = new SqlCommand(
-                "DELETE FROM Medical_Evaluations WHERE evaluation_id = @EvaluationId;", connection);
-            AddParameter(command, "@EvaluationId", evaluationId);
-            command.ExecuteNonQuery();
-        }
+            using var db = dbContextFactory.CreateDbContext();
+            var evaluation = db.MedicalEvaluations.FirstOrDefault(e => e.EvaluationID == evaluationId);
+            if (evaluation is null)
+            {
+                return;
+            }
 
-        private static void AddParameter(SqlCommand command, string name, object? value)
-        {
-            command.Parameters.Add(new SqlParameter(name, value ?? DBNull.Value));
+            db.MedicalEvaluations.Remove(evaluation);
+            db.SaveChanges();
         }
     }
 }
