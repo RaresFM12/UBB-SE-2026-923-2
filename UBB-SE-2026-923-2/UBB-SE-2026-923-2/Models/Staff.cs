@@ -18,6 +18,10 @@
         public int YearsOfExperience { get; set; }
         public double HourlyRate { get; set; }
 
+        public Staff()
+        {
+        }
+
         public string FullName => $"{FirstName} {LastName}".Trim();
     }
 }

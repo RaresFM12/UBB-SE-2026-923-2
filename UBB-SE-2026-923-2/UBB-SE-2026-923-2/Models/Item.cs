@@ -21,10 +21,24 @@ namespace UBB_SE_2026_923_2.Models
         private const string ImagePathDefault = "..\\..\\Assets\\placeholder.png";
         public Dictionary<string, float> ActiveSubstances { get; set; }
         public Dictionary<DateOnly, int> Batches { get; set; }
+
+        public Item()
+        {
+            Name = string.Empty;
+            Producer = string.Empty;
+            Category = string.Empty;
+            ImagePath = ImagePathDefault;
+            Label = string.Empty;
+            Description = string.Empty;
+            ActiveSubstances = new Dictionary<string, float>();
+            Batches = new Dictionary<DateOnly, int>();
+        }
+
         public Item(int id, string name, string producer, string category,
                     float price, int numberOfPills,
                     string label = "", string description = "", string imagePath = ImagePathDefault,
                     float discount = 0f)
+            : this()
         {
             Id = id;
             Name = name;
@@ -37,27 +51,15 @@ namespace UBB_SE_2026_923_2.Models
             Label = label;
             Description = description;
             DiscountPercentage = discount;
-            ActiveSubstances = new Dictionary<string, float>();
-            Batches = new Dictionary<DateOnly, int>();
         }
+
         public Item(int id, string name, string producer, string category,
                     float price, int numberOfPills,
                     string label = "", string description = "", string imagePath = ImagePathDefault,
                     float discount = 0f, int quantity = 0)
+            : this(id, name, producer, category, price, numberOfPills, label, description, imagePath, discount)
         {
-            Id = id;
-            Name = name;
-            Producer = producer;
-            Price = price;
-            NumberOfPills = numberOfPills;
-            Category = category;
-            ImagePath = imagePath;
             Quantity = quantity;
-            Label = label;
-            Description = description;
-            DiscountPercentage = discount;
-            ActiveSubstances = new Dictionary<string, float>();
-            Batches = new Dictionary<DateOnly, int>();
         }
 
         public Item(string name, string producer, string category,
@@ -65,19 +67,9 @@ namespace UBB_SE_2026_923_2.Models
             int quantity = 0,
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
+            : this(0, name, producer, category, price, numberOfPills, label, description, imagePath, discount)
         {
-            Name = name;
-            Producer = producer;
-            Price = price;
-            NumberOfPills = numberOfPills;
-            Category = category;
-            ImagePath = imagePath;
             Quantity = quantity;
-            Label = label;
-            Description = description;
-            DiscountPercentage = discount;
-            ActiveSubstances = new Dictionary<string, float>();
-            Batches = new Dictionary<DateOnly, int>();
         }
 
         public Item(string name, string producer, string category,
@@ -86,17 +78,8 @@ namespace UBB_SE_2026_923_2.Models
                     int quantity = 0,
                     string label = "", string description = "", string imagePath = ImagePathDefault,
                     float discount = 0f)
+            : this(name, producer, category, price, numberOfPills, quantity, label, description, imagePath, discount)
         {
-            Name = name;
-            Producer = producer;
-            Price = price;
-            NumberOfPills = numberOfPills;
-            Category = category;
-            ImagePath = imagePath;
-            Quantity = quantity;
-            Label = label;
-            Description = description;
-            DiscountPercentage = discount;
             ActiveSubstances = activeSubstances;
             Batches = batches;
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using UBB_SE_2026_923_2.Configuration;
 
 namespace UBB_SE_2026_923_2.Repositories
 {
@@ -6,7 +7,7 @@ namespace UBB_SE_2026_923_2.Repositories
     {
         public static string GetConnectionString()
         {
-            return "Data Source=" + Environment.MachineName + ";Initial Catalog=Pharmacy;Integrated Security=true;TrustServerCertificate=true;";
+            return AppSettings.ConnectionString;
         }
     }
 }

@@ -25,15 +25,20 @@ namespace UBB_SE_2026_923_2.Models
         public bool IsCompleted { get; set; }
         public bool IsExpired { get; set; }
         public Dictionary<int, Tuple<int, float>> ItemQuantitiesWithFinalPrice { get; private set; }
+
+        public Order()
+        {
+            ItemQuantitiesWithFinalPrice = new Dictionary<int, Tuple<int, float>>();
+        }
+
         public Order(int id, int clientId, DateOnly pickUpDate,
-                     bool isCompleted = false, bool isExpired = false)
+                     bool isCompleted = false, bool isExpired = false) : this()
         {
             Id = id;
             ClientId = clientId;
             PickUpDate = pickUpDate;
             IsCompleted = isCompleted;
             IsExpired = isExpired;
-            ItemQuantitiesWithFinalPrice = new Dictionary<int, Tuple<int, float>>();
         }
 
         public bool Equals(Order other)
