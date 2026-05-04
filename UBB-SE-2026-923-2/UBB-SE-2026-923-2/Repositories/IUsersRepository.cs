@@ -15,7 +15,7 @@ namespace UBB_SE_2026_923_2.Repositories
         User GetUserByEmail(string email);
 
         void AddUser(string email, string phoneNumber, string passwordHash, string username,
-            bool discountNotifications, bool isDisabled = false, bool isAdmin = false, int loyaltyPoints = 0);
+            bool discountNotifications, bool isDisabled = false, bool isAdmin = false, int loyaltyPoints = 0, string role = "Client");
         void UpdateUser(User user);
 
         List<User> GetAllUsers();

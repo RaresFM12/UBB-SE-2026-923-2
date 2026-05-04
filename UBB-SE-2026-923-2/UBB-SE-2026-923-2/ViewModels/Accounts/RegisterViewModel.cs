@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -12,13 +13,25 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         private IUserAccountService userAccountService;
         private string email;
         private string password;
-        private string confirmPassword;
         private string username;
         private string phoneNumber;
         private string errorMessage;
+        private string selectedRole;
 
         public event Action RegisterSucceded;
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public List<string> RoleOptions { get; } = new List<string> { "Admin", "Client", "Doctor", "Pharmacist" };
+
+        public string SelectedRole
+        {
+            get => selectedRole;
+            set
+            {
+                selectedRole = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string Email
         {
@@ -36,15 +49,6 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
             set
             {
                 password = value;
-                OnPropertyChanged();
-            }
-        }
-        public string ConfirmPassword
-        {
-            get => confirmPassword;
-            set
-            {
-                confirmPassword = value;
                 OnPropertyChanged();
             }
         }
@@ -81,6 +85,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         public RegisterViewModel(IUserAccountService userAccountService)
         {
             this.userAccountService = userAccountService;
+            selectedRole = "Client";
             RegisterCommand = new RelayCommand(Register);
         }
         private void Register()
@@ -90,9 +95,9 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
                 userAccountService.Register(
                     Email,
                     Password,
-                    ConfirmPassword,
                     Username,
-                    PhoneNumber);
+                    PhoneNumber,
+                    SelectedRole);
 
                 RegisterSucceded?.Invoke();
             }

@@ -12,9 +12,9 @@ namespace UBB_SE_2026_923_2.Services
         void Register(
             string email,
             string password,
-            string confirmPassword,
             string username,
-            string phoneNumber);
+            string phoneNumber,
+            string role = "Client");
 
         void UpdateProfile(string newUsername, string newPhoneNumber);
 

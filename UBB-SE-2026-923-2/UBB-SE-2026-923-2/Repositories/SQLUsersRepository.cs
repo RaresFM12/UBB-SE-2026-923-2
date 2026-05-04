@@ -68,7 +68,7 @@ namespace UBB_SE_2026_923_2.Repositories
         }
 
         public void AddUser(string email, string phoneNumber, string passwordHash, string username,
-            bool discountNotifications, bool isDisabled = false, bool isAdmin = false, int loyaltyPoints = 0)
+            bool discountNotifications, bool isDisabled = false, bool isAdmin = false, int loyaltyPoints = 0, string role = "Client")
         {
             using var db = dbContextFactory.CreateDbContext();
 
@@ -80,7 +80,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 Username = username,
                 IsAdmin = isAdmin,
                 IsDisabled = isDisabled,
-                Role = nameof(UserRole.Client),
+                Role = role,
                 DiscountNotifications = discountNotifications,
                 LoyaltyPoints = loyaltyPoints,
             };

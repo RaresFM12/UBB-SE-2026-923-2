@@ -70,23 +70,18 @@ namespace UBB_SE_2026_923_2.Services
         public void Register(
             string email,
             string password,
-            string confirmPassword,
             string username,
-            string phoneNumber)
+            string phoneNumber,
+            string role = "Client")
         {
             if (!userValidationService.IsCorrectEmailFormat(email))
             {
                 throw new Exception("Not a valid email format\nmust be <text>@<text>.<text>");
             }
 
-            if (!userValidationService.IsCorrectPasswordFormat(password))
+            if (string.IsNullOrWhiteSpace(password))
             {
-                throw new Exception("Incorrect format, must have: min 8 chars\n -1 symbol from {!,@,#,%,^,*}\n -1 capital and 1 small letter\n -1 digit");
-            }
-
-            if (password != confirmPassword)
-            {
-                throw new Exception("Passwords don't match");
+                throw new Exception("Password cannot be empty.");
             }
 
             if (username != null && !userValidationService.IsCorrectUsernameFormat(username))
@@ -107,7 +102,7 @@ namespace UBB_SE_2026_923_2.Services
 
             string hashedPassword = securityService.HashPassword(password);
             bool discountNotificationsSetting = false;
-            UsersRepository.AddUser(email, phoneNumber, hashedPassword, username, discountNotificationsSetting);
+            UsersRepository.AddUser(email, phoneNumber, hashedPassword, username, discountNotificationsSetting, role: role);
             CurrentUser = UsersRepository.GetUserByEmail(email);
         }
 

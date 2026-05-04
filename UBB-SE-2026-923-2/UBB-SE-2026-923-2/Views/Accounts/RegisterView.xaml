@@ -89,14 +89,14 @@
                     </PasswordBox.Resources>
                 </PasswordBox>
                 
-                <PasswordBox
-                    x:Name="ConfirmPasswordBox"
-                    PlaceholderText="Confirm Password"
-                    PasswordChanged="ConfirmPasswordBox_PasswordChanged">
-                    <PasswordBox.Resources>
-                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#389e7c"/>
-                    </PasswordBox.Resources>
-                </PasswordBox>
+                <ComboBox
+                    PlaceholderText="Select Role"
+                    ItemsSource="{Binding RoleOptions}"
+                    SelectedItem="{Binding SelectedRole, Mode=TwoWay}"
+                    HorizontalAlignment="Stretch"
+                    BorderBrush="#389e7c"
+                    Foreground="#389e7c">
+                </ComboBox>
 
 
                 <Border Background="#FFEAEA"

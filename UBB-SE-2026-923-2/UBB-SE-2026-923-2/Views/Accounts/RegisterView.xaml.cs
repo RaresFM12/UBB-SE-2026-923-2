@@ -23,11 +23,6 @@ namespace UBB_SE_2026_923_2.Views.Accounts
             var vm = (RegisterViewModel)this.DataContext;
             vm.Password = PasswordBox.Password;
         }
-        private void ConfirmPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            var vm = (RegisterViewModel)this.DataContext;
-            vm.ConfirmPassword = ConfirmPasswordBox.Password;
-        }
         private void Login_Click(object sender, RoutedEventArgs e)
         {
             (this.Parent as Frame)?.Navigate(typeof(LoginView));
