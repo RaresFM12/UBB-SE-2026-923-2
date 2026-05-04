@@ -138,6 +138,17 @@ public class AppDbContext : DbContext
                   .WithOne(link => link.Substance)
                   .HasForeignKey(link => link.SubstanceName)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // Reference data: curated list of pharmacological substances with
+            // their lethal dose. Items reference these by Name, so the seed
+            // values must exist before any Item -> ItemSubstance link can be
+            // created. Item rows themselves stay user-generated.
+            entity.HasData(
+                new Substance { Name = "Ibuprofen",   LethalDose = 3200.00f, Description = "Anti-inflammatory pain reliever" },
+                new Substance { Name = "Paracetamol", LethalDose = 4000.00f, Description = "Pain reliever and fever reducer" },
+                new Substance { Name = "Magnesium",   LethalDose = 2500.00f, Description = "Mineral supplement for muscle and nerve support" },
+                new Substance { Name = "Vitamin C",   LethalDose = 2000.00f, Description = "Vitamin supplement for immune support" },
+                new Substance { Name = "Cetirizine",  LethalDose =  500.00f, Description = "Antihistamine for allergy relief" });
         });
 
         modelBuilder.Entity<Item>(entity =>
@@ -378,6 +389,19 @@ public class AppDbContext : DbContext
             entity.HasKey(m => m.MedicineName);
             entity.Property(m => m.MedicineName).HasMaxLength(200);
             entity.Property(m => m.WarningMessage).HasMaxLength(1000);
+
+            // Reference data consumed by MedicalEvaluationService.CheckMedicineConflict.
+            entity.HasData(
+                new HighRiskMedicine
+                {
+                    MedicineName = "Warfarin",
+                    WarningMessage = "Anticoagulant - check INR before prescribing.",
+                },
+                new HighRiskMedicine
+                {
+                    MedicineName = "Methotrexate",
+                    WarningMessage = "Hepatotoxic - confirm dosing and weekly schedule.",
+                });
         });
     }
 }

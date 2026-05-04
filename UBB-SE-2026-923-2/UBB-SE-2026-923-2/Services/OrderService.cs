@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using UBB_SE_2026_923_2.Configuration;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
 using UBB_SE_2026_923_2.ViewModels.Orders;
