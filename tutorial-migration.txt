@@ -1,0 +1,9 @@
+Ce sa faci????
+
+Grija mare!! Nu mai facem tabelele cu query sql! - Se fac automat din codul din clasele Model!
+
+In caz ca abia ai dat un clone: ./create-database 
+
+Cand vrei sa propagi schimbarile din Models in DB ./add-migration [ce_nume_vrei_nu_conteaza] apoi ./update-database
+
+
