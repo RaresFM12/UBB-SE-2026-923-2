@@ -74,6 +74,7 @@ namespace UBB_SE_2026_923_2.Views
                     Add("Auto-Audit", "admin-auto-audit", typeof(FatigueAuditPage));
                     Add("ER Dispatch", "admin-er-dispatch", typeof(ERDispatchPage));
                     Add("Accounts Management", "admin-accounts", typeof(AdminAccountsManagementView));
+                    Add("Pharmacy Inventory Update", "admin-pharmacy-inventory", typeof(EditPage));
                     break;
 
                 case UserRole.Pharmacist:
