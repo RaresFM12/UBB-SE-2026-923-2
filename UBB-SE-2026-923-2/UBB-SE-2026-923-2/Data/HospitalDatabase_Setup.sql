@@ -662,3 +662,4 @@ UNION ALL SELECT 'Doctors',                       COUNT(*) FROM dbo.Doctors
 UNION ALL SELECT 'PharmacyStaff',                 COUNT(*) FROM dbo.PharmacyStaff
 UNION ALL SELECT 'MedicineSales',                 COUNT(*) FROM dbo.MedicineSales;
 GO
+

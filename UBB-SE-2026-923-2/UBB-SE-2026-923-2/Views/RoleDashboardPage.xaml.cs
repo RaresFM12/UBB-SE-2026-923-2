@@ -48,11 +48,15 @@ namespace UBB_SE_2026_923_2.Views
                 ptFactory.CreatePeriodTrackerService(),
                 ptFactory.CreateWellnessItemsService(),
                 ptFactory.CreateBasketService());
+            var productCatalogueService = new ProductCatalogueService(new SQLItemsRepository(dbContextFactory));
+            var user = ServiceWrapper.UserAccountService.CurrentUser;
+            var catalogParameter = ((IProductCatalogueService)productCatalogueService, user, orderService);
+
             MenuList.ItemsSource = items;
-            BuildForRole();
+            BuildForRole(catalogParameter);
         }
 
-        private void BuildForRole()
+        private void BuildForRole((IProductCatalogueService, User, IOrderService) catalogParameter)
         {
             items.Clear();
             routes.Clear();
@@ -70,13 +74,14 @@ namespace UBB_SE_2026_923_2.Views
                     Add("Auto-Audit", "admin-auto-audit", typeof(FatigueAuditPage));
                     Add("ER Dispatch", "admin-er-dispatch", typeof(ERDispatchPage));
                     Add("Accounts Management", "admin-accounts", typeof(AdminAccountsManagementView));
+                    Add("Pharmacy Inventory Update", "admin-pharmacy-inventory", typeof(EditPage));
                     break;
 
                 case UserRole.Pharmacist:
                     Add("See Schedule", "pharmacist-schedule", typeof(PharmacySchedulePage));
                     Add("Vacation Window", "pharmacist-vacation", typeof(PharmacistVacationPage));
                     Add("Salary", "pharmacist-salary", typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
-                    Add("Product Catalogue", "pharmacist-catalogue", typeof(HomePage), ServiceWrapper.UserAccountService.CurrentUser);
+                    Add("Product Catalogue", "pharmacist-catalogue", typeof(CatalogPage), catalogParameter);
                     Add("Order Management", "pharmacist-orders", typeof(OrderManagementPage), orderService);
                     Add("Edit Inventory", "pharmacist-edit", typeof(EditPage));
                     Add("Statistics", "pharmacist-statistics", typeof(StatisticsPage));
@@ -90,19 +95,21 @@ namespace UBB_SE_2026_923_2.Views
                     Add("See Schedule", "doctor-schedule", typeof(DoctorSchedulePage));
                     Add("Salary", "doctor-salary", typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
                     Add("Hang Out", "doctor-hangout", typeof(HangOutPlaceholderPage));
-                    Add("Product Catalogue", "doctor-catalogue", typeof(HomePage), ServiceWrapper.UserAccountService.CurrentUser);
+                    Add("Product Catalogue", "doctor-catalogue", typeof(CatalogPage), catalogParameter);
                     Add("Order History", "doctor-orders", typeof(OrderHistoryPage), orderService);
                     Add("Period Tracker", "doctor-period-tracker", typeof(PeriodTrackerPage), periodTrackerViewModel);
                     break;
 
                 case UserRole.Client:
-                    Add("Product Catalogue", "client-catalogue", typeof(HomePage), ServiceWrapper.UserAccountService.CurrentUser);
+                    Add("Product Catalogue", "client-catalogue", typeof(CatalogPage), catalogParameter);
                     Add("Shopping Cart", "client-cart", typeof(BasketPage), orderService);
                     Add("Order History", "client-orders", typeof(OrderHistoryPage), orderService);
                     Add("Period Tracker", "client-period-tracker", typeof(PeriodTrackerPage), periodTrackerViewModel);
                     Add("Notifications", "client-notifications", typeof(Notifications));
                     break;
             }
+
+            Add("Profile", "profile-management", typeof(ProfileManagementView));
 
             var first = items.FirstOrDefault();
             if (first != null)
