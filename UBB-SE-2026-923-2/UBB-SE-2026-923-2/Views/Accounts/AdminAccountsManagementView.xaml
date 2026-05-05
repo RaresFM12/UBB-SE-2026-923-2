@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UBB_SE_2026_923_2.Views.Accounts.AdminAccountsManagementView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -12,73 +11,37 @@
 
     <Page.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        <!--for the box-->
-        <SolidColorBrush x:Key="TextControlBackground" Color="White"/>
-        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#389e7c"/>
-        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="White"/>
-
-
-        <!--for the text-->
-        <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#389e7c"></SolidColorBrush>
-        <SolidColorBrush x:Key="TextControlForeground" Color="#389e7c"></SolidColorBrush>
-        <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="White"></SolidColorBrush>
-        <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#389e7c"></SolidColorBrush>
-        <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#389e7c"></SolidColorBrush>
-
-        <!--button stuff-->
-        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C8E6C9"/>
-        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#C8E6C9"/>
-
     </Page.Resources>
 
-    <Grid Padding="20" Background="White">
+    <Grid Padding="20" Background="{StaticResource AppBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-
         <StackPanel Grid.Row="0" Spacing="10">
 
             <TextBlock Text="Admin Dashboard"
-               FontSize="24"
-               FontWeight="SemiBold"
-               Foreground="#2F6F5E"/>
+                       FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource AppAccentBrush}"/>
 
-            <StackPanel Orientation="Horizontal"
-                        Spacing="10">
+            <StackPanel Orientation="Horizontal" Spacing="10">
 
                 <TextBox Width="300"
                          PlaceholderText="Search users..."
-                         PlaceholderForeground="#389e7c"
-                         Background="#F4F8F6"
-                         BorderBrush="#2F6F5E"
-                         CornerRadius="6"
-                         Text="{Binding SearchQuery, Mode=TwoWay}">
-                    <TextBox.Resources>
-                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#389e7c"/>
-                    </TextBox.Resources>
-                </TextBox>
+                         Text="{Binding SearchQuery, Mode=TwoWay}"/>
 
-                <Button Content="Search"
-                        Background="#2F6F5E"
-                        Foreground="White"
-                        CornerRadius="6"
-                        Click="OnSearchClick">
-                </Button>
+                <Button Content="Search" Click="OnSearchClick"/>
 
             </StackPanel>
 
-            <TextBlock Text="{Binding ErrorMessage}"
-               Foreground="Red">
-                
-            </TextBlock>
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource AppErrorBrush}"/>
 
         </StackPanel>
-        
-        
+
         <Border Grid.Row="1"
-                Background="#E8F0EA"
+                Background="{StaticResource AppSurfaceBrush}"
                 CornerRadius="12"
                 Padding="10">
             <ListView 
@@ -92,69 +55,50 @@
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="item:UserItemViewModel">
 
-                            <Border Padding="12" 
-                                    Margin="6"
-                                    CornerRadius="10"
-                                    Background="{x:Bind Background}"
-                                    BorderThickness="0">
+                        <Border Padding="12" 
+                                Margin="6"
+                                CornerRadius="10"
+                                Background="{StaticResource AppBackgroundBrush}"
+                                BorderThickness="0">
 
-                                <StackPanel Spacing="6">
+                            <StackPanel Spacing="6">
 
-                                    <TextBlock Text="{x:Bind Email}"
-                                               FontWeight="SemiBold"
-                                               FontSize="16"
-                                               Foreground="#2F6F5E">
-                                    
-                                    </TextBlock>
+                                <TextBlock Text="{x:Bind Email}"
+                                           FontWeight="SemiBold"
+                                           FontSize="16"
+                                           Foreground="{StaticResource AppAccentBrush}"/>
 
-                                    <TextBlock Text="{x:Bind Username}"
-                                               Foreground="#4A7D6E">
-                                    
-                                    </TextBlock>
+                                <TextBlock Text="{x:Bind Username}"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"/>
 
-                                    <TextBlock Text="{x:Bind PhoneNumber}"
-                                               Foreground="#4A7D6E">
-                                    
-                                    </TextBlock>
+                                <TextBlock Text="{x:Bind PhoneNumber}"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"/>
 
-                                    <TextBlock Text="DISABLED"
-                                               Foreground="Red"
-                                               FontWeight="Bold"
-                                               Visibility="{x:Bind ShowDisabledLabel, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    
-                                    </TextBlock>
+                                <TextBlock Text="DISABLED"
+                                           Foreground="{StaticResource AppErrorBrush}"
+                                           FontWeight="Bold"
+                                           Visibility="{x:Bind ShowDisabledLabel, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-                                    <StackPanel Orientation="Horizontal"
-                                                Spacing="10">
-                                        <CheckBox Content="Admin"
-                                                  Foreground="#2F6F5E"
-                                                  Visibility="{x:Bind ShowPromote, Converter={StaticResource BoolToVisibilityConverter}}"
-                                                  Tapped="OnPromoteClick">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <CheckBox Content="Admin"
+                                              Foreground="{StaticResource AppAccentBrush}"
+                                              Visibility="{x:Bind ShowPromote, Converter={StaticResource BoolToVisibilityConverter}}"
+                                              Tapped="OnPromoteClick"/>
 
-
-                                    </CheckBox>
-
-                                        <Button Content="Disable Account"
-                                                Background="#2F6F5E"
-                                                Foreground="White"
-                                                CornerRadius="6"
-                                                Padding="10,4"
-                                                Visibility="{x:Bind ShowDisable, Converter={StaticResource BoolToVisibilityConverter}}"
-                                                Click="OnDisableClick">
-                                        
-                                        </Button>
-
-                                    </StackPanel>
+                                    <Button Content="Disable Account"
+                                            Visibility="{x:Bind ShowDisable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Click="OnDisableClick"/>
 
                                 </StackPanel>
-                            </Border>
+
+                            </StackPanel>
+                        </Border>
 
                     </DataTemplate>
                 </ListView.ItemTemplate>
 
             </ListView>
         </Border>
-
 
     </Grid>
 </Page>

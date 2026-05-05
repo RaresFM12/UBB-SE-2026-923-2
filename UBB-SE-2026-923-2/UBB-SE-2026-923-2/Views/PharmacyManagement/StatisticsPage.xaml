@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UBB_SE_2026_923_2.Views.PharmacyManagement.StatisticsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -7,94 +6,77 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:UBB_SE_2026_923_2.Models"
-    mc:Ignorable="d"
-    RequestedTheme="Light"
-    Background="White">
-
-    <Page.Resources>
-        <Style TargetType="TextBlock">
-            <Setter Property="Foreground" Value="Black"/>
-        </Style>
-
-    </Page.Resources>
+    mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollMode="Enabled"
-              HorizontalScrollMode="Enabled">
+                  HorizontalScrollMode="Enabled"
+                  Background="{StaticResource AppBackgroundBrush}">
 
-        <Grid>
+        <Grid Padding="20">
 
-            <!-- TOP NAV -->
             <Button Content="Edit Page"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Margin="10"
-                Click="GoToEditPageClick"/>
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="10"
+                    Click="GoToEditPageClick"/>
 
-            <!-- SWITCH BUTTONS -->
             <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Center"
+                        HorizontalAlignment="Center"
                         VerticalAlignment="Top"
-                    Margin="0,50,0,10"
-                    Spacing="10">
+                        Margin="0,50,0,10"
+                        Spacing="10">
 
-                <Button Content="Items"
-                    Click="OnItemsClick"
-                    Background="#66d4af"/>
-
-                <Button Content="Substances"
-                    Click="OnSubstancesClick"
-                    Background="#66d4af"/>
+                <Button Content="Items" Click="OnItemsClick"/>
+                <Button Content="Substances" Click="OnSubstancesClick"/>
             </StackPanel>
 
-            <!-- ITEMS GRID -->
             <StackPanel x:Name="ItemsGrid"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,100,0,0"
-                    Spacing="10">
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Margin="0,100,0,0"
+                        Spacing="10">
 
                 <TextBlock Text="Top 30 Most Ordered Items (Last Month)"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       HorizontalAlignment="Center"/>
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource AppTextPrimaryBrush}"
+                           HorizontalAlignment="Center"/>
 
                 <TextBlock Text="{x:Bind ItemsWarning}"
-                           Foreground="Orange"
+                           Foreground="#D97706"
                            HorizontalAlignment="Center"
                            FontStyle="Italic"/>
 
                 <Grid Width="600"
-                  Height="400"
-                  BorderBrush="Gray"
-                  BorderThickness="1">
+                      Height="400"
+                      BorderBrush="{StaticResource AppAccentBrush}"
+                      BorderThickness="1"
+                      CornerRadius="8">
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- HEADER -->
-                    <Grid Grid.Row="0" Background="#EEE" Padding="5">
+                    <Grid Grid.Row="0" Background="{StaticResource AppSurfaceBrush}" Padding="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Item ID" Grid.Column="0" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Item Name" Grid.Column="1" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Orders" Grid.Column="2" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Item ID" Grid.Column="0" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Item Name" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Orders" Grid.Column="2" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
                     </Grid>
 
-                    <!-- LIST -->
                     <ListView Grid.Row="1"
-                          ItemsSource="{x:Bind TopItems}">
-
+                              ItemsSource="{x:Bind TopItems}">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="x:Object">
-                                <Border BorderBrush="Gray"
-                                    BorderThickness="0,0,0,1"
-                                    Padding="5">
+                                <Border BorderBrush="{StaticResource AppAccentBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="10">
 
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -103,67 +85,64 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Column="0" Text="{Binding Item1}" HorizontalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Item2}" HorizontalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding Item3}" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="0" Text="{Binding Item1}" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Item2}" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Item3}" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Grid>
 
                                 </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
-
                     </ListView>
-
                 </Grid>
             </StackPanel>
 
-            <!-- SUBSTANCES GRID -->
             <StackPanel x:Name="SubstancesGrid"
-                    Visibility="Collapsed"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,100,0,0"
-                    Spacing="10">
+                        Visibility="Collapsed"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Margin="0,100,0,0"
+                        Spacing="10">
 
                 <TextBlock Text="Top 30 Most Popular Substances (Last Month)"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       HorizontalAlignment="Center"/>
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource AppTextPrimaryBrush}"
+                           HorizontalAlignment="Center"/>
 
                 <TextBlock Text="{x:Bind SubstancesWarning}"
-                           Foreground="Orange"
+                           Foreground="#D97706"
                            HorizontalAlignment="Center"
                            FontStyle="Italic"/>
 
                 <Grid Width="600"
-                  Height="400"
-                  BorderBrush="Gray"
-                  BorderThickness="1">
+                      Height="400"
+                      BorderBrush="{StaticResource AppAccentBrush}"
+                      BorderThickness="1"
+                      CornerRadius="8">
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- HEADER -->
-                    <Grid Grid.Row="0" Background="#EEE" Padding="5">
+                    <Grid Grid.Row="0" Background="{StaticResource AppSurfaceBrush}" Padding="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Name" Grid.Column="0" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Number of Orders" Grid.Column="1" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Name" Grid.Column="0" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Number of Orders" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
                     </Grid>
 
-                    <!-- LIST -->
                     <ListView Grid.Row="1"
                               ItemsSource="{x:Bind TopSubstances}">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="x:Object">
-                                <Border BorderBrush="Gray"
+                                <Border BorderBrush="{StaticResource AppAccentBrush}"
                                         BorderThickness="0,0,0,1"
-                                        Padding="5">    
+                                        Padding="10">
 
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -171,18 +150,16 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Column="0" Text="{Binding Key}" HorizontalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Value}" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="0" Text="{Binding Key}" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Value}" Foreground="{StaticResource AppTextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Grid>
 
                                 </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-
                 </Grid>
             </StackPanel>
-
         </Grid>
     </ScrollViewer>
 </Page>

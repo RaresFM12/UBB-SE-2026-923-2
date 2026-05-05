@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UBB_SE_2026_923_2.Views.Orders.ModifyIncompleteOrderPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -11,22 +10,18 @@
     x:Name="PageRoot">
 
     <Grid Padding="20"
-          ColumnDefinitions="*, Auto">
+          ColumnDefinitions="*, Auto"
+          Background="{StaticResource AppBackgroundBrush}">
 
         <ListView Grid.Row="1"
                   Grid.Column="0"
                   ItemsSource="{x:Bind ViewModel.OrderItems}">
 
             <ListView.ItemTemplate>
-
-                <!-- defining the way items are presented 
-            in the list view of the bucket -->
                 <DataTemplate x:DataType="model:ItemDetail">
-
                     <Grid RowDefinitions="Auto, Auto"
                           ColumnDefinitions="Auto, *, Auto">
 
-                        <!-- Thumbnail image (occupies the left half of the item view) -->
                         <Image Grid.Row="0"
                                Grid.RowSpan="2"
                                Grid.Column="0"
@@ -36,25 +31,26 @@
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"/>
 
-                        <!-- Item description and delete button (upper row after image) -->
                         <Grid Grid.Row="0"
-                                Grid.Column="1"
-                                Grid.ColumnDefinitions="*, Auto">
+                              Grid.Column="1"
+                              Grid.ColumnDefinitions="*, Auto">
 
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
                                        Text="{x:Bind ItemDescription, Mode=OneTime}"
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontSize="15"/>
+                                       FontSize="15"
+                                       Foreground="{StaticResource AppTextPrimaryBrush}"/>
                             <Button Grid.Row="0"
                                     Grid.Column="1"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
                                     Content="🗑"
+                                    Background="Transparent"
+                                    Foreground="{StaticResource AppErrorBrush}"
                                     Command="{Binding DataContext.RemoveItemCommand, ElementName=PageRoot}"
                                     CommandParameter="{Binding}"/>
-
                         </Grid>
 
                         <StackPanel Grid.Row="1"
@@ -64,28 +60,25 @@
                                     VerticalAlignment="Center"
                                     Spacing="10">
 
-                            <TextBlock Text="{x:Bind ItemQuantityString, Mode=OneTime}"/>
+                            <TextBlock Text="{x:Bind ItemQuantityString, Mode=OneTime}"
+                                       Foreground="{StaticResource AppTextPrimaryBrush}"/>
                             <TextBlock Text="{x:Bind ItemFinalPriceString, Mode=OneTime}"
-                                       FontWeight="Bold" Foreground="Red"/>
-
+                                       FontWeight="Bold" Foreground="{StaticResource AppErrorBrush}"/>
                         </StackPanel>
-
                     </Grid>
-
                 </DataTemplate>
-
             </ListView.ItemTemplate>
-
         </ListView>
-
 
         <ListView Grid.Row="0"
                   Grid.Column="1">
 
-            <TextBlock Text="Total price:"/>
+            <TextBlock Text="Total price:"
+                       FontSize="15"
+                       Foreground="{StaticResource AppTextSecondaryBrush}"/>
             <TextBlock Text="{x:Bind ViewModel.TotalPriceString, Mode=OneWay}"
                        FontSize="30"
-                       Foreground="Red"
+                       Foreground="{StaticResource AppErrorBrush}"
                        FontWeight="Bold"
                        Padding="15"/>
 
@@ -98,16 +91,19 @@
                           SelectedDatesChanged="CheckUnselectedDate"/>
 
             <StackPanel Orientation="Horizontal"
-                        Padding="15">
+                        Padding="15"
+                        Spacing="10">
 
                 <Button Content="Go back"
-                        Click="CancelChanges"/>
+                        Click="CancelChanges"
+                        Background="Transparent"
+                        Foreground="{StaticResource AppAccentBrush}"
+                        BorderBrush="{StaticResource AppAccentBrush}"
+                        BorderThickness="1"/>
                 <Button Content="Save changes"
                         Click="ModifyOrder"/>
 
             </StackPanel>
-
         </ListView>
-
     </Grid>
 </Page>

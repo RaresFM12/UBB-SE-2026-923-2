@@ -3,15 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Page.Resources>
-        <SolidColorBrush x:Key="BgBrush" Color="#FF0B120D"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#FF0F1711"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#FFB7C2BA"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#FF166534"/>
-    </Page.Resources>
-
-    <ScrollViewer Background="{StaticResource BgBrush}">
+    <ScrollViewer Background="{StaticResource AppBackgroundBrush}">
         <Grid Padding="24" RowSpacing="14">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -22,7 +14,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="Automated ER Dispatch &amp; Doctor Status Management"
-                       Foreground="{StaticResource TextBrush}"
+                       Foreground="{StaticResource AppAccentBrush}"
                        FontSize="36"
                        FontWeight="SemiBold"/>
 
@@ -36,45 +28,42 @@
 
                 <Button Grid.Column="0"
                         Content="Run Dispatch"
-                        Click="RunDispatch_Click"
-                        Background="{StaticResource AccentBrush}"
-                        Foreground="White"
-                        BorderBrush="{StaticResource AccentBrush}"/>
+                        Click="RunDispatch_Click"/>
 
                 <Button Grid.Column="1"
                         Content="Refresh"
                         Click="Refresh_Click"
                         Background="Transparent"
-                        Foreground="{StaticResource TextBrush}"
-                        BorderBrush="{StaticResource AccentBrush}"
+                        Foreground="{StaticResource AppAccentBrush}"
+                        BorderBrush="{StaticResource AppAccentBrush}"
                         BorderThickness="1"/>
 
                 <Button Grid.Column="2"
                         Content="Simulate Incoming"
                         Click="SimulateIncoming_Click"
                         Background="Transparent"
-                        Foreground="{StaticResource TextBrush}"
-                        BorderBrush="{StaticResource AccentBrush}"
+                        Foreground="{StaticResource AppAccentBrush}"
+                        BorderBrush="{StaticResource AppAccentBrush}"
                         BorderThickness="1"/>
 
                 <StackPanel Grid.Column="3" Margin="12,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="Dispatch Status:" Foreground="{StaticResource TextBrush}" FontSize="16"/>
+                    <TextBlock Text="Dispatch Status:" Foreground="{StaticResource AppTextSecondaryBrush}" FontSize="16"/>
                     <TextBlock Text="{Binding StatusMessage}"
-                               Foreground="{StaticResource TextBrush}"
+                               Foreground="{StaticResource AppTextPrimaryBrush}"
                                FontSize="16"
                                FontWeight="SemiBold"/>
                 </StackPanel>
             </Grid>
 
             <Border Grid.Row="2"
-                    Background="#332A1204"
-                    BorderBrush="{StaticResource AccentBrush}"
+                    Background="{StaticResource AppSurfaceBrush}"
+                    BorderBrush="{StaticResource AppAccentBrush}"
                     BorderThickness="1"
                     CornerRadius="12"
                     Padding="12">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Click 'Run Dispatch' to process pending ER requests and automatically assign doctors."
-                               Foreground="{StaticResource TextBrush}"
+                               Foreground="{StaticResource AppTextPrimaryBrush}"
                                TextWrapping="Wrap"/>
 
                     <Grid ColumnSpacing="10">
@@ -89,42 +78,42 @@
                                   ItemsSource="{Binding UnmatchedRequests}"
                                   DisplayMemberPath="RequestLabel"
                                   SelectionChanged="UnmatchedRequestCombo_SelectionChanged"
-                                  PlaceholderText="Select unmatched request"/>
+                                  PlaceholderText="Select unmatched request"
+                                  HorizontalAlignment="Stretch"/>
 
                         <ComboBox Grid.Column="1"
                                   x:Name="OverrideDoctorCombo"
                                   ItemsSource="{Binding OverrideCandidates}"
                                   DisplayMemberPath="DisplayLabel"
-                                  PlaceholderText="Select near-end IN_EXAMINATION doctor"/>
+                                  PlaceholderText="Select near-end IN_EXAMINATION doctor"
+                                  HorizontalAlignment="Stretch"/>
 
                         <Button Grid.Column="2"
                                 Content="Apply Override"
-                                Click="ApplyOverride_Click"
-                                Background="{StaticResource AccentBrush}"
-                                Foreground="White"
-                                BorderBrush="{StaticResource AccentBrush}"/>
+                                Click="ApplyOverride_Click"/>
                     </Grid>
 
                     <TextBlock Text="{Binding ManualInterventionHint}"
-                               Foreground="{StaticResource MutedBrush}"
+                               Foreground="{StaticResource AppTextSecondaryBrush}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>
 
             <Border Grid.Row="3"
-                    Background="{StaticResource CardBrush}"
-                    BorderBrush="#FFB91C1C"
+                    Background="{StaticResource AppSurfaceBrush}"
+                    BorderBrush="{StaticResource AppErrorBrush}"
                     BorderThickness="1"
                     CornerRadius="14"
-                    Padding="12">
+                    Padding="12"
+                    Margin="0,10,0,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="Unmatched Requests (Red Flag - Manual Intervention Required)"
-                               Foreground="{StaticResource TextBrush}"
+                    <TextBlock Text="Unmatched Requests (Manual Intervention Required)"
+                               Foreground="{StaticResource AppErrorBrush}"
                                FontSize="20"
                                FontWeight="SemiBold"
                                Margin="0,0,0,8"/>
@@ -132,11 +121,11 @@
                     <ListView Grid.Row="1" ItemsSource="{Binding UnmatchedRequests}" Background="Transparent">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="#FFEF4444" BorderThickness="1" CornerRadius="8" Padding="8" Margin="0,0,0,8">
+                                <Border BorderBrush="{StaticResource AppErrorBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,8" Background="{StaticResource AppBackgroundBrush}">
                                     <StackPanel>
-                                        <TextBlock Text="{Binding RequestSpecialization}" Foreground="{StaticResource TextBrush}" FontSize="16" FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding RequestLocation}" Foreground="{StaticResource MutedBrush}"/>
-                                        <TextBlock Text="{Binding NoMatchReason}" Foreground="#FFFFB4B4" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding RequestSpecialization}" Foreground="{StaticResource AppTextPrimaryBrush}" FontSize="16" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding RequestLocation}" Foreground="{StaticResource AppTextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding NoMatchReason}" Foreground="{StaticResource AppErrorBrush}" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
@@ -146,11 +135,12 @@
             </Border>
 
             <Border Grid.Row="4"
-                    Background="{StaticResource CardBrush}"
-                    BorderBrush="{StaticResource AccentBrush}"
+                    Background="{StaticResource AppSurfaceBrush}"
+                    BorderBrush="{StaticResource AppAccentBrush}"
                     BorderThickness="1"
                     CornerRadius="14"
-                    Padding="12">
+                    Padding="12"
+                    Margin="0,10,0,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -158,7 +148,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Successful Matches (Doctor Assigned)"
-                               Foreground="{StaticResource TextBrush}"
+                               Foreground="{StaticResource AppAccentBrush}"
                                FontSize="20"
                                FontWeight="SemiBold"
                                Margin="0,0,0,8"/>
@@ -166,11 +156,11 @@
                     <ListView Grid.Row="1" ItemsSource="{Binding SuccessfulMatches}" Background="Transparent">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" CornerRadius="8" Padding="8" Margin="0,0,0,8">
+                                <Border BorderBrush="{StaticResource AppAccentBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,8" Background="{StaticResource AppBackgroundBrush}">
                                     <StackPanel>
-                                        <TextBlock Text="{Binding AssignedDoctor}" Foreground="{StaticResource TextBrush}" FontSize="16" FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding Specialization}" Foreground="{StaticResource MutedBrush}"/>
-                                        <TextBlock Text="{Binding MatchReason}" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding AssignedDoctor}" Foreground="{StaticResource AppTextPrimaryBrush}" FontSize="16" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Specialization}" Foreground="{StaticResource AppTextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding MatchReason}" Foreground="{StaticResource AppTextSecondaryBrush}" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
@@ -181,4 +171,3 @@
         </Grid>
     </ScrollViewer>
 </Page>
-

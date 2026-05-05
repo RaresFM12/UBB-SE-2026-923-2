@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UBB_SE_2026_923_2.Views.Accounts.ProfileManagementView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -11,117 +10,43 @@
 
     <Page.Resources>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-        <!--for the box-->
-        <SolidColorBrush x:Key="TextControlBackground" Color="White"/>
-        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#389e7c"/>
-        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="White"/>
-
-
-        <!--for the text-->
-        <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#389e7c"></SolidColorBrush>
-        <SolidColorBrush x:Key="TextControlForeground" Color="#389e7c"></SolidColorBrush>
-        <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="White"></SolidColorBrush>
-        <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#389e7c"></SolidColorBrush>
-        <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#389e7c"></SolidColorBrush>
-
-        <!--button stuff-->
-        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C8E6C9"/>
-        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#C8E6C9"/>
-
     </Page.Resources>
-    <Grid Background="White">
-        <Border
-            Padding="20"
-            Background="#E8F5E9"
-            CornerRadius="10"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center">
+
+    <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Border Padding="20"
+                Background="{StaticResource AppSurfaceBrush}"
+                CornerRadius="10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+
             <StackPanel Spacing="12" Padding="20" MaxWidth="400">
-
                 <TextBlock Text="My Profile"
-                   FontSize="24"
-                   Foreground="#389e7c"
-                   FontWeight="Bold"/>
+                           FontSize="24"
+                           Foreground="{StaticResource AppAccentBrush}"
+                           FontWeight="Bold"/>
 
+                <TextBlock Text="Email" Foreground="{StaticResource AppAccentBrush}"/>
+                <TextBox Text="{Binding Email}" IsReadOnly="True"/>
 
+                <TextBlock Text="Username" Foreground="{StaticResource AppAccentBrush}"/>
+                <TextBox Text="{Binding Username, Mode=TwoWay}"/>
 
-                <TextBlock
-                           Text="Email"
-                           Foreground="#389e7c">
-                </TextBlock>
-                <TextBox
-                 Text="{Binding Email}"
-                 IsReadOnly="True"
-                    BorderBrush="#389e7c">
-                    <TextBox.Resources>
-                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#389e7c"/>
-                    </TextBox.Resources>
-                </TextBox>
-
-                <TextBlock
-                           Text="Username"
-                           Foreground="#389e7c">
-                </TextBlock>
-                <TextBox
-                 Text="{Binding Username, Mode=TwoWay}"
-                    BorderBrush="#389e7c">
-                    <TextBox.Resources>
-                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#389e7c"/>
-                    </TextBox.Resources>
-                </TextBox>
-
-                <TextBlock
-                           Text="Phone Number"
-                           Foreground="#389e7c">
-                </TextBlock>
-                <TextBox
-                 Text="{Binding PhoneNumber, Mode=TwoWay}"
-                    BorderBrush="#389e7c">
-                    <TextBox.Resources>
-                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#389e7c"/>
-                    </TextBox.Resources>
-                </TextBox>
+                <TextBlock Text="Phone Number" Foreground="{StaticResource AppAccentBrush}"/>
+                <TextBox Text="{Binding PhoneNumber, Mode=TwoWay}"/>
 
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <Button Content="Change Password"
-                        Background="#389e7c"
-                        Foreground="White"
-                        BorderBrush="Gray"
-                        Click="OnChangePasswordClick">
-                       
-                    </Button>
-                    <Button Content="Order History"
-                        Background="#389e7c"
-                        Foreground="White"
-                        BorderBrush="Gray"
-                        Click="OnOrderHistoryClick">
-
-                    </Button>
-
-
+                    <Button Content="Change Password" Click="OnChangePasswordClick"/>
+                    <Button Content="Order History" Click="OnOrderHistoryClick"/>
                 </StackPanel>
-
-
 
                 <TextBlock Text="{Binding ErrorMessage}"
-                   Foreground="Red"
-                   Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
-                
-                
+                           Foreground="{StaticResource AppErrorBrush}"
+                           Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
+
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <Button Content="Save Changes"
-                    Background="#389e7c"
-                    Foreground="White"
-                    BorderBrush="Gray"
-                    Click="OnSaveClick"/>
-
-                    <Button Content="Cancel"
-                    Background="#389e7c"
-                    Foreground="White"
-                    BorderBrush="Gray"
-                    Click="OnCancelClick"/>
+                    <Button Content="Save Changes" Click="OnSaveClick"/>
+                    <Button Content="Cancel" Click="OnCancelClick"/>
                 </StackPanel>
-
             </StackPanel>
         </Border>
     </Grid>

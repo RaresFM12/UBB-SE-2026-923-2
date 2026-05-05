@@ -10,15 +10,9 @@
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter"/>
-
-        <SolidColorBrush x:Key="BgBrush" Color="#FF0B120D"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#FF0F1711"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#FFB7C2BA"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#FF166534"/>
     </Page.Resources>
 
-    <Grid Padding="24" RowSpacing="14" Background="{StaticResource BgBrush}">
+    <Grid Padding="24" RowSpacing="14" Background="{StaticResource AppBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -26,7 +20,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -35,12 +28,12 @@
 
             <StackPanel Grid.Column="0" Spacing="4">
                 <TextBlock Text="Pharmacy Schedule"
-                           Foreground="{StaticResource TextBrush}"
+                           Foreground="{StaticResource AppTextPrimaryBrush}"
                            FontSize="44"
                            FontWeight="SemiBold"
                            VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding HeaderSubtitle}"
-                           Foreground="{StaticResource MutedBrush}"
+                           Foreground="{StaticResource AppTextSecondaryBrush}"
                            FontSize="16"/>
             </StackPanel>
 
@@ -49,10 +42,10 @@
                       ItemsSource="{Binding Pharmacists}"
                       SelectedItem="{Binding SelectedPharmacist, Mode=TwoWay}"
                       DisplayMemberPath="PharmacistName"
-                      PlaceholderText="Select pharmacist"/>
+                      PlaceholderText="Select pharmacist"
+                      HorizontalAlignment="Stretch"/>
         </Grid>
 
-        <!-- Controls (navigation + view mode) -->
         <Grid Grid.Row="1" ColumnSpacing="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -65,26 +58,17 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Content="Previous" Command="{Binding PreviousPeriodCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
-            <Button Grid.Column="1" Content="Today" Command="{Binding TodayCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
-            <Button Grid.Column="2" Content="Next" Command="{Binding NextPeriodCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
+            <Button Grid.Column="0" Content="Previous" Command="{Binding PreviousPeriodCommand}"/>
+            <Button Grid.Column="1" Content="Today" Command="{Binding TodayCommand}"/>
+            <Button Grid.Column="2" Content="Next" Command="{Binding NextPeriodCommand}"/>
 
             <Button x:Name="DateButton"
                     Grid.Column="3"
                     Content="{Binding SelectedDateText}"
                     Margin="8,0,0,0"
                     Background="Transparent"
-                    Foreground="{StaticResource TextBrush}"
-                    BorderBrush="{StaticResource AccentBrush}"
+                    Foreground="{StaticResource AppAccentBrush}"
+                    BorderBrush="{StaticResource AppAccentBrush}"
                     BorderThickness="1"
                     Padding="12,6">
                 <Button.Flyout>
@@ -96,58 +80,46 @@
                 </Button.Flyout>
             </Button>
 
-            <Button Grid.Column="4" Content="Daily" Command="{Binding ShowDailyCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"
-                    Margin="8,0,0,0"/>
-            <Button Grid.Column="5" Content="Weekly" Command="{Binding ShowWeeklyCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
-            <Button Grid.Column="6" Content="Refresh" Command="{Binding RefreshCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
+            <Button Grid.Column="4" Content="Daily" Command="{Binding ShowDailyCommand}" Margin="8,0,0,0"/>
+            <Button Grid.Column="5" Content="Weekly" Command="{Binding ShowWeeklyCommand}"/>
+            <Button Grid.Column="6" Content="Refresh" Command="{Binding RefreshCommand}"/>
         </Grid>
 
-        <!-- Error / access messages -->
         <StackPanel Grid.Row="2" Spacing="10">
-            <Border Background="#332A1204"
-                    BorderBrush="{StaticResource AccentBrush}"
+            <Border Background="{StaticResource AppSurfaceBrush}"
+                    BorderBrush="{StaticResource AppErrorBrush}"
                     BorderThickness="1"
                     CornerRadius="14"
                     Padding="14,10"
                     Visibility="{Binding IsAccessDenied, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock TextWrapping="Wrap"
-                           Foreground="#FFFFB4B4"
+                           Foreground="{StaticResource AppErrorBrush}"
                            Text="Pharmacy Schedule is available to pharmacist accounts. Set Role to Pharmacist in CurrentUserService to view your roster."/>
             </Border>
 
-            <Border Background="#332A1204"
-                    BorderBrush="{StaticResource AccentBrush}"
+            <Border Background="{StaticResource AppSurfaceBrush}"
+                    BorderBrush="{StaticResource AppErrorBrush}"
                     BorderThickness="1"
                     CornerRadius="14"
                     Padding="14,10"
                     Visibility="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                 <TextBlock Text="{Binding ErrorMessage}"
-                           Foreground="#FFFFB4B4"
+                           Foreground="{StaticResource AppErrorBrush}"
                            TextWrapping="Wrap"/>
             </Border>
         </StackPanel>
 
-        <!-- Content: empty state + schedule list -->
         <Grid Grid.Row="3">
             <StackPanel HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Spacing="8"
                         Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock Text="No shifts in this period."
-                           Foreground="{StaticResource TextBrush}"
+                           Foreground="{StaticResource AppTextPrimaryBrush}"
                            FontSize="20"
                            HorizontalAlignment="Center"/>
                 <TextBlock Text="Try Previous/Next, change the period, or Refresh."
-                           Foreground="{StaticResource MutedBrush}"
+                           Foreground="{StaticResource AppTextSecondaryBrush}"
                            HorizontalAlignment="Center"/>
             </StackPanel>
 
@@ -166,8 +138,8 @@
 
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="{StaticResource CardBrush}"
-                                BorderBrush="{StaticResource AccentBrush}"
+                        <Border Background="{StaticResource AppSurfaceBrush}"
+                                BorderBrush="{StaticResource AppAccentBrush}"
                                 BorderThickness="1"
                                 CornerRadius="14"
                                 Padding="12">
@@ -186,13 +158,13 @@
 
                                     <TextBlock Grid.Column="0"
                                                Text="{Binding RotationAssignment}"
-                                               Foreground="{StaticResource TextBrush}"
+                                               Foreground="{StaticResource AppTextPrimaryBrush}"
                                                FontSize="20"
                                                FontWeight="SemiBold"
                                                TextWrapping="Wrap"/>
 
                                     <Border Grid.Column="1"
-                                            Background="{StaticResource AccentBrush}"
+                                            Background="{StaticResource AppAccentBrush}"
                                             CornerRadius="12"
                                             Padding="10,4"
                                             Margin="12,0,0,0"
@@ -205,13 +177,13 @@
 
                                 <TextBlock Grid.Row="1"
                                            Text="{Binding TimeRangeDetail}"
-                                           Foreground="{StaticResource MutedBrush}"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"
                                            FontSize="14"
                                            TextWrapping="Wrap"/>
 
                                 <TextBlock Grid.Row="2"
                                            Text="{Binding DayLabel}"
-                                           Foreground="{StaticResource MutedBrush}"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"
                                            FontSize="13"/>
                             </Grid>
                         </Border>
@@ -219,15 +191,14 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <!-- Loading overlay -->
-            <Grid Background="#66000000"
+            <Grid Background="#66FFFFFF"
                   Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
                 <StackPanel HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Spacing="10">
                     <ProgressRing IsActive="True" Width="56" Height="56"/>
                     <TextBlock Text="Loading pharmacy roster..."
-                               Foreground="{StaticResource TextBrush}"
+                               Foreground="{StaticResource AppTextPrimaryBrush}"
                                FontSize="18"
                                HorizontalAlignment="Center"/>
                 </StackPanel>

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UBB_SE_2026_923_2.Views.Accounts.RegisterView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -11,122 +10,70 @@
 
     <Page.Resources>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-
-        <!--input box backgrounds-->
-        <SolidColorBrush x:Key="TextControlBackground" Color="#FF1A1A1A"/>
-        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#FF222222"/>
-        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#FF1A1A1A"/>
-        <SolidColorBrush x:Key="TextControlBorderBrush" Color="#FF166534"/>
-        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#FF22C55E"/>
-        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#FF22C55E"/>
-
-        <!--input text-->
-        <SolidColorBrush x:Key="TextControlForeground" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#FF888888"/>
-        <SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="#FF166534"/>
-        <SolidColorBrush x:Key="TextControlHeaderForeground" Color="#FF22C55E"/>
-
-        <!--button-->
-        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#FF14532D"/>
-        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FF15803D"/>
-
-        <!--combobox-->
-        <SolidColorBrush x:Key="ComboBoxBackground" Color="#FF1A1A1A"/>
-        <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#FF222222"/>
-        <SolidColorBrush x:Key="ComboBoxForeground" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#FF166534"/>
-        <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#FF22C55E"/>
-        <SolidColorBrush x:Key="ComboBoxHeaderForeground" Color="#FF22C55E"/>
-
     </Page.Resources>
 
-    <Grid Background="#FF000000">
-        <Border
-            Width="340"
-            Padding="28"
-            Background="#FF0F0F0F"
-            CornerRadius="12"
-            BorderBrush="#FF166534"
-            BorderThickness="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center">
+    <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Border Width="340"
+                Padding="28"
+                Background="{StaticResource AppBackgroundBrush}"
+                CornerRadius="12"
+                BorderBrush="{StaticResource AppAccentBrush}"
+                BorderThickness="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
 
             <StackPanel Spacing="14">
-                <TextBlock
-                    Text="Register"
-                    FontSize="26"
-                    FontWeight="SemiBold"
-                    HorizontalAlignment="Center"
-                    Foreground="#FF22C55E"
-                    Margin="0,0,0,6"/>
+                <TextBlock Text="Register"
+                           FontSize="26"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource AppAccentBrush}"
+                           Margin="0,0,0,6"/>
 
-                <TextBox
-                    Header="Email"
-                    PlaceholderText="Email"
-                    BorderBrush="#FF166534"
-                    Foreground="White"
-                    Text="{Binding Email, Mode=TwoWay}"/>
+                <TextBox Header="Email"
+                         PlaceholderText="Email"
+                         Text="{Binding Email, Mode=TwoWay}"/>
 
-                <TextBox
-                    Header="Phone Number"
-                    PlaceholderText="Phone number (optional)"
-                    BorderBrush="#FF166534"
-                    Foreground="White"
-                    Text="{Binding PhoneNumber, Mode=TwoWay}"/>
+                <TextBox Header="Phone Number"
+                         PlaceholderText="Phone number"
+                         Text="{Binding PhoneNumber, Mode=TwoWay}"/>
 
-                <TextBox
-                    Header="Username"
-                    PlaceholderText="Username (optional)"
-                    BorderBrush="#FF166534"
-                    Foreground="White"
-                    Text="{Binding Username, Mode=TwoWay}"/>
+                <TextBox Header="Username"
+                         PlaceholderText="Username"
+                         Text="{Binding Username, Mode=TwoWay}"/>
 
-                <PasswordBox
-                    x:Name="PasswordBox"
-                    Header="Password"
-                    PlaceholderText="Password"
-                    BorderBrush="#FF166534"
-                    Foreground="White"
-                    PasswordChanged="PasswordBox_PasswordChanged"/>
+                <PasswordBox x:Name="PasswordBox"
+                             Header="Password"
+                             PlaceholderText="Password"
+                             PasswordChanged="PasswordBox_PasswordChanged"/>
 
-                <ComboBox
-                    Header="Role"
-                    PlaceholderText="Select Role"
-                    ItemsSource="{Binding RoleOptions}"
-                    SelectedItem="{Binding SelectedRole, Mode=TwoWay}"
-                    HorizontalAlignment="Stretch"
-                    BorderBrush="#FF166534"
-                    Foreground="White"/>
+                <ComboBox Header="Role"
+                          PlaceholderText="Select Role"
+                          ItemsSource="{Binding RoleOptions}"
+                          SelectedItem="{Binding SelectedRole, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch"/>
 
-                <Border Background="#44FF0000"
+                <Border Background="#11FF0000"
                         Padding="10"
                         CornerRadius="6"
                         Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
                     <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="#FFFF6B6B"/>
+                               Foreground="{StaticResource AppErrorBrush}"/>
                 </Border>
 
-                <Button
-                    Content="Register"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Center"
-                    Margin="0,4,0,0"
-                    Background="#FF166534"
-                    Foreground="White"
-                    BorderBrush="#FF166534"
-                    Command="{Binding RegisterCommand}"/>
+                <Button Content="Register"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Margin="0,4,0,0"
+                        Command="{Binding RegisterCommand}"/>
 
                 <TextBlock HorizontalAlignment="Center">
-                    <Run Text="Already have an account?" Foreground="#FFAAAAAA"/>
+                    <Run Text="Already have an account?" Foreground="{StaticResource AppTextSecondaryBrush}"/>
                     <Hyperlink Click="Login_Click">
-                        <Run Foreground="#FF22C55E">Login</Run>
+                        <Run Foreground="{StaticResource AppAccentBrush}">Login</Run>
                     </Hyperlink>
                 </TextBlock>
-
             </StackPanel>
-
         </Border>
     </Grid>
 </Page>
