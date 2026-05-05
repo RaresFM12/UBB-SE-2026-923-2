@@ -36,10 +36,9 @@ namespace UBB_SE_2026_923_2.Migrations
                     (5, N'Pharmacy', @TodayStart, DATEADD(HOUR,8,@TodayStart), N'SCHEDULED');
                 END
 
-                -- Substances
-                IF NOT EXISTS (SELECT 1 FROM dbo.Substances)
-                BEGIN
-                    INSERT INTO dbo.Substances (Name, LethalDose, Description) VALUES
+               -- Substances
+                INSERT INTO dbo.Substances (Name, LethalDose, Description)
+                SELECT Name, LethalDose, Description FROM (VALUES
                     (N'Ibuprofen',       3200.00, N'Anti-inflammatory pain reliever'),
                     (N'Paracetamol',     4000.00, N'Pain reliever and fever reducer'),
                     (N'Magnesium',       2500.00, N'Mineral supplement for muscle and nerve support'),
@@ -58,8 +57,9 @@ namespace UBB_SE_2026_923_2.Migrations
                     (N'Dexpanthenol',    5000.00, N'Skin protectant and moisturizer'),
                     (N'Vitamin D3',        50.00, N'Essential vitamin for bone health and immunity'),
                     (N'Xylometazoline',    10.00, N'Decongestant for nasal passages'),
-                    (N'Acetylcysteine',  3000.00, N'Mucolytic agent to clear mucus');
-                END
+                    (N'Acetylcysteine',  3000.00, N'Mucolytic agent to clear mucus')
+                ) AS src(Name, LethalDose, Description)
+                WHERE NOT EXISTS (SELECT 1 FROM dbo.Substances WHERE Name = src.Name);
 
                 -- Items (35 products explicitly mapped by ID)
                 IF NOT EXISTS (SELECT 1 FROM dbo.Items)
@@ -105,6 +105,35 @@ namespace UBB_SE_2026_923_2.Migrations
                     
                     SET IDENTITY_INSERT dbo.Items OFF;
                 END
+
+                -- ItemSubstances (link items to their active substances)
+                IF NOT EXISTS (SELECT 1 FROM dbo.ItemSubstances)
+                BEGIN
+                    INSERT INTO dbo.ItemSubstances (ItemId, SubstanceName, Concentration) VALUES
+                    (1,  N'Ibuprofen',      400.0),
+                    (2,  N'Paracetamol',    500.0),
+                    (3,  N'Magnesium',      150.0),
+                    (4,  N'Iron',            14.0),
+                    (5,  N'Vitamin C',     1000.0),
+                    (6,  N'Calcium',        500.0),
+                    (6,  N'Vitamin D3',      10.0),
+                    (7,  N'Omega 3',        500.0),
+                    (8,  N'Melatonin',        3.0),
+                    (9,  N'Probiotics',     100.0),
+                    (10, N'Zinc',            10.0),
+                    (14, N'Magnesium',      150.0),
+                    (15, N'Probiotics',     100.0),
+                    (16, N'Cetirizine',      10.0),
+                    (17, N'Loratadine',      10.0),
+                    (18, N'Loperamide',       2.0),
+                    (19, N'Simethicone',     40.0),
+                    (22, N'Diclofenac',      10.0),
+                    (23, N'Dexpanthenol',    50.0),
+                    (29, N'Vitamin D3',      10.0),
+                    (33, N'Xylometazoline',   0.1),
+                    (34, N'Acetylcysteine', 600.0);
+                END
+
 
                 -- Users (explicitly mapped by ID)
                 IF NOT EXISTS (SELECT 1 FROM dbo.Users)
