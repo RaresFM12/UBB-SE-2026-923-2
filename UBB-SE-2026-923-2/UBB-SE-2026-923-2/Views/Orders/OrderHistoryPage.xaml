@@ -11,66 +11,91 @@
     x:Name="PageRoot">
 
     <Page.Resources>
-        <Style TargetType="TextBlock" x:Key="ExpiredTextStyle">
-            <Setter Property="Foreground" Value="{StaticResource AppErrorBrush}"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-
-        <Style TargetType="Button" x:Key="ExpiredButtonStyle">
-            <Setter Property="Width" Value="100"/>
-            <Setter Property="Background" Value="{StaticResource AppErrorBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
-
-        <Style TargetType="TextBlock" x:Key="CompletedTextStyle">
-            <Setter Property="Foreground" Value="{StaticResource AppAccentBrush}"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-
-        <Style TargetType="TextBlock" x:Key="IncompletedTextStyle">
-            <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-
-        <Style TargetType="Button" x:Key="IncompletedButtonStyle">
-            <Setter Property="Width" Value="100"/>
-        </Style>
 
         <DataTemplate x:Key="CompletedTemplate" x:DataType="model:Order">
-            <Grid ColumnDefinitions="*, 2*, 2*, *, *, *">
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind IdString}" Style="{StaticResource CompletedTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind PickUpDateString}" Style="{StaticResource CompletedTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="{x:Bind ExpirationDateString}" Style="{StaticResource CompletedTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="Completed" Style="{StaticResource CompletedTextStyle}"/>
+            <Grid Padding="16" Background="{StaticResource AppSurfaceBrush}" CornerRadius="10" Margin="0,0,0,12" BorderBrush="{StaticResource AppAccentBrush}" BorderThickness="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind IdString}" FontSize="16" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="15" Margin="0,6,0,0">
+                        <TextBlock>
+                            <Run Text="Pick-up: " Foreground="{StaticResource AppTextSecondaryBrush}"/><Run Text="{x:Bind PickUpDateString}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="Expires: " Foreground="{StaticResource AppTextSecondaryBrush}"/><Run Text="{x:Bind ExpirationDateString}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                        </TextBlock>
+                        <TextBlock Text="Completed" Foreground="{StaticResource AppAccentBrush}" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </StackPanel>
             </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="ExpiredTemplate" x:DataType="model:Order">
-            <Grid ColumnDefinitions="*, 2*, 2*, *, *, *">
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind IdString}" Style="{StaticResource ExpiredTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind PickUpDateString}" Style="{StaticResource ExpiredTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="{x:Bind ExpirationDateString}" Style="{StaticResource ExpiredTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="Expired" Style="{StaticResource ExpiredTextStyle}"/>
-                <Button Grid.Row="0" Grid.Column="4" Content="Resubmit"
-                        Command="{Binding DataContext.ResubmitCommand, ElementName=PageRoot}"
-                        CommandParameter="{Binding}" Style="{StaticResource ExpiredButtonStyle}"/>
+            <Grid Padding="16" Background="{StaticResource AppSurfaceBrush}" CornerRadius="10" Margin="0,0,0,12" BorderBrush="{StaticResource AppErrorBrush}" BorderThickness="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind IdString}" FontSize="16" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="15" Margin="0,6,0,0">
+                        <TextBlock>
+                            <Run Text="Pick-up: " Foreground="{StaticResource AppTextSecondaryBrush}"/><Run Text="{x:Bind PickUpDateString}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="Expired: " Foreground="{StaticResource AppTextSecondaryBrush}"/><Run Text="{x:Bind ExpirationDateString}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                        </TextBlock>
+                        <TextBlock Text="Expired" Foreground="{StaticResource AppErrorBrush}" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Resubmit Order"
+                            Command="{Binding DataContext.ResubmitCommand, ElementName=PageRoot}"
+                            CommandParameter="{Binding}" 
+                            Background="{StaticResource AppErrorBrush}" 
+                            Foreground="White"/>
+                </StackPanel>
             </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="IncompletedTemplate" x:DataType="model:Order">
-            <Grid ColumnDefinitions="*, 2*, 2*, *, *, *">
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind IdString}" Style="{StaticResource IncompletedTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind PickUpDateString}" Style="{StaticResource IncompletedTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="{x:Bind ExpirationDateString}" Style="{StaticResource IncompletedTextStyle}"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="Incompleted" Style="{StaticResource IncompletedTextStyle}"/>
-                <Button Grid.Row="0" Grid.Column="4" Content="Cancel"
-                        Command="{Binding DataContext.CancelCommand, ElementName=PageRoot}"
-                        CommandParameter="{Binding}" Style="{StaticResource IncompletedButtonStyle}"
-                        Background="Transparent" Foreground="{StaticResource AppErrorBrush}" BorderBrush="{StaticResource AppErrorBrush}" BorderThickness="1"/>
-                <Button Grid.Row="0" Grid.Column="5" Content="Modify"
-                        Command="{Binding DataContext.GoToDetailPageCommand, ElementName=PageRoot}"
-                        CommandParameter="{Binding}" Style="{StaticResource IncompletedButtonStyle}"/>
+            <Grid Padding="16" Background="{StaticResource AppSurfaceBrush}" CornerRadius="10" Margin="0,0,0,12" BorderBrush="{StaticResource AppAccentBrush}" BorderThickness="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind IdString}" FontSize="16" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="15" Margin="0,6,0,0">
+                        <TextBlock>
+                            <Run Text="Pick-up: " Foreground="{StaticResource AppTextSecondaryBrush}"/><Run Text="{x:Bind PickUpDateString}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="Expires: " Foreground="{StaticResource AppTextSecondaryBrush}"/><Run Text="{x:Bind ExpirationDateString}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                        </TextBlock>
+                        <TextBlock Text="Incomplete (Pending)" Foreground="#D97706" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Button Content="Cancel Order"
+                            Command="{Binding DataContext.CancelCommand, ElementName=PageRoot}"
+                            CommandParameter="{Binding}" 
+                            Background="Transparent" 
+                            Foreground="{StaticResource AppErrorBrush}" 
+                            BorderBrush="{StaticResource AppErrorBrush}" 
+                            BorderThickness="1"/>
+                    <Button Content="Modify Order"
+                            Command="{Binding DataContext.GoToDetailPageCommand, ElementName=PageRoot}"
+                            CommandParameter="{Binding}"/>
+                </StackPanel>
             </Grid>
         </DataTemplate>
 
@@ -80,30 +105,43 @@
                                      IncompletedTemplate="{StaticResource IncompletedTemplate}"/>
     </Page.Resources>
 
-    <Grid Padding="100, 30, 100, 30" 
+    <Grid Padding="60, 30, 60, 30" 
           RowDefinitions="Auto, *"
-          ColumnDefinitions="*, Auto"
           Background="{StaticResource AppBackgroundBrush}">
 
-        <TextBlock Grid.Row="0"
-                   Grid.Column="0"
-                   Text="Your orders"
-                   FontSize="30"
-                   FontWeight="Bold"
-                   Foreground="{StaticResource AppAccentBrush}"/>
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-        <CheckBox Grid.Row="0"
-                  Grid.Column="1"
-                  Content="Only expired orders"
-                  IsChecked="{x:Bind ViewModel.IsExpiredCheckbox, Mode=TwoWay}"
-                  Foreground="{StaticResource AppTextPrimaryBrush}"/>
+            <TextBlock Grid.Column="0"
+                       Text="Your Orders"
+                       FontSize="30"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource AppAccentBrush}"
+                       VerticalAlignment="Center"/>
+
+            <CheckBox Grid.Column="1"
+                      Content="Show expired orders"
+                      IsChecked="{x:Bind ViewModel.IsExpiredCheckbox, Mode=TwoWay}"
+                      Foreground="{StaticResource AppTextPrimaryBrush}"
+                      VerticalAlignment="Center"/>
+        </Grid>
 
         <ListView Grid.Row="1"
-                  Grid.Column="0"
-                  Grid.ColumnSpan="2"
                   x:Name="OrderListView"
                   ItemsSource="{x:Bind ViewModel.OrderHistory}"
-                  ItemTemplateSelector="{StaticResource OrderTemplateSelector}">
+                  ItemTemplateSelector="{StaticResource OrderTemplateSelector}"
+                  SelectionMode="None">
+
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0"/>
+                </Style>
+            </ListView.ItemContainerStyle>
         </ListView>
 
     </Grid>
