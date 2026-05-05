@@ -24,6 +24,22 @@ namespace UBB_SE_2026_923_2.Migrations
                     SET IDENTITY_INSERT dbo.Staff OFF;
                 END
 
+                -- MedicalEvaluations
+                IF NOT EXISTS (SELECT 1 FROM dbo.MedicalEvaluations)
+                BEGIN
+                    INSERT INTO dbo.MedicalEvaluations (PatientId, Symptoms, MedicationsList, Notes, EvaluationDate, DoctorId) VALUES
+                    (N'PAT-001', N'Headache, fever, fatigue',        N'Panadol Extra',                    N'Patient advised to rest and hydrate',       '2026-04-10 09:00', 1),
+                    (N'PAT-002', N'Joint pain, swelling',            N'Nurofen Express',                  N'Referred for physiotherapy',                '2026-04-11 10:30', 1),
+                    (N'PAT-003', N'Nausea, abdominal pain',          N'Espumisan',                        N'Follow-up in 1 week',                       '2026-04-12 11:00', 2),
+                    (N'PAT-004', N'Shortness of breath, chest pain', N'None',                             N'Urgent cardiology referral',                '2026-04-13 08:00', 3),
+                    (N'PAT-005', N'Skin rash, itching',              N'Zyrtec',                           N'Allergy testing recommended',               '2026-04-14 14:00', 1),
+                    (N'PAT-006', N'Insomnia, anxiety',               N'Melatonin Sleep',                  N'Stress management counseling suggested',    '2026-04-15 15:30', 2),
+                    (N'PAT-007', N'Runny nose, sneezing',            N'Claritine, Olynth Nasal Spray',    N'Seasonal allergies, reassess in spring',    '2026-04-16 09:30', 3),
+                    (N'PAT-008', N'Back pain, muscle stiffness',     N'Voltaren Gel, Nurofen Express',    N'Advised to avoid heavy lifting',            '2026-04-17 11:00', 1),
+                    (N'PAT-009', N'Diarrhea, stomach cramps',        N'Imodium, Smecta',                  N'Dietary changes recommended',               '2026-04-18 10:00', 2),
+                    (N'PAT-010', N'Productive cough, mucus',         N'ACC 600',                          N'Follow-up if no improvement in 5 days',    '2026-04-19 13:00', 3);
+                END
+
                 -- Shifts
                 IF NOT EXISTS (SELECT 1 FROM dbo.Shifts)
                 BEGIN
@@ -61,7 +77,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 ) AS src(Name, LethalDose, Description)
                 WHERE NOT EXISTS (SELECT 1 FROM dbo.Substances WHERE Name = src.Name);
 
-                -- Items (35 products explicitly mapped by ID)
+                -- Items (36 products explicitly mapped by ID)
                 IF NOT EXISTS (SELECT 1 FROM dbo.Items)
                 BEGIN
                     SET IDENTITY_INSERT dbo.Items ON;
@@ -101,8 +117,9 @@ namespace UBB_SE_2026_923_2.Migrations
                     (32, N'Sterile Plasters',         12.50, N'first aid',    50, N'Urgo',         N'Assets/plasters.png',     100, N'Waterproof',          N'Assorted sizes of waterproof bandages',                 0),
                     (33, N'Olynth Nasal Spray',       16.50, N'cold and flu',  1, N'J&J',          N'Assets/olynth.png',        45, N'Decongestant',        N'Xylometazoline spray for unblocking the nose',           0),
                     (34, N'ACC 600',                  29.00, N'cold and flu', 10, N'Sandoz',       N'Assets/acc600.png',        30, N'Mucus Clearance',     N'Effervescent tablets for productive coughs',             0),
-                    (35, N'Theraflu Extra',           33.00, N'cold and flu', 10, N'GSK',          N'Assets/theraflu.png',      25, N'Severe Cold',         N'Hot liquid powder for severe cold symptoms',            10);
-                    
+                    (35, N'Theraflu Extra',           33.00, N'cold and flu', 10, N'GSK',          N'Assets/theraflu.png',      25, N'Severe Cold',         N'Hot liquid powder for severe cold symptoms',            10),
+                    (36, N'Paracetamol Generic', 9.99, N'pain relief', 16, N'Generic Pharma', N'Assets/paracetamol.png', 30, N'Generic', N'Generic paracetamol tablets', 0);
+
                     SET IDENTITY_INSERT dbo.Items OFF;
                 END
 
@@ -131,7 +148,8 @@ namespace UBB_SE_2026_923_2.Migrations
                     (23, N'Dexpanthenol',    50.0),
                     (29, N'Vitamin D3',      10.0),
                     (33, N'Xylometazoline',   0.1),
-                    (34, N'Acetylcysteine', 600.0);
+                    (34, N'Acetylcysteine', 600.0),
+                    (36, N'Paracetamol', 500.0);
                 END
                 
                 -- Adding item batches
@@ -185,7 +203,9 @@ namespace UBB_SE_2026_923_2.Migrations
                     (2, N'johndoe@test.com',     N'0711111111', N'hashed_pwd_john',  0, 0, N'johndoe',      N'Client',     1,  150, '1900-01-01', 28, 5, 0),
                     (3, N'janedoe@test.com',     N'0722222222', N'hashed_pwd_jane',  0, 0, N'janedoe',      N'Client',     0,   45, '2026-01-01', 28, 5, 0),
                     (4, N'house@hospital.local', N'0733333333', N'hashed_pwd_house', 0, 0, N'dr_house',     N'Doctor',     0,    0, '1900-01-01', 28, 5, 0),
-                    (5, N'jamie@hospital.local', N'0744444444', N'hashed_pwd_jamie', 0, 0, N'jamie_pharm',  N'Pharmacist', 0,    0, '1900-01-01', 28, 5, 0);
+                    (5, N'jamie@hospital.local', N'0744444444', N'hashed_pwd_jamie', 0, 0, N'jamie_pharm',  N'Pharmacist', 0,    0, '1900-01-01', 28, 5, 0),
+                    (6, N'paul@gmail.com', N'0744444444', N'abc123', 0, 1, N'paul',  N'Admin', 0,    0, '1900-01-01', 28, 5, 0),
+                    (7, N'paull@gmail.com', N'0744444445', N'abc123', 0, 0, N'Paul',  N'Client', 0,    0, '1900-01-01', 28, 5, 0);
                     
                     SET IDENTITY_INSERT dbo.Users OFF;
                 END
