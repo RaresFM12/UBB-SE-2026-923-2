@@ -190,17 +190,19 @@
 
             <StackPanel Grid.Row="2"
                         Orientation="Horizontal"
-                        Spacing="20"
+                        Spacing="30"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center">
 
                 <DatePicker Date="{x:Bind ViewModel.StartPeriodDate, Mode=TwoWay}"
                             Header="Start Date of Last Period"
+                            VerticalAlignment="Center"
                             DayFormat="{}{day.integer} ({dayofweek.abbreviated})"/>
 
                 <NumberBox Header="How much did your last period last:"
                            Value="{x:Bind ViewModel.PeriodLastsInput, Mode=TwoWay}"
-                           SpinButtonPlacementMode="Inline"
+                           SpinButtonPlacementMode="Compact"
+                           VerticalAlignment="Center"
                            SmallChange="1"
                            Minimum="1"
                            Maximum="9"
@@ -210,12 +212,13 @@
                            Maximum="45"
                            Header="How much does your average cycle last:"
                            Value="{x:Bind ViewModel.CycleDaysInput, Mode=TwoWay}"
-                           SpinButtonPlacementMode="Inline"
+                           SpinButtonPlacementMode="Compact"
+                           VerticalAlignment="Center"
                            SmallChange="1"
                            Width="160"/>
 
                 <StackPanel Orientation="Vertical"
-                            Spacing="10"
+                            Spacing="20"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center">
                     <RadioButtons Header="When do PMS symptoms appear:"
@@ -226,12 +229,15 @@
                         <RadioButton Content="7-14 days before period"/>
                     </RadioButtons>
                 </StackPanel>
+
             </StackPanel>
 
             <Button Grid.Row="3"
                     Command="{x:Bind ViewModel.CalculateCommand}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
+                    Padding="30,10"
+                    FontSize="16"
                     Content="CALCULATE"/>
 
             <StackPanel Grid.Row="4"
