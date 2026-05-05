@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UBB_SE_2026_923_2.Views.Orders.NonEditableOrderDetailPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -10,21 +9,16 @@
     mc:Ignorable="d">
 
     <Grid Padding="20"
-          ColumnDefinitions="*, Auto">
+          ColumnDefinitions="*, Auto"
+          Background="{StaticResource AppBackgroundBrush}">
 
         <ListView Grid.Row="0"
-              Grid.Column="0"
-              ItemsSource="{x:Bind ViewModel.OrderItems}">
+                  Grid.Column="0"
+                  ItemsSource="{x:Bind ViewModel.OrderItems}">
 
             <ListView.ItemTemplate>
-
-                <!-- defining the way items are presented 
-                in the list view of the bucket -->
                 <DataTemplate x:DataType="localModel:ItemDetail">
-
                     <Grid ColumnDefinitions="Auto, *, Auto">
-
-                        <!-- Thumbnail image (occupies the left half of the item view) -->
                         <Image Grid.Row="0"
                                Grid.Column="0"
                                Source="{x:Bind ItemThumbnailImagePath, Mode=OneTime}"
@@ -37,7 +31,8 @@
                                    Text="{x:Bind ItemDescription, Mode=OneTime}"
                                    VerticalAlignment="Center"
                                    FontWeight="Bold"
-                                   FontSize="15"/>
+                                   FontSize="15"
+                                   Foreground="{StaticResource AppTextPrimaryBrush}"/>
 
                         <StackPanel Grid.Row="0"
                                     Grid.Column="2"
@@ -46,46 +41,45 @@
                                     VerticalAlignment="Center"
                                     Spacing="10">
 
-                            <TextBlock Text="{x:Bind ItemQuantityString, Mode=OneTime}"/>
+                            <TextBlock Text="{x:Bind ItemQuantityString, Mode=OneTime}"
+                                       Foreground="{StaticResource AppTextPrimaryBrush}"/>
                             <TextBlock Text="{x:Bind ItemFinalPriceString, Mode=OneTime}"
-                                       FontWeight="Bold" Foreground="Red"/>
-
+                                       FontWeight="Bold" Foreground="{StaticResource AppErrorBrush}"/>
                         </StackPanel>
-
                     </Grid>
-
                 </DataTemplate>
-
             </ListView.ItemTemplate>
-
         </ListView>
-
 
         <ListView Grid.Row="0"
                   Grid.Column="1">
 
             <TextBlock Text="Total price:"
-                       FontSize="15"/>
+                       FontSize="15"
+                       Foreground="{StaticResource AppTextSecondaryBrush}"/>
             <TextBlock Text="{x:Bind ViewModel.TotalPriceString}"
                        FontSize="30"
                        FontWeight="Bold"
+                       Foreground="{StaticResource AppErrorBrush}"
                        Padding="15"/>
 
             <TextBlock Text="Order status:"
-                       FontSize="15"/>
+                       FontSize="15"
+                       Foreground="{StaticResource AppTextSecondaryBrush}"/>
             <TextBlock Text="{x:Bind ViewModel.StatusString}"
                        FontSize="30"
                        FontWeight="Bold"
+                       Foreground="{StaticResource AppTextPrimaryBrush}"
                        Padding="15"/>
 
             <TextBlock Text="Pick-up date:"
-                       FontSize="15"/>
+                       FontSize="15"
+                       Foreground="{StaticResource AppTextSecondaryBrush}"/>
             <TextBlock Text="{x:Bind ViewModel.PickUpDateString}"
                        FontSize="30"
                        FontWeight="Bold"
+                       Foreground="{StaticResource AppTextPrimaryBrush}"
                        Padding="15"/>
-
         </ListView>
-
     </Grid>
 </Page>

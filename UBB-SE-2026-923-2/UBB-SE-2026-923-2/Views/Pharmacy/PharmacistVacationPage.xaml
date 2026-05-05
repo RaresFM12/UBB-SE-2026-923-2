@@ -6,17 +6,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Page.Resources>
-        <SolidColorBrush x:Key="BgBrush" Color="#FF0B120D"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#FF0F1711"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#FFB7C2BA"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#FF166534"/>
-    </Page.Resources>
-
-    <Grid Background="{StaticResource BgBrush}" Padding="24">
-        <Border Background="{StaticResource CardBrush}"
-                BorderBrush="{StaticResource AccentBrush}"
+    <Grid Background="{StaticResource AppBackgroundBrush}" Padding="24">
+        <Border Background="{StaticResource AppSurfaceBrush}"
+                BorderBrush="{StaticResource AppAccentBrush}"
                 BorderThickness="1"
                 CornerRadius="14"
                 Padding="20"
@@ -25,30 +17,32 @@
                 VerticalAlignment="Top">
             <StackPanel Spacing="14">
                 <TextBlock Text="Pharmacist Vacation Window"
-                           Foreground="{StaticResource TextBrush}"
+                           Foreground="{StaticResource AppAccentBrush}"
                            FontSize="28"
                            FontWeight="SemiBold"/>
 
                 <TextBlock Text="Select a pharmacist and date range to add a VACATION shift."
-                           Foreground="{StaticResource MutedBrush}"
+                           Foreground="{StaticResource AppTextSecondaryBrush}"
                            TextWrapping="Wrap"/>
 
                 <ComboBox x:Name="PharmacistComboBox"
                           Header="Pharmacist"
                           PlaceholderText="Select pharmacist"
-                          DisplayMemberPath="displayName"/>
+                          DisplayMemberPath="displayName"
+                          HorizontalAlignment="Stretch"/>
 
                 <CalendarDatePicker x:Name="StartDatePicker"
-                                    Header="Start date"/>
+                                    Header="Start date"
+                                    HorizontalAlignment="Stretch"/>
 
                 <CalendarDatePicker x:Name="EndDatePicker"
-                                    Header="End date"/>
+                                    Header="End date"
+                                    HorizontalAlignment="Stretch"/>
 
                 <Button Content="Add Vacation Shift"
                         Click="AddVacationShift_Click"
-                        Background="{StaticResource AccentBrush}"
-                        Foreground="White"
-                        Padding="10"/>
+                        HorizontalAlignment="Stretch"
+                        Margin="0,10,0,0"/>
 
                 <InfoBar x:Name="StatusInfoBar"
                          IsOpen="False"

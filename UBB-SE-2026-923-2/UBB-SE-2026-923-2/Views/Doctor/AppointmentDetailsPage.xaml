@@ -6,20 +6,30 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="#FF0B120D" Padding="40">
-        <Border Background="#FF0F1711" BorderBrush="#FF166534" BorderThickness="1" 
-                CornerRadius="12" Padding="30" HorizontalAlignment="Center" VerticalAlignment="Center" Width="450">
+    <Grid Background="{StaticResource AppBackgroundBrush}" Padding="40">
+        <Border Background="{StaticResource AppSurfaceBrush}" 
+                BorderBrush="{StaticResource AppAccentBrush}" 
+                BorderThickness="1" 
+                CornerRadius="12" 
+                Padding="30" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center" 
+                Width="450">
             <StackPanel Spacing="20">
-                <TextBlock Text="Appointment Details" Foreground="White" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <TextBlock Text="Appointment Details" 
+                           Foreground="{StaticResource AppAccentBrush}" 
+                           FontSize="28" 
+                           FontWeight="SemiBold" 
+                           Margin="0,0,0,10"/>
 
                 <StackPanel Spacing="5">
-                    <TextBlock Text="Patient:" Foreground="#FFB7C2BA" FontSize="12"/>
-                    <TextBlock x:Name="PatientNameText" Foreground="White" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="Patient:" Foreground="{StaticResource AppTextSecondaryBrush}" FontSize="12"/>
+                    <TextBlock x:Name="PatientNameText" Foreground="{StaticResource AppTextPrimaryBrush}" FontSize="18" FontWeight="Bold"/>
                 </StackPanel>
 
                 <StackPanel Spacing="5">
-                    <TextBlock Text="Doctor:" Foreground="#FFB7C2BA" FontSize="12"/>
-                    <TextBlock x:Name="DoctorNameText" Foreground="White" FontSize="18"/>
+                    <TextBlock Text="Doctor:" Foreground="{StaticResource AppTextSecondaryBrush}" FontSize="12"/>
+                    <TextBlock x:Name="DoctorNameText" Foreground="{StaticResource AppTextPrimaryBrush}" FontSize="18"/>
                 </StackPanel>
 
                 <Grid>
@@ -29,28 +39,33 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Spacing="5">
-                        <TextBlock Text="Date:" Foreground="#FFB7C2BA" FontSize="12"/>
-                        <TextBlock x:Name="DateText" Foreground="White" FontSize="16"/>
+                        <TextBlock Text="Date:" Foreground="{StaticResource AppTextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock x:Name="DateText" Foreground="{StaticResource AppTextPrimaryBrush}" FontSize="16"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Spacing="5">
-                        <TextBlock Text="Time:" Foreground="#FFB7C2BA" FontSize="12"/>
-                        <TextBlock x:Name="TimeText" Foreground="White" FontSize="16"/>
+                        <TextBlock Text="Time:" Foreground="{StaticResource AppTextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock x:Name="TimeText" Foreground="{StaticResource AppTextPrimaryBrush}" FontSize="16"/>
                     </StackPanel>
                 </Grid>
 
                 <StackPanel Spacing="5" Margin="0,10,0,20">
-                    <TextBlock Text="Current Status:" Foreground="#FFB7C2BA" FontSize="12"/>
-                    <TextBlock x:Name="StatusText" Foreground="#FF166534" FontSize="18" FontWeight="SemiBold"/>
+                    <TextBlock Text="Current Status:" Foreground="{StaticResource AppTextSecondaryBrush}" FontSize="12"/>
+                    <TextBlock x:Name="StatusText" Foreground="{StaticResource AppAccentBrush}" FontSize="18" FontWeight="SemiBold"/>
                 </StackPanel>
 
-                <Button Content="Mark as Finished" Click="FinishBtn_Click" 
-                        Background="#2E7D32" Foreground="White" 
-                        HorizontalAlignment="Stretch" Padding="10"/>
+                <Button Content="Mark as Finished" 
+                        Click="FinishBtn_Click" 
+                        HorizontalAlignment="Stretch"/>
 
-                <Button Content="Go Back" Click="GoBack_Click" 
-                        Background="Transparent" BorderBrush="#FFB7C2BA" BorderThickness="1" 
-                        Foreground="White" HorizontalAlignment="Stretch" Margin="0,10,0,0"/>
+                <Button Content="Go Back" 
+                        Click="GoBack_Click" 
+                        Background="Transparent" 
+                        BorderBrush="{StaticResource AppAccentBrush}" 
+                        BorderThickness="1" 
+                        Foreground="{StaticResource AppAccentBrush}" 
+                        HorizontalAlignment="Stretch" 
+                        Margin="0,10,0,0"/>
 
                 <InfoBar x:Name="StatusInfoBar" IsOpen="False" IsClosable="True" Margin="0,10,0,0"/>
             </StackPanel>

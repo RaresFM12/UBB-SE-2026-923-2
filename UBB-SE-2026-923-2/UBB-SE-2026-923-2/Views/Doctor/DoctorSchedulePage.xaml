@@ -10,15 +10,9 @@
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter"/>
-
-        <SolidColorBrush x:Key="BgBrush" Color="#FF0B120D"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#FF0F1711"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#FFB7C2BA"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#FF166534"/>
     </Page.Resources>
 
-    <Grid Padding="24" RowSpacing="14" Background="{StaticResource BgBrush}">
+    <Grid Padding="24" RowSpacing="14" Background="{StaticResource AppBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -34,7 +28,7 @@
 
             <TextBlock Grid.Column="0"
                        Text="Doctor Schedule"
-                       Foreground="{StaticResource TextBrush}"
+                       Foreground="{StaticResource AppTextPrimaryBrush}"
                        FontSize="44"
                        FontWeight="SemiBold"
                        VerticalAlignment="Center"/>
@@ -44,7 +38,8 @@
                       ItemsSource="{Binding Doctors}"
                       SelectedItem="{Binding SelectedDoctor, Mode=TwoWay}"
                       DisplayMemberPath="DoctorName"
-                      PlaceholderText="Select doctor"/>
+                      PlaceholderText="Select doctor"
+                      HorizontalAlignment="Stretch"/>
         </Grid>
 
         <Grid Grid.Row="1" ColumnSpacing="10">
@@ -61,32 +56,23 @@
 
             <Button Grid.Column="0"
                     Content="{Binding PreviousButtonText}"
-                    Command="{Binding PreviousDayCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
+                    Command="{Binding PreviousDayCommand}"/>
 
             <Button Grid.Column="1"
                     Content="Today"
-                    Command="{Binding TodayCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
+                    Command="{Binding TodayCommand}"/>
 
             <Button Grid.Column="2"
                     Content="{Binding NextButtonText}"
-                    Command="{Binding NextDayCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
+                    Command="{Binding NextDayCommand}"/>
 
             <Button x:Name="DateButton"
                     Grid.Column="3"
                     Content="{Binding SelectedDateText}"
                     Margin="8,0,0,0"
                     Background="Transparent"
-                    Foreground="{StaticResource TextBrush}"
-                    BorderBrush="{StaticResource AccentBrush}"
+                    Foreground="{StaticResource AppAccentBrush}"
+                    BorderBrush="{StaticResource AppAccentBrush}"
                     BorderThickness="1"
                     Padding="12,6">
                 <Button.Flyout>
@@ -101,35 +87,26 @@
             <Button Grid.Column="4"
                     Content="Daily"
                     Command="{Binding DailyModeCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"
                     Margin="8,0,0,0"/>
 
             <Button Grid.Column="5"
                     Content="Weekly"
-                    Command="{Binding WeeklyModeCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
+                    Command="{Binding WeeklyModeCommand}"/>
 
             <Button Grid.Column="6"
                     Content="Refresh"
-                    Command="{Binding RefreshCommand}"
-                    Background="{StaticResource AccentBrush}"
-                    Foreground="White"
-                    BorderBrush="{StaticResource AccentBrush}"/>
+                    Command="{Binding RefreshCommand}"/>
         </Grid>
 
         <Border Grid.Row="2"
-                Background="#332A1204"
-                BorderBrush="{StaticResource AccentBrush}"
+                Background="{StaticResource AppSurfaceBrush}"
+                BorderBrush="{StaticResource AppErrorBrush}"
                 BorderThickness="1"
                 CornerRadius="14"
                 Padding="14,10"
                 Visibility="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
             <TextBlock Text="{Binding ErrorMessage}"
-                       Foreground="#FFFFB4B4"
+                       Foreground="{StaticResource AppErrorBrush}"
                        TextWrapping="Wrap"/>
         </Border>
 
@@ -139,11 +116,11 @@
                         Spacing="8"
                         Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock Text="No appointments or shifts for this period."
-                           Foreground="{StaticResource TextBrush}"
+                           Foreground="{StaticResource AppTextPrimaryBrush}"
                            FontSize="20"
                            HorizontalAlignment="Center"/>
                 <TextBlock Text="Try Previous/Next, click date, or Refresh."
-                           Foreground="{StaticResource MutedBrush}"
+                           Foreground="{StaticResource AppTextSecondaryBrush}"
                            HorizontalAlignment="Center"/>
             </StackPanel>
 
@@ -151,15 +128,15 @@
                           HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="16">
                     <TextBlock Text="Appointments"
-                               Foreground="{StaticResource TextBrush}"
+                               Foreground="{StaticResource AppAccentBrush}"
                                FontSize="20"
                                FontWeight="SemiBold"/>
 
                     <ItemsControl ItemsSource="{Binding Appointments}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{StaticResource CardBrush}"
-                                        BorderBrush="{StaticResource AccentBrush}"
+                                <Border Background="{StaticResource AppSurfaceBrush}"
+                                        BorderBrush="{StaticResource AppAccentBrush}"
                                         BorderThickness="1"
                                         CornerRadius="14"
                                         Padding="12"
@@ -172,24 +149,21 @@
 
                                         <StackPanel Spacing="4">
                                             <TextBlock Text="{Binding DateText}"
-                                                       Foreground="{StaticResource MutedBrush}"
+                                                       Foreground="{StaticResource AppTextSecondaryBrush}"
                                                        FontSize="28"/>
                                             <TextBlock Text="{Binding TimeRangeText}"
-                                                       Foreground="{StaticResource TextBrush}"
+                                                       Foreground="{StaticResource AppTextPrimaryBrush}"
                                                        FontSize="24"
                                                        FontWeight="SemiBold"/>
                                             <TextBlock Text="{Binding Status}"
-                                                       Foreground="{StaticResource MutedBrush}"
+                                                       Foreground="{StaticResource AppTextSecondaryBrush}"
                                                        FontSize="20"/>
                                         </StackPanel>
 
                                         <Button Grid.Column="1"
                                                 Content="Details"
                                                 Click="DetailsButton_Click"
-                                                VerticalAlignment="Center"
-                                                Background="{StaticResource AccentBrush}"
-                                                Foreground="White"
-                                                BorderBrush="{StaticResource AccentBrush}"/>
+                                                VerticalAlignment="Center"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -197,32 +171,32 @@
                     </ItemsControl>
 
                     <TextBlock Text="Shifts"
-                               Foreground="{StaticResource TextBrush}"
+                               Foreground="{StaticResource AppAccentBrush}"
                                FontSize="20"
                                FontWeight="SemiBold"/>
 
                     <ItemsControl ItemsSource="{Binding Shifts}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{StaticResource CardBrush}"
-                                        BorderBrush="{StaticResource AccentBrush}"
+                                <Border Background="{StaticResource AppSurfaceBrush}"
+                                        BorderBrush="{StaticResource AppAccentBrush}"
                                         BorderThickness="1"
                                         CornerRadius="14"
                                         Padding="12"
                                         Margin="0,0,0,12">
                                     <StackPanel Spacing="4">
                                         <TextBlock Text="{Binding DateText}"
-                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Foreground="{StaticResource AppTextSecondaryBrush}"
                                                    FontSize="28"/>
                                         <TextBlock Text="{Binding TimeRangeText}"
-                                                   Foreground="{StaticResource TextBrush}"
+                                                   Foreground="{StaticResource AppTextPrimaryBrush}"
                                                    FontSize="24"
                                                    FontWeight="SemiBold"/>
                                         <TextBlock Text="{Binding LocationText}"
-                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Foreground="{StaticResource AppTextSecondaryBrush}"
                                                    FontSize="20"/>
                                         <TextBlock Text="{Binding Status}"
-                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Foreground="{StaticResource AppTextSecondaryBrush}"
                                                    FontSize="18"/>
                                     </StackPanel>
                                 </Border>
