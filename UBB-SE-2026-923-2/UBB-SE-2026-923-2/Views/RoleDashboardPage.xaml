@@ -4,13 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Page.Resources>
-        <SolidColorBrush x:Key="BgBrush" Color="#FF000000"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="#FF0F0F0F"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#FF131313"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#FF166534"/>
-
-
         <Style x:Key="MenuItemContainerStyle" TargetType="ListViewItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Padding" Value="0"/>
@@ -20,16 +13,15 @@
         </Style>
     </Page.Resources>
 
-    <Grid Background="{StaticResource BgBrush}">
+    <Grid Background="{StaticResource AppBackgroundBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Left menu -->
         <Border Grid.Column="0"
-                Background="{StaticResource SurfaceBrush}"
-                BorderBrush="{StaticResource AccentBrush}"
+                Background="{StaticResource AppSurfaceBrush}"
+                BorderBrush="{StaticResource AppAccentBrush}"
                 BorderThickness="0,0,1,0">
             <Grid Padding="16" RowSpacing="16">
                 <Grid.RowDefinitions>
@@ -40,11 +32,11 @@
 
                 <StackPanel>
                     <TextBlock Text="DevCore Hospital"
-                               Foreground="{StaticResource TextBrush}"
+                               Foreground="{StaticResource AppTextPrimaryBrush}"
                                FontSize="24"
                                FontWeight="SemiBold"/>
                     <TextBlock x:Name="RoleText"
-                               Foreground="{StaticResource AccentBrush}"
+                               Foreground="{StaticResource AppAccentBrush}"
                                Margin="0,6,0,0"/>
                 </StackPanel>
 
@@ -60,8 +52,8 @@
                         <DataTemplate>
                             <Border CornerRadius="10"
                                     Padding="0"
-                                    Background="{StaticResource CardBrush}"
-                                    BorderBrush="{StaticResource AccentBrush}"
+                                    Background="{StaticResource AppBackgroundBrush}"
+                                    BorderBrush="{StaticResource AppAccentBrush}"
                                     BorderThickness="1">
                                 <Grid Height="56">
                                     <Grid.ColumnDefinitions>
@@ -70,12 +62,12 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Border Grid.Column="0"
-                                            Background="{StaticResource AccentBrush}"
+                                            Background="{StaticResource AppAccentBrush}"
                                             CornerRadius="10,0,0,10"/>
 
                                     <TextBlock Grid.Column="1"
                                                Text="{Binding Title}"
-                                               Foreground="{StaticResource TextBrush}"
+                                               Foreground="{StaticResource AppTextPrimaryBrush}"
                                                FontSize="16"
                                                VerticalAlignment="Center"
                                                Margin="12,0,0,0"/>
@@ -88,14 +80,11 @@
                 <Button Grid.Row="2"
                         Content="Logout"
                         Click="ChangeRole_Click"
-                        Background="{StaticResource AccentBrush}"
-                        Foreground="White"
-                        BorderBrush="{StaticResource AccentBrush}"/>
+                        HorizontalAlignment="Stretch"/>
             </Grid>
         </Border>
 
-        <!-- Right content -->
-        <Grid Grid.Column="1" Background="#FF111111">
+        <Grid Grid.Column="1" Background="{StaticResource AppBackgroundBrush}">
             <Frame x:Name="ContentFrame"/>
         </Grid>
     </Grid>

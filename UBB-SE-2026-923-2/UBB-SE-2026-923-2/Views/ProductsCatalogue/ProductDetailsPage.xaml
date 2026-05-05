@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="UBB_SE_2026_923_2.Views.ProductsCatalogue.ProductDetailsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,14 +12,16 @@
         <converters:StockLevelToColorConverter x:Key="StockColorConverter" />
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </Page.Resources>
-    
-    <Grid Background="#F5F7F6">
+
+    <Grid Background="{StaticResource AppBackgroundBrush}">
         <Grid HorizontalAlignment="Center"
               VerticalAlignment="Center"
               MaxWidth="900"
               Padding="10">
 
-            <Border Background="White"
+            <Border Background="{StaticResource AppSurfaceBrush}"
+                    BorderBrush="{StaticResource AppAccentBrush}"
+                    BorderThickness="1"
                     CornerRadius="12"
                     Padding="35">
                 <Grid>
@@ -29,14 +30,12 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Top section: image + key info -->
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="300"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Product image – source is set in code-behind after navigation -->
                         <Image x:Name="ProductImage"
                                Width="250"
                                Height="250"
@@ -44,134 +43,110 @@
 
                         <StackPanel Grid.Column="1" Spacing="10">
 
-                            <!-- Name -->
                             <TextBlock x:Name="ProductName"
                                        Text="{Binding ProductName}"
                                        FontSize="26"
                                        FontWeight="Bold"
-                                       Foreground="#389e7c"/>
+                                       Foreground="{StaticResource AppAccentBrush}"/>
 
-                            <!-- Price row -->
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <TextBlock x:Name="FinalPrice"
                                            Text="{Binding FinalPriceDisplay}"
                                            FontWeight="Bold"
                                            FontSize="18"
-                                           Foreground="#389e7c"/>
-                                <!--
-                                    BUG FIX: OldPrice and Discount labels now bind to ViewModel
-                                    properties that return empty string when there is no discount,
-                                    so they naturally collapse to zero width instead of showing
-                                    "0.00 lei" with a strikethrough when no discount exists.
-                                -->
+                                           Foreground="{StaticResource AppAccentBrush}"/>
+
                                 <TextBlock x:Name="OldPrice"
                                            Text="{Binding OldPriceDisplay}"
-                                           Foreground="Gray"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"
                                            TextDecorations="Strikethrough"/>
+
                                 <TextBlock x:Name="Discount"
                                            Text="{Binding DiscountDisplay}"
-                                           Foreground="Red"/>
+                                           Foreground="{StaticResource AppErrorBrush}"/>
                             </StackPanel>
 
-                            <!-- Stock status -->
                             <TextBlock Text="{Binding StockText}" 
                                        Foreground="{Binding CurrentStockLevel, Converter={StaticResource StockColorConverter}}" />
 
-                            <!-- Quantity + Add to Basket -->
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <TextBox x:Name="QuantityBox"
                                          Width="80"
                                          PlaceholderText="Qty"
-                                         PlaceholderForeground="#389e7c"
-                                         Foreground="#389e7c"
-                                         Background="White"
-                                         BorderBrush="#389e7c"
                                          IsEnabled="{Binding IsQuantityBoxEnabled}"/>
 
                                 <Button x:Name="AddToCartButton"
                                         Content="Add to Basket"
                                         Click="OnAddToBasket"
-                                        Background="#389e7c"
-                                        Foreground="White"
-                                        IsEnabled="{Binding IsAddToCartEnabled}">
-                                    <Button.Resources>
-                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#389e7c"/>
-                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#2c7d62"/>
-                                    </Button.Resources>
-                                </Button>
+                                        IsEnabled="{Binding IsAddToCartEnabled}"/>
                             </StackPanel>
 
-                            <!-- Stock alert subscription -->
                             <Button x:Name="StockAlertButton"
                                     Content="{Binding StockAlertButtonText}"
                                     Click="OnToggleStockAlert"
                                     Background="#FF9800"
                                     Foreground="White"
                                     Visibility="{Binding IsStockAlertButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <Button.Resources>
-                                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FF9800"/>
-                                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#E68900"/>
-                                </Button.Resources>
                             </Button>
 
-                            <!-- Validation error -->
                             <TextBlock x:Name="ErrorText"
                                        Text="{Binding ErrorText}"
-                                       Foreground="Red"/>
+                                       Foreground="{StaticResource AppErrorBrush}"/>
                         </StackPanel>
                     </Grid>
 
-                    <!-- Details section -->
                     <StackPanel Grid.Row="1"
                                 Margin="0,30,0,0"
                                 Spacing="10"
-                                Background="#E8F5E9"
+                                Background="{StaticResource AppBackgroundBrush}"
+                                BorderBrush="{StaticResource AppAccentBrush}"
+                                BorderThickness="1"
                                 Padding="20"
                                 CornerRadius="10">
 
                         <TextBlock Text="Description"
                                    FontSize="20"
                                    FontWeight="Bold"
-                                   Foreground="#389e7c"/>
+                                   Foreground="{StaticResource AppAccentBrush}"/>
 
                         <TextBlock x:Name="DescriptionText"
                                    Text="{Binding DescriptionText}"
-                                   Foreground="#389e7c"
+                                   Foreground="{StaticResource AppTextPrimaryBrush}"
                                    TextWrapping="Wrap"/>
 
                         <TextBlock>
-                            <Run Text="Label: " FontWeight="Bold" Foreground="#389e7c"/>
+                            <Run Text="Label: " FontWeight="Bold" Foreground="{StaticResource AppAccentBrush}"/>
                             <Run x:Name="LabelText"
                                  Text="{Binding LabelText}"
-                                 Foreground="#389e7c"/>
+                                 Foreground="{StaticResource AppTextPrimaryBrush}"/>
                         </TextBlock>
 
                         <TextBlock>
-                            <Run Text="Producer: " FontWeight="Bold" Foreground="#389e7c"/>
+                            <Run Text="Producer: " FontWeight="Bold" Foreground="{StaticResource AppAccentBrush}"/>
                             <Run x:Name="ProducerText"
                                  Text="{Binding ProducerText}"
-                                 Foreground="#389e7c"/>
+                                 Foreground="{StaticResource AppTextPrimaryBrush}"/>
                         </TextBlock>
 
                         <TextBlock>
-                            <Run Text="Active substances: " FontWeight="Bold" Foreground="#389e7c"/>
+                            <Run Text="Active substances: " FontWeight="Bold" Foreground="{StaticResource AppAccentBrush}"/>
                             <Run x:Name="SubstancesText"
                                  Text="{Binding SubstancesText}"
-                                 Foreground="#389e7c"/>
+                                 Foreground="{StaticResource AppTextPrimaryBrush}"/>
                         </TextBlock>
 
                         <TextBlock>
-                            <Run Text="Category: " FontWeight="Bold" Foreground="#389e7c"/>
+                            <Run Text="Category: " FontWeight="Bold" Foreground="{StaticResource AppAccentBrush}"/>
                             <Run x:Name="CategoryText"
                                  Text="{Binding CategoryText}"
-                                 Foreground="#389e7c"/>
+                                 Foreground="{StaticResource AppTextPrimaryBrush}"/>
                         </TextBlock>
 
                         <TextBlock>
-                            <Run Text="Number of pills: " FontWeight="Bold" Foreground="#389e7c"/>
+                            <Run Text="Number of pills: " FontWeight="Bold" Foreground="{StaticResource AppAccentBrush}"/>
                             <Run x:Name="PillsText"
                                  Text="{Binding PillsText}"
-                                 Foreground="#389e7c"/>
+                                 Foreground="{StaticResource AppTextPrimaryBrush}"/>
                         </TextBlock>
 
                     </StackPanel>

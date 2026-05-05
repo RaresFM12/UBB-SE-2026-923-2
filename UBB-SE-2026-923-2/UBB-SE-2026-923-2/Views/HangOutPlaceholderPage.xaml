@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:UBB_SE_2026_923_2.Models"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{StaticResource AppBackgroundBrush}">
 
     <Grid Padding="24">
         <Grid.ColumnDefinitions>
@@ -15,7 +15,7 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0" Spacing="16" Margin="0,0,24,0">
-            <TextBlock Text="Create Hangout" FontSize="28" FontWeight="SemiBold"/>
+            <TextBlock Text="Create Hangout" FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource AppAccentBrush}"/>
 
             <ComboBox Header="Select Doctor" 
                       ItemsSource="{x:Bind ViewModel.Doctors}"
@@ -31,36 +31,36 @@
 
             <ComboBox Header="Max Participants" ItemsSource="{x:Bind ViewModel.MaximumParticipantsOptions}" SelectedItem="{x:Bind ViewModel.MaximumParticipants, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
 
-            <Button Content="Create Hangout" Command="{x:Bind ViewModel.CreateCommand}" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Stretch"/>
+            <Button Content="Create Hangout" Command="{x:Bind ViewModel.CreateCommand}" HorizontalAlignment="Stretch"/>
 
-            <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Foreground="#EF4444" TextWrapping="Wrap"/>
-            <TextBlock Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}" Foreground="#22C55E" TextWrapping="Wrap"/>
+            <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Foreground="{StaticResource AppErrorBrush}" TextWrapping="Wrap"/>
+            <TextBlock Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}" Foreground="{StaticResource AppAccentBrush}" TextWrapping="Wrap"/>
         </StackPanel>
 
         <StackPanel Grid.Column="1" Spacing="16">
-            <TextBlock Text="Available Staff Hangouts" FontSize="28" FontWeight="SemiBold"/>
+            <TextBlock Text="Available Staff Hangouts" FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource AppAccentBrush}"/>
 
             <ListView ItemsSource="{x:Bind ViewModel.Hangouts, Mode=OneWay}" SelectionMode="None">
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="models:Hangout">
-                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                        <Border Background="{StaticResource AppSurfaceBrush}" BorderBrush="{StaticResource AppAccentBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="{x:Bind Title}" FontSize="20" FontWeight="Bold"/>
-                                    <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Bind Title}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                                    <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap" Foreground="{StaticResource AppTextSecondaryBrush}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
-                                        <TextBlock Text="{x:Bind FormattedDate}"/>
-                                        <TextBlock Text="{x:Bind ParticipantList.Count}"/>
-                                        <TextBlock Text="/"/>
-                                        <TextBlock Text="{x:Bind MaxParticipants}"/>
-                                        <TextBlock Text="Participants"/>
+                                        <TextBlock Text="{x:Bind FormattedDate}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                                        <TextBlock Text="{x:Bind ParticipantList.Count}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                                        <TextBlock Text="/" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                                        <TextBlock Text="{x:Bind MaxParticipants}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                                        <TextBlock Text="Participants" Foreground="{StaticResource AppTextPrimaryBrush}"/>
                                     </StackPanel>
                                 </StackPanel>
-                                <Button Grid.Column="1" Content="Join" VerticalAlignment="Center" Click="Join_Click" Tag="{x:Bind HangoutID}" Style="{StaticResource AccentButtonStyle}"/>
+                                <Button Grid.Column="1" Content="Join" VerticalAlignment="Center" Click="Join_Click" Tag="{x:Bind HangoutID}"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
