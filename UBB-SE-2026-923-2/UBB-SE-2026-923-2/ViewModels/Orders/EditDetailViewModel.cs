@@ -12,7 +12,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 {
     public class EditDetailViewModel : INotifyPropertyChanged
     {
-        private OrderService orderService;
+        private IOrderService orderService;
 
         public ICommand RemoveItemCommand { get; set; }
 
@@ -38,10 +38,10 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
         public int ShownOrderID;
 
-        public EditDetailViewModel(OrderService oService, int orderID)
+        public EditDetailViewModel(IOrderService _orderService, int orderID)
         {
             ShownOrderID = orderID;
-            orderService = oService;
+            orderService = _orderService;
             RemoveItemCommand = new RelayCommandWithOneParameter<ItemDetail>(RemoveItemFromUnsavedOrder);
 
             Order currOrder = orderService.OrdersRepository.GetOrder(orderID);
@@ -51,7 +51,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
             foreach (KeyValuePair<int, Tuple<int, float>> orderEntry in itemsInOrder)
             {
-                Item currentItem = oService.ItemsRepository.GetItemById(orderEntry.Key);
+                Item currentItem = orderService.ItemsRepository.GetItemById(orderEntry.Key);
                 string alteredImagePath = currentItem.ImagePath;
 
                 string itemDescription = currentItem.Name + " - " + currentItem.Producer;

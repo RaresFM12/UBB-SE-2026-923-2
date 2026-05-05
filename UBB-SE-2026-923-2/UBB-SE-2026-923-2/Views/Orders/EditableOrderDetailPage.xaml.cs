@@ -10,7 +10,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 {
     public sealed partial class EditableOrderDetailPage : Page
     {
-        private OrderService orderService;
+        private IOrderService orderService;
         public EditDetailViewModel ViewModel { get; set; }
 
         public EditableOrderDetailPage()
@@ -20,7 +20,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            var extractedArgs = (Tuple<OrderService, int>)e.Parameter;
+            var extractedArgs = (Tuple<IOrderService, int>)e.Parameter;
 
             orderService = extractedArgs.Item1;
             int orderID = extractedArgs.Item2;
