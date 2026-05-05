@@ -12,7 +12,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 {
     public class ModifyIncompleteOrderViewModel : INotifyPropertyChanged
     {
-        private OrderService orderService;
+        private IOrderService orderService;
         public int CurrentOrderID;
 
         public ICommand RemoveItemCommand { get; set; }
@@ -31,13 +31,13 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
         }
         public DateOnly PickUpDate { get; private set; }
 
-        public ModifyIncompleteOrderViewModel(OrderService orderServ, int currOrderID)
+        public ModifyIncompleteOrderViewModel(IOrderService _orderService, int currOrderID)
         {
-            orderService = orderServ;
+            orderService = _orderService;
             CurrentOrderID = currOrderID;
             RemoveItemCommand = new RelayCommandWithOneParameter<ItemDetail>(RemoveItemFromUnsavedOrder);
 
-            Order currOrder = orderServ.OrdersRepository.GetOrder(CurrentOrderID);
+            Order currOrder = orderService.OrdersRepository.GetOrder(CurrentOrderID);
             Dictionary<int, Tuple<int, float>> itemsInOrder = currOrder.ItemQuantitiesWithFinalPrice;
             OrderItems = new ();
             float totalPrice = 0f;

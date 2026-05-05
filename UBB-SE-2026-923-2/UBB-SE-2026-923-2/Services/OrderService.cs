@@ -430,6 +430,7 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             AddOrderWithItems(ActiveUser.Id, chosenPickUpDate, itemInformationForOrder);
+            OrdersRepository.RemoveOrder(orderIdToResubmit); // or mark as no longer expired
         }
 
         public void CancelOrder(int orderIdToCancel)

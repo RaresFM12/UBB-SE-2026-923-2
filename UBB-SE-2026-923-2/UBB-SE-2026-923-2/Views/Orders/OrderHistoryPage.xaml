@@ -11,11 +11,8 @@
     mc:Ignorable="d"
     x:Name="PageRoot">
 
-    
-    <Page.Resources>
 
-        <!-- I'll try to use Style for practice -->
-        <!-- TODO how to share style setters between styles? -->
+    <Page.Resources>
         <Style TargetType="TextBlock" x:Key="ExpiredTextStyle">
             <Setter Property="Foreground" Value="Red"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -44,8 +41,6 @@
         </Style>
 
 
-        <!-- declaring data templates for every status
-        and a data template selector at the end -->
         <DataTemplate x:Key="CompletedTemplate" x:DataType="model:Order">
 
             <Grid ColumnDefinitions="*, 2*, 2*, *, *, *">
