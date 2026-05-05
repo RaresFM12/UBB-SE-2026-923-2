@@ -111,12 +111,12 @@ namespace UBB_SE_2026_923_2.Migrations
                 BEGIN
                     SET IDENTITY_INSERT dbo.Users ON;
                     
-                    INSERT INTO dbo.Users (Id, Email, PhoneNumber, PasswordHash, IsDisabled, IsAdmin, Username, [Role], DiscountNotifications, LoyaltyPoints) VALUES
-                    (1, N'admin@pharmacy.local', N'0700000000', N'hashed_pwd_admin', 0, 1, N'admin_super',  N'Admin',      1, 1000),
-                    (2, N'johndoe@test.com',     N'0711111111', N'hashed_pwd_john',  0, 0, N'johndoe',      N'Client',     1,  150),
-                    (3, N'janedoe@test.com',     N'0722222222', N'hashed_pwd_jane',  0, 0, N'janedoe',      N'Client',     0,   45),
-                    (4, N'house@hospital.local', N'0733333333', N'hashed_pwd_house', 0, 0, N'dr_house',     N'Doctor',     0,    0),
-                    (5, N'jamie@hospital.local', N'0744444444', N'hashed_pwd_jamie', 0, 0, N'jamie_pharm',  N'Pharmacist', 0,    0);
+                    INSERT INTO dbo.Users (Id, Email, PhoneNumber, PasswordHash, IsDisabled, IsAdmin, Username, [Role], DiscountNotifications, LoyaltyPoints, StartPeriodDate, CycleDays, PeriodLasts, PremenstrualSyndromeOption) VALUES
+                    (1, N'admin@pharmacy.local', N'0700000000', N'hashed_pwd_admin', 0, 1, N'admin_super',  N'Admin',      1, 1000, '1900-01-01', 28, 5, 0),
+                    (2, N'johndoe@test.com',     N'0711111111', N'hashed_pwd_john',  0, 0, N'johndoe',      N'Client',     1,  150, '1900-01-01', 28, 5, 0),
+                    (3, N'janedoe@test.com',     N'0722222222', N'hashed_pwd_jane',  0, 0, N'janedoe',      N'Client',     0,   45, '2026-01-01', 28, 5, 0),
+                    (4, N'house@hospital.local', N'0733333333', N'hashed_pwd_house', 0, 0, N'dr_house',     N'Doctor',     0,    0, '1900-01-01', 28, 5, 0),
+                    (5, N'jamie@hospital.local', N'0744444444', N'hashed_pwd_jamie', 0, 0, N'jamie_pharm',  N'Pharmacist', 0,    0, '1900-01-01', 28, 5, 0);
                     
                     SET IDENTITY_INSERT dbo.Users OFF;
                 END
