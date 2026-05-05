@@ -6,18 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <SolidColorBrush x:Key="BgBrush" Color="#FF0B120D"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#FF0F1711"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#FFB7C2BA"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#FF166534"/>
-    </UserControl.Resources>
+    <Grid Background="{StaticResource AppBackgroundBrush}" Padding="24">
 
-    <Grid Background="{StaticResource BgBrush}" Padding="24">
-
-        <Border Background="{StaticResource CardBrush}"
-                BorderBrush="{StaticResource AccentBrush}"
+        <Border Background="{StaticResource AppSurfaceBrush}"
+                BorderBrush="{StaticResource AppAccentBrush}"
                 BorderThickness="1"
                 CornerRadius="12"
                 Padding="20"
@@ -27,7 +19,7 @@
 
             <StackPanel Spacing="15">
                 <TextBlock Text="Programare Tură Nouă"
-                           Foreground="{StaticResource TextBrush}"
+                           Foreground="{StaticResource AppAccentBrush}"
                            FontSize="24" 
                            FontWeight="SemiBold"
                            Margin="0,0,0,10"/>
@@ -35,13 +27,11 @@
                 <ComboBox x:Name="EmployeeComboBox"
                           Header="Personal medical"
                           PlaceholderText="Alege angajatul"
-                          HorizontalAlignment="Stretch"
-                          Foreground="{StaticResource TextBrush}"/>
+                          HorizontalAlignment="Stretch"/>
 
                 <CalendarDatePicker x:Name="ShiftDatePicker"
                                     Header="Data calendaristică"
-                                    HorizontalAlignment="Stretch"
-                                    Foreground="{StaticResource TextBrush}"/>
+                                    HorizontalAlignment="Stretch"/>
 
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
@@ -50,20 +40,15 @@
                     </Grid.ColumnDefinitions>
 
                     <TimePicker x:Name="StartTimePicker" Header="Start" 
-                                Grid.Column="0" HorizontalAlignment="Stretch" 
-                                Foreground="{StaticResource TextBrush}"/>
+                                Grid.Column="0" HorizontalAlignment="Stretch"/>
 
                     <TimePicker x:Name="EndTimePicker" Header="Final" 
-                                Grid.Column="1" HorizontalAlignment="Stretch" 
-                                Foreground="{StaticResource TextBrush}"/>
+                                Grid.Column="1" HorizontalAlignment="Stretch"/>
                 </Grid>
 
                 <Button Content="Confirmă Tura"
                         Click="SaveShift_Click"
-                        Background="{StaticResource AccentBrush}"
-                        Foreground="White"
                         HorizontalAlignment="Stretch"
-                        Padding="10"
                         Margin="0,10,0,0"/>
 
                 <InfoBar x:Name="StatusInfoBar" IsOpen="False" IsClosable="True" Margin="0,10,0,0"/>

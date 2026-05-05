@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Name="RootPage"
     x:Class="UBB_SE_2026_923_2.Views.ProductsCatalogue.CatalogPage"
@@ -14,47 +13,53 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Page.Resources>
 
-    <Grid Padding="20" Background="#F5F7F6">
+    <Grid Padding="20" Background="{StaticResource AppBackgroundBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="#E8F5E9" CornerRadius="10" Padding="10" Margin="0,0,15,0">
+        <Border Grid.Column="0" 
+                Background="{StaticResource AppSurfaceBrush}" 
+                BorderBrush="{StaticResource AppAccentBrush}" 
+                BorderThickness="1" 
+                CornerRadius="10" 
+                Padding="10" 
+                Margin="0,0,15,0">
             <ScrollViewer>
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Sort By" FontWeight="Bold" Margin="0,10,0,0" Foreground="#389e7c"/>
+                    <TextBlock Text="Sort By" FontWeight="Bold" Margin="0,10,0,0" Foreground="{StaticResource AppAccentBrush}"/>
                     <ComboBox ItemsSource="{Binding SortOptions}" 
                               SelectedItem="{Binding SelectedSortOption, Mode=TwoWay}" 
-                              Foreground="#389e7c" BorderBrush="#389e7c" HorizontalAlignment="Stretch"/>
+                              HorizontalAlignment="Stretch"/>
 
                     <ComboBox ItemsSource="{Binding SortDirections}" 
                               SelectedItem="{Binding SelectedSortDirection, Mode=TwoWay}" 
-                              Foreground="#389e7c" BorderBrush="#389e7c" HorizontalAlignment="Stretch"/>
+                              HorizontalAlignment="Stretch"/>
 
-                    <TextBlock Text="Categories" FontWeight="Bold" Margin="0,10,0,0" Foreground="#389e7c"/>
-                    <CheckBox Content="Medicine" IsChecked="{Binding FilterMedicine, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <CheckBox Content="Supplements" IsChecked="{Binding FilterSupplements, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <CheckBox Content="Wellness" IsChecked="{Binding FilterWellness, Mode=TwoWay}" Foreground="#389e7c"/>
+                    <TextBlock Text="Categories" FontWeight="Bold" Margin="0,10,0,0" Foreground="{StaticResource AppAccentBrush}"/>
+                    <CheckBox Content="Medicine" IsChecked="{Binding FilterMedicine, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="Supplements" IsChecked="{Binding FilterSupplements, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="Wellness" IsChecked="{Binding FilterWellness, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
 
-                    <TextBlock Text="Price" FontWeight="Bold" Margin="0,10,0,0" Foreground="#389e7c"/>
-                    <CheckBox Content="0 - 49 lei" IsChecked="{Binding FilterPrice0_49, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <CheckBox Content="50 - 99 lei" IsChecked="{Binding FilterPrice50_99, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <CheckBox Content="100 - 199 lei" IsChecked="{Binding FilterPrice100_199, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <CheckBox Content="200 - 499 lei" IsChecked="{Binding FilterPrice200_499, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <CheckBox Content="500+ lei" IsChecked="{Binding FilterPrice500Plus, Mode=TwoWay}" Foreground="#389e7c"/>
+                    <TextBlock Text="Price" FontWeight="Bold" Margin="0,10,0,0" Foreground="{StaticResource AppAccentBrush}"/>
+                    <CheckBox Content="0 - 49 lei" IsChecked="{Binding FilterPrice0_49, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="50 - 99 lei" IsChecked="{Binding FilterPrice50_99, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="100 - 199 lei" IsChecked="{Binding FilterPrice100_199, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="200 - 499 lei" IsChecked="{Binding FilterPrice200_499, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="500+ lei" IsChecked="{Binding FilterPrice500Plus, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
 
-                    <TextBlock Text="Stock" FontWeight="Bold" Margin="0,10,0,0" Foreground="#389e7c"/>
-                    <RadioButton Content="All" GroupName="StockGroup" IsChecked="{Binding IsStockAll, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <RadioButton Content="In Stock" GroupName="StockGroup" IsChecked="{Binding IsStockIn, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <RadioButton Content="Low Stock" GroupName="StockGroup" IsChecked="{Binding IsStockLow, Mode=TwoWay}" Foreground="#389e7c"/>
+                    <TextBlock Text="Stock" FontWeight="Bold" Margin="0,10,0,0" Foreground="{StaticResource AppAccentBrush}"/>
+                    <RadioButton Content="All" GroupName="StockGroup" IsChecked="{Binding IsStockAll, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <RadioButton Content="In Stock" GroupName="StockGroup" IsChecked="{Binding IsStockIn, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <RadioButton Content="Low Stock" GroupName="StockGroup" IsChecked="{Binding IsStockLow, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
 
-                    <TextBlock Text="Discount" FontWeight="Bold" Margin="0,10,0,0" Foreground="#389e7c"/>
-                    <RadioButton Content="All" GroupName="DiscountGroup" IsChecked="{Binding IsDiscountAll, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <RadioButton Content="Discounted" GroupName="DiscountGroup" IsChecked="{Binding IsDiscountYes, Mode=TwoWay}" Foreground="#389e7c"/>
-                    <RadioButton Content="Non-discounted" GroupName="DiscountGroup" IsChecked="{Binding IsDiscountNo, Mode=TwoWay}" Foreground="#389e7c"/>
+                    <TextBlock Text="Discount" FontWeight="Bold" Margin="0,10,0,0" Foreground="{StaticResource AppAccentBrush}"/>
+                    <RadioButton Content="All" GroupName="DiscountGroup" IsChecked="{Binding IsDiscountAll, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <RadioButton Content="Discounted" GroupName="DiscountGroup" IsChecked="{Binding IsDiscountYes, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <RadioButton Content="Non-discounted" GroupName="DiscountGroup" IsChecked="{Binding IsDiscountNo, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
 
-                    <Button Content="Apply Filters" Command="{Binding ApplyFiltersCommand}" Background="#389e7c" Foreground="White" HorizontalAlignment="Stretch"/>
+                    <Button Content="Apply Filters" Command="{Binding ApplyFiltersCommand}" HorizontalAlignment="Stretch"/>
                 </StackPanel>
             </ScrollViewer>
         </Border>
@@ -67,13 +72,13 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Margin="10,10,0,10" Spacing="10" Orientation="Horizontal">
-                <TextBox Width="300" Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search products..." Foreground="#389e7c" BorderBrush="#389e7c" Background="White"/>
-                <Button Content="Search" Command="{Binding SearchCommand}" Background="#389e7c" Foreground="White"/>
+                <TextBox Width="300" Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search products..."/>
+                <Button Content="Search" Command="{Binding SearchCommand}"/>
             </StackPanel>
 
             <ScrollViewer Grid.Row="1">
                 <StackPanel>
-                    <TextBlock Text="{Binding EmptyMessage}" Foreground="Gray" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                    <TextBlock Text="{Binding EmptyMessage}" Foreground="{StaticResource AppTextSecondaryBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" 
                                Visibility="{Binding IsEmptyMessageVisible, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,20,0,0"/>
 
                     <ItemsControl ItemsSource="{Binding Products}">
@@ -85,22 +90,23 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Click="OnProductClicked" Background="Transparent" BorderThickness="0" Padding="0">
-                                    <Border Width="220" Margin="10" Padding="10" CornerRadius="10" Background="White" BorderBrush="#DDDDDD" BorderThickness="1">
+                                    <Border Width="220" Margin="10" Padding="10" CornerRadius="10" Background="{StaticResource AppSurfaceBrush}" BorderBrush="{StaticResource AppAccentBrush}" BorderThickness="1">
                                         <StackPanel Spacing="8">
                                             <Image Source="{Binding Image}" Height="120" Stretch="UniformToFill"/>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="#389e7c" TextWrapping="WrapWholeWords"/>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}" TextWrapping="WrapWholeWords"/>
 
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <TextBlock Text="{Binding FinalPriceDisplay}" Foreground="#389e7c" FontWeight="Bold"/>
-                                                <TextBlock Text="{Binding OldPriceDisplay}" Foreground="Gray" TextDecorations="Strikethrough" Opacity="{Binding DiscountOpacity}"/>
-                                                <TextBlock Text="{Binding DiscountDisplay}" Foreground="Red" Opacity="{Binding DiscountOpacity}"/>
+                                                <TextBlock Text="{Binding FinalPriceDisplay}" Foreground="{StaticResource AppAccentBrush}" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding OldPriceDisplay}" Foreground="{StaticResource AppTextSecondaryBrush}" TextDecorations="Strikethrough" Opacity="{Binding DiscountOpacity}"/>
+                                                <TextBlock Text="{Binding DiscountDisplay}" Foreground="{StaticResource AppErrorBrush}" Opacity="{Binding DiscountOpacity}"/>
                                             </StackPanel>
 
                                             <TextBlock Text="{Binding StockText}" Foreground="{Binding StockColor}" FontSize="12"/>
 
-                                            <Button Content="Add to Cart" Background="#389e7c" Foreground="White" 
+                                            <Button Content="Add to Cart" 
                                                     Command="{Binding DataContext.AddToCartCommand, ElementName=RootPage}" 
-                                                    CommandParameter="{Binding}" IsEnabled="{Binding CanAddToCart}" />
+                                                    CommandParameter="{Binding}" IsEnabled="{Binding CanAddToCart}" 
+                                                    HorizontalAlignment="Stretch"/>
                                         </StackPanel>
                                     </Border>
                                 </Button>
@@ -111,10 +117,11 @@
             </ScrollViewer>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="0,20,0,0">
-                <Button Content="Previous" Command="{Binding PreviousPageCommand}" Foreground="#389e7c" Background="White" BorderBrush="#389e7c" BorderThickness="1"/>
-                <TextBlock Text="{Binding PageText}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#389e7c"/>
-                <Button Content="Next" Command="{Binding NextPageCommand}" Foreground="#389e7c" Background="White" BorderBrush="#389e7c" BorderThickness="1"/>
+                <Button Content="Previous" Command="{Binding PreviousPageCommand}" Background="Transparent" Foreground="{StaticResource AppAccentBrush}" BorderBrush="{StaticResource AppAccentBrush}" BorderThickness="1"/>
+                <TextBlock Text="{Binding PageText}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource AppAccentBrush}"/>
+                <Button Content="Next" Command="{Binding NextPageCommand}" Background="Transparent" Foreground="{StaticResource AppAccentBrush}" BorderBrush="{StaticResource AppAccentBrush}" BorderThickness="1"/>
             </StackPanel>
         </Grid>
     </Grid>
 </Page>
+

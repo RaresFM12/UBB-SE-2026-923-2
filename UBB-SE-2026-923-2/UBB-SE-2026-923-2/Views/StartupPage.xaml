@@ -2,7 +2,12 @@
     x:Class="UBB_SE_2026_923_2.Views.StartupPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid>
-        <TextBlock Text="Startup OK" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+    <Grid Background="{StaticResource AppBackgroundBrush}">
+        <TextBlock Text="Startup OK" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center"
+                   Foreground="{StaticResource AppTextPrimaryBrush}"/>
     </Grid>
 </Page>
+
