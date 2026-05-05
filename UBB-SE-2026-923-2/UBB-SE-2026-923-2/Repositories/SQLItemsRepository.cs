@@ -116,13 +116,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 .Include(i => i.ItemSubstanceEntries)
                 .Include(i => i.ItemBatchEntries)
                 .ToList();
-
-            foreach (var item in items)
-            {
-                ProjectIntoLegacyDictionaries(item);
-            }
-
-            return items;
+            return items.Select(i => ProjectIntoLegacyDictionaries(i)).ToList();
         }
 
         public List<Item> GetItemsByName(string name)
@@ -134,13 +128,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 .Include(i => i.ItemBatchEntries)
                 .Where(i => i.Name == name)
                 .ToList();
-
-            foreach (var item in items)
-            {
-                ProjectIntoLegacyDictionaries(item);
-            }
-
-            return items;
+            return items.Select(i => ProjectIntoLegacyDictionaries(i)).ToList();
         }
 
         public void UpdateItemById(Item newItem)

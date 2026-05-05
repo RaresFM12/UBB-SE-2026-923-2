@@ -9,7 +9,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 {
     public sealed partial class ResubmitOrderPage : Page
     {
-        private OrderService orderService;
+        private IOrderService orderService;
         private ResubmitOrderViewModel viewModel;
 
         public ResubmitOrderPage()
@@ -19,7 +19,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            var extractedArgs = (Tuple<OrderService, int>)e.Parameter;
+            var extractedArgs = (Tuple<IOrderService, int>)e.Parameter;
 
             orderService = extractedArgs.Item1;
             int orderID = extractedArgs.Item2;

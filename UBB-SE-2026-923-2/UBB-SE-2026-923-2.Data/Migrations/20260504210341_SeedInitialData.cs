@@ -24,6 +24,22 @@ namespace UBB_SE_2026_923_2.Migrations
                     SET IDENTITY_INSERT dbo.Staff OFF;
                 END
 
+                -- MedicalEvaluations
+                IF NOT EXISTS (SELECT 1 FROM dbo.MedicalEvaluations)
+                BEGIN
+                    INSERT INTO dbo.MedicalEvaluations (PatientId, Symptoms, MedicationsList, Notes, EvaluationDate, DoctorId) VALUES
+                    (N'PAT-001', N'Headache, fever, fatigue',        N'Panadol Extra',                    N'Patient advised to rest and hydrate',       '2026-04-10 09:00', 1),
+                    (N'PAT-002', N'Joint pain, swelling',            N'Nurofen Express',                  N'Referred for physiotherapy',                '2026-04-11 10:30', 1),
+                    (N'PAT-003', N'Nausea, abdominal pain',          N'Espumisan',                        N'Follow-up in 1 week',                       '2026-04-12 11:00', 2),
+                    (N'PAT-004', N'Shortness of breath, chest pain', N'None',                             N'Urgent cardiology referral',                '2026-04-13 08:00', 3),
+                    (N'PAT-005', N'Skin rash, itching',              N'Zyrtec',                           N'Allergy testing recommended',               '2026-04-14 14:00', 1),
+                    (N'PAT-006', N'Insomnia, anxiety',               N'Melatonin Sleep',                  N'Stress management counseling suggested',    '2026-04-15 15:30', 2),
+                    (N'PAT-007', N'Runny nose, sneezing',            N'Claritine, Olynth Nasal Spray',    N'Seasonal allergies, reassess in spring',    '2026-04-16 09:30', 3),
+                    (N'PAT-008', N'Back pain, muscle stiffness',     N'Voltaren Gel, Nurofen Express',    N'Advised to avoid heavy lifting',            '2026-04-17 11:00', 1),
+                    (N'PAT-009', N'Diarrhea, stomach cramps',        N'Imodium, Smecta',                  N'Dietary changes recommended',               '2026-04-18 10:00', 2),
+                    (N'PAT-010', N'Productive cough, mucus',         N'ACC 600',                          N'Follow-up if no improvement in 5 days',    '2026-04-19 13:00', 3);
+                END
+
                 -- Shifts
                 IF NOT EXISTS (SELECT 1 FROM dbo.Shifts)
                 BEGIN
@@ -36,10 +52,9 @@ namespace UBB_SE_2026_923_2.Migrations
                     (5, N'Pharmacy', @TodayStart, DATEADD(HOUR,8,@TodayStart), N'SCHEDULED');
                 END
 
-                -- Substances
-                IF NOT EXISTS (SELECT 1 FROM dbo.Substances)
-                BEGIN
-                    INSERT INTO dbo.Substances (Name, LethalDose, Description) VALUES
+               -- Substances
+                INSERT INTO dbo.Substances (Name, LethalDose, Description)
+                SELECT Name, LethalDose, Description FROM (VALUES
                     (N'Ibuprofen',       3200.00, N'Anti-inflammatory pain reliever'),
                     (N'Paracetamol',     4000.00, N'Pain reliever and fever reducer'),
                     (N'Magnesium',       2500.00, N'Mineral supplement for muscle and nerve support'),
@@ -58,10 +73,11 @@ namespace UBB_SE_2026_923_2.Migrations
                     (N'Dexpanthenol',    5000.00, N'Skin protectant and moisturizer'),
                     (N'Vitamin D3',        50.00, N'Essential vitamin for bone health and immunity'),
                     (N'Xylometazoline',    10.00, N'Decongestant for nasal passages'),
-                    (N'Acetylcysteine',  3000.00, N'Mucolytic agent to clear mucus');
-                END
+                    (N'Acetylcysteine',  3000.00, N'Mucolytic agent to clear mucus')
+                ) AS src(Name, LethalDose, Description)
+                WHERE NOT EXISTS (SELECT 1 FROM dbo.Substances WHERE Name = src.Name);
 
-                -- Items (35 products explicitly mapped by ID)
+                -- Items (36 products explicitly mapped by ID)
                 IF NOT EXISTS (SELECT 1 FROM dbo.Items)
                 BEGIN
                     SET IDENTITY_INSERT dbo.Items ON;
@@ -101,9 +117,80 @@ namespace UBB_SE_2026_923_2.Migrations
                     (32, N'Sterile Plasters',         12.50, N'first aid',    50, N'Urgo',         N'Assets/plasters.png',     100, N'Waterproof',          N'Assorted sizes of waterproof bandages',                 0),
                     (33, N'Olynth Nasal Spray',       16.50, N'cold and flu',  1, N'J&J',          N'Assets/olynth.png',        45, N'Decongestant',        N'Xylometazoline spray for unblocking the nose',           0),
                     (34, N'ACC 600',                  29.00, N'cold and flu', 10, N'Sandoz',       N'Assets/acc600.png',        30, N'Mucus Clearance',     N'Effervescent tablets for productive coughs',             0),
-                    (35, N'Theraflu Extra',           33.00, N'cold and flu', 10, N'GSK',          N'Assets/theraflu.png',      25, N'Severe Cold',         N'Hot liquid powder for severe cold symptoms',            10);
-                    
+                    (35, N'Theraflu Extra',           33.00, N'cold and flu', 10, N'GSK',          N'Assets/theraflu.png',      25, N'Severe Cold',         N'Hot liquid powder for severe cold symptoms',            10),
+                    (36, N'Paracetamol Generic', 9.99, N'pain relief', 16, N'Generic Pharma', N'Assets/paracetamol.png', 30, N'Generic', N'Generic paracetamol tablets', 0);
+
                     SET IDENTITY_INSERT dbo.Items OFF;
+                END
+
+                -- ItemSubstances (link items to their active substances)
+                IF NOT EXISTS (SELECT 1 FROM dbo.ItemSubstances)
+                BEGIN
+                    INSERT INTO dbo.ItemSubstances (ItemId, SubstanceName, Concentration) VALUES
+                    (1,  N'Ibuprofen',      400.0),
+                    (2,  N'Paracetamol',    500.0),
+                    (3,  N'Magnesium',      150.0),
+                    (4,  N'Iron',            14.0),
+                    (5,  N'Vitamin C',     1000.0),
+                    (6,  N'Calcium',        500.0),
+                    (6,  N'Vitamin D3',      10.0),
+                    (7,  N'Omega 3',        500.0),
+                    (8,  N'Melatonin',        3.0),
+                    (9,  N'Probiotics',     100.0),
+                    (10, N'Zinc',            10.0),
+                    (14, N'Magnesium',      150.0),
+                    (15, N'Probiotics',     100.0),
+                    (16, N'Cetirizine',      10.0),
+                    (17, N'Loratadine',      10.0),
+                    (18, N'Loperamide',       2.0),
+                    (19, N'Simethicone',     40.0),
+                    (22, N'Diclofenac',      10.0),
+                    (23, N'Dexpanthenol',    50.0),
+                    (29, N'Vitamin D3',      10.0),
+                    (33, N'Xylometazoline',   0.1),
+                    (34, N'Acetylcysteine', 600.0),
+                    (36, N'Paracetamol', 500.0);
+                END
+                
+                -- Adding item batches
+                IF NOT EXISTS (SELECT 1 FROM dbo.ItemBatches)
+                BEGIN
+                    INSERT INTO dbo.ItemBatches (ItemId, ExpirationDate, NumberOfPacks) VALUES
+                    (1,  '2027-01-01', 40),
+                    (2,  '2027-01-01', 35),
+                    (3,  '2027-01-01', 25),
+                    (4,  '2027-01-01', 18),
+                    (5,  '2027-01-01', 50),
+                    (6,  '2027-01-01', 22),
+                    (7,  '2027-01-01', 14),
+                    (8,  '2027-01-01', 12),
+                    (9,  '2027-01-01', 16),
+                    (10, '2027-01-01', 28),
+                    (11, '2027-01-01', 20),
+                    (12, '2027-01-01', 17),
+                    (13, '2027-01-01', 30),
+                    (14, '2027-01-01', 19),
+                    (15, '2027-01-01', 21),
+                    (16, '2027-01-01', 40),
+                    (17, '2027-01-01', 35),
+                    (18, '2027-01-01', 50),
+                    (19, '2027-01-01', 60),
+                    (20, '2027-01-01', 45),
+                    (21, '2027-01-01', 30),
+                    (22, '2027-01-01', 25),
+                    (23, '2027-01-01', 40),
+                    (24, '2027-01-01', 55),
+                    (25, '2027-01-01', 20),
+                    (26, '2027-01-01', 15),
+                    (27, '2027-01-01', 15),
+                    (28, '2027-01-01', 22),
+                    (29, '2027-01-01', 80),
+                    (30, '2027-01-01', 40),
+                    (31, '2027-01-01', 30),
+                    (32, '2027-01-01', 100),
+                    (33, '2027-01-01', 45),
+                    (34, '2027-01-01', 30),
+                    (35, '2027-01-01', 25);
                 END
 
                 -- Users (explicitly mapped by ID)
@@ -111,12 +198,14 @@ namespace UBB_SE_2026_923_2.Migrations
                 BEGIN
                     SET IDENTITY_INSERT dbo.Users ON;
                     
-                    INSERT INTO dbo.Users (Id, Email, PhoneNumber, PasswordHash, IsDisabled, IsAdmin, Username, [Role], DiscountNotifications, LoyaltyPoints) VALUES
-                    (1, N'admin@pharmacy.local', N'0700000000', N'hashed_pwd_admin', 0, 1, N'admin_super',  N'Admin',      1, 1000),
-                    (2, N'johndoe@test.com',     N'0711111111', N'hashed_pwd_john',  0, 0, N'johndoe',      N'Client',     1,  150),
-                    (3, N'janedoe@test.com',     N'0722222222', N'hashed_pwd_jane',  0, 0, N'janedoe',      N'Client',     0,   45),
-                    (4, N'house@hospital.local', N'0733333333', N'hashed_pwd_house', 0, 0, N'dr_house',     N'Doctor',     0,    0),
-                    (5, N'jamie@hospital.local', N'0744444444', N'hashed_pwd_jamie', 0, 0, N'jamie_pharm',  N'Pharmacist', 0,    0);
+                    INSERT INTO dbo.Users (Id, Email, PhoneNumber, PasswordHash, IsDisabled, IsAdmin, Username, [Role], DiscountNotifications, LoyaltyPoints, StartPeriodDate, CycleDays, PeriodLasts, PremenstrualSyndromeOption) VALUES
+                    (1, N'admin@pharmacy.local', N'0700000000', N'hashed_pwd_admin', 0, 1, N'admin_super',  N'Admin',      1, 1000, '1900-01-01', 28, 5, 0),
+                    (2, N'johndoe@test.com',     N'0711111111', N'hashed_pwd_john',  0, 0, N'johndoe',      N'Client',     1,  150, '1900-01-01', 28, 5, 0),
+                    (3, N'janedoe@test.com',     N'0722222222', N'hashed_pwd_jane',  0, 0, N'janedoe',      N'Client',     0,   45, '2026-01-01', 28, 5, 0),
+                    (4, N'house@hospital.local', N'0733333333', N'hashed_pwd_house', 0, 0, N'dr_house',     N'Doctor',     0,    0, '1900-01-01', 28, 5, 0),
+                    (5, N'jamie@hospital.local', N'0744444444', N'hashed_pwd_jamie', 0, 0, N'jamie_pharm',  N'Pharmacist', 0,    0, '1900-01-01', 28, 5, 0),
+                    (6, N'paul@gmail.com', N'0744444444', N'abc123', 0, 1, N'paul',  N'Admin', 0,    0, '1900-01-01', 28, 5, 0),
+                    (7, N'paull@gmail.com', N'0744444445', N'abc123', 0, 0, N'Paul',  N'Client', 0,    0, '1900-01-01', 28, 5, 0);
                     
                     SET IDENTITY_INSERT dbo.Users OFF;
                 END

@@ -66,7 +66,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             if (PickUpDateSelector.SelectedDates.Count > 0)
             {
-                DateTimeOffset selectedDate = PickUpDateSelector.SelectedDates[0];
+                DateTimeOffset selectedDate = PickUpDateSelector.SelectedDates[PickUpDateSelector.SelectedDates.Count - 1];
 
                 if (viewModel.PlaceOrderCommand.CanExecute(selectedDate))
                 {

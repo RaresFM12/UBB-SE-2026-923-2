@@ -10,7 +10,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 {
     public sealed partial class ModifyIncompleteOrderPage : Page
     {
-        private OrderService orderService;
+        private IOrderService orderService;
         public ModifyIncompleteOrderViewModel ViewModel { get; set; }
 
         public ModifyIncompleteOrderPage()
@@ -20,7 +20,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            var extractedArgs = (Tuple<OrderService, int>)e.Parameter;
+            var extractedArgs = (Tuple<IOrderService, int>)e.Parameter;
 
             orderService = extractedArgs.Item1;
             int orderID = extractedArgs.Item2;
@@ -32,10 +32,10 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
         private void SetPickUpDate(object sender, RoutedEventArgs e)
         {
-            DateTimeOffset chosenPickUpDate = new System.DateTimeOffset(
-                ViewModel.PickUpDate,
-                new TimeOnly(12, 0),
-                new TimeSpan(12, 0, 0));
+            PickUpDateSelector.MinDate = new DateTimeOffset(DateTime.Now.Date.AddDays(1));
+            DateTimeOffset chosenPickUpDate = new DateTimeOffset(
+                ViewModel.PickUpDate.ToDateTime(new TimeOnly(12, 0)),
+                new TimeSpan(0, 0, 0));
             PickUpDateSelector.SelectedDates.Add(chosenPickUpDate);
         }
 
@@ -43,11 +43,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             if (PickUpDateSelector.SelectedDates.Count == 0)
             {
-                DateTimeOffset chosenPickUpDate = new System.DateTimeOffset(
-                    ViewModel.PickUpDate,
-                    new TimeOnly(12, 0),
-                    new TimeSpan(12, 0, 0));
-                PickUpDateSelector.SelectedDates.Add(chosenPickUpDate);
+                PickUpDateSelector.SelectedDates.Add(PickUpDateSelector.MinDate);
             }
         }
 
@@ -65,7 +61,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
                 updatedQuantities.Add(entry.ItemID, new Tuple<int, float>(entry.ItemQuantity, entry.ItemFinalPrice));
             }
 
-            DateOnly selectedDate = DateOnly.FromDateTime(PickUpDateSelector.SelectedDates[0].Date);
+            DateOnly selectedDate = DateOnly.FromDateTime(PickUpDateSelector.SelectedDates[PickUpDateSelector.SelectedDates.Count - 1].Date);
 
             try
             {
