@@ -8,5 +8,6 @@ namespace UBB_SE_2026_923_2.Repositories
         IReadOnlyList<Shift> GetAllShifts();
         void AddShift(Shift newShift);
         void UpdateShiftStatus(int shiftId, ShiftStatus status);
+        void UpdateShiftStaffId(int shiftId, int newStaffId);
     }
 }

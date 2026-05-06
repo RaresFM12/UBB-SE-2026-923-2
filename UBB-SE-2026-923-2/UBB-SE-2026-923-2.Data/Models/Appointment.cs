@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -20,6 +21,12 @@ namespace UBB_SE_2026_923_2.Models
         public string Location { get; set; } = string.Empty;
 
         public string Notes { get; set; } = string.Empty;
+
+        // External patient identifier supplied by the Patient Management team.
+        // Not persisted as a separate column yet; populated by services from
+        // PatientName so callers can rely on a stable name for cross-team data.
+        [NotMapped]
+        public string ExternalRefId { get; set; } = string.Empty;
 
         // ---- EF Core navigation property (persisted) ----
         public Doctor? Doctor { get; set; }

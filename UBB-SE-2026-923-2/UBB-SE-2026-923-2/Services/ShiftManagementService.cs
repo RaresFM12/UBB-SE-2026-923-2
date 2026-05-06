@@ -36,20 +36,30 @@ namespace UBB_SE_2026_923_2.Services
         {
             bool HasMatchingId(Shift existingShift) => existingShift.Id == shiftId;
             var shift = shiftRepository.GetAllShifts().FirstOrDefault(HasMatchingId);
-            if (shift != null)
+            if (shift == null)
+            {
+                return;
+            }
+
+            bool wasActive = shift.Status == ShiftStatus.ACTIVE;
+            shiftRepository.UpdateShiftStatus(shiftId, ShiftStatus.CANCELLED);
+
+            if (wasActive)
             {
                 staffRepository.UpdateStaffAvailability(shift.AppointedStaff.StaffID, false, DoctorStatus.OFF_DUTY);
-                shiftRepository.UpdateShiftStatus(shiftId, ShiftStatus.COMPLETED);
             }
         }
 
         public bool ValidateNoOverlap(int staffId, DateTime start, DateTime end)
         {
-            bool OverlapsWithStaff(Shift shift) =>
-                (shift.AppointedStaff.StaffID == staffId) &&
-                ((start >= shift.StartTime && start < shift.EndTime) || (end > shift.StartTime && end <= shift.EndTime));
+            bool BlocksOverlap(Shift shift) =>
+                shift.AppointedStaff.StaffID == staffId
+                && shift.Status != ShiftStatus.COMPLETED
+                && shift.Status != ShiftStatus.CANCELLED
+                && start < shift.EndTime
+                && end > shift.StartTime;
 
-            return !shiftRepository.GetAllShifts().Any(OverlapsWithStaff);
+            return !shiftRepository.GetAllShifts().Any(BlocksOverlap);
         }
 
         public void AddShift(Shift shift) => shiftRepository.AddShift(shift);
@@ -90,6 +100,22 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
+            if (newStaff.GetType() != shift.AppointedStaff?.GetType())
+            {
+                return false;
+            }
+
+            if (newStaff.StaffID == shift.AppointedStaff?.StaffID)
+            {
+                return false;
+            }
+
+            if (!ValidateNoOverlap(newStaff.StaffID, shift.StartTime, shift.EndTime))
+            {
+                return false;
+            }
+
+            shiftRepository.UpdateShiftStaffId(shift.Id, newStaff.StaffID);
             shift.AppointedStaff = newStaff;
             return true;
         }

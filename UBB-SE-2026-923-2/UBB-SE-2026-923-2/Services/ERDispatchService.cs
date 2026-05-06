@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
@@ -14,6 +15,7 @@ namespace UBB_SE_2026_923_2.Services
         private const string UnmatchedStatus = "UNMATCHED";
         private const string DefaultSpecialization = "General";
         private const string FallbackLocation = "Ward A";
+        private const string ERAssignmentNotificationTitle = "ER Assignment";
 
         private static readonly (string Specialization, string Location)[] FallbackTemplates =
         {
@@ -23,18 +25,25 @@ namespace UBB_SE_2026_923_2.Services
             ("Pediatrics", FallbackLocation),
         };
 
+        // Serializes match + status mutation so two concurrent dispatches
+        // cannot pick the same AVAILABLE doctor.
+        private readonly SemaphoreSlim dispatchLock = new SemaphoreSlim(1, 1);
+
         private readonly IERDispatchRepository requestRepository;
         private readonly IStaffRepository staffRepository;
         private readonly IShiftRepository shiftRepository;
+        private readonly INotificationRepository? notificationRepository;
 
         public ERDispatchService(
             IERDispatchRepository requestRepository,
             IStaffRepository staffRepository,
-            IShiftRepository shiftRepository)
+            IShiftRepository shiftRepository,
+            INotificationRepository? notificationRepository = null)
         {
             this.requestRepository = requestRepository;
             this.staffRepository = staffRepository;
             this.shiftRepository = shiftRepository;
+            this.notificationRepository = notificationRepository;
         }
 
         public Task<IReadOnlyList<int>> SimulateIncomingRequestsAsync(int count)
@@ -77,46 +86,65 @@ namespace UBB_SE_2026_923_2.Services
             return Task.FromResult<IReadOnlyList<int>>(pendingIds);
         }
 
-        public Task<ERDispatchResult> DispatchERRequestAsync(int requestId)
+        public async Task<ERDispatchResult> DispatchERRequestAsync(int requestId)
         {
-            bool HasMatchingId(ERRequest pendingRequest) => pendingRequest.Id == requestId;
-            var request = GetPendingRequests().FirstOrDefault(HasMatchingId);
-            if (request == null)
+            await dispatchLock.WaitAsync();
+            try
             {
-                return Task.FromResult(new ERDispatchResult
+                bool HasMatchingId(ERRequest pendingRequest) => pendingRequest.Id == requestId;
+                var request = GetPendingRequests().FirstOrDefault(HasMatchingId);
+                if (request == null)
                 {
-                    IsSuccess = false,
-                    Message = $"ER request #{requestId} not found or already processed.",
-                });
-            }
+                    return new ERDispatchResult
+                    {
+                        IsSuccess = false,
+                        Message = $"ER request #{requestId} not found or already processed.",
+                    };
+                }
 
-            var matchedDoctor = FindBestMatchingDoctor(request);
+                var matchedDoctor = FindBestMatchingDoctor(request);
 
-            if (matchedDoctor == null)
-            {
-                requestRepository.UpdateRequestStatus(requestId, UnmatchedStatus, null, null);
-                return Task.FromResult(new ERDispatchResult
+                if (matchedDoctor == null)
+                {
+                    requestRepository.UpdateRequestStatus(requestId, UnmatchedStatus, null, null);
+                    return new ERDispatchResult
+                    {
+                        Request = request,
+                        IsSuccess = false,
+                        Message = $"No AVAILABLE {request.Specialization} specialist found for {request.Location}.",
+                    };
+                }
+
+                requestRepository.UpdateRequestStatus(requestId, AssignedStatus, matchedDoctor.DoctorId, matchedDoctor.FullName);
+                await staffRepository.UpdateStatusAsync(matchedDoctor.DoctorId, DoctorStatus.IN_EXAMINATION.ToString());
+
+                NotifyER(matchedDoctor, request);
+
+                return new ERDispatchResult
                 {
                     Request = request,
-                    IsSuccess = false,
-                    Message = $"No AVAILABLE {request.Specialization} specialist found for {request.Location}.",
-                });
+                    MatchedDoctorId = matchedDoctor.DoctorId,
+                    MatchedDoctorName = matchedDoctor.FullName,
+                    MatchReason = $"Specialty match ({matchedDoctor.Specialization}) + AVAILABLE status + at {request.Location}",
+                    IsSuccess = true,
+                    Message = $"Assigned to {matchedDoctor.FullName}. Status changed to IN_EXAMINATION.",
+                };
+            }
+            finally
+            {
+                dispatchLock.Release();
+            }
+        }
+
+        private void NotifyER(DoctorProfile matchedDoctor, ERRequest request)
+        {
+            if (notificationRepository == null)
+            {
+                return;
             }
 
-            requestRepository.UpdateRequestStatus(requestId, AssignedStatus, matchedDoctor.DoctorId, matchedDoctor.FullName);
-            Task UpdateMatchedDoctorStatusAsync() =>
-                staffRepository.UpdateStatusAsync(matchedDoctor.DoctorId, DoctorStatus.IN_EXAMINATION.ToString());
-            Task.Run(UpdateMatchedDoctorStatusAsync).GetAwaiter().GetResult();
-
-            return Task.FromResult(new ERDispatchResult
-            {
-                Request = request,
-                MatchedDoctorId = matchedDoctor.DoctorId,
-                MatchedDoctorName = matchedDoctor.FullName,
-                MatchReason = $"Specialty match ({matchedDoctor.Specialization}) + AVAILABLE status + at {request.Location}",
-                IsSuccess = true,
-                Message = $"Assigned to {matchedDoctor.FullName}. Status changed to IN_EXAMINATION.",
-            });
+            string message = $"You have been assigned to ER request #{request.Id} ({request.Specialization}) at {request.Location}.";
+            notificationRepository.AddNotification(matchedDoctor.DoctorId, ERAssignmentNotificationTitle, message);
         }
 
         public Task<IReadOnlyList<DoctorProfile>> GetManualOverrideCandidatesAsync(int requestId, int nearEndMinutes)
@@ -159,43 +187,53 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task<ERDispatchResult> ManualOverrideAsync(int requestId, int doctorId, int nearEndMinutes)
         {
-            var request = requestRepository.GetRequestById(requestId);
-            bool HasMatchingDoctorId(DoctorProfile rosterEntry) => rosterEntry.DoctorId == doctorId;
-            var doctor = GetDoctorRosterForDispatch().FirstOrDefault(HasMatchingDoctorId);
-
-            if (request == null || doctor == null)
+            await dispatchLock.WaitAsync();
+            try
             {
-                return new ERDispatchResult
+                var request = requestRepository.GetRequestById(requestId);
+                bool HasMatchingDoctorId(DoctorProfile rosterEntry) => rosterEntry.DoctorId == doctorId;
+                var doctor = GetDoctorRosterForDispatch().FirstOrDefault(HasMatchingDoctorId);
+
+                if (request == null || doctor == null)
                 {
-                    IsSuccess = false,
-                    Message = "Request or doctor not found.",
-                };
-            }
+                    return new ERDispatchResult
+                    {
+                        IsSuccess = false,
+                        Message = "Request or doctor not found.",
+                    };
+                }
 
-            var eligibleCandidates = await GetManualOverrideCandidatesAsync(requestId, nearEndMinutes);
-            bool HasMatchingDoctorIdInCandidates(DoctorProfile overrideCandidate) => overrideCandidate.DoctorId == doctorId;
-            if (!eligibleCandidates.Any(HasMatchingDoctorIdInCandidates))
-            {
+                var eligibleCandidates = await GetManualOverrideCandidatesAsync(requestId, nearEndMinutes);
+                bool HasMatchingDoctorIdInCandidates(DoctorProfile overrideCandidate) => overrideCandidate.DoctorId == doctorId;
+                if (!eligibleCandidates.Any(HasMatchingDoctorIdInCandidates))
+                {
+                    return new ERDispatchResult
+                    {
+                        Request = request,
+                        IsSuccess = false,
+                        Message = $"Manual override blocked. Doctor must be IN_EXAMINATION within {nearEndMinutes} min of end_time.",
+                    };
+                }
+
+                requestRepository.UpdateRequestStatus(requestId, AssignedStatus, doctor.DoctorId, doctor.FullName);
+                await staffRepository.UpdateStatusAsync(doctor.DoctorId, DoctorStatus.IN_EXAMINATION.ToString());
+
+                NotifyER(doctor, request);
+
                 return new ERDispatchResult
                 {
                     Request = request,
-                    IsSuccess = false,
-                    Message = $"Manual override blocked. Doctor must be IN_EXAMINATION within {nearEndMinutes} min of end_time.",
+                    MatchedDoctorId = doctor.DoctorId,
+                    MatchedDoctorName = doctor.FullName,
+                    MatchReason = $"Manual override by administrator ({nearEndMinutes} min near end_time rule)",
+                    IsSuccess = true,
+                    Message = $"Manually assigned to {doctor.FullName}. Status changed to IN_EXAMINATION.",
                 };
             }
-
-            requestRepository.UpdateRequestStatus(requestId, AssignedStatus, doctor.DoctorId, doctor.FullName);
-            await staffRepository.UpdateStatusAsync(doctor.DoctorId, DoctorStatus.IN_EXAMINATION.ToString());
-
-            return new ERDispatchResult
+            finally
             {
-                Request = request,
-                MatchedDoctorId = doctor.DoctorId,
-                MatchedDoctorName = doctor.FullName,
-                MatchReason = $"Manual override by administrator ({nearEndMinutes} min near end_time rule)",
-                IsSuccess = true,
-                Message = $"Manually assigned to {doctor.FullName}. Status changed to IN_EXAMINATION.",
-            };
+                dispatchLock.Release();
+            }
         }
 
         private DoctorProfile? FindBestMatchingDoctor(ERRequest request)

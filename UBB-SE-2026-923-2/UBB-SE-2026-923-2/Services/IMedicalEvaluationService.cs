@@ -13,9 +13,13 @@ namespace UBB_SE_2026_923_2.Services
 
         void SaveEvaluation(MedicalEvaluation record);
 
+        void UpdateEvaluation(MedicalEvaluation record);
+
         void DeleteEvaluation(int evaluationId);
 
         bool IsDoctorFatigued(string doctorId);
+
+        void RaiseFatigueIntervention(int doctorId, string doctorName);
 
         string? CheckMedicineConflict(string patientId, string medications);
     }

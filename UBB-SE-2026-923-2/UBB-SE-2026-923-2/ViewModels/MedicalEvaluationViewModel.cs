@@ -334,7 +334,11 @@ namespace UBB_SE_2026_923_2.ViewModels
         {
             if (IsEditing && SelectedEvaluation != null)
             {
-                SelectedEvaluation = null;
+                SelectedEvaluation.Symptoms = Symptoms;
+                SelectedEvaluation.MedicationsList = MedicationsList;
+                SelectedEvaluation.Notes = DoctorNotes;
+
+                evaluationService.UpdateEvaluation(SelectedEvaluation);
             }
             else
             {
@@ -442,7 +446,13 @@ namespace UBB_SE_2026_923_2.ViewModels
 
         private void CheckDoctorFatigue()
         {
+            bool wasFatigued = IsFatigued;
             IsFatigued = evaluationService.IsDoctorFatigued(currentUserService.UserId.ToString());
+
+            if (IsFatigued && !wasFatigued)
+            {
+                evaluationService.RaiseFatigueIntervention(currentUserService.UserId, CurrentDoctorName);
+            }
         }
 
         public void ExecuteDeletion()
