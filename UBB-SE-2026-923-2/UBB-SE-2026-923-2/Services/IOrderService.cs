@@ -19,6 +19,7 @@ namespace UBB_SE_2026_923_2.Services
         void ModifyIncompleteOrder(int orderIdToModify, Dictionary<int, Tuple<int, float>> updatedQuantities, DateOnly updatedPickUpDate);
         void ResubmitExpiredOrder(int orderIdToResubmit, DateOnly chosenPickUpDate);
         void CancelOrder(int orderId);
+        void ExpireOverdueOrders();
 
         void AddToBasket(int itemId, int quantityToBuy);
         void AddItemToBasket(int itemId, int quantityToBuy, float extraDiscountPercentage = 0f);
