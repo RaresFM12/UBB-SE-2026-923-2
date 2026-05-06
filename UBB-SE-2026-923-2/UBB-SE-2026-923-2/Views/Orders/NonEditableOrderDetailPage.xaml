@@ -9,10 +9,22 @@
     mc:Ignorable="d">
 
     <Grid Padding="20"
+          RowDefinitions="Auto, *"
           ColumnDefinitions="*, Auto"
           Background="{StaticResource AppBackgroundBrush}">
 
-        <ListView Grid.Row="0"
+        <Button Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Content="&#8592; Back"
+                Click="OnBackClick"
+                HorizontalAlignment="Left"
+                Background="Transparent"
+                Foreground="{StaticResource AppAccentBrush}"
+                FontSize="16"
+                Margin="0 0 0 10"/>
+
+        <ListView Grid.Row="1"
                   Grid.Column="0"
                   ItemsSource="{x:Bind ViewModel.OrderItems}">
 
@@ -51,7 +63,7 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <ListView Grid.Row="0"
+        <ListView Grid.Row="1"
                   Grid.Column="1">
 
             <TextBlock Text="Total price:"

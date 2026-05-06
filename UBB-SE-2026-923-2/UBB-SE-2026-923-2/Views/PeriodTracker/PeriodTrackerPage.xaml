@@ -5,7 +5,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="using:UBB_SE_2026_923_2.ViewModels.PeriodTracker"
+    xmlns:converters="using:UBB_SE_2026_923_2.Converters"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Page.Resources>
 
     <ScrollViewer VerticalScrollMode="Enabled"
                   HorizontalScrollMode="Enabled"
@@ -199,23 +204,25 @@
                             VerticalAlignment="Center"
                             DayFormat="{}{day.integer} ({dayofweek.abbreviated})"/>
 
-                <NumberBox Header="How much did your last period last:"
-                           Value="{x:Bind ViewModel.PeriodLastsInput, Mode=TwoWay}"
-                           SpinButtonPlacementMode="Compact"
-                           VerticalAlignment="Center"
-                           SmallChange="1"
-                           Minimum="1"
-                           Maximum="9"
-                           Width="160"/>
+                <StackPanel Orientation="Vertical" Spacing="4" Width="160">
+                    <TextBlock Text="How much did your last period last:"
+                               Foreground="{StaticResource AppTextSecondaryBrush}"
+                               TextWrapping="Wrap"/>
+                    <TextBox Text="{x:Bind ViewModel.PeriodLastsInputText, Mode=TwoWay}"
+                             PlaceholderText="1 – 9"
+                             Foreground="{StaticResource AppTextPrimaryBrush}"
+                             Width="160"/>
+                </StackPanel>
 
-                <NumberBox Minimum="20"
-                           Maximum="45"
-                           Header="How much does your average cycle last:"
-                           Value="{x:Bind ViewModel.CycleDaysInput, Mode=TwoWay}"
-                           SpinButtonPlacementMode="Compact"
-                           VerticalAlignment="Center"
-                           SmallChange="1"
-                           Width="160"/>
+                <StackPanel Orientation="Vertical" Spacing="4" Width="160">
+                    <TextBlock Text="How much does your average cycle last:"
+                               Foreground="{StaticResource AppTextSecondaryBrush}"
+                               TextWrapping="Wrap"/>
+                    <TextBox Text="{x:Bind ViewModel.CycleDaysInputText, Mode=TwoWay}"
+                             PlaceholderText="20 – 45"
+                             Foreground="{StaticResource AppTextPrimaryBrush}"
+                             Width="160"/>
+                </StackPanel>
 
                 <StackPanel Orientation="Vertical"
                             Spacing="20"
@@ -232,13 +239,22 @@
 
             </StackPanel>
 
-            <Button Grid.Row="3"
-                    Command="{x:Bind ViewModel.CalculateCommand}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Padding="30,10"
-                    FontSize="16"
-                    Content="CALCULATE"/>
+            <StackPanel Grid.Row="3"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="8">
+                <Button Command="{x:Bind ViewModel.CalculateCommand}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Padding="30,10"
+                        FontSize="16"
+                        Content="CALCULATE"/>
+                <TextBlock Text="{x:Bind ViewModel.ValidationErrorMessage, Mode=OneWay}"
+                           Foreground="{StaticResource AppErrorBrush}"
+                           HorizontalAlignment="Center"
+                           Visibility="{x:Bind ViewModel.HasValidationError, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            </StackPanel>
 
             <StackPanel Grid.Row="4"
                         Orientation="Horizontal"

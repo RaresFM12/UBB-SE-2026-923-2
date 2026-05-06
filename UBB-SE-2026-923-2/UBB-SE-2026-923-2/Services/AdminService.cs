@@ -80,10 +80,13 @@ namespace UBB_SE_2026_923_2.Services
                                        newItem.Label, newItem.Description, newItem.ImagePath,
                                        newItem.DiscountPercentage);
             }
+            catch (ArgumentException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error adding item: {ex.Message}");
-                return;
             }
         }
 
@@ -98,10 +101,13 @@ namespace UBB_SE_2026_923_2.Services
                                        newItem.Label, newItem.Description, newItem.ImagePath,
                                        newItem.DiscountPercentage);
             }
+            catch (ArgumentException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error adding item: {ex.Message}");
-                return;
             }
         }
 
@@ -199,6 +205,13 @@ namespace UBB_SE_2026_923_2.Services
                 item.ActiveSubstances.Count == EmptyQuantity)
             {
                 throw new ArgumentException("Invalid item data. Please check the input and try again.");
+            }
+
+            bool nameAlreadyExists = itemRepository.GetAllItems()
+                .Any(existingItem => string.Equals(existingItem.Name, item.Name, StringComparison.OrdinalIgnoreCase));
+            if (nameAlreadyExists)
+            {
+                throw new ArgumentException($"An item named \"{item.Name}\" already exists.");
             }
         }
 

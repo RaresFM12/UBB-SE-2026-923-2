@@ -59,7 +59,15 @@ namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
 
         private void OnToggleStockAlert(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("Stock alert button clicked!");
+            ViewModel.ToggleStockAlert();
+        }
+
+        private void OnBackClick(object sender, RoutedEventArgs e)
+        {
+            if (Frame.CanGoBack)
+            {
+                Frame.GoBack();
+            }
         }
     }
 }

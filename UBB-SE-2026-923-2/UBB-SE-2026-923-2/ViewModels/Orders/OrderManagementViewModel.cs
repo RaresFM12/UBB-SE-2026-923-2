@@ -115,6 +115,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
             FilteredOrderList = new ();
             RedirectToDetailPageCommand = new RelayCommandWithOneParameter<OrderDetail>(OnClickDetailButton);
 
+            orderService.ExpireOverdueOrders();
             foreach (Order currOrder in orderService.OrdersRepository.GetAllOrders())
             {
                 int userID = orderService.OrdersRepository.GetOrder(currOrder.Id).ClientId;

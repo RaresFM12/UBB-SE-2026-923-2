@@ -439,6 +439,20 @@ namespace UBB_SE_2026_923_2.Services
             orderToCancel.IsExpired = true;
             OrdersRepository.UpdateOrder(orderToCancel);
         }
+
+        public void ExpireOverdueOrders()
+        {
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            List<Order> allOrders = OrdersRepository.GetAllOrders();
+            foreach (Order order in allOrders)
+            {
+                if (!order.IsExpired && !order.IsCompleted && today > order.PickUpDate.AddDays(Order.OrderExpirationDays))
+                {
+                    order.IsExpired = true;
+                    OrdersRepository.UpdateOrder(order);
+                }
+            }
+        }
     }
 }
 

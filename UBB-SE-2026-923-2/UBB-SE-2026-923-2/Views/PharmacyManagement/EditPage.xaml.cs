@@ -246,7 +246,16 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 System.Diagnostics.Debug.WriteLine("Added active substance: " + ActiveSubstancesDict.ElementAt(i).Key + " " + ActiveSubstancesDict.ElementAt(i).Value);
             }
 
-            ViewModel.AddItemWithQuantity(newItem);
+            try
+            {
+                ViewModel.AddItemWithQuantity(newItem);
+            }
+            catch (ArgumentException ex)
+            {
+                AddItemFormatError.Text = ex.Message;
+                AddItemFormatError.Visibility = Visibility.Visible;
+                return;
+            }
 
             ViewModel.RefreshItems();
             ItemList.ItemsSource = ViewModel.Items;
@@ -349,6 +358,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             SubstanceNameBox.Background = new SolidColorBrush(Colors.White);
             ConcentrationBox.Background = new SolidColorBrush(Colors.White);
             AddItemMandatoryError.Visibility = Visibility.Collapsed;
+            AddItemFormatError.Text = "Wrong Format!";
             AddItemFormatError.Visibility = Visibility.Collapsed;
         }
 
@@ -639,7 +649,18 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            Item item = ViewModel.GetItemById(int.Parse(IdBox.Text));
+            Item item;
+            try
+            {
+                item = ViewModel.GetItemById(int.Parse(IdBox.Text));
+            }
+            catch (Exception)
+            {
+                IdBox.Background = new SolidColorBrush(Colors.LightPink);
+                IdBox.Text = string.Empty;
+                UpdateInvalidIdError.Visibility = Visibility.Visible;
+                return;
+            }
             NameBoxUpdate.Text = item.Name;
             ProducerBoxUpdate.Text = item.Producer;
             PriceBoxUpdate.Text = item.Price.ToString();
@@ -679,11 +700,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             }
             else
             {
-                try
-                {
-                    ViewModel.GetItemById(id);
-                }
-                catch (Exception ex)
+                if (ViewModel.GetItemById(id) is null)
                 {
                     IdBox.Background = new SolidColorBrush(Colors.LightPink);
                     IdBox.Text = string.Empty;
@@ -1145,8 +1162,16 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
             Substance newSubstance = new Substance(name, lethalDose, description);
 
-            ViewModel.AddSubstance(newSubstance);
-            System.Diagnostics.Debug.WriteLine("Added substance");
+            try
+            {
+                ViewModel.AddSubstance(newSubstance);
+            }
+            catch (ArgumentException ex)
+            {
+                AddSubstanceFormatError.Text = ex.Message;
+                AddSubstanceFormatError.Visibility = Visibility.Visible;
+                return;
+            }
 
             ClearSubstanceBoxes();
             ViewModel.RefreshSubstances();

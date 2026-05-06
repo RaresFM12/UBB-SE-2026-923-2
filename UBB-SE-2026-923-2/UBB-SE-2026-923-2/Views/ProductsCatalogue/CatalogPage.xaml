@@ -38,9 +38,13 @@
                               HorizontalAlignment="Stretch"/>
 
                     <TextBlock Text="Categories" FontWeight="Bold" Margin="0,10,0,0" Foreground="{StaticResource AppAccentBrush}"/>
-                    <CheckBox Content="Medicine" IsChecked="{Binding FilterMedicine, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                    <CheckBox Content="Supplements" IsChecked="{Binding FilterSupplements, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="Pain Relief" IsChecked="{Binding FilterPainRelief, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
                     <CheckBox Content="Wellness" IsChecked="{Binding FilterWellness, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="Cold and Flu" IsChecked="{Binding FilterColdAndFlu, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="Allergy" IsChecked="{Binding FilterAllergy, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="Digestion" IsChecked="{Binding FilterDigestion, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="Skincare" IsChecked="{Binding FilterSkincare, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                    <CheckBox Content="First Aid" IsChecked="{Binding FilterFirstAid, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
 
                     <TextBlock Text="Price" FontWeight="Bold" Margin="0,10,0,0" Foreground="{StaticResource AppAccentBrush}"/>
                     <CheckBox Content="0 - 49 lei" IsChecked="{Binding FilterPrice0_49, Mode=TwoWay}" Foreground="{StaticResource AppTextPrimaryBrush}"/>

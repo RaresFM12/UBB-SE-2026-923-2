@@ -52,6 +52,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
             {
                 return;
             }
+            orderService.ExpireOverdueOrders();
             int clientId = orderService.ActiveUser.Id;
             List<Order> userOrders = orderService.OrdersRepository.GetOrdersOfClient(clientId);
             foreach (Order currentOrder in userOrders)

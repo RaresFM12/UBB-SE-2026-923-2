@@ -47,7 +47,7 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
         public float FinalPrice => OldPrice * (1 - Discount);
         public string OldPriceDisplay => $"{OldPrice:F2} lei";
         public string FinalPriceDisplay => $"{FinalPrice:F2} lei";
-        public string DiscountDisplay => HasDiscount ? $"-{Discount * 100}%" : string.Empty;
+        public string DiscountDisplay => HasDiscount ? $"-{Math.Round(Discount * 100, 2):G}%" : string.Empty;
 
         public string StockText =>
             Quantity == 0 ? "Out of stock" :
@@ -84,9 +84,13 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
 
         public string SearchText { get; set; } = string.Empty;
 
-        public bool FilterMedicine { get; set; }
-        public bool FilterSupplements { get; set; }
+        public bool FilterPainRelief { get; set; }
         public bool FilterWellness { get; set; }
+        public bool FilterColdAndFlu { get; set; }
+        public bool FilterAllergy { get; set; }
+        public bool FilterDigestion { get; set; }
+        public bool FilterSkincare { get; set; }
+        public bool FilterFirstAid { get; set; }
 
         public bool FilterPrice0_49 { get; set; }
         public bool FilterPrice50_99 { get; set; }
@@ -272,7 +276,7 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
         public CatalogPageViewModel()
         {
             SearchCommand = new RelayCommand(Search);
-            ApplyFiltersCommand = new RelayCommand(ApplyFilters);
+            ApplyFiltersCommand = new RelayCommand(ApplyFiltersFromButton);
             NextPageCommand = new RelayCommand(NextPage);
             PreviousPageCommand = new RelayCommand(PreviousPage);
             AddToCartCommand = new RelayCommand<UIItem>(AddToCart);
@@ -286,6 +290,12 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
             LoadProducts();
         }
         private void Search()
+        {
+            currentPage = 0;
+            ApplyFilters();
+        }
+
+        private void ApplyFiltersFromButton()
         {
             currentPage = 0;
             ApplyFilters();
@@ -379,21 +389,13 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
         private List<string> BuildCategoryList()
         {
             var list = new List<string>();
-            if (FilterMedicine)
-            {
-                list.Add("Medicine");
-            }
-
-            if (FilterSupplements)
-            {
-                list.Add("Supplements");
-            }
-
-            if (FilterWellness)
-            {
-                list.Add("Wellness");
-            }
-
+            if (FilterPainRelief) list.Add("pain relief");
+            if (FilterWellness) list.Add("wellness");
+            if (FilterColdAndFlu) list.Add("cold and flu");
+            if (FilterAllergy) list.Add("allergy");
+            if (FilterDigestion) list.Add("digestion");
+            if (FilterSkincare) list.Add("skincare");
+            if (FilterFirstAid) list.Add("first aid");
             return list;
         }
 

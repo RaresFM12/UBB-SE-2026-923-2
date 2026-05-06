@@ -70,6 +70,7 @@ namespace UBB_SE_2026_923_2.Services
         public void Register(
             string email,
             string password,
+            string confirmPassword,
             string username,
             string phoneNumber,
             string role = "Client")
@@ -84,12 +85,24 @@ namespace UBB_SE_2026_923_2.Services
                 throw new Exception("Password cannot be empty.");
             }
 
+            if (password != confirmPassword)
+            {
+                throw new Exception("Passwords don't match.");
+            }
+
+            if (!userValidationService.IsCorrectPasswordFormat(password))
+            {
+                throw new Exception("Password must be 8+ characters and include uppercase, lowercase, digit, and a special character (!@#%^*).");
+            }
+
             if (username != null && !userValidationService.IsCorrectUsernameFormat(username))
             {
                 throw new Exception("Username is not valid, must contain only letters and/or _");
             }
 
-            if (phoneNumber != null && !userValidationService.IsCorrectPhoneNumberFormat(phoneNumber))
+            phoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? string.Empty : phoneNumber;
+
+            if (!string.IsNullOrEmpty(phoneNumber) && !userValidationService.IsCorrectPhoneNumberFormat(phoneNumber))
             {
                 throw new Exception("Phone number must contain only digits");
             }
@@ -153,6 +166,11 @@ namespace UBB_SE_2026_923_2.Services
             if (string.IsNullOrWhiteSpace(newPassword))
             {
                 throw new Exception("New password cannot be empty.");
+            }
+
+            if (!userValidationService.IsCorrectPasswordFormat(newPassword))
+            {
+                throw new Exception("Password must be 8+ characters and include uppercase, lowercase, digit, and a special character (!@#%^*).");
             }
 
             if (newPassword != confirmNewPassword)

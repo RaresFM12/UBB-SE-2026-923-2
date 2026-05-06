@@ -17,7 +17,7 @@ public static class AppSettings
     private const string ConnectionStringKey = "AppDatabase";
 
     private const string FallbackConnectionString =
-        @"Data Source=localhost\SQLEXPRESS;Initial Catalog=HospitalDatabase;Integrated Security=True;Encrypt=True;Trust Server Certificate=True";
+        @"Data Source=localhost;Initial Catalog=HospitalDatabase;Integrated Security=True;Encrypt=True;Trust Server Certificate=True";
 
     private static readonly Lazy<IConfigurationRoot> ConfigurationLazy = new(BuildConfiguration);
 

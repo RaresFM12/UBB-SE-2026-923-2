@@ -32,7 +32,7 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
             HasDiscount ? $"{currentItem.Price:F2} lei" : string.Empty;
 
         public string DiscountDisplay =>
-            HasDiscount ? $"{currentItem.DiscountPercentage}% off" : string.Empty;
+            HasDiscount ? $"{Math.Round(currentItem.DiscountPercentage, 2):G}% off" : string.Empty;
 
         public bool HasDiscount => (currentItem?.DiscountPercentage ?? 0) > 0;
 
