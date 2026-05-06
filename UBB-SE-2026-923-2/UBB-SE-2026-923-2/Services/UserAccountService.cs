@@ -100,7 +100,9 @@ namespace UBB_SE_2026_923_2.Services
                 throw new Exception("Username is not valid, must contain only letters and/or _");
             }
 
-            if (phoneNumber != null && !userValidationService.IsCorrectPhoneNumberFormat(phoneNumber))
+            phoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? string.Empty : phoneNumber;
+
+            if (!string.IsNullOrEmpty(phoneNumber) && !userValidationService.IsCorrectPhoneNumberFormat(phoneNumber))
             {
                 throw new Exception("Phone number must contain only digits");
             }
