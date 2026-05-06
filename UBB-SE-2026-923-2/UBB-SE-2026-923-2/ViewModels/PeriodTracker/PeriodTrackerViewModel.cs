@@ -89,37 +89,56 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
             }
         }
 
-        private double cycleDaysInput;
-        public double CycleDaysInput
+        private string cycleDaysInputText = string.Empty;
+        public string CycleDaysInputText
         {
-            get => cycleDaysInput;
+            get => cycleDaysInputText;
             set
             {
-                if (cycleDaysInput == value)
+                if (cycleDaysInputText == value)
                 {
                     return;
                 }
 
-                cycleDaysInput = value;
+                cycleDaysInputText = value;
                 OnPropertyChanged();
             }
         }
 
-        private double periodLastsInput;
-        public double PeriodLastsInput
+        private string periodLastsInputText = string.Empty;
+        public string PeriodLastsInputText
         {
-            get => periodLastsInput;
+            get => periodLastsInputText;
             set
             {
-                if (periodLastsInput == value)
+                if (periodLastsInputText == value)
                 {
                     return;
                 }
 
-                periodLastsInput = value;
+                periodLastsInputText = value;
                 OnPropertyChanged();
             }
         }
+
+        private string validationErrorMessage = string.Empty;
+        public string ValidationErrorMessage
+        {
+            get => validationErrorMessage;
+            set
+            {
+                if (validationErrorMessage == value)
+                {
+                    return;
+                }
+
+                validationErrorMessage = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasValidationError));
+            }
+        }
+
+        public bool HasValidationError => !string.IsNullOrEmpty(validationErrorMessage);
 
         private int premenstrualSyndromeOptionInput;
         public int PremenstrualSyndromeOptionInput
@@ -168,8 +187,8 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
             PeriodTrackerState trackerState = periodTrackerService.GetTrackerState();
 
             StartPeriodDate = trackerState.StartPeriodDate;
-            CycleDaysInput = trackerState.CycleDays;
-            PeriodLastsInput = trackerState.PeriodLasts;
+            CycleDaysInputText = trackerState.CycleDays > 0 ? trackerState.CycleDays.ToString() : string.Empty;
+            PeriodLastsInputText = trackerState.PeriodLasts > 0 ? trackerState.PeriodLasts.ToString() : string.Empty;
             PremenstrualSyndromeOptionInput = trackerState.PremenstrualSyndromeOption;
 
             LoadNotes();
@@ -178,8 +197,8 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
             {
                 Calendars.CalculatePeriodTracker(
                     StartPeriodDate.Date,
-                    (int)CycleDaysInput,
-                    (int)PeriodLastsInput,
+                    trackerState.CycleDays,
+                    trackerState.PeriodLasts,
                     PremenstrualSyndromeOptionInput);
 
                 CalendarsVisibility = Visibility.Visible;
@@ -215,16 +234,30 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
 
         private void CalculatePeriodTracker()
         {
+            if (!int.TryParse(PeriodLastsInputText, out int periodLasts) || periodLasts < 1 || periodLasts > 9)
+            {
+                ValidationErrorMessage = "Period length must be a whole number between 1 and 9.";
+                return;
+            }
+
+            if (!int.TryParse(CycleDaysInputText, out int cycleDays) || cycleDays < 20 || cycleDays > 45)
+            {
+                ValidationErrorMessage = "Cycle length must be a whole number between 20 and 45.";
+                return;
+            }
+
+            ValidationErrorMessage = string.Empty;
+
             periodTrackerService.UpdatePeriodTracker(
                 StartPeriodDate,
-                CycleDaysInput,
-                PeriodLastsInput,
+                cycleDays,
+                periodLasts,
                 PremenstrualSyndromeOptionInput);
 
             Calendars.CalculatePeriodTracker(
                 StartPeriodDate.Date,
-                (int)CycleDaysInput,
-                (int)PeriodLastsInput,
+                cycleDays,
+                periodLasts,
                 PremenstrualSyndromeOptionInput);
 
             CalendarsVisibility = Visibility.Visible;

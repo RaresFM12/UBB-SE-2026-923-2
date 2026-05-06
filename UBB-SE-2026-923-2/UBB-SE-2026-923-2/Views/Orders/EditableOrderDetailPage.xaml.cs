@@ -30,6 +30,14 @@ namespace UBB_SE_2026_923_2.Views.Orders
             base.OnNavigatedTo(e);
         }
 
+        private void OnBackClick(object sender, RoutedEventArgs e)
+        {
+            if (Frame.CanGoBack)
+            {
+                Frame.GoBack();
+            }
+        }
+
         private async void CompleteOrder(object sender, RoutedEventArgs e)
         {
             int orderID = ViewModel.ShownOrderID;

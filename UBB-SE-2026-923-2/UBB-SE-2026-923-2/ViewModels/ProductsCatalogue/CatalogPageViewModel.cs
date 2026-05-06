@@ -302,6 +302,8 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
                 return;
             }
 
+            currentPage = 0;
+
             var categories = BuildCategoryList();
             var priceRanges = BuildPriceRangeList();
 

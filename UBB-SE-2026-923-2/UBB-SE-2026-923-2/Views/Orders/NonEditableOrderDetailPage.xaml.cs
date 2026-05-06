@@ -1,4 +1,5 @@
 using System;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using UBB_SE_2026_923_2.Services;
@@ -26,6 +27,14 @@ namespace UBB_SE_2026_923_2.Views.Orders
             DataContext = ViewModel;
 
             base.OnNavigatedTo(e);
+        }
+
+        private void OnBackClick(object sender, RoutedEventArgs e)
+        {
+            if (Frame.CanGoBack)
+            {
+                Frame.GoBack();
+            }
         }
     }
 }

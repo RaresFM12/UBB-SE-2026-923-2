@@ -14,6 +14,16 @@
     </Page.Resources>
 
     <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Button Content="&#8592; Back"
+                Click="OnBackClick"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="16"
+                Background="Transparent"
+                Foreground="{StaticResource AppAccentBrush}"
+                FontSize="16"
+                Canvas.ZIndex="1"/>
+
         <Grid HorizontalAlignment="Center"
               VerticalAlignment="Center"
               MaxWidth="900"
