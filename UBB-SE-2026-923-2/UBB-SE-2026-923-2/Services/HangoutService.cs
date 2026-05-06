@@ -20,17 +20,20 @@ namespace UBB_SE_2026_923_2.Services
         private readonly IHangoutParticipantRepository hangoutParticipantRepository;
         private readonly IAppointmentRepository appointmentRepository;
         private readonly IStaffRepository staffRepository;
+        private readonly IEvaluationsRepository? evaluationsRepository;
 
         public HangoutService(
             IHangoutRepository hangoutRepository,
             IHangoutParticipantRepository hangoutParticipantRepository,
             IAppointmentRepository appointmentRepository,
-            IStaffRepository staffRepository)
+            IStaffRepository staffRepository,
+            IEvaluationsRepository? evaluationsRepository = null)
         {
             this.hangoutRepository = hangoutRepository;
             this.hangoutParticipantRepository = hangoutParticipantRepository;
             this.appointmentRepository = appointmentRepository;
             this.staffRepository = staffRepository;
+            this.evaluationsRepository = evaluationsRepository;
         }
 
         public int CreateHangout(string title, string description, DateTime date, int maxParticipants, IStaff creator)
@@ -53,6 +56,11 @@ namespace UBB_SE_2026_923_2.Services
             if (HasConflictingAppointmentOnDate(creator.StaffID, date))
             {
                 throw new InvalidOperationException("You cannot create a hangout on a day where you have active scheduled appointments.");
+            }
+
+            if (HasMedicalEvaluationOnDate(creator.StaffID, date))
+            {
+                throw new InvalidOperationException("You cannot create a hangout on a day where you have a medical evaluation logged.");
             }
 
             int newHangoutId = hangoutRepository.AddHangout(title, description ?? string.Empty, date, maxParticipants);
@@ -88,6 +96,11 @@ namespace UBB_SE_2026_923_2.Services
             if (HasConflictingAppointmentOnDate(staff.StaffID, hangout.Date))
             {
                 throw new InvalidOperationException("You cannot join a hangout on a day where you have active scheduled appointments.");
+            }
+
+            if (HasMedicalEvaluationOnDate(staff.StaffID, hangout.Date))
+            {
+                throw new InvalidOperationException("You cannot join a hangout on a day where you have a medical evaluation logged.");
             }
 
             hangoutParticipantRepository.AddParticipant(hangoutId, staff.StaffID);
@@ -136,6 +149,21 @@ namespace UBB_SE_2026_923_2.Services
                 && IsActiveStatus(appointment.Status);
 
             return allAppointments.Any(IsConflictingForStaff);
+        }
+
+        private bool HasMedicalEvaluationOnDate(int staffId, DateTime date)
+        {
+            if (evaluationsRepository == null)
+            {
+                return false;
+            }
+
+            bool IsForStaffOnDate(MedicalEvaluation evaluation) =>
+                evaluation.Evaluator != null
+                && evaluation.Evaluator.StaffID == staffId
+                && evaluation.EvaluationDate.Date == date.Date;
+
+            return evaluationsRepository.GetAllEvaluations().Any(IsForStaffOnDate);
         }
     }
 }

@@ -195,12 +195,13 @@
 
             <StackPanel Grid.Row="2"
                         Orientation="Horizontal"
-                        Spacing="20"
+                        Spacing="30"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center">
 
                 <DatePicker Date="{x:Bind ViewModel.StartPeriodDate, Mode=TwoWay}"
                             Header="Start Date of Last Period"
+                            VerticalAlignment="Center"
                             DayFormat="{}{day.integer} ({dayofweek.abbreviated})"/>
 
                 <StackPanel Orientation="Vertical" Spacing="4" Width="160">
@@ -224,7 +225,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical"
-                            Spacing="10"
+                            Spacing="20"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center">
                     <RadioButtons Header="When do PMS symptoms appear:"
@@ -235,6 +236,7 @@
                         <RadioButton Content="7-14 days before period"/>
                     </RadioButtons>
                 </StackPanel>
+
             </StackPanel>
 
             <StackPanel Grid.Row="3"
@@ -245,6 +247,8 @@
                 <Button Command="{x:Bind ViewModel.CalculateCommand}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
+                        Padding="30,10"
+                        FontSize="16"
                         Content="CALCULATE"/>
                 <TextBlock Text="{x:Bind ViewModel.ValidationErrorMessage, Mode=OneWay}"
                            Foreground="{StaticResource AppErrorBrush}"

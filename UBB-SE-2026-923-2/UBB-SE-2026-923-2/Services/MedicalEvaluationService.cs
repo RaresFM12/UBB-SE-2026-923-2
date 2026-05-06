@@ -17,6 +17,9 @@ namespace UBB_SE_2026_923_2.Services
         private const string AllergyKeyword = "Allergy";
         private const string AdverseKeyword = "Adverse";
         private const string RiskMarker = "[RISK]";
+        private const int AdminBroadcastRecipientId = 0;
+        private const string FatigueAlertTitle = "Fatigue Intervention Required";
+        private static readonly char[] MedicationSeparators = { ',', ';', '\n', '\r', '/', '|' };
 
         private readonly IEvaluationsRepository evaluationsRepository;
         private readonly IHighRiskMedicineRepository highRiskMedicineRepository;
@@ -24,6 +27,7 @@ namespace UBB_SE_2026_923_2.Services
         private readonly IStaffRepository staffRepository;
         private readonly IShiftRepository shiftRepository;
         private readonly ICurrentUserService currentUserService;
+        private readonly INotificationRepository? notificationRepository;
 
         public MedicalEvaluationService(
             IEvaluationsRepository evaluationsRepository,
@@ -31,7 +35,8 @@ namespace UBB_SE_2026_923_2.Services
             IAppointmentRepository appointmentRepository,
             IStaffRepository staffRepository,
             IShiftRepository shiftRepository,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            INotificationRepository? notificationRepository = null)
         {
             this.evaluationsRepository = evaluationsRepository;
             this.highRiskMedicineRepository = highRiskMedicineRepository;
@@ -39,6 +44,7 @@ namespace UBB_SE_2026_923_2.Services
             this.staffRepository = staffRepository;
             this.shiftRepository = shiftRepository;
             this.currentUserService = currentUserService;
+            this.notificationRepository = notificationRepository;
         }
 
         public List<Doctor> GetAllDoctors() =>
@@ -99,8 +105,41 @@ namespace UBB_SE_2026_923_2.Services
                 assumedRisk);
         }
 
+        public void UpdateEvaluation(MedicalEvaluation record)
+        {
+            if (record == null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            if (record.EvaluationID <= 0)
+            {
+                throw new ArgumentException("EvaluationID is required to update.", nameof(record));
+            }
+
+            evaluationsRepository.UpdateEvaluation(
+                record.EvaluationID,
+                record.Symptoms ?? string.Empty,
+                record.Notes ?? string.Empty,
+                record.MedicationsList ?? string.Empty);
+        }
+
         public void DeleteEvaluation(int evaluationId) =>
             evaluationsRepository.DeleteEvaluation(evaluationId);
+
+        public void RaiseFatigueIntervention(int doctorId, string doctorName)
+        {
+            if (notificationRepository == null)
+            {
+                return;
+            }
+
+            string message = string.IsNullOrWhiteSpace(doctorName)
+                ? $"Doctor #{doctorId} exceeded the {FatigueThresholdHours:F0}h duty limit. Reassign active cases."
+                : $"{doctorName} (Doctor #{doctorId}) exceeded the {FatigueThresholdHours:F0}h duty limit. Reassign active cases.";
+
+            notificationRepository.AddNotification(AdminBroadcastRecipientId, FatigueAlertTitle, message);
+        }
 
         public bool IsDoctorFatigued(string doctorId)
         {
@@ -145,6 +184,12 @@ namespace UBB_SE_2026_923_2.Services
 
         private string? CheckPatientHistoryForRisk(string patientId, string currentMedicines)
         {
+            var currentDrugs = SplitMedicines(currentMedicines);
+            if (currentDrugs.Count == 0)
+            {
+                return null;
+            }
+
             bool MatchesPatient(MedicalEvaluation evaluation) =>
                 string.Equals(evaluation.PatientId, patientId, StringComparison.OrdinalIgnoreCase);
             bool MentionsAllergyOrAdverse(MedicalEvaluation evaluation) =>
@@ -152,18 +197,44 @@ namespace UBB_SE_2026_923_2.Services
                 || ContainsKeyword(evaluation.Symptoms, AdverseKeyword)
                 || ContainsKeyword(evaluation.Notes, AllergyKeyword)
                 || ContainsKeyword(evaluation.Notes, AdverseKeyword);
-            bool ListsSameMedicine(MedicalEvaluation evaluation) =>
-                !string.IsNullOrEmpty(evaluation.MedicationsList)
-                && evaluation.MedicationsList.Contains(currentMedicines, StringComparison.OrdinalIgnoreCase);
 
-            var pastEvaluationWithMatch = evaluationsRepository.GetAllEvaluations()
-                .Where(MatchesPatient)
-                .Where(MentionsAllergyOrAdverse)
-                .FirstOrDefault(ListsSameMedicine);
+            string? FirstSharedDrug(MedicalEvaluation evaluation)
+            {
+                var historicalDrugs = SplitMedicines(evaluation.MedicationsList);
+                bool MatchesAnyHistoricalDrug(string currentDrug) =>
+                    historicalDrugs.Any(historical => string.Equals(historical, currentDrug, StringComparison.OrdinalIgnoreCase));
+                return currentDrugs.FirstOrDefault(MatchesAnyHistoricalDrug);
+            }
 
-            return pastEvaluationWithMatch == null
-                ? null
-                : $"HISTORY ALERT: Patient had a past Adverse Reaction/Allergy to {currentMedicines} recorded in their history.";
+            foreach (var evaluation in evaluationsRepository.GetAllEvaluations())
+            {
+                if (!MatchesPatient(evaluation) || !MentionsAllergyOrAdverse(evaluation))
+                {
+                    continue;
+                }
+
+                var sharedDrug = FirstSharedDrug(evaluation);
+                if (sharedDrug != null)
+                {
+                    return $"HISTORY ALERT: Patient had a past Adverse Reaction/Allergy to {sharedDrug} recorded in their history.";
+                }
+            }
+
+            return null;
+        }
+
+        private static List<string> SplitMedicines(string? medications)
+        {
+            if (string.IsNullOrWhiteSpace(medications))
+            {
+                return new List<string>();
+            }
+
+            return medications
+                .Split(MedicationSeparators, StringSplitOptions.RemoveEmptyEntries)
+                .Select(token => token.Trim())
+                .Where(token => token.Length > 0)
+                .ToList();
         }
 
         private static bool ContainsKeyword(string? text, string keyword) =>

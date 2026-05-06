@@ -8,7 +8,6 @@ namespace UBB_SE_2026_923_2.Services
 {
     public sealed class PharmacyVacationService : IPharmacyVacationService
     {
-        private const int MaxVacationDaysPerMonth = 4;
         private const int OneDay = 1;
         private const int FirstShiftId = 1;
         private const int IdIncrement = 1;
@@ -60,13 +59,10 @@ namespace UBB_SE_2026_923_2.Services
 
             if (overlappingShift is not null)
             {
-                throw new InvalidOperationException("Cannot add vacation: this period overlaps an existing shift.");
-            }
-
-            if (WouldExceedMonthlyVacationLimit(pharmacistShifts, start, endExclusive, MaxVacationDaysPerMonth))
-            {
-                throw new InvalidOperationException(
-                    $"Cannot add vacation: pharmacist would exceed {MaxVacationDaysPerMonth} vacation days in a month.");
+                bool isExistingVacation = overlappingShift.Status == ShiftStatus.VACATION;
+                throw new InvalidOperationException(isExistingVacation
+                    ? "Cannot add vacation: this period overlaps an existing vacation entry."
+                    : "Cannot add vacation: this period overlaps an existing shift.");
             }
 
             int ByShiftId(Shift shift) => shift.Id;
@@ -86,44 +82,5 @@ namespace UBB_SE_2026_923_2.Services
             shiftRepository.AddShift(vacationShift);
         }
 
-        private static bool WouldExceedMonthlyVacationLimit(
-            IEnumerable<Shift> staffShifts,
-            DateTime newStartInclusive,
-            DateTime newEndExclusive,
-            int maxDaysPerMonth)
-        {
-            var daysByMonth = new Dictionary<(int Year, int Month), HashSet<DateTime>>();
-
-            bool IsVacationShift(Shift existingShift) => existingShift.Status == ShiftStatus.VACATION;
-
-            foreach (var shift in staffShifts.Where(IsVacationShift))
-            {
-                AddShiftDaysToBuckets(daysByMonth, shift.StartTime.Date, shift.EndTime.Date);
-            }
-
-            AddShiftDaysToBuckets(daysByMonth, newStartInclusive.Date, newEndExclusive.Date);
-
-            bool ExceedsLimit(HashSet<DateTime> daysInMonth) => daysInMonth.Count > maxDaysPerMonth;
-
-            return daysByMonth.Values.Any(ExceedsLimit);
-        }
-
-        private static void AddShiftDaysToBuckets(
-            Dictionary<(int Year, int Month), HashSet<DateTime>> buckets,
-            DateTime startInclusive,
-            DateTime endExclusive)
-        {
-            for (var day = startInclusive.Date; day < endExclusive.Date; day = day.AddDays(OneDay))
-            {
-                var key = (day.Year, day.Month);
-                if (!buckets.TryGetValue(key, out var daysInMonth))
-                {
-                    daysInMonth = new HashSet<DateTime>();
-                    buckets[key] = daysInMonth;
-                }
-
-                daysInMonth.Add(day);
-            }
-        }
     }
 }

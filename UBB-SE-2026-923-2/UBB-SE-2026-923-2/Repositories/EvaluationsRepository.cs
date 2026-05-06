@@ -52,6 +52,21 @@ namespace UBB_SE_2026_923_2.Repositories
             db.SaveChanges();
         }
 
+        public void UpdateEvaluation(int evaluationId, string diagnosis, string notes, string medications)
+        {
+            using var db = dbContextFactory.CreateDbContext();
+            var evaluation = db.MedicalEvaluations.FirstOrDefault(e => e.EvaluationID == evaluationId);
+            if (evaluation is null)
+            {
+                return;
+            }
+
+            evaluation.Symptoms = diagnosis ?? string.Empty;
+            evaluation.Notes = notes ?? string.Empty;
+            evaluation.MedicationsList = medications ?? string.Empty;
+            db.SaveChanges();
+        }
+
         public void DeleteEvaluation(int evaluationId)
         {
             using var db = dbContextFactory.CreateDbContext();
