@@ -124,6 +124,7 @@ namespace UBB_SE_2026_923_2.Models
             ActiveSubstances.Remove(substanceName);
         }
 
+
         public void AddNewBatchToItem(DateOnly newExpirationDate, int numberOfPacks)
         {
             if (Batches.ContainsKey(newExpirationDate))
