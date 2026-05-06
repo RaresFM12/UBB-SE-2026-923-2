@@ -7,10 +7,10 @@ namespace UBB_SE_2026_923_2.Views.Accounts
 {
     public sealed partial class ChangePasswordView : ContentDialog
     {
-        private UserAccountService accountService;
+        private IUserAccountService accountService;
         public ChangePasswordViewModel ViewModel { get; }
 
-        public ChangePasswordView(UserAccountService service)
+        public ChangePasswordView(IUserAccountService service)
         {
             this.InitializeComponent();
 
@@ -22,20 +22,17 @@ namespace UBB_SE_2026_923_2.Views.Accounts
 
         private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            try
-            {
-                ViewModel.OldPassword = OldPasswordBox.Password;
-                ViewModel.NewPassword = NewPasswordBox.Password;
-                ViewModel.ConfirmPassword = ConfirmPasswordBox.Password;
+            ViewModel.OldPassword = OldPasswordBox.Password;
+            ViewModel.NewPassword = NewPasswordBox.Password;
+            ViewModel.ConfirmPassword = ConfirmPasswordBox.Password;
 
-                ViewModel.ErrorMessage = null;
+            ViewModel.ErrorMessage = null;
 
-                ViewModel.ChangePasswordCommand.Execute(null);
-            }
-            catch (Exception ex)
+            ViewModel.ChangePasswordCommand.Execute(null);
+
+            if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
             {
                 args.Cancel = true;
-                ViewModel.ErrorMessage = ex.Message;
             }
         }
     }

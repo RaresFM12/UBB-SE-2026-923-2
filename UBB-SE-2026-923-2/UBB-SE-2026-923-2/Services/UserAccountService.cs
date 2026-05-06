@@ -168,6 +168,11 @@ namespace UBB_SE_2026_923_2.Services
                 throw new Exception("New password cannot be empty.");
             }
 
+            if (!userValidationService.IsCorrectPasswordFormat(newPassword))
+            {
+                throw new Exception("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character (!@#%^*).");
+            }
+
             if (newPassword != confirmNewPassword)
             {
                 throw new Exception("Passwords don't match");
