@@ -276,7 +276,7 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
         public CatalogPageViewModel()
         {
             SearchCommand = new RelayCommand(Search);
-            ApplyFiltersCommand = new RelayCommand(ApplyFilters);
+            ApplyFiltersCommand = new RelayCommand(ApplyFiltersFromButton);
             NextPageCommand = new RelayCommand(NextPage);
             PreviousPageCommand = new RelayCommand(PreviousPage);
             AddToCartCommand = new RelayCommand<UIItem>(AddToCart);
@@ -295,14 +295,18 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
             ApplyFilters();
         }
 
+        private void ApplyFiltersFromButton()
+        {
+            currentPage = 0;
+            ApplyFilters();
+        }
+
         private void ApplyFilters()
         {
             if (productService == null)
             {
                 return;
             }
-
-            currentPage = 0;
 
             var categories = BuildCategoryList();
             var priceRanges = BuildPriceRangeList();

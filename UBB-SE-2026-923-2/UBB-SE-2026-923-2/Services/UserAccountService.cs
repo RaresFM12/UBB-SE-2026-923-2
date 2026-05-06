@@ -92,7 +92,7 @@ namespace UBB_SE_2026_923_2.Services
 
             if (!userValidationService.IsCorrectPasswordFormat(password))
             {
-                throw new Exception("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character");
+                throw new Exception("Password must be 8+ characters and include uppercase, lowercase, digit, and a special character (!@#%^*).");
             }
 
             if (username != null && !userValidationService.IsCorrectUsernameFormat(username))
@@ -170,7 +170,7 @@ namespace UBB_SE_2026_923_2.Services
 
             if (!userValidationService.IsCorrectPasswordFormat(newPassword))
             {
-                throw new Exception("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character (!@#%^*).");
+                throw new Exception("Password must be 8+ characters and include uppercase, lowercase, digit, and a special character (!@#%^*).");
             }
 
             if (newPassword != confirmNewPassword)

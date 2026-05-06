@@ -63,7 +63,8 @@
                         CornerRadius="6"
                         Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
                     <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="{StaticResource AppErrorBrush}"/>
+                               Foreground="{StaticResource AppErrorBrush}"
+                               TextWrapping="Wrap"/>
                 </Border>
 
                 <Button Content="Register"
