@@ -101,9 +101,12 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task CreateAppointmentAsync(string patientName, int doctorId, DateTime date, TimeSpan startTime)
         {
+            await EnsureDoctorIsBookableAsync(doctorId);
+
             var appointment = new Appointment
             {
                 PatientName = patientName,
+                ExternalRefId = ExtractExternalRefId(patientName),
                 DoctorId = doctorId,
                 Date = date.Date,
                 StartTime = startTime,
@@ -111,13 +114,16 @@ namespace UBB_SE_2026_923_2.Services
                 Status = ScheduledStatus,
             };
             await PersistAppointmentAsync(appointment);
-            await staffRepository.UpdateStatusAsync(doctorId, InExaminationStatus);
         }
 
         public async Task BookAppointmentAsync(Appointment appointment)
         {
+            await EnsureDoctorIsBookableAsync(appointment.DoctorId);
+            if (string.IsNullOrWhiteSpace(appointment.ExternalRefId))
+            {
+                appointment.ExternalRefId = ExtractExternalRefId(appointment.PatientName);
+            }
             await PersistAppointmentAsync(appointment);
-            await staffRepository.UpdateStatusAsync(appointment.DoctorId, InExaminationStatus);
         }
 
         public async Task FinishAppointmentAsync(Appointment appointment)
@@ -132,16 +138,66 @@ namespace UBB_SE_2026_923_2.Services
 
             var allAppointments = await dataSource.GetAllAppointmentsAsync();
 
-            bool IsScheduledForSameDoctor(Appointment existingAppointment) =>
-                existingAppointment.DoctorId == appointment.DoctorId
-                && string.Equals(existingAppointment.Status, ScheduledStatus, StringComparison.OrdinalIgnoreCase);
+            DateTime finishedStart = appointment.Date.Date.Add(appointment.StartTime);
+            DateTime finishedEnd = appointment.Date.Date.Add(appointment.EndTime);
 
-            int activeAppointments = allAppointments.Count(IsScheduledForSameDoctor);
+            bool OverlapsFinishedWindow(Appointment existingAppointment)
+            {
+                if (existingAppointment.Id == appointment.Id)
+                {
+                    return false;
+                }
 
-            if (activeAppointments == NoActiveAppointmentsCount)
+                if (existingAppointment.DoctorId != appointment.DoctorId)
+                {
+                    return false;
+                }
+
+                if (!string.Equals(existingAppointment.Status, ScheduledStatus, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                DateTime otherStart = existingAppointment.Date.Date.Add(existingAppointment.StartTime);
+                DateTime otherEnd = existingAppointment.Date.Date.Add(existingAppointment.EndTime);
+                return otherStart < finishedEnd && otherEnd > finishedStart;
+            }
+
+            int concurrentAppointments = allAppointments.Count(OverlapsFinishedWindow);
+
+            if (concurrentAppointments == NoActiveAppointmentsCount)
             {
                 await staffRepository.UpdateStatusAsync(appointment.DoctorId, AvailableStatus);
             }
+        }
+
+        private async Task EnsureDoctorIsBookableAsync(int doctorId)
+        {
+            var doctor = staffRepository.GetStaffById(doctorId) as Doctor;
+            if (doctor == null)
+            {
+                return;
+            }
+
+            if (doctor.DoctorStatus == DoctorStatus.OFF_DUTY)
+            {
+                throw new InvalidOperationException(
+                    $"Doctor #{doctorId} is OFF_DUTY and cannot accept new appointments.");
+            }
+
+            await Task.CompletedTask;
+        }
+
+        private static string ExtractExternalRefId(string? patientName)
+        {
+            if (string.IsNullOrWhiteSpace(patientName))
+            {
+                return string.Empty;
+            }
+
+            return patientName.StartsWith(PatientNamePrefix, StringComparison.OrdinalIgnoreCase)
+                ? patientName.Substring(PatientNamePrefix.Length).Trim()
+                : patientName.Trim();
         }
 
         public async Task<IReadOnlyList<Appointment>> GetAppointmentsInRangeAsync(int doctorId, DateTime fromDate, DateTime toDate)
@@ -256,6 +312,7 @@ namespace UBB_SE_2026_923_2.Services
                 DoctorId = appointment.DoctorId,
                 DoctorName = (appointment.DoctorName ?? string.Empty).Trim(),
                 PatientName = patientName,
+                ExternalRefId = ExtractExternalRefId(patientName),
                 Date = appointment.Date,
                 StartTime = appointment.StartTime,
                 EndTime = appointment.EndTime,
