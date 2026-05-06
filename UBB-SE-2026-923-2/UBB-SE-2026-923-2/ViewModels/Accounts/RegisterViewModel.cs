@@ -15,6 +15,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         private string password;
         private string username;
         private string phoneNumber;
+        private string confirmPassword;
         private string errorMessage;
         private string selectedRole;
 
@@ -49,6 +50,16 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
             set
             {
                 password = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string ConfirmPassword
+        {
+            get => confirmPassword;
+            set
+            {
+                confirmPassword = value;
                 OnPropertyChanged();
             }
         }
@@ -95,6 +106,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
                 userAccountService.Register(
                     Email,
                     Password,
+                    ConfirmPassword,
                     Username,
                     PhoneNumber,
                     SelectedRole);

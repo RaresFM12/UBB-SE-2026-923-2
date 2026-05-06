@@ -47,6 +47,11 @@
                              PlaceholderText="Password"
                              PasswordChanged="PasswordBox_PasswordChanged"/>
 
+                <PasswordBox x:Name="ConfirmPasswordBox"
+                             Header="Confirm Password"
+                             PlaceholderText="Confirm password"
+                             PasswordChanged="ConfirmPasswordBox_PasswordChanged"/>
+
                 <ComboBox Header="Role"
                           PlaceholderText="Select Role"
                           ItemsSource="{Binding RoleOptions}"
