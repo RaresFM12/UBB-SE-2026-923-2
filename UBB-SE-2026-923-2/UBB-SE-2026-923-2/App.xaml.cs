@@ -81,7 +81,7 @@ namespace UBB_SE_2026_923_2
             // connection-string factory delegates.
 
             // Pharmacy-side repositories.
-            services.AddScoped<IUsersRepository, SQLUsersRepository>();
+            services.AddSingleton<IUsersRepository, HttpUsersRepository>();
             services.AddScoped<IItemsRepository, SQLItemsRepository>();
             services.AddScoped<IOrdersRepository, SQLOrdersRepository>();
             services.AddScoped<ISubstancesRepository, SQLSubstancesRepository>();
@@ -101,8 +101,8 @@ namespace UBB_SE_2026_923_2
             services.AddSingleton<IPharmacyShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
 
             // Hospital-side single-interface repositories.
-            services.AddSingleton<IPharmacyHandoverRepository, PharmacyHandoverRepository>();
-            services.AddSingleton<IShiftSwapRepository, ShiftSwapRepository>();
+            services.AddSingleton<IPharmacyHandoverRepository, HttpPharmacyHandoverRepository>();
+            services.AddSingleton<IShiftSwapRepository, HttpShiftSwapRepository>();
             services.AddSingleton<INotificationRepository, HttpNotificationRepository>();
             // Appointments now go through the Web API instead of EF Core directly.
             services.AddSingleton<IAppointmentRepository, HttpAppointmentRepository>();

@@ -42,6 +42,9 @@ builder.Services.AddScoped<IHangoutParticipantRepository, HangoutParticipantRepo
 builder.Services.AddScoped<IERDispatchRepository, ERDispatchRepository>();
 builder.Services.AddScoped<IEvaluationsRepository, EvaluationsRepository>();
 builder.Services.AddScoped<IHighRiskMedicineRepository, HighRiskMedicineRepository>();
+builder.Services.AddScoped<IPharmacyHandoverRepository, PharmacyHandoverRepository>();
+builder.Services.AddScoped<IShiftSwapRepository, ShiftSwapRepository>();
+builder.Services.AddScoped<IUsersRepository, SQLUsersRepository>();
 
 var app = builder.Build();
 

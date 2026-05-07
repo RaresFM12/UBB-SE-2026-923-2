@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -8,6 +9,11 @@ namespace UBB_SE_2026_923_2.Models
     {
         public int Quantity { get; set; }
         public float ExtraDiscountPercentage { get; set; }
+
+        // Parameterless ctor required by System.Text.Json for round-trip via API.
+        public BasketEntry()
+        {
+        }
 
         public BasketEntry(int quantity, float extraDiscountPercentage = 0f)
         {
@@ -18,7 +24,9 @@ namespace UBB_SE_2026_923_2.Models
 
     public class User
     {
-        public int Id { get; private set; }
+        // Setters opened up (previously private) so System.Text.Json can
+        // round-trip the User payload across the Web API.
+        public int Id { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public string PasswordHash { get; set; }
@@ -33,19 +41,19 @@ namespace UBB_SE_2026_923_2.Models
         public int PremenstrualSyndromeOption { get; set; }
 
         [NotMapped]
-        public Dictionary<int, Tuple<string, bool>> PeriodNotes { get; private set; }
+        public Dictionary<int, Tuple<string, bool>> PeriodNotes { get; set; }
 
         [NotMapped]
-        public List<int> StockAlerts { get; private set; }
+        public List<int> StockAlerts { get; set; }
 
         [NotMapped]
-        public List<int> FavoriteItems { get; private set; }
+        public List<int> FavoriteItems { get; set; }
 
         [NotMapped]
-        public Dictionary<int, float> UserDiscounts { get; private set; }
+        public Dictionary<int, float> UserDiscounts { get; set; }
 
         [NotMapped]
-        public Dictionary<int, BasketEntry> Basket { get; private set; }
+        public Dictionary<int, BasketEntry> Basket { get; set; }
 
         public bool DiscountNotifications { get; set; }
         public int LoyaltyPoints { get; set; }
@@ -54,9 +62,15 @@ namespace UBB_SE_2026_923_2.Models
         // The legacy [NotMapped] dictionaries above remain as the in-memory API
         // for existing callers; Phase 2 rewires repositories to populate these
         // collections instead, then the dictionary adapters can be removed.
+        // [JsonIgnore]: server projects these into the legacy dictionaries
+        // before returning, and they create cycles back to User over the wire.
+        [JsonIgnore]
         public ICollection<PeriodNote> PeriodNoteEntries { get; set; } = new List<PeriodNote>();
+        [JsonIgnore]
         public ICollection<UserDiscount> UserDiscountEntries { get; set; } = new List<UserDiscount>();
+        [JsonIgnore]
         public ICollection<UserNotification> UserNotificationEntries { get; set; } = new List<UserNotification>();
+        [JsonIgnore]
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
         private const int CycleDaysDefault = 28;
