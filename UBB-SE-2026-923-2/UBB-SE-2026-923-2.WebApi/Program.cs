@@ -14,7 +14,16 @@ builder.Services
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Several controllers expose nested request records that share short
+    // names (UpdateStatusRequest in Appointments, ERRequests, ShiftSwaps...).
+    // Use the full type name as the schemaId so Swashbuckle does not collide.
+    // The "+" separator that the CLR uses for nested types breaks JSON-Pointer
+    // refs ("#/components/schemas/...+...") in the Swagger UI, so replace it
+    // with "." to keep the ids ref-safe.
+    options.CustomSchemaIds(type => type.FullName?.Replace('+', '.'));
+});
 
 var connectionString = builder.Configuration.GetConnectionString("AppDatabase")
     ?? throw new InvalidOperationException("ConnectionStrings:AppDatabase is not configured.");
