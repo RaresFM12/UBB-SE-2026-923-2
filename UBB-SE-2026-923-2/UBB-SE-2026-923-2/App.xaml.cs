@@ -86,18 +86,19 @@ namespace UBB_SE_2026_923_2
             services.AddScoped<IOrdersRepository, SQLOrdersRepository>();
             services.AddScoped<ISubstancesRepository, SQLSubstancesRepository>();
 
-            // StaffRepository implements three interfaces — register the
-            // concrete type once and forward the interfaces to the same
-            // singleton instance.
-            services.AddSingleton<StaffRepository>();
-            services.AddSingleton<IStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
-            services.AddSingleton<IShiftManagementStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
-            services.AddSingleton<IPharmacyStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
+            // Staff goes through the Web API. One HTTP-backed instance is
+            // forwarded to all three staff-repository interfaces.
+            services.AddSingleton<HttpStaffRepository>();
+            services.AddSingleton<IStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
+            services.AddSingleton<IShiftManagementStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
+            services.AddSingleton<IPharmacyStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
 
-            services.AddSingleton<ShiftRepository>();
-            services.AddSingleton<IShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
-            services.AddSingleton<IShiftManagementShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
-            services.AddSingleton<IPharmacyShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
+            // Shifts now go through the Web API. One HTTP-backed instance is
+            // forwarded to all three shift-repository interfaces.
+            services.AddSingleton<HttpShiftRepository>();
+            services.AddSingleton<IShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
+            services.AddSingleton<IShiftManagementShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
+            services.AddSingleton<IPharmacyShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
 
             // Hospital-side single-interface repositories.
             services.AddSingleton<IPharmacyHandoverRepository, PharmacyHandoverRepository>();

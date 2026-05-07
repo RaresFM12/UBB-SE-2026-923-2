@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -14,7 +15,10 @@ namespace UBB_SE_2026_923_2.Models
         // Legacy interface-typed accessor preserved for existing call sites.
         // Delegates to the concrete Staff navigation so the EF-loaded entity
         // is visible through the old API. Phase 2 migrates callers onto Staff.
+        // [JsonIgnore] — interface property cannot be deserialized over HTTP;
+        // the Staff navigation already carries the same instance.
         [NotMapped]
+        [JsonIgnore]
         public IStaff AppointedStaff
         {
             get => Staff;

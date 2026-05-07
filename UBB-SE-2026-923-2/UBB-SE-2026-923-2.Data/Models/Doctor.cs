@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -11,7 +12,9 @@ namespace UBB_SE_2026_923_2.Models
         public DoctorStatus DoctorStatus { get; set; }
 
         // ---- EF Core navigation collections (persisted) ----
+        [JsonIgnore]
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+        [JsonIgnore]
         public ICollection<MedicalEvaluation> MedicalEvaluations { get; set; } = new List<MedicalEvaluation>();
 
         public Doctor()
