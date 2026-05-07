@@ -41,12 +41,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
             mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(sampleItems);
         }
 
-        private static Item CreateItem(int id, string name, string producer, string label, float price, int pills, int qty, float discount, string category)
+        private static Item CreateItem(int id, string name, string producer, string label, float price, int pills, int quantity, float discount, string category)
         {
             var item = new Item(id, name, producer, category, price, pills, label, "", "", discount: discount, quantity: 0);
-            if (qty > 0)
+            if (quantity > 0)
             {
-                item.Batches[DateOnly.FromDateTime(System.DateTime.Now.AddDays(30))] = qty;
+                item.Batches[DateOnly.FromDateTime(System.DateTime.Now.AddDays(30))] = quantity;
             }
             return item;
         }
