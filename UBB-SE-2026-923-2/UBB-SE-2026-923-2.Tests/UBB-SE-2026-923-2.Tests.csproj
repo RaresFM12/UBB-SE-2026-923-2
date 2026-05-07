@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>UBB_SE_2026_923_2.Tests</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UBB-SE-2026-923-2.Data\UBB-SE-2026-923-2.Data.csproj" />
+  </ItemGroup>
+
+  <!-- Link service source files from the WinUI project so we can unit-test them
+       without pulling in the entire Windows App SDK dependency tree. -->
+  <ItemGroup>
+    <Compile Include="..\UBB-SE-2026-923-2\Services\ISecurityService.cs" Link="LinkedSources\ISecurityService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\SecurityService.cs" Link="LinkedSources\SecurityService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\IUserValidationService.cs" Link="LinkedSources\IUserValidationService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\UserValidationService.cs" Link="LinkedSources\UserValidationService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\IUserAccountService.cs" Link="LinkedSources\IUserAccountService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\UserAccountService.cs" Link="LinkedSources\UserAccountService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IUsersRepository.cs" Link="LinkedSources\IUsersRepository.cs" />
+  </ItemGroup>
+
+</Project>
