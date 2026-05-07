@@ -20,7 +20,7 @@ public static class AppSettings
     private const string FallbackConnectionString =
         @"Data Source=localhost;Initial Catalog=HospitalDatabase;Integrated Security=True;Encrypt=True;Trust Server Certificate=True";
 
-    private const string FallbackWebApiBaseUrl = "http://localhost:5100/";
+    private const string FallbackWebApiBaseUrl = "http://172.30.241.79:8081/";
 
     private static readonly Lazy<IConfigurationRoot> ConfigurationLazy = new(BuildConfiguration);
 

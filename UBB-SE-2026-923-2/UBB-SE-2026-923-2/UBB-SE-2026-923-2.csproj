@@ -60,9 +60,9 @@
     <PackageReference Include="Syncfusion.Core.WinUI" Version="33.2.4" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="appsettings.json">
+    <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewer</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
 
   <!--
