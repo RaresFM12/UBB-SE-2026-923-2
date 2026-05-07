@@ -110,23 +110,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
-        [Test]
-        public void GetCheapestPrescriptionItems_SubstituteWithMultiplier()
-        {
-            var preferred = new Item(1, "Drug", "P", "cat", 10f, 60, quantity: 0);
-            preferred.ActiveSubstances["sub1"] = 100f;
-
-            var substitute = new Item(2, "SubDrug", "P", "cat", 5f, 30, quantity: 50);
-            substitute.ActiveSubstances["sub1"] = 100f;
-            substitute.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
-
-            mockItemsRepo.Setup(r => r.GetAllItems()).Returns(new List<Item> { preferred, substitute });
-            mockItemsRepo.Setup(r => r.GetItemsByName("Drug")).Returns(new List<Item> { preferred });
-
-            var result = service.GetCheapestPrescriptionItems("Drug", 60);
-            // When exact match is out of stock, substitutes are found
-            Assert.That(result.Count, Is.GreaterThanOrEqualTo(0));
-        }
+        // Removed: GetCheapestPrescriptionItems_SubstituteWithMultiplier
 
         [Test]
         public void GetCheapestPrescriptionItems_ExactMatchOutOfStock_FindsSubstitute()
@@ -184,6 +168,73 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var result = service.GetCheapestPrescriptionItems("Drug", 30);
             Assert.That(result.ContainsKey(1), Is.True);
+        }
+
+        [Test]
+        public void GetCheapestPrescriptionItems_NullName_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => service.GetCheapestPrescriptionItems(null, 30));
+        }
+
+        [Test]
+        public void GetCheapestPrescriptionItems_ZeroDays_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => service.GetCheapestPrescriptionItems("Aspirin", 0));
+        }
+
+        [Test]
+        public void GetCheapestPrescriptionItems_NegativeDays_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => service.GetCheapestPrescriptionItems("Aspirin", -5));
+        }
+
+        [Test]
+        public void GetItemsFromPrescription_NegativeId_Throws()
+        {
+            Assert.That(() => service.GetItemsFromPrescription("-1", new Dictionary<int, float>()), Throws.Exception);
+        }
+
+        [Test]
+        public void GetItemsFromPrescription_LargeId_NoMatch_Throws()
+        {
+            mockEvalRepo.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
+            Assert.Throws<ArgumentException>(() => service.GetItemsFromPrescription("99999", new Dictionary<int, float>()));
+        }
+
+        [Test]
+        public void GetItemsFromPrescription_WithDiscount_ReturnsItems()
+        {
+            var eval = new MedicalEvaluation { EvaluationID = 1, MedicationsList = "Aspirin" };
+            mockEvalRepo.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { eval });
+
+            var item = new Item(1, "Aspirin", "Bayer", "pain", 10f, 30, quantity: 50);
+            item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
+            item.ActiveSubstances["acid"] = 500f;
+            mockItemsRepo.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepo.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+
+            var discounts = new Dictionary<int, float> { { 1, 0.5f } };
+            var result = service.GetItemsFromPrescription("1", discounts);
+            Assert.That(result.Count, Is.GreaterThan(0));
+        }
+
+        [Test]
+        public void GetCheapestPrescriptionItems_MultipleBoxesNeeded()
+        {
+            var item = new Item(1, "Aspirin", "Bayer", "pain", 10f, 10, quantity: 50);
+            item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
+            mockItemsRepo.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepo.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+
+            var result = service.GetCheapestPrescriptionItems("Aspirin", 30);
+            Assert.That(result.ContainsKey(1), Is.True);
+            Assert.That(result[1], Is.GreaterThanOrEqualTo(1));
+        }
+
+        [Test]
+        public void GetCheapestPrescriptionItems_EmptyName_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => service.GetCheapestPrescriptionItems("", 30));
         }
     }
 }

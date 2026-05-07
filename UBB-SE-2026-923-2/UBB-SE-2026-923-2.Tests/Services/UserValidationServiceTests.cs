@@ -129,5 +129,161 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             Assert.That(validationService.IsCorrectUsernameFormat("johndoe"), Is.True);
         }
+
+        [Test]
+        public void IsCorrectEmailFormat_MultipleAts_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectEmailFormat("user@sub@domain.com"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectEmailFormat_SubdomainEmail_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectEmailFormat("user@sub.domain.com"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectEmailFormat_WhitespaceOnly_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectEmailFormat("   "), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectEmailFormat_DotBeforeAt_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectEmailFormat("user.name@domain.com"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectEmailFormat_PlusInLocal_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectEmailFormat("user+tag@domain.com"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectPasswordFormat_NullPassword_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectPasswordFormat(null!), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectPasswordFormat_EmptyPassword_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectPasswordFormat(""), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectPasswordFormat_WhitespaceOnly_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectPasswordFormat("   "), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectPasswordFormat_ExactlyEightChars_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectPasswordFormat("Abcdef1!"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectPasswordFormat_LongValidPassword_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectPasswordFormat("Abcdefghij1!"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectPasswordFormat_AllCriteriaMet_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectPasswordFormat("Test123!@"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectPhoneNumberFormat_NullPhone_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectPhoneNumberFormat(null!), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectPhoneNumberFormat_WhitespaceOnly_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectPhoneNumberFormat("   "), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectPhoneNumberFormat_SingleDigit_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectPhoneNumberFormat("5"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectPhoneNumberFormat_WithDashes_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectPhoneNumberFormat("071-111-111"), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectPhoneNumberFormat_WithSpaces_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectPhoneNumberFormat("071 111 111"), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectPhoneNumberFormat_WithPlusSign_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectPhoneNumberFormat("+40711111111"), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_NullUsername_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat(null!), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_EmptyUsername_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat(""), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_WhitespaceOnly_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat("   "), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_WithUnderscore_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat("john_doe_smith"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_SingleChar_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat("a"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_AllUppercase_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat("JOHN"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_MixedCase_ReturnsTrue()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat("JohnDoe"), Is.True);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_WithSpaces_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat("john doe"), Is.False);
+        }
+
+        [Test]
+        public void IsCorrectUsernameFormat_WithDot_ReturnsFalse()
+        {
+            Assert.That(validationService.IsCorrectUsernameFormat("john.doe"), Is.False);
+        }
     }
 }
