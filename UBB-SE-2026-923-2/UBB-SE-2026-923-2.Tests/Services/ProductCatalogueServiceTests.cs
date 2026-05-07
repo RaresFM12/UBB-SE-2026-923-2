@@ -38,7 +38,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 CreateItem(12, "Collagen", "Beauty", "beauty", 30f, 60, 10, 0.1f, "beauty"),
             };
 
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(sampleItems);
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(sampleItems);
         }
 
         private static Item CreateItem(int id, string name, string producer, string label, float price, int pills, int qty, float discount, string category)
@@ -84,14 +84,14 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItems_FilterByCategory_ReturnsMatching()
         {
             var result = service.GetItems(null, categories: new List<string> { "vitamins" }, pageSize: 100);
-            Assert.That(result.All(i => i.Category == "vitamins"), Is.True);
+            Assert.That(result.All(item => item.Category == "vitamins"), Is.True);
         }
 
         [Test]
         public void GetItems_FilterByMultipleCategories_ReturnsAll()
         {
             var result = service.GetItems(null, categories: new List<string> { "vitamins", "pain" }, pageSize: 100);
-            Assert.That(result.All(i => i.Category == "vitamins" || i.Category == "pain"), Is.True);
+            Assert.That(result.All(item => item.Category == "vitamins" || item.Category == "pain"), Is.True);
         }
 
         [Test]
@@ -105,7 +105,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItems_FilterByPriceRange_ReturnsInRange()
         {
             var result = service.GetItems(null, priceRanges: new List<(float, float)> { (0f, 10f) }, pageSize: 100);
-            Assert.That(result.All(i => i.Price * (1 - i.DiscountPercentage) <= 10f), Is.True);
+            Assert.That(result.All(item => item.Price * (1 - item.DiscountPercentage) <= 10f), Is.True);
         }
 
         [Test]
@@ -126,14 +126,14 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItems_StockFilterInStock_ReturnsOnlyInStock()
         {
             var result = service.GetItems(null, stockFilter: "in_stock", pageSize: 100);
-            Assert.That(result.All(i => i.Quantity > 0), Is.True);
+            Assert.That(result.All(item => item.Quantity > 0), Is.True);
         }
 
         [Test]
         public void GetItems_StockFilterLowStock_ReturnsLowStock()
         {
             var result = service.GetItems(null, stockFilter: "low_stock", pageSize: 100);
-            Assert.That(result.All(i => i.Quantity > 0 && i.Quantity < 10), Is.True);
+            Assert.That(result.All(item => item.Quantity > 0 && item.Quantity < 10), Is.True);
         }
 
         [Test]
@@ -154,14 +154,14 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItems_DiscountedTrue_ReturnsOnlyDiscounted()
         {
             var result = service.GetItems(null, discounted: true, pageSize: 100);
-            Assert.That(result.All(i => i.DiscountPercentage > 0), Is.True);
+            Assert.That(result.All(item => item.DiscountPercentage > 0), Is.True);
         }
 
         [Test]
         public void GetItems_DiscountedFalse_ReturnsOnlyNonDiscounted()
         {
             var result = service.GetItems(null, discounted: false, pageSize: 100);
-            Assert.That(result.All(i => i.DiscountPercentage == 0), Is.True);
+            Assert.That(result.All(item => item.DiscountPercentage == 0), Is.True);
         }
 
         [Test]
@@ -258,7 +258,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItems_CombinedFilters_Work()
         {
             var result = service.GetItems("i", categories: new List<string> { "vitamins" }, discounted: false, pageSize: 100);
-            Assert.That(result.All(i => i.Category == "vitamins" && i.DiscountPercentage == 0 && i.Name.Contains("i", System.StringComparison.OrdinalIgnoreCase)), Is.True);
+            Assert.That(result.All(item => item.Category == "vitamins" && item.DiscountPercentage == 0 && item.Name.Contains("i", System.StringComparison.OrdinalIgnoreCase)), Is.True);
         }
 
         [Test]
@@ -290,3 +290,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
     }
 }
+
+
+

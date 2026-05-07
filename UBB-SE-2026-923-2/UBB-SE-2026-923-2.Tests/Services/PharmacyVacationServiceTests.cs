@@ -45,7 +45,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Pharmacyst(2, "Alice", "Brown", "", true, "cert2", 3),
                 new Pharmacyst(3, "Alice", "Adams", "", true, "cert3", 2),
             };
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(pharmacists);
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(pharmacists);
             var result = service.GetPharmacists();
             Assert.That(result[0].FirstName, Is.EqualTo("Alice"));
             Assert.That(result[0].LastName, Is.EqualTo("Adams"));
@@ -57,7 +57,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetPharmacists_Empty_ReturnsEmpty()
         {
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst>());
             var result = service.GetPharmacists();
             Assert.That(result.Count, Is.EqualTo(0));
         }
@@ -72,7 +72,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void RegisterVacation_PharmacistNotFound_Throws()
         {
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst>());
             Assert.Throws<ArgumentException>(() =>
                 service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3)));
         }
@@ -81,10 +81,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RegisterVacation_OverlapsExistingShift_Throws()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
 
             var existingShift = new Shift(1, pharmacist, "Pharmacy", DateTime.Now.AddDays(2), DateTime.Now.AddDays(3), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             Assert.Throws<InvalidOperationException>(() =>
                 service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(4)));
@@ -94,10 +94,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RegisterVacation_OverlapsExistingVacation_ThrowsWithVacationMessage()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
 
             var existingShift = new Shift(1, pharmacist, "Vacation", DateTime.Now.AddDays(2), DateTime.Now.AddDays(3), ShiftStatus.VACATION);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             var ex = Assert.Throws<InvalidOperationException>(() =>
                 service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(4)));
@@ -108,11 +108,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RegisterVacation_NoOverlap_AddsShift()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
 
             service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3));
-            mockShiftRepository.Verify(r => r.AddShift(It.Is<Shift>(s =>
+            mockShiftRepository.Verify(repository => repository.AddShift(It.Is<Shift>(s =>
                 s.Status == ShiftStatus.VACATION &&
                 s.AppointedStaff.StaffID == 1)), Times.Once);
         }
@@ -121,8 +121,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RegisterVacation_SameDay_NoOverlap_Works()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
 
             var date = DateTime.Now.AddDays(10).Date;
             Assert.DoesNotThrow(() => service.RegisterVacation(1, date, date));
@@ -132,10 +132,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RegisterVacation_NonOverlappingShift_Works()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
 
             var existingShift = new Shift(1, pharmacist, "Pharmacy", DateTime.Now.AddDays(10), DateTime.Now.AddDays(11), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             Assert.DoesNotThrow(() => service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3)));
         }
@@ -144,7 +144,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetPharmacists_SinglePharmacist_ReturnsOne()
         {
             var pharmacists = new List<Pharmacyst> { new Pharmacyst(1, "John", "Doe", "", true, "cert", 5) };
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(pharmacists);
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(pharmacists);
             var result = service.GetPharmacists();
             Assert.That(result.Count, Is.EqualTo(1));
         }
@@ -155,7 +155,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var pharmacists = new List<Pharmacyst>();
             for (int i = 1; i <= 10; i++)
                 pharmacists.Add(new Pharmacyst(i, $"First{i}", $"Last{i}", "", true, $"cert{i}", i));
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(pharmacists);
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(pharmacists);
             var result = service.GetPharmacists();
             Assert.That(result.Count, Is.EqualTo(10));
         }
@@ -168,7 +168,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Pharmacyst(1, "Anna", "Zeta", "", true, "c1", 1),
                 new Pharmacyst(2, "Anna", "Alpha", "", true, "c2", 2),
             };
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(pharmacists);
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(pharmacists);
             var result = service.GetPharmacists();
             Assert.That(result[0].LastName, Is.EqualTo("Alpha"));
             Assert.That(result[1].LastName, Is.EqualTo("Zeta"));
@@ -178,22 +178,22 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RegisterVacation_ValidInput_ShiftHasVacationStatus()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
 
             service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3));
-            mockShiftRepository.Verify(r => r.AddShift(It.Is<Shift>(s => s.Status == ShiftStatus.VACATION)), Times.Once);
+            mockShiftRepository.Verify(repository => repository.AddShift(It.Is<Shift>(service => service.Status == ShiftStatus.VACATION)), Times.Once);
         }
 
         [Test]
         public void RegisterVacation_ValidInput_ShiftLocationIsVacation()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
 
             service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3));
-            mockShiftRepository.Verify(r => r.AddShift(It.Is<Shift>(s => s.Location == "Vacation")), Times.Once);
+            mockShiftRepository.Verify(repository => repository.AddShift(It.Is<Shift>(service => service.Location == "Vacation")), Times.Once);
         }
 
         [Test]
@@ -201,46 +201,46 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
             var otherStaff = new Pharmacyst(2, "C", "D", "", true, "cert2", 3);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
 
             var existingShift = new Shift(5, otherStaff, "Pharmacy", DateTime.Now.AddDays(20), DateTime.Now.AddDays(21), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3));
-            mockShiftRepository.Verify(r => r.AddShift(It.Is<Shift>(s => s.Id == 6)), Times.Once);
+            mockShiftRepository.Verify(repository => repository.AddShift(It.Is<Shift>(service => service.Id == 6)), Times.Once);
         }
 
         [Test]
         public void RegisterVacation_NoExistingShifts_IdIsOne()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
 
             service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3));
-            mockShiftRepository.Verify(r => r.AddShift(It.Is<Shift>(s => s.Id == 1)), Times.Once);
+            mockShiftRepository.Verify(repository => repository.AddShift(It.Is<Shift>(service => service.Id == 1)), Times.Once);
         }
 
         [Test]
         public void RegisterVacation_EndDateSameAsStart_Works()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
 
             var date = DateTime.Now.AddDays(5).Date;
             Assert.DoesNotThrow(() => service.RegisterVacation(1, date, date));
-            mockShiftRepository.Verify(r => r.AddShift(It.IsAny<Shift>()), Times.Once);
+            mockShiftRepository.Verify(repository => repository.AddShift(It.IsAny<Shift>()), Times.Once);
         }
 
         [Test]
         public void RegisterVacation_OverlapsExistingShift_ThrowsWithShiftMessage()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
 
             var existingShift = new Shift(1, pharmacist, "Pharmacy", DateTime.Now.AddDays(2), DateTime.Now.AddDays(3), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             var ex = Assert.Throws<InvalidOperationException>(() =>
                 service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(4)));
@@ -251,11 +251,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RegisterVacation_AdjacentShiftBefore_NoOverlap_Works()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
 
             var startDate = DateTime.Now.AddDays(5).Date;
             var existingShift = new Shift(1, pharmacist, "Pharmacy", startDate.AddDays(-2), startDate, ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             Assert.DoesNotThrow(() => service.RegisterVacation(1, startDate, startDate.AddDays(2)));
         }
@@ -264,12 +264,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RegisterVacation_AdjacentShiftAfter_NoOverlap_Works()
         {
             var pharmacist = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
 
             var startDate = DateTime.Now.AddDays(5).Date;
             var endDate = startDate.AddDays(2);
             var existingShift = new Shift(1, pharmacist, "Pharmacy", endDate.AddDays(1), endDate.AddDays(3), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             Assert.DoesNotThrow(() => service.RegisterVacation(1, startDate, endDate));
         }
@@ -279,10 +279,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var pharmacist1 = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
             var pharmacist2 = new Pharmacyst(2, "C", "D", "", true, "cert2", 3);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist1, pharmacist2 });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist1, pharmacist2 });
 
             var existingShift = new Shift(1, pharmacist2, "Pharmacy", DateTime.Now.AddDays(2), DateTime.Now.AddDays(3), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             Assert.DoesNotThrow(() => service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(4)));
         }
@@ -296,7 +296,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetPharmacists_ReturnsReadOnlyList()
         {
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst>());
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst>());
             var result = service.GetPharmacists();
             Assert.That(result, Is.InstanceOf<IReadOnlyList<Pharmacyst>>());
         }
@@ -306,12 +306,13 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var pharmacist1 = new Pharmacyst(1, "A", "B", "", true, "cert", 5);
             var pharmacist2 = new Pharmacyst(2, "C", "D", "", true, "cert2", 3);
-            mockStaffRepository.Setup(r => r.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist1, pharmacist2 });
+            mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist1, pharmacist2 });
 
             var existingShift = new Shift(1, pharmacist2, "Pharmacy", DateTime.Now.AddDays(1), DateTime.Now.AddDays(5), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
             Assert.DoesNotThrow(() => service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(5)));
         }
     }
 }
+

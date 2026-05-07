@@ -43,9 +43,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void Login_ValidCredentials_SetsCurrentUser()
         {
             var user = CreateUser(email: "paul@gmail.com", passwordHash: "abc123");
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("paul@gmail.com")).Returns(true);
-            mockUsersRepository.Setup(r => r.GetUserByEmail("paul@gmail.com")).Returns(user);
-            mockSecurityService.Setup(s => s.VerifyPassword("abc123", "abc123")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("paul@gmail.com")).Returns(true);
+            mockUsersRepository.Setup(repository => repository.GetUserByEmail("paul@gmail.com")).Returns(user);
+            mockSecurityService.Setup(service => service.VerifyPassword("abc123", "abc123")).Returns(true);
 
             userAccountService.Login("paul@gmail.com", "abc123");
 
@@ -61,7 +61,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Login_EmptyPassword_ThrowsArgumentException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("test@test.com")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("test@test.com")).Returns(true);
 
             Assert.Throws<ArgumentException>(() => userAccountService.Login("test@test.com", ""));
         }
@@ -69,7 +69,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Login_InvalidEmailFormat_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("invalid")).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("invalid")).Returns(false);
 
             var ex = Assert.Throws<Exception>(() => userAccountService.Login("invalid", "password"));
 
@@ -79,8 +79,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Login_EmailNotFound_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("unknown@test.com")).Returns(true);
-            mockUsersRepository.Setup(r => r.GetUserByEmail("unknown@test.com")).Returns((User)null!);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("unknown@test.com")).Returns(true);
+            mockUsersRepository.Setup(repository => repository.GetUserByEmail("unknown@test.com")).Returns((User)null!);
 
             var ex = Assert.Throws<Exception>(() => userAccountService.Login("unknown@test.com", "password"));
 
@@ -91,8 +91,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void Login_DisabledAccount_ThrowsException()
         {
             var user = CreateUser(isDisabled: true);
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("test@test.com")).Returns(true);
-            mockUsersRepository.Setup(r => r.GetUserByEmail("test@test.com")).Returns(user);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("test@test.com")).Returns(true);
+            mockUsersRepository.Setup(repository => repository.GetUserByEmail("test@test.com")).Returns(user);
 
             var ex = Assert.Throws<Exception>(() => userAccountService.Login("test@test.com", "password"));
 
@@ -103,9 +103,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void Login_IncorrectPassword_ThrowsException()
         {
             var user = CreateUser(passwordHash: "hashed");
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("test@test.com")).Returns(true);
-            mockUsersRepository.Setup(r => r.GetUserByEmail("test@test.com")).Returns(user);
-            mockSecurityService.Setup(s => s.VerifyPassword("wrong", "hashed")).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("test@test.com")).Returns(true);
+            mockUsersRepository.Setup(repository => repository.GetUserByEmail("test@test.com")).Returns(user);
+            mockSecurityService.Setup(service => service.VerifyPassword("wrong", "hashed")).Returns(false);
 
             var ex = Assert.Throws<Exception>(() => userAccountService.Login("test@test.com", "wrong"));
 
@@ -115,7 +115,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Register_InvalidEmailFormat_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("bad")).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("bad")).Returns(false);
 
             Assert.Throws<Exception>(() =>
                 userAccountService.Register("bad", "Pass1234!", "Pass1234!", "user", "0711111111"));
@@ -124,7 +124,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Register_EmptyPassword_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("a@b.c")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("a@b.c")).Returns(true);
 
             var ex = Assert.Throws<Exception>(() =>
                 userAccountService.Register("a@b.c", "", "", "user", "0711111111"));
@@ -135,7 +135,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Register_PasswordsDoNotMatch_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("a@b.c")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("a@b.c")).Returns(true);
 
             var ex = Assert.Throws<Exception>(() =>
                 userAccountService.Register("a@b.c", "Pass1234!", "Different1!", "user", "0711111111"));
@@ -146,8 +146,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Register_WeakPassword_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("a@b.c")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat("weak")).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("a@b.c")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPasswordFormat("weak")).Returns(false);
 
             Assert.Throws<Exception>(() =>
                 userAccountService.Register("a@b.c", "weak", "weak", "user", "0711111111"));
@@ -156,9 +156,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Register_InvalidUsername_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("a@b.c")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat("Pass1234!")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat("bad user!")).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("a@b.c")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPasswordFormat("Pass1234!")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectUsernameFormat("bad user!")).Returns(false);
 
             Assert.Throws<Exception>(() =>
                 userAccountService.Register("a@b.c", "Pass1234!", "Pass1234!", "bad user!", "0711111111"));
@@ -167,11 +167,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Register_InvalidPhoneNumber_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("a@b.c")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat("Pass1234!")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat("user")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat("abc")).Returns(false);
-            mockUsersRepository.Setup(r => r.GetUserByEmail("a@b.c")).Returns((User)null!);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("a@b.c")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPasswordFormat("Pass1234!")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectUsernameFormat("user")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPhoneNumberFormat("abc")).Returns(false);
+            mockUsersRepository.Setup(repository => repository.GetUserByEmail("a@b.c")).Returns((User)null!);
 
             Assert.Throws<Exception>(() =>
                 userAccountService.Register("a@b.c", "Pass1234!", "Pass1234!", "user", "abc"));
@@ -188,13 +188,13 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser();
             LoginAs(user);
-            mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat("newname")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat("0799999999")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectUsernameFormat("newname")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPhoneNumberFormat("0799999999")).Returns(true);
 
             userAccountService.UpdateProfile("newname", "0799999999");
 
             Assert.That(userAccountService.CurrentUser!.Username, Is.EqualTo("newname"));
-            mockUsersRepository.Verify(r => r.UpdateUser(It.IsAny<User>()), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(It.IsAny<User>()), Times.Once);
         }
 
         [Test]
@@ -202,7 +202,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser();
             LoginAs(user);
-            mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat("bad!")).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectUsernameFormat("bad!")).Returns(false);
 
             Assert.Throws<Exception>(() => userAccountService.UpdateProfile("bad!", "0711111111"));
         }
@@ -219,7 +219,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser(passwordHash: "oldhash");
             LoginAs(user);
-            mockSecurityService.Setup(s => s.VerifyPassword("wrong", "oldhash")).Returns(false);
+            mockSecurityService.Setup(service => service.VerifyPassword("wrong", "oldhash")).Returns(false);
 
             var ex = Assert.Throws<Exception>(() =>
                 userAccountService.ChangePassword("wrong", "New1234!", "New1234!"));
@@ -232,8 +232,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser(passwordHash: "oldhash");
             LoginAs(user);
-            mockSecurityService.Setup(s => s.VerifyPassword("old", "oldhash")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat("New1234!")).Returns(true);
+            mockSecurityService.Setup(service => service.VerifyPassword("old", "oldhash")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPasswordFormat("New1234!")).Returns(true);
 
             var ex = Assert.Throws<Exception>(() =>
                 userAccountService.ChangePassword("old", "New1234!", "Different!"));
@@ -246,14 +246,14 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser(passwordHash: "oldhash");
             LoginAs(user);
-            mockSecurityService.Setup(s => s.VerifyPassword("old", "oldhash")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat("New1234!")).Returns(true);
-            mockSecurityService.Setup(s => s.HashPassword("New1234!")).Returns("newhash");
+            mockSecurityService.Setup(service => service.VerifyPassword("old", "oldhash")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPasswordFormat("New1234!")).Returns(true);
+            mockSecurityService.Setup(service => service.HashPassword("New1234!")).Returns("newhash");
 
             userAccountService.ChangePassword("old", "New1234!", "New1234!");
 
             Assert.That(userAccountService.CurrentUser!.PasswordHash, Is.EqualTo("newhash"));
-            mockUsersRepository.Verify(r => r.UpdateUser(It.IsAny<User>()), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(It.IsAny<User>()), Times.Once);
         }
 
         [Test]
@@ -277,7 +277,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var admin = CreateUser(id: 1, isAdmin: true);
             var target = CreateUser(id: 5, username: "target");
             LoginAs(admin);
-            mockUsersRepository.Setup(r => r.GetAllUsers()).Returns(new List<User> { admin, target });
+            mockUsersRepository.Setup(repository => repository.GetAllUsers()).Returns(new List<User> { admin, target });
 
             var result = userAccountService.SearchUsers("id:5");
 
@@ -292,7 +292,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var user1 = CreateUser(id: 2, username: "john_doe");
             var user2 = CreateUser(id: 3, username: "jane_doe");
             LoginAs(admin);
-            mockUsersRepository.Setup(r => r.GetAllUsers()).Returns(new List<User> { admin, user1, user2 });
+            mockUsersRepository.Setup(repository => repository.GetAllUsers()).Returns(new List<User> { admin, user1, user2 });
 
             var result = userAccountService.SearchUsers("username:doe");
 
@@ -305,7 +305,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var admin = CreateUser(id: 1, isAdmin: true, email: "admin@test.com");
             var user1 = CreateUser(id: 2, email: "paul@gmail.com");
             LoginAs(admin);
-            mockUsersRepository.Setup(r => r.GetAllUsers()).Returns(new List<User> { admin, user1 });
+            mockUsersRepository.Setup(repository => repository.GetAllUsers()).Returns(new List<User> { admin, user1 });
 
             var result = userAccountService.SearchUsers("mail:gmail");
 
@@ -319,7 +319,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var admin = CreateUser(id: 1, isAdmin: true);
             var user1 = CreateUser(id: 2);
             LoginAs(admin);
-            mockUsersRepository.Setup(r => r.GetAllUsers()).Returns(new List<User> { admin, user1 });
+            mockUsersRepository.Setup(repository => repository.GetAllUsers()).Returns(new List<User> { admin, user1 });
 
             var result = userAccountService.SearchUsers("anything");
 
@@ -354,7 +354,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             userAccountService.PromoteToAdmin(client);
 
             Assert.That(client.IsAdmin, Is.True);
-            mockUsersRepository.Verify(r => r.UpdateUser(client), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(client), Times.Once);
         }
 
         [Test]
@@ -366,7 +366,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             userAccountService.PromoteToAdmin(client);
 
-            mockUsersRepository.Verify(r => r.UpdateUser(It.IsAny<User>()), Times.Never);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(It.IsAny<User>()), Times.Never);
         }
 
         [Test]
@@ -378,14 +378,14 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             userAccountService.PromoteToAdmin(client);
 
-            mockUsersRepository.Verify(r => r.UpdateUser(It.IsAny<User>()), Times.Never);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(It.IsAny<User>()), Times.Never);
         }
 
         private void LoginAs(User user)
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(user.Email)).Returns(true);
-            mockUsersRepository.Setup(r => r.GetUserByEmail(user.Email)).Returns(user);
-            mockSecurityService.Setup(s => s.VerifyPassword(user.PasswordHash, user.PasswordHash)).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat(user.Email)).Returns(true);
+            mockUsersRepository.Setup(repository => repository.GetUserByEmail(user.Email)).Returns(user);
+            mockSecurityService.Setup(service => service.VerifyPassword(user.PasswordHash, user.PasswordHash)).Returns(true);
             userAccountService.Login(user.Email, user.PasswordHash);
         }
 
@@ -398,7 +398,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Login_NullPassword_ThrowsArgumentException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("test@test.com")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("test@test.com")).Returns(true);
             Assert.Throws<ArgumentException>(() => userAccountService.Login("test@test.com", null));
         }
 
@@ -411,7 +411,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Login_WhitespacePassword_ThrowsArgumentException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("test@test.com")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("test@test.com")).Returns(true);
             Assert.Throws<ArgumentException>(() => userAccountService.Login("test@test.com", "   "));
         }
 
@@ -419,9 +419,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void Login_SuccessfulLogin_CurrentUserNotNull()
         {
             var user = CreateUser(email: "u@u.com", passwordHash: "pass");
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("u@u.com")).Returns(true);
-            mockUsersRepository.Setup(r => r.GetUserByEmail("u@u.com")).Returns(user);
-            mockSecurityService.Setup(s => s.VerifyPassword("pass", "pass")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("u@u.com")).Returns(true);
+            mockUsersRepository.Setup(repository => repository.GetUserByEmail("u@u.com")).Returns(user);
+            mockSecurityService.Setup(service => service.VerifyPassword("pass", "pass")).Returns(true);
 
             userAccountService.Login("u@u.com", "pass");
 
@@ -431,7 +431,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Register_EmptyEmail_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("")).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("")).Returns(false);
             Assert.Throws<Exception>(() =>
                 userAccountService.Register("", "Pass1234!", "Pass1234!", "user", "0711111111"));
         }
@@ -439,7 +439,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void Register_NullEmail_ThrowsException()
         {
-            mockUserValidationService.Setup(v => v.IsCorrectEmailFormat((string)null!)).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat((string)null!)).Returns(false);
             Assert.Throws<Exception>(() =>
                 userAccountService.Register(null, "Pass1234!", "Pass1234!", "user", "0711111111"));
         }
@@ -449,7 +449,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser(passwordHash: "oldhash");
             LoginAs(user);
-            mockSecurityService.Setup(s => s.VerifyPassword("", "oldhash")).Returns(false);
+            mockSecurityService.Setup(service => service.VerifyPassword("", "oldhash")).Returns(false);
 
             Assert.Throws<Exception>(() =>
                 userAccountService.ChangePassword("", "New1234!", "New1234!"));
@@ -460,8 +460,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser(passwordHash: "oldhash");
             LoginAs(user);
-            mockSecurityService.Setup(s => s.VerifyPassword("old", "oldhash")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat("weak")).Returns(false);
+            mockSecurityService.Setup(service => service.VerifyPassword("old", "oldhash")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPasswordFormat("weak")).Returns(false);
 
             Assert.Throws<Exception>(() =>
                 userAccountService.ChangePassword("old", "weak", "weak"));
@@ -472,8 +472,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser();
             LoginAs(user);
-            mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat("validname")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat("abc")).Returns(false);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectUsernameFormat("validname")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPhoneNumberFormat("abc")).Returns(false);
 
             Assert.Throws<Exception>(() => userAccountService.UpdateProfile("validname", "abc"));
         }
@@ -483,8 +483,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = CreateUser();
             LoginAs(user);
-            mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat("newname")).Returns(true);
-            mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat("0722222222")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectUsernameFormat("newname")).Returns(true);
+            mockUserValidationService.Setup(validationService => validationService.IsCorrectPhoneNumberFormat("0722222222")).Returns(true);
 
             userAccountService.UpdateProfile("newname", "0722222222");
 
@@ -497,7 +497,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var admin = CreateUser(id: 1, isAdmin: true);
             var user1 = CreateUser(id: 2);
             LoginAs(admin);
-            mockUsersRepository.Setup(r => r.GetAllUsers()).Returns(new List<User> { admin, user1 });
+            mockUsersRepository.Setup(repository => repository.GetAllUsers()).Returns(new List<User> { admin, user1 });
 
             var result = userAccountService.SearchUsers("");
 
@@ -509,7 +509,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var admin = CreateUser(id: 1, isAdmin: true);
             LoginAs(admin);
-            mockUsersRepository.Setup(r => r.GetAllUsers()).Returns(new List<User> { admin });
+            mockUsersRepository.Setup(repository => repository.GetAllUsers()).Returns(new List<User> { admin });
 
             var result = userAccountService.SearchUsers("id:999");
 
@@ -526,3 +526,5 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
     }
 }
+
+

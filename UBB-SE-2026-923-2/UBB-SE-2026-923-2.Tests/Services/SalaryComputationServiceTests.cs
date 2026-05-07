@@ -35,9 +35,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 mockStaffRepository.Object,
                 mockShiftRepository.Object);
 
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
-            mockHangoutRepository.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>());
-            mockHandoverRepository.Setup(r => r.GetAllPharmacyHandovers()).Returns(new List<PharmacyHandover>());
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout>());
+            mockHandoverRepository.Setup(repository => repository.GetAllPharmacyHandovers()).Returns(new List<PharmacyHandover>());
         }
 
         [Test]
@@ -133,8 +133,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
-            mockHangoutRepository.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
+            mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout>
             {
                 new Hangout(1, "Fun", "Desc", new DateTime(2025, 1, 15), 10)
             });
@@ -169,8 +169,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
             var shift = new Shift(1, pharmacist, "Pharmacy", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
-            mockHandoverRepository.Setup(r => r.GetAllPharmacyHandovers()).Returns(
-                Enumerable.Range(0, 20).Select(i => new PharmacyHandover
+            mockHandoverRepository.Setup(repository => repository.GetAllPharmacyHandovers()).Returns(
+                Enumerable.Range(0, 20).Select(index => new PharmacyHandover
                 {
                     PharmacistId = 1,
                     HandoverDate = new DateTime(2025, 1, 10)
@@ -184,7 +184,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetAllStaff_ReturnsFromRepo()
         {
             var doctor = new Doctor(1, "A", "B", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 0);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor });
             var result = service.GetAllStaff();
             Assert.That(result.Count, Is.EqualTo(1));
         }
@@ -202,7 +202,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var doctor = new Doctor(1, "A", "B", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 0);
             var shift = new Shift(1, doctor, "A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.ACTIVE);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
             var result = service.GetAllShifts();
             Assert.That(result.Count, Is.EqualTo(1));
         }
@@ -282,8 +282,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
-            mockHangoutRepository.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>());
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout>());
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
             Assert.That(result, Is.GreaterThan(600));
@@ -361,3 +361,5 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
     }
 }
+
+

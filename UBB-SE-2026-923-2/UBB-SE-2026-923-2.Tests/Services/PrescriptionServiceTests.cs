@@ -45,7 +45,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetItemsFromPrescription_EvaluationNotFound_Throws()
         {
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
             Assert.Throws<ArgumentException>(() => service.GetItemsFromPrescription("1", new Dictionary<int, float>()));
         }
 
@@ -53,7 +53,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItemsFromPrescription_EvaluationNoMedications_Throws()
         {
             var evaluation = new MedicalEvaluation { EvaluationID = 1, MedicationsList = "" };
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
             Assert.Throws<ArgumentException>(() => service.GetItemsFromPrescription("1", new Dictionary<int, float>()));
         }
 
@@ -61,13 +61,13 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItemsFromPrescription_ValidPrescription_ReturnsItems()
         {
             var evaluation = new MedicalEvaluation { EvaluationID = 1, MedicationsList = "Aspirin" };
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
 
             var item = new Item(1, "Aspirin", "Bayer", "pain", 10f, 30, quantity: 50);
             item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
             item.ActiveSubstances["acid"] = 500f;
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
 
             var result = service.GetItemsFromPrescription("1", new Dictionary<int, float>());
             Assert.That(result.Count, Is.GreaterThan(0));
@@ -77,12 +77,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItemsFromPrescription_NullUserDiscounts_DoesNotThrow()
         {
             var evaluation = new MedicalEvaluation { EvaluationID = 1, MedicationsList = "Aspirin" };
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
 
             var item = new Item(1, "Aspirin", "Bayer", "pain", 10f, 30, quantity: 50);
             item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
 
             Assert.DoesNotThrow(() => service.GetItemsFromPrescription("1", null));
         }
@@ -92,8 +92,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var item = new Item(1, "Aspirin", "Bayer", "pain", 10f, 30, quantity: 50);
             item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
 
             var result = service.GetCheapestPrescriptionItems("Aspirin", 30);
             Assert.That(result.ContainsKey(1), Is.True);
@@ -103,8 +103,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetCheapestPrescriptionItems_NoMatch_ReturnsEmpty()
         {
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item>());
-            mockItemsRepository.Setup(r => r.GetItemsByName("Unknown")).Returns(new List<Item>());
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item>());
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Unknown")).Returns(new List<Item>());
 
             var result = service.GetCheapestPrescriptionItems("Unknown", 30);
             Assert.That(result.Count, Is.EqualTo(0));
@@ -121,8 +121,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             item.ActiveSubstances["acid"] = 500f;
 
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item, substituteItem });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item, substituteItem });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
 
             var result = service.GetCheapestPrescriptionItems("Aspirin", 30);
             Assert.That(result.ContainsKey(2), Is.True);
@@ -132,15 +132,15 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItemsFromPrescription_MultipleMedications_ReturnsMultiple()
         {
             var evaluation = new MedicalEvaluation { EvaluationID = 1, MedicationsList = "Aspirin, Ibuprofen" };
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
 
             var item1 = new Item(1, "Aspirin", "Bayer", "pain", 10f, 30, quantity: 50);
             item1.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
             var item2 = new Item(2, "Ibuprofen", "Advil", "pain", 15f, 30, quantity: 50);
             item2.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item1, item2 });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item1 });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Ibuprofen")).Returns(new List<Item> { item2 });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item1, item2 });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item1 });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Ibuprofen")).Returns(new List<Item> { item2 });
 
             var result = service.GetItemsFromPrescription("1", new Dictionary<int, float>());
             Assert.That(result.Count, Is.EqualTo(2));
@@ -160,8 +160,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var expensive = new Item(2, "Drug", "Q", "cat", 20f, 30, quantity: 50);
             expensive.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
 
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { expensive, cheap });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Drug")).Returns(new List<Item> { expensive, cheap });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { expensive, cheap });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Drug")).Returns(new List<Item> { expensive, cheap });
 
             var result = service.GetCheapestPrescriptionItems("Drug", 30);
             Assert.That(result.ContainsKey(1), Is.True);
@@ -194,7 +194,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetItemsFromPrescription_LargeId_NoMatch_Throws()
         {
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
             Assert.Throws<ArgumentException>(() => service.GetItemsFromPrescription("99999", new Dictionary<int, float>()));
         }
 
@@ -202,13 +202,13 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItemsFromPrescription_WithDiscount_ReturnsItems()
         {
             var evaluation = new MedicalEvaluation { EvaluationID = 1, MedicationsList = "Aspirin" };
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { evaluation });
 
             var item = new Item(1, "Aspirin", "Bayer", "pain", 10f, 30, quantity: 50);
             item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
             item.ActiveSubstances["acid"] = 500f;
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
 
             var discounts = new Dictionary<int, float> { { 1, 0.5f } };
             var result = service.GetItemsFromPrescription("1", discounts);
@@ -220,8 +220,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var item = new Item(1, "Aspirin", "Bayer", "pain", 10f, 10, quantity: 50);
             item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
 
             var result = service.GetCheapestPrescriptionItems("Aspirin", 30);
             Assert.That(result.ContainsKey(1), Is.True);
@@ -245,8 +245,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var item = new Item(1, "Aspirin", "Bayer", "pain", 5f, 1, quantity: 50);
             item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
 
             var result = service.GetCheapestPrescriptionItems("Aspirin", 1);
             Assert.That(result, Is.Not.Null);
@@ -272,11 +272,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
             item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(-10))] = 50;
             item.ActiveSubstances["acid"] = 500f;
 
-            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
-            mockItemsRepository.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepository.Setup(repository => repository.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
 
             var result = service.GetCheapestPrescriptionItems("Aspirin", 30);
             Assert.That(result, Is.Not.Null);
         }
     }
 }
+

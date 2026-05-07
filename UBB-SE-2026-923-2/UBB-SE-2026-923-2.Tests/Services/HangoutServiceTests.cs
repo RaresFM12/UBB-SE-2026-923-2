@@ -37,9 +37,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 mockEvaluationsRepository.Object);
 
             doctor1 = new Doctor(1, "John", "Doe", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 5);
-            mockAppointmentRepository.Setup(r => r.GetAllAppointmentsAsync())
+            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
                 .ReturnsAsync(new List<Appointment>());
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void CreateHangout_ConflictingAppointment_Throws()
         {
             var hangoutDate = DateTime.Now.AddDays(10);
-            mockAppointmentRepository.Setup(r => r.GetAllAppointmentsAsync())
+            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
                 .ReturnsAsync(new List<Appointment>
                 {
                     new Appointment { DoctorId = 1, Date = hangoutDate.Date, Status = "Scheduled", StartTime = TimeSpan.FromHours(9) }
@@ -102,7 +102,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void CreateHangout_MedicalEvalOnDate_Throws()
         {
             var hangoutDate = DateTime.Now.AddDays(10);
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
             {
                 new MedicalEvaluation { Evaluator = doctor1, EvaluationDate = hangoutDate.Date }
             });
@@ -114,18 +114,18 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void CreateHangout_Valid_ReturnsId()
         {
-            mockHangoutRepository.Setup(r => r.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
+            mockHangoutRepository.Setup(repository => repository.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
                 .Returns(42);
 
             var result = service.CreateHangout("ValidTitle", "desc", DateTime.Now.AddDays(10), 5, doctor1);
             Assert.That(result, Is.EqualTo(42));
-            mockParticipantRepository.Verify(r => r.AddParticipant(42, 1), Times.Once);
+            mockParticipantRepository.Verify(repository => repository.AddParticipant(42, 1), Times.Once);
         }
 
         [Test]
         public void CreateHangout_NullDescription_Works()
         {
-            mockHangoutRepository.Setup(r => r.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
+            mockHangoutRepository.Setup(repository => repository.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
                 .Returns(1);
             Assert.DoesNotThrow(() => service.CreateHangout("ValidTitle", null, DateTime.Now.AddDays(10), 5, doctor1));
         }
@@ -133,7 +133,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void JoinHangout_HangoutNotFound_Throws()
         {
-            mockHangoutRepository.Setup(r => r.GetHangoutById(1)).Returns((Hangout)null);
+            mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns((Hangout)null);
             Assert.Throws<ArgumentException>(() => service.JoinHangout(1, doctor1));
         }
 
@@ -141,8 +141,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void JoinHangout_HangoutFull_Throws()
         {
             var hangout = new Hangout(1, "Title", "Desc", DateTime.Now.AddDays(10), 1);
-            mockHangoutRepository.Setup(r => r.GetHangoutById(1)).Returns(hangout);
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)> { (1, 2) });
+            mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)> { (1, 2) });
 
             Assert.Throws<InvalidOperationException>(() => service.JoinHangout(1, doctor1));
         }
@@ -151,8 +151,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void JoinHangout_AlreadyJoined_Throws()
         {
             var hangout = new Hangout(1, "Title", "Desc", DateTime.Now.AddDays(10), 10);
-            mockHangoutRepository.Setup(r => r.GetHangoutById(1)).Returns(hangout);
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
+            mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
 
             Assert.Throws<InvalidOperationException>(() => service.JoinHangout(1, doctor1));
         }
@@ -162,9 +162,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var hangoutDate = DateTime.Now.AddDays(10);
             var hangout = new Hangout(1, "Title", "Desc", hangoutDate, 10);
-            mockHangoutRepository.Setup(r => r.GetHangoutById(1)).Returns(hangout);
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
-            mockAppointmentRepository.Setup(r => r.GetAllAppointmentsAsync())
+            mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
                 .ReturnsAsync(new List<Appointment>
                 {
                     new Appointment { DoctorId = 1, Date = hangoutDate.Date, Status = "Scheduled", StartTime = TimeSpan.FromHours(9) }
@@ -177,20 +177,20 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void JoinHangout_Valid_AddsParticipant()
         {
             var hangout = new Hangout(1, "Title", "Desc", DateTime.Now.AddDays(10), 10);
-            mockHangoutRepository.Setup(r => r.GetHangoutById(1)).Returns(hangout);
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
 
             service.JoinHangout(1, doctor1);
-            mockParticipantRepository.Verify(r => r.AddParticipant(1, 1), Times.Once);
+            mockParticipantRepository.Verify(repository => repository.AddParticipant(1, 1), Times.Once);
         }
 
         [Test]
         public void GetAllHangouts_ReturnsHangoutsWithParticipants()
         {
             var hangout = new Hangout(1, "Title", "Desc", DateTime.Now.AddDays(10), 10);
-            mockHangoutRepository.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout> { hangout });
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout> { hangout });
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
 
             var result = service.GetAllHangouts();
             Assert.That(result.Count, Is.EqualTo(1));
@@ -200,9 +200,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetAllHangouts_Empty_ReturnsEmpty()
         {
-            mockHangoutRepository.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>());
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff>());
+            mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout>());
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff>());
 
             var result = service.GetAllHangouts();
             Assert.That(result.Count, Is.EqualTo(0));
@@ -213,9 +213,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var hangoutDate = DateTime.Now.AddDays(10);
             var hangout = new Hangout(1, "Title", "Desc", hangoutDate, 10);
-            mockHangoutRepository.Setup(r => r.GetHangoutById(1)).Returns(hangout);
-            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
-            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
+            mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
+            mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
             {
                 new MedicalEvaluation { Evaluator = doctor1, EvaluationDate = hangoutDate.Date }
             });
@@ -226,7 +226,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void CreateHangout_ExactMinTitleLength_Works()
         {
-            mockHangoutRepository.Setup(r => r.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
+            mockHangoutRepository.Setup(repository => repository.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
                 .Returns(1);
             Assert.DoesNotThrow(() => service.CreateHangout("Hello", "desc", DateTime.Now.AddDays(10), 5, doctor1));
         }
@@ -234,7 +234,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void CreateHangout_ExactMaxTitleLength_Works()
         {
-            mockHangoutRepository.Setup(r => r.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
+            mockHangoutRepository.Setup(repository => repository.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
                 .Returns(1);
             Assert.DoesNotThrow(() => service.CreateHangout(new string('A', 25), "desc", DateTime.Now.AddDays(10), 5, doctor1));
         }
@@ -247,3 +247,4 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
     }
 }
+

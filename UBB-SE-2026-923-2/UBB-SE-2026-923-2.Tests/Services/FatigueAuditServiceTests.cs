@@ -45,7 +45,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void ReassignShift_ValidIds_ReturnsTrue()
         {
             service.ReassignShift(1, 2);
-            mockShiftRepository.Verify(r => r.UpdateShiftStaffId(1, 2), Times.Once);
+            mockShiftRepository.Verify(repository => repository.UpdateShiftStaffId(1, 2), Times.Once);
         }
 
         [Test]
@@ -79,8 +79,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void RunAutoAudit_NoShifts_NoViolations()
         {
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
 
             var result = service.RunAutoAudit(DateTime.Now);
             Assert.That(result.Violations.Count, Is.EqualTo(0));
@@ -91,7 +91,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RunAutoAudit_ExceedMaxWeeklyHours_ReportsViolation()
         {
             var monday = new DateTime(2025, 1, 6); // Monday
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
             var shifts = new List<Shift>();
             for (int day = 0; day < 7; day++)
             {
@@ -100,58 +100,58 @@ namespace UBB_SE_2026_923_2.Tests.Services
                     monday.AddDays(day).AddHours(16), // 10 hours each = 70 total
                     ShiftStatus.SCHEDULED));
             }
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
             Assert.That(result.HasConflicts, Is.True);
-            Assert.That(result.Violations.Any(v => v.Rule == "MAX_60H_PER_WEEK"), Is.True);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MAX_60H_PER_WEEK"), Is.True);
         }
 
         [Test]
         public void RunAutoAudit_InsufficientRest_ReportsViolation()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
             var shifts = new List<Shift>
             {
                 new Shift(1, doctor1, "Ward", monday.AddHours(6), monday.AddHours(14), ShiftStatus.SCHEDULED),
                 new Shift(2, doctor1, "Ward", monday.AddHours(18), monday.AddHours(26), ShiftStatus.SCHEDULED), // 4h gap
             };
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
             Assert.That(result.HasConflicts, Is.True);
-            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.True);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MIN_12H_REST"), Is.True);
         }
 
         [Test]
         public void RunAutoAudit_SufficientRest_NoViolation()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
 
             var shifts = new List<Shift>
             {
                 new Shift(1, doctor1, "Ward", monday.AddHours(6), monday.AddHours(14), ShiftStatus.SCHEDULED),
                 new Shift(2, doctor1, "Ward", monday.AddDays(1).AddHours(6), monday.AddDays(1).AddHours(14), ShiftStatus.SCHEDULED), // 16h gap
             };
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
-            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.False);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MIN_12H_REST"), Is.False);
         }
 
         [Test]
         public void RunAutoAudit_CancelledShifts_Ignored()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
 
             var shifts = new List<Shift>
             {
                 new Shift(1, doctor1, "Ward", monday.AddHours(6), monday.AddHours(16), ShiftStatus.CANCELLED),
             };
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
             Assert.That(result.Violations.Count, Is.EqualTo(0));
@@ -161,24 +161,24 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RunAutoAudit_MultipleStaff_EachCheckedIndependently()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2 });
             var shifts = new List<Shift>();
             for (int day = 0; day < 7; day++)
             {
                 shifts.Add(new Shift(day + 1, doctor1, "Ward", monday.AddDays(day).AddHours(6), monday.AddDays(day).AddHours(16), ShiftStatus.SCHEDULED));
             }
             shifts.Add(new Shift(8, doctor2, "Ward", monday.AddHours(8), monday.AddHours(16), ShiftStatus.SCHEDULED));
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
-            Assert.That(result.Violations.All(v => v.StaffId == 1), Is.True);
+            Assert.That(result.Violations.All(violation => violation.StaffId == 1), Is.True);
         }
 
         [Test]
         public void RunAutoAudit_Exactly60Hours_NoViolation()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
             var shifts = new List<Shift>();
             for (int day = 0; day < 6; day++)
             {
@@ -187,34 +187,34 @@ namespace UBB_SE_2026_923_2.Tests.Services
                     monday.AddDays(day).AddHours(16),
                     ShiftStatus.SCHEDULED));
             }
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
-            Assert.That(result.Violations.Any(v => v.Rule == "MAX_60H_PER_WEEK"), Is.False);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MAX_60H_PER_WEEK"), Is.False);
         }
 
         [Test]
         public void RunAutoAudit_Exactly12HoursRest_NoViolation()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
 
             var shifts = new List<Shift>
             {
                 new Shift(1, doctor1, "Ward", monday.AddHours(6), monday.AddHours(14), ShiftStatus.SCHEDULED),
                 new Shift(2, doctor1, "Ward", monday.AddHours(26), monday.AddHours(34), ShiftStatus.SCHEDULED), // 12h gap exactly
             };
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
-            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.False);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MIN_12H_REST"), Is.False);
         }
 
         [Test]
         public void RunAutoAudit_NoStaff_NoViolations()
         {
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff>());
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff>());
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
 
             var result = service.RunAutoAudit(DateTime.Now);
             Assert.That(result.Violations.Count, Is.EqualTo(0));
@@ -224,7 +224,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RunAutoAudit_BothViolationsSameStaff_ReportsBoth()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
             var shifts = new List<Shift>();
             for (int day = 0; day < 7; day++)
             {
@@ -234,12 +234,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
                     ShiftStatus.SCHEDULED));
             }
             shifts.Add(new Shift(8, doctor1, "Ward", monday.AddHours(20), monday.AddHours(28), ShiftStatus.SCHEDULED));
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
             Assert.That(result.HasConflicts, Is.True);
-            Assert.That(result.Violations.Any(v => v.Rule == "MAX_60H_PER_WEEK"), Is.True);
-            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.True);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MAX_60H_PER_WEEK"), Is.True);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MIN_12H_REST"), Is.True);
         }
 
         [Test]
@@ -247,14 +247,14 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var result = service.ReassignShift(5, 10);
             Assert.That(result, Is.True);
-            mockShiftRepository.Verify(r => r.UpdateShiftStaffId(5, 10), Times.Once);
+            mockShiftRepository.Verify(repository => repository.UpdateShiftStaffId(5, 10), Times.Once);
         }
 
         [Test]
         public void RunAutoAudit_ActiveShifts_AreConsidered()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
 
             var shifts = new List<Shift>();
             for (int day = 0; day < 7; day++)
@@ -264,7 +264,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
                     monday.AddDays(day).AddHours(16),
                     ShiftStatus.ACTIVE));
             }
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
             Assert.That(result.HasConflicts, Is.True);
@@ -274,24 +274,24 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RunAutoAudit_CompletedShifts_AreConsidered()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
 
             var shifts = new List<Shift>
             {
                 new Shift(1, doctor1, "Ward", monday.AddHours(6), monday.AddHours(14), ShiftStatus.COMPLETED),
                 new Shift(2, doctor1, "Ward", monday.AddHours(18), monday.AddHours(26), ShiftStatus.COMPLETED), // 4h gap
             };
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
-            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.True);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MIN_12H_REST"), Is.True);
         }
 
         [Test]
         public void RunAutoAudit_ShiftsFromDifferentWeek_NotCounted()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
             var nextMonday = monday.AddDays(7);
             var shifts = new List<Shift>();
             for (int day = 0; day < 7; day++)
@@ -301,23 +301,23 @@ namespace UBB_SE_2026_923_2.Tests.Services
                     nextMonday.AddDays(day).AddHours(16),
                     ShiftStatus.SCHEDULED));
             }
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
-            Assert.That(result.Violations.Any(v => v.Rule == "MAX_60H_PER_WEEK"), Is.False);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MAX_60H_PER_WEEK"), Is.False);
         }
 
         [Test]
         public void RunAutoAudit_SingleShortShift_NoViolations()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
 
             var shifts = new List<Shift>
             {
                 new Shift(1, doctor1, "Ward", monday.AddHours(9), monday.AddHours(13), ShiftStatus.SCHEDULED),
             };
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
             Assert.That(result.HasConflicts, Is.False);
@@ -328,7 +328,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void RunAutoAudit_ThreeShiftsWithSufficientRest_NoRestViolation()
         {
             var monday = new DateTime(2025, 1, 6);
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
 
             var shifts = new List<Shift>
             {
@@ -336,10 +336,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Shift(2, doctor1, "Ward", monday.AddDays(1).AddHours(6), monday.AddDays(1).AddHours(14), ShiftStatus.SCHEDULED),
                 new Shift(3, doctor1, "Ward", monday.AddDays(2).AddHours(6), monday.AddDays(2).AddHours(14), ShiftStatus.SCHEDULED),
             };
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(shifts);
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = service.RunAutoAudit(monday);
-            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.False);
+            Assert.That(result.Violations.Any(violation => violation.Rule == "MIN_12H_REST"), Is.False);
         }
     }
 }
+
+

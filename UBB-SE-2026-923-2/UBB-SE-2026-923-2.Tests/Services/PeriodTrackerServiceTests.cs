@@ -25,7 +25,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             service = new PeriodTrackerService(mockUsersRepository.Object, mockCurrentUserService.Object);
 
             testUser = new User(1, "a@b.com", "123", "hash", false, false, "user1", false, 0);
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns(testUser);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns(testUser);
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetCurrentUser_NullUser_ReturnsNull()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             var result = service.GetCurrentUser();
             Assert.That(result, Is.Null);
         }
@@ -46,7 +46,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetTrackerState_NullUser_ReturnsDefault()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             var result = service.GetTrackerState();
             Assert.That(result.CycleDays, Is.EqualTo(28));
             Assert.That(result.PeriodLasts, Is.EqualTo(5));
@@ -58,7 +58,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             testUser.CycleDays = 30;
             testUser.PeriodLasts = 6;
-            mockUsersRepository.Setup(r => r.UserHasPeriodTracker(1)).Returns(true);
+            mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(true);
             var result = service.GetTrackerState();
             Assert.That(result.CycleDays, Is.EqualTo(30));
             Assert.That(result.PeriodLasts, Is.EqualTo(6));
@@ -68,7 +68,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetNotes_NullUser_ReturnsEmpty()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             var result = service.GetNotes();
             Assert.That(result.Count, Is.EqualTo(0));
         }
@@ -92,7 +92,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetMaxNoteId_NullUser_ReturnsZero()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             var result = service.GetMaxNoteId();
             Assert.That(result, Is.EqualTo(0));
         }
@@ -110,7 +110,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void UpdatePeriodTracker_NullUser_DoesNotThrow()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             Assert.DoesNotThrow(() => service.UpdatePeriodTracker(DateTimeOffset.Now, 28, 5, 0));
         }
 
@@ -118,7 +118,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void UpdatePeriodTracker_ValidUser_UpdatesAndSaves()
         {
             service.UpdatePeriodTracker(new DateTimeOffset(new DateTime(2025, 3, 1)), 30, 6, 1);
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
             Assert.That(testUser.CycleDays, Is.EqualTo(30));
             Assert.That(testUser.PeriodLasts, Is.EqualTo(6));
         }
@@ -126,7 +126,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void AddNote_NullUser_DoesNotThrow()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             Assert.DoesNotThrow(() => service.AddNote("test"));
         }
 
@@ -134,7 +134,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void AddNote_ValidUser_AddsNote()
         {
             service.AddNote("My note");
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
             Assert.That(testUser.PeriodNotes.Count, Is.EqualTo(1));
             Assert.That(testUser.PeriodNotes.Values.First().Item1, Is.EqualTo("My note"));
         }
@@ -143,14 +143,14 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void AddNote_NullBody_AddsEmptyString()
         {
             service.AddNote(null);
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
             Assert.That(testUser.PeriodNotes.Values.First().Item1, Is.EqualTo(""));
         }
 
         [Test]
         public void UpdateNote_NullUser_DoesNotThrow()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             Assert.DoesNotThrow(() => service.UpdateNote(1, "body", false));
         }
 
@@ -161,7 +161,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             service.UpdateNote(1, "New", true);
             Assert.That(testUser.PeriodNotes[1].Item1, Is.EqualTo("New"));
             Assert.That(testUser.PeriodNotes[1].Item2, Is.True);
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
         }
 
         [Test]
@@ -175,7 +175,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void DeleteNote_NullUser_DoesNotThrow()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             Assert.DoesNotThrow(() => service.DeleteNote(1));
         }
 
@@ -185,7 +185,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             testUser.AddPeriodNoteToUser(1, "Note", false);
             service.DeleteNote(1);
             Assert.That(testUser.PeriodNotes.ContainsKey(1), Is.False);
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
         }
 
         [Test]
@@ -197,7 +197,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void SaveCurrentUser_NullUser_DoesNotThrow()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             Assert.DoesNotThrow(() => service.SaveCurrentUser());
         }
 
@@ -205,7 +205,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void SaveCurrentUser_ValidUser_CallsUpdate()
         {
             service.SaveCurrentUser();
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
         }
 
         [Test]
@@ -219,7 +219,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetTrackerState_UserNoPeriodTracker_HasPeriodTrackerFalse()
         {
-            mockUsersRepository.Setup(r => r.UserHasPeriodTracker(1)).Returns(false);
+            mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(false);
             var result = service.GetTrackerState();
             Assert.That(result.HasPeriodTracker, Is.False);
         }
@@ -273,7 +273,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetTrackerState_DefaultCycleDays_Returns28()
         {
-            mockUsersRepository.Setup(r => r.UserHasPeriodTracker(1)).Returns(true);
+            mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(true);
             var result = service.GetTrackerState();
             Assert.That(result.CycleDays, Is.EqualTo(testUser.CycleDays));
         }
@@ -290,7 +290,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetTrackerState_ValidUser_ReturnsPremenstrualSyndromeOption()
         {
             testUser.PremenstrualSyndromeOption = 2;
-            mockUsersRepository.Setup(r => r.UserHasPeriodTracker(1)).Returns(true);
+            mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(true);
             var result = service.GetTrackerState();
             Assert.That(result.PremenstrualSyndromeOption, Is.EqualTo(2));
         }
@@ -299,7 +299,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetTrackerState_UserWithConfiguredStartDate_ReturnsConfiguredDate()
         {
             testUser.StartPeriodDate = new DateOnly(2025, 3, 15);
-            mockUsersRepository.Setup(r => r.UserHasPeriodTracker(1)).Returns(true);
+            mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(true);
             var result = service.GetTrackerState();
             Assert.That(result.StartPeriodDate.DateTime.Date, Is.EqualTo(new DateTime(2025, 3, 15)));
         }
@@ -331,7 +331,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void UpdatePeriodTracker_CallsSaveCurrentUser()
         {
             service.UpdatePeriodTracker(DateTimeOffset.Now, 28, 5, 0);
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
         }
 
         [Test]
@@ -374,7 +374,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             testUser.AddPeriodNoteToUser(1, "Old", false);
             service.UpdateNote(1, "New", false);
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
         }
 
         [Test]
@@ -382,7 +382,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             testUser.AddPeriodNoteToUser(1, "Note", false);
             service.DeleteNote(1);
-            mockUsersRepository.Verify(r => r.UpdateUser(testUser), Times.Once);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(testUser), Times.Once);
         }
 
         [Test]
@@ -400,7 +400,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void DeleteNote_NullNotes_DoesNotThrow()
         {
-            mockCurrentUserService.Setup(s => s.RaresCurrentUser).Returns((User)null);
+            mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
             Assert.DoesNotThrow(() => service.DeleteNote(1));
         }
 
@@ -460,7 +460,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetTrackerState_AfterUpdate_ReflectsNewValues()
         {
-            mockUsersRepository.Setup(r => r.UserHasPeriodTracker(1)).Returns(true);
+            mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(true);
             service.UpdatePeriodTracker(new DateTimeOffset(new DateTime(2025, 1, 1)), 35, 7, 1);
             var result = service.GetTrackerState();
             Assert.That(result.CycleDays, Is.EqualTo(35));
@@ -499,7 +499,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetTrackerState_StartPeriodDateMidnight_HasZeroTime()
         {
             testUser.StartPeriodDate = new DateOnly(2025, 5, 10);
-            mockUsersRepository.Setup(r => r.UserHasPeriodTracker(1)).Returns(true);
+            mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(true);
             var result = service.GetTrackerState();
             Assert.That(result.StartPeriodDate.Hour, Is.EqualTo(0));
             Assert.That(result.StartPeriodDate.Minute, Is.EqualTo(0));
@@ -528,7 +528,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void DeleteNote_DoesNotCallSave_WhenNoteNotFound()
         {
             service.DeleteNote(999);
-            mockUsersRepository.Verify(r => r.UpdateUser(It.IsAny<User>()), Times.Never);
+            mockUsersRepository.Verify(repository => repository.UpdateUser(It.IsAny<User>()), Times.Never);
         }
 
         [Test]
@@ -543,7 +543,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetTrackerState_AfterMultipleUpdates_ReturnsLatest()
         {
-            mockUsersRepository.Setup(r => r.UserHasPeriodTracker(1)).Returns(true);
+            mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(true);
             service.UpdatePeriodTracker(DateTimeOffset.Now, 25, 4, 0);
             service.UpdatePeriodTracker(DateTimeOffset.Now, 32, 8, 2);
             var result = service.GetTrackerState();
@@ -591,3 +591,4 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
     }
 }
+

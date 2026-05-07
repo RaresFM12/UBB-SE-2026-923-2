@@ -35,55 +35,55 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void SetShiftActive_ExistingShift_UpdatesStatus()
         {
             var shift = new Shift(1, doctor1, "Ward A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             service.SetShiftActive(1);
-            mockShiftRepository.Verify(r => r.UpdateShiftStatus(1, ShiftStatus.ACTIVE), Times.Once);
-            mockStaffRepository.Verify(r => r.UpdateStaffAvailability(1, true, DoctorStatus.AVAILABLE), Times.Once);
+            mockShiftRepository.Verify(repository => repository.UpdateShiftStatus(1, ShiftStatus.ACTIVE), Times.Once);
+            mockStaffRepository.Verify(repository => repository.UpdateStaffAvailability(1, true, DoctorStatus.AVAILABLE), Times.Once);
         }
 
         [Test]
         public void SetShiftActive_NonExistingShift_DoesNothing()
         {
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
             service.SetShiftActive(99);
-            mockShiftRepository.Verify(r => r.UpdateShiftStatus(It.IsAny<int>(), It.IsAny<ShiftStatus>()), Times.Never);
+            mockShiftRepository.Verify(repository => repository.UpdateShiftStatus(It.IsAny<int>(), It.IsAny<ShiftStatus>()), Times.Never);
         }
 
         [Test]
         public void CancelShift_ExistingActiveShift_CancelsAndUpdatesAvailability()
         {
             var shift = new Shift(1, doctor1, "Ward A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.ACTIVE);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             service.CancelShift(1);
-            mockShiftRepository.Verify(r => r.UpdateShiftStatus(1, ShiftStatus.CANCELLED), Times.Once);
-            mockStaffRepository.Verify(r => r.UpdateStaffAvailability(1, false, DoctorStatus.OFF_DUTY), Times.Once);
+            mockShiftRepository.Verify(repository => repository.UpdateShiftStatus(1, ShiftStatus.CANCELLED), Times.Once);
+            mockStaffRepository.Verify(repository => repository.UpdateStaffAvailability(1, false, DoctorStatus.OFF_DUTY), Times.Once);
         }
 
         [Test]
         public void CancelShift_ExistingScheduledShift_CancelsNoAvailabilityUpdate()
         {
             var shift = new Shift(1, doctor1, "Ward A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             service.CancelShift(1);
-            mockShiftRepository.Verify(r => r.UpdateShiftStatus(1, ShiftStatus.CANCELLED), Times.Once);
-            mockStaffRepository.Verify(r => r.UpdateStaffAvailability(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<DoctorStatus>()), Times.Never);
+            mockShiftRepository.Verify(repository => repository.UpdateShiftStatus(1, ShiftStatus.CANCELLED), Times.Once);
+            mockStaffRepository.Verify(repository => repository.UpdateStaffAvailability(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<DoctorStatus>()), Times.Never);
         }
 
         [Test]
         public void CancelShift_NonExistingShift_DoesNothing()
         {
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
             service.CancelShift(99);
-            mockShiftRepository.Verify(r => r.UpdateShiftStatus(It.IsAny<int>(), It.IsAny<ShiftStatus>()), Times.Never);
+            mockShiftRepository.Verify(repository => repository.UpdateShiftStatus(It.IsAny<int>(), It.IsAny<ShiftStatus>()), Times.Never);
         }
 
         [Test]
         public void ValidateNoOverlap_NoShifts_ReturnsTrue()
         {
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
             Assert.That(service.ValidateNoOverlap(1, DateTime.Now, DateTime.Now.AddHours(8)), Is.True);
         }
 
@@ -92,7 +92,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             Assert.That(service.ValidateNoOverlap(1, now.AddHours(4), now.AddHours(12)), Is.False);
         }
@@ -102,7 +102,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.CANCELLED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             Assert.That(service.ValidateNoOverlap(1, now.AddHours(4), now.AddHours(12)), Is.True);
         }
@@ -112,7 +112,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.COMPLETED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             Assert.That(service.ValidateNoOverlap(1, now.AddHours(4), now.AddHours(12)), Is.True);
         }
@@ -122,7 +122,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor2, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             Assert.That(service.ValidateNoOverlap(1, now.AddHours(4), now.AddHours(12)), Is.True);
         }
@@ -130,11 +130,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void TryAddShift_NoOverlap_AddsAndReturnsTrue()
         {
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
             var now = DateTime.Now;
             var result = service.TryAddShift(doctor1, now, now.AddHours(8), "Ward A");
             Assert.That(result, Is.True);
-            mockShiftRepository.Verify(r => r.AddShift(It.IsAny<Shift>()), Times.Once);
+            mockShiftRepository.Verify(repository => repository.AddShift(It.IsAny<Shift>()), Times.Once);
         }
 
         [Test]
@@ -142,11 +142,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             var result = service.TryAddShift(doctor1, now.AddHours(4), now.AddHours(12), "Ward B");
             Assert.That(result, Is.False);
-            mockShiftRepository.Verify(r => r.AddShift(It.IsAny<Shift>()), Times.Never);
+            mockShiftRepository.Verify(repository => repository.AddShift(It.IsAny<Shift>()), Times.Never);
         }
 
         [Test]
@@ -200,7 +200,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
             var existingShift = new Shift(2, doctor2, "Ward B", now.AddHours(4), now.AddHours(12), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift, existingShift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift, existingShift });
 
             Assert.That(service.ReassignShift(shift, doctor2), Is.False);
         }
@@ -210,11 +210,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             var result = service.ReassignShift(shift, doctor2);
             Assert.That(result, Is.True);
-            mockShiftRepository.Verify(r => r.UpdateShiftStaffId(1, 2), Times.Once);
+            mockShiftRepository.Verify(repository => repository.UpdateShiftStaffId(1, 2), Times.Once);
         }
 
         [Test]
@@ -223,8 +223,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var today = DateTime.Today;
             var shift1 = new Shift(1, doctor1, "Ward A", today.AddHours(8), today.AddHours(16), ShiftStatus.SCHEDULED);
             var shift2 = new Shift(2, doctor2, "Ward B", today.AddDays(1).AddHours(8), today.AddDays(1).AddHours(16), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift1, shift2 });
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2 });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift1, shift2 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2 });
 
             var result = service.GetDailyShifts(today);
             Assert.That(result.Count, Is.EqualTo(1));
@@ -237,8 +237,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var monday = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday);
             var shift1 = new Shift(1, doctor1, "Ward A", monday.AddHours(8), monday.AddHours(16), ShiftStatus.SCHEDULED);
             var shift2 = new Shift(2, doctor2, "Ward B", monday.AddDays(10).AddHours(8), monday.AddDays(10).AddHours(16), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift1, shift2 });
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2 });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift1, shift2 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2 });
 
             var result = service.GetWeeklyShifts(monday);
             Assert.That(result.Count, Is.EqualTo(1));
@@ -250,8 +250,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var now = DateTime.Now;
             var shift1 = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.ACTIVE);
             var shift2 = new Shift(2, doctor2, "Ward B", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift1, shift2 });
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2 });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift1, shift2 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2 });
 
             var result = service.GetActiveShifts();
             Assert.That(result.Count, Is.EqualTo(1));
@@ -263,7 +263,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             Assert.That(service.IsStaffWorkingDuring(1, now.AddHours(1), now.AddHours(2)), Is.True);
         }
@@ -273,7 +273,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             Assert.That(service.IsStaffWorkingDuring(1, now.AddHours(10), now.AddHours(12)), Is.False);
         }
@@ -283,7 +283,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
             Assert.That(service.IsStaffWorkingDuring(2, now.AddHours(1), now.AddHours(2)), Is.False);
         }
@@ -293,18 +293,18 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var now = DateTime.Now;
             var shift = new Shift(1, doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2, pharmacist1 });
+            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2, pharmacist1 });
 
             var result = service.FindStaffReplacements(shift);
-            Assert.That(result.All(s => s is Doctor), Is.True);
-            Assert.That(result.All(s => s.StaffID != 1), Is.True);
+            Assert.That(result.All(staff => staff is Doctor), Is.True);
+            Assert.That(result.All(service => service.StaffID != 1), Is.True);
         }
 
         [Test]
         public void GetSpecializationsAndCertificationsForLocation_Pharmacy_ReturnsCerts()
         {
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, pharmacist1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1, pharmacist1 });
             var result = service.GetSpecializationsAndCertificationsForLocation("Pharmacy");
             Assert.That(result.Contains("CertA"), Is.True);
         }
@@ -312,10 +312,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetSpecializationsAndCertificationsForLocation_Hospital_ReturnsSpecializations()
         {
-            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2, pharmacist1 });
+            mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor1, doctor2, pharmacist1 });
             var result = service.GetSpecializationsAndCertificationsForLocation("Hospital");
             Assert.That(result.Contains("Cardiology"), Is.True);
             Assert.That(result.Contains("Surgery"), Is.True);
         }
     }
 }
+
+
