@@ -36,6 +36,10 @@ builder.Services.AddScoped<IStaffRepository>(sp => sp.GetRequiredService<StaffRe
 builder.Services.AddScoped<IShiftManagementStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
 builder.Services.AddScoped<IPharmacyStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
 
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IHangoutRepository, HangoutRepository>();
+builder.Services.AddScoped<IHangoutParticipantRepository, HangoutParticipantRepository>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -15,12 +16,14 @@ namespace UBB_SE_2026_923_2.Models
         public string FormattedDate => Date.ToString(DateFormat);
         public int MaxParticipants { get; set; }
 
-        // Legacy in-memory view — not persisted. Phase 2 will migrate callers
-        // onto HangoutParticipantEntries below.
+        // Legacy in-memory view — not persisted, IStaff cannot round-trip
+        // through JSON (interface property), so omit it from API payloads.
         [NotMapped]
+        [JsonIgnore]
         public List<IStaff> ParticipantList { get; } = new List<IStaff>();
 
         // ---- EF Core navigation collection (persisted) ----
+        [JsonIgnore]
         public ICollection<HangoutParticipant> HangoutParticipantEntries { get; set; } = new List<HangoutParticipant>();
 
         // Parameterless constructor required by EF Core when materializing entities.

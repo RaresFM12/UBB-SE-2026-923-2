@@ -103,11 +103,11 @@ namespace UBB_SE_2026_923_2
             // Hospital-side single-interface repositories.
             services.AddSingleton<IPharmacyHandoverRepository, PharmacyHandoverRepository>();
             services.AddSingleton<IShiftSwapRepository, ShiftSwapRepository>();
-            services.AddSingleton<INotificationRepository, NotificationRepository>();
+            services.AddSingleton<INotificationRepository, HttpNotificationRepository>();
             // Appointments now go through the Web API instead of EF Core directly.
             services.AddSingleton<IAppointmentRepository, HttpAppointmentRepository>();
-            services.AddSingleton<IHangoutRepository, HangoutRepository>();
-            services.AddSingleton<IHangoutParticipantRepository, HangoutParticipantRepository>();
+            services.AddSingleton<IHangoutRepository, HttpHangoutRepository>();
+            services.AddSingleton<IHangoutParticipantRepository, HttpHangoutParticipantRepository>();
             services.AddSingleton<IEvaluationsRepository, EvaluationsRepository>();
             services.AddSingleton<IERDispatchRepository, ERDispatchRepository>();
             services.AddSingleton<IHighRiskMedicineRepository, HighRiskMedicineRepository>();
