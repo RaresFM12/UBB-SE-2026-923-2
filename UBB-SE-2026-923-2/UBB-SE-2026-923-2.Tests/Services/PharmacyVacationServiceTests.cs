@@ -99,9 +99,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var existingShift = new Shift(1, pharmacist, "Vacation", DateTime.Now.AddDays(2), DateTime.Now.AddDays(3), ShiftStatus.VACATION);
             mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
-            var ex = Assert.Throws<InvalidOperationException>(() =>
+            var thrownException = Assert.Throws<InvalidOperationException>(() =>
                 service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(4)));
-            Assert.That(ex.Message, Does.Contain("vacation"));
+            Assert.That(thrownException.Message, Does.Contain("vacation"));
         }
 
         [Test]
@@ -242,9 +242,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var existingShift = new Shift(1, pharmacist, "Pharmacy", DateTime.Now.AddDays(2), DateTime.Now.AddDays(3), ShiftStatus.SCHEDULED);
             mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
 
-            var ex = Assert.Throws<InvalidOperationException>(() =>
+            var thrownException = Assert.Throws<InvalidOperationException>(() =>
                 service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(4)));
-            Assert.That(ex.Message, Does.Contain("shift"));
+            Assert.That(thrownException.Message, Does.Contain("shift"));
         }
 
         [Test]
@@ -315,4 +315,5 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
     }
 }
+
 

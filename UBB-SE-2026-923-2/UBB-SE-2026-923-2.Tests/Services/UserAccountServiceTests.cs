@@ -71,9 +71,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("invalid")).Returns(false);
 
-            var ex = Assert.Throws<Exception>(() => userAccountService.Login("invalid", "password"));
+            var thrownException = Assert.Throws<Exception>(() => userAccountService.Login("invalid", "password"));
 
-            Assert.That(ex.Message, Is.EqualTo("Not a valid e-mail"));
+            Assert.That(thrownException.Message, Is.EqualTo("Not a valid e-mail"));
         }
 
         [Test]
@@ -82,9 +82,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
             mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("unknown@test.com")).Returns(true);
             mockUsersRepository.Setup(repository => repository.GetUserByEmail("unknown@test.com")).Returns((User)null!);
 
-            var ex = Assert.Throws<Exception>(() => userAccountService.Login("unknown@test.com", "password"));
+            var thrownException = Assert.Throws<Exception>(() => userAccountService.Login("unknown@test.com", "password"));
 
-            Assert.That(ex.Message, Is.EqualTo("E-mail not found"));
+            Assert.That(thrownException.Message, Is.EqualTo("E-mail not found"));
         }
 
         [Test]
@@ -94,9 +94,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
             mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("test@test.com")).Returns(true);
             mockUsersRepository.Setup(repository => repository.GetUserByEmail("test@test.com")).Returns(user);
 
-            var ex = Assert.Throws<Exception>(() => userAccountService.Login("test@test.com", "password"));
+            var thrownException = Assert.Throws<Exception>(() => userAccountService.Login("test@test.com", "password"));
 
-            Assert.That(ex.Message, Is.EqualTo("Account disabled"));
+            Assert.That(thrownException.Message, Is.EqualTo("Account disabled"));
         }
 
         [Test]
@@ -107,9 +107,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
             mockUsersRepository.Setup(repository => repository.GetUserByEmail("test@test.com")).Returns(user);
             mockSecurityService.Setup(service => service.VerifyPassword("wrong", "hashed")).Returns(false);
 
-            var ex = Assert.Throws<Exception>(() => userAccountService.Login("test@test.com", "wrong"));
+            var thrownException = Assert.Throws<Exception>(() => userAccountService.Login("test@test.com", "wrong"));
 
-            Assert.That(ex.Message, Is.EqualTo("Incorrect password"));
+            Assert.That(thrownException.Message, Is.EqualTo("Incorrect password"));
         }
 
         [Test]
@@ -126,10 +126,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("a@b.c")).Returns(true);
 
-            var ex = Assert.Throws<Exception>(() =>
+            var thrownException = Assert.Throws<Exception>(() =>
                 userAccountService.Register("a@b.c", "", "", "user", "0711111111"));
 
-            Assert.That(ex.Message, Is.EqualTo("Password cannot be empty."));
+            Assert.That(thrownException.Message, Is.EqualTo("Password cannot be empty."));
         }
 
         [Test]
@@ -137,10 +137,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             mockUserValidationService.Setup(validationService => validationService.IsCorrectEmailFormat("a@b.c")).Returns(true);
 
-            var ex = Assert.Throws<Exception>(() =>
+            var thrownException = Assert.Throws<Exception>(() =>
                 userAccountService.Register("a@b.c", "Pass1234!", "Different1!", "user", "0711111111"));
 
-            Assert.That(ex.Message, Is.EqualTo("Passwords don't match."));
+            Assert.That(thrownException.Message, Is.EqualTo("Passwords don't match."));
         }
 
         [Test]
@@ -221,10 +221,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
             LoginAs(user);
             mockSecurityService.Setup(service => service.VerifyPassword("wrong", "oldhash")).Returns(false);
 
-            var ex = Assert.Throws<Exception>(() =>
+            var thrownException = Assert.Throws<Exception>(() =>
                 userAccountService.ChangePassword("wrong", "New1234!", "New1234!"));
 
-            Assert.That(ex.Message, Is.EqualTo("Incorrect password"));
+            Assert.That(thrownException.Message, Is.EqualTo("Incorrect password"));
         }
 
         [Test]
@@ -235,10 +235,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
             mockSecurityService.Setup(service => service.VerifyPassword("old", "oldhash")).Returns(true);
             mockUserValidationService.Setup(validationService => validationService.IsCorrectPasswordFormat("New1234!")).Returns(true);
 
-            var ex = Assert.Throws<Exception>(() =>
+            var thrownException = Assert.Throws<Exception>(() =>
                 userAccountService.ChangePassword("old", "New1234!", "Different!"));
 
-            Assert.That(ex.Message, Is.EqualTo("Passwords don't match"));
+            Assert.That(thrownException.Message, Is.EqualTo("Passwords don't match"));
         }
 
         [Test]
@@ -526,5 +526,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
     }
 }
+
 
 
