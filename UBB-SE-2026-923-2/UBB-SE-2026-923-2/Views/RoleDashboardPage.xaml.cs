@@ -38,17 +38,20 @@ namespace UBB_SE_2026_923_2.Views
 
             currentUser = App.Services.GetRequiredService<ICurrentUserService>();
             orderService = new OrderService();
-            var dbContextFactory = App.Services.GetRequiredService<Microsoft.EntityFrameworkCore.IDbContextFactory<UBB_SE_2026_923_2.Data.AppDbContext>>();
+            // Repositories now come from DI as HTTP-backed implementations; the
+            // desktop no longer talks to EF Core directly.
+            var usersRepository = App.Services.GetRequiredService<IUsersRepository>();
+            var itemsRepository = App.Services.GetRequiredService<IItemsRepository>();
             var ptFactory = new PeriodTrackerServiceFactory(
-                new SQLUsersRepository(dbContextFactory),
-                new SQLItemsRepository(dbContextFactory),
+                usersRepository,
+                itemsRepository,
                 App.Services.GetRequiredService<RaresICurrentUserService>(),
                 orderService);
             periodTrackerViewModel = new PeriodTrackerViewModel(
                 ptFactory.CreatePeriodTrackerService(),
                 ptFactory.CreateWellnessItemsService(),
                 ptFactory.CreateBasketService());
-            var productCatalogueService = new ProductCatalogueService(new SQLItemsRepository(dbContextFactory));
+            var productCatalogueService = new ProductCatalogueService(itemsRepository);
             var user = ServiceWrapper.UserAccountService.CurrentUser;
             var catalogParameter = ((IProductCatalogueService)productCatalogueService, user, orderService);
 

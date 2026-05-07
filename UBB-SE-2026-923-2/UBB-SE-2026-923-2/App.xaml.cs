@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using System;
+using System.Net.Http;
 using UBB_SE_2026_923_2.Configuration;
-using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Repositories;
 using UBB_SE_2026_923_2.Services;
 using UBB_SE_2026_923_2.ViewModels;
@@ -50,17 +49,10 @@ namespace UBB_SE_2026_923_2
         {
             var services = new ServiceCollection();
 
-            // EF Core context registration.
-            // AddDbContextFactory exposes IDbContextFactory<AppDbContext> (singleton),
-            // which is the only safe way for our singleton repositories to obtain a
-            // short-lived DbContext per call (DbContext itself is NOT thread-safe).
-            // AddDbContext is also called so any service that prefers a directly-
-            // injected (scoped) AppDbContext continues to work.
-            services.AddDbContextFactory<AppDbContext>(options =>
-                options.UseSqlServer(AppSettings.ConnectionString));
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(AppSettings.ConnectionString));
-
+            // The desktop project no longer talks to the database directly:
+            // every repository is HTTP-backed and goes through the Web API.
+            // EF Core lives in UBB-SE-2026-923-2.Data and is hosted by
+            // UBB-SE-2026-923-2.WebApi.
             RegisterInfrastructure(services);
             RegisterRepositories(services);
             RegisterServices(services);
@@ -74,6 +66,13 @@ namespace UBB_SE_2026_923_2
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<RaresICurrentUserService, CurrentUserServiceAdapter>();
             services.AddSingleton<DialogPresenter>();
+
+            // Single HttpClient pointing at the local Web API. Replace BaseAddress
+            // when deploying the API somewhere other than localhost.
+            services.AddSingleton<HttpClient>(_ => new HttpClient
+            {
+                BaseAddress = new Uri(AppSettings.WebApiBaseUrl),
+            });
         }
 
         private static void RegisterRepositories(IServiceCollection services)
@@ -83,34 +82,36 @@ namespace UBB_SE_2026_923_2
             // connection-string factory delegates.
 
             // Pharmacy-side repositories.
-            services.AddScoped<IUsersRepository, SQLUsersRepository>();
-            services.AddScoped<IItemsRepository, SQLItemsRepository>();
-            services.AddScoped<IOrdersRepository, SQLOrdersRepository>();
-            services.AddScoped<ISubstancesRepository, SQLSubstancesRepository>();
+            services.AddSingleton<IUsersRepository, HttpUsersRepository>();
+            services.AddSingleton<IItemsRepository, HttpItemsRepository>();
+            services.AddSingleton<IOrdersRepository, HttpOrdersRepository>();
+            services.AddSingleton<ISubstancesRepository, HttpSubstancesRepository>();
 
-            // StaffRepository implements three interfaces — register the
-            // concrete type once and forward the interfaces to the same
-            // singleton instance.
-            services.AddSingleton<StaffRepository>();
-            services.AddSingleton<IStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
-            services.AddSingleton<IShiftManagementStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
-            services.AddSingleton<IPharmacyStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
+            // Staff goes through the Web API. One HTTP-backed instance is
+            // forwarded to all three staff-repository interfaces.
+            services.AddSingleton<HttpStaffRepository>();
+            services.AddSingleton<IStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
+            services.AddSingleton<IShiftManagementStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
+            services.AddSingleton<IPharmacyStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
 
-            services.AddSingleton<ShiftRepository>();
-            services.AddSingleton<IShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
-            services.AddSingleton<IShiftManagementShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
-            services.AddSingleton<IPharmacyShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
+            // Shifts now go through the Web API. One HTTP-backed instance is
+            // forwarded to all three shift-repository interfaces.
+            services.AddSingleton<HttpShiftRepository>();
+            services.AddSingleton<IShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
+            services.AddSingleton<IShiftManagementShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
+            services.AddSingleton<IPharmacyShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
 
             // Hospital-side single-interface repositories.
-            services.AddSingleton<IPharmacyHandoverRepository, PharmacyHandoverRepository>();
-            services.AddSingleton<IShiftSwapRepository, ShiftSwapRepository>();
-            services.AddSingleton<INotificationRepository, NotificationRepository>();
-            services.AddSingleton<IAppointmentRepository, AppointmentRepository>();
-            services.AddSingleton<IHangoutRepository, HangoutRepository>();
-            services.AddSingleton<IHangoutParticipantRepository, HangoutParticipantRepository>();
-            services.AddSingleton<IEvaluationsRepository, EvaluationsRepository>();
-            services.AddSingleton<IERDispatchRepository, ERDispatchRepository>();
-            services.AddSingleton<IHighRiskMedicineRepository, HighRiskMedicineRepository>();
+            services.AddSingleton<IPharmacyHandoverRepository, HttpPharmacyHandoverRepository>();
+            services.AddSingleton<IShiftSwapRepository, HttpShiftSwapRepository>();
+            services.AddSingleton<INotificationRepository, HttpNotificationRepository>();
+            // Appointments now go through the Web API instead of EF Core directly.
+            services.AddSingleton<IAppointmentRepository, HttpAppointmentRepository>();
+            services.AddSingleton<IHangoutRepository, HttpHangoutRepository>();
+            services.AddSingleton<IHangoutParticipantRepository, HttpHangoutParticipantRepository>();
+            services.AddSingleton<IEvaluationsRepository, HttpEvaluationsRepository>();
+            services.AddSingleton<IERDispatchRepository, HttpERDispatchRepository>();
+            services.AddSingleton<IHighRiskMedicineRepository, HttpHighRiskMedicineRepository>();
         }
 
         private static void RegisterServices(IServiceCollection services)

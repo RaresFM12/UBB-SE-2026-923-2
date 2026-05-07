@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -8,7 +9,8 @@ namespace UBB_SE_2026_923_2.Models
     {
         public const int OrderExpirationDays = 7;
 
-        public int Id { get; private set; }
+        // Setter opened up so System.Text.Json can rehydrate Id over HTTP.
+        public int Id { get; set; }
         public string IdString
         {
             get { return "Order#" + Id; }
@@ -29,10 +31,14 @@ namespace UBB_SE_2026_923_2.Models
         // Legacy in-memory view — not persisted. Phase 2 will migrate callers
         // onto OrderItemEntries below.
         [NotMapped]
-        public Dictionary<int, Tuple<int, float>> ItemQuantitiesWithFinalPrice { get; private set; }
+        public Dictionary<int, Tuple<int, float>> ItemQuantitiesWithFinalPrice { get; set; }
 
         // ---- EF Core navigation properties (persisted) ----
+        // [JsonIgnore]: ClientId already carries the FK; OrderItemEntries are
+        // projected into the legacy dictionary by the server before returning.
+        [JsonIgnore]
         public User? Client { get; set; }
+        [JsonIgnore]
         public ICollection<OrderItem> OrderItemEntries { get; set; } = new List<OrderItem>();
 
         public Order()

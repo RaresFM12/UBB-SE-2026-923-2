@@ -15,17 +15,24 @@ namespace UBB_SE_2026_923_2.Configuration;
 public static class AppSettings
 {
     private const string ConnectionStringKey = "AppDatabase";
+    private const string WebApiBaseUrlKey = "WebApiBaseUrl";
 
     private const string FallbackConnectionString =
         @"Data Source=localhost;Initial Catalog=HospitalDatabase;Integrated Security=True;Encrypt=True;Trust Server Certificate=True";
+
+    private const string FallbackWebApiBaseUrl = "http://localhost:5100/";
 
     private static readonly Lazy<IConfigurationRoot> ConfigurationLazy = new(BuildConfiguration);
 
     private static readonly Lazy<string> ConnectionStringLazy = new(LoadConnectionString);
 
+    private static readonly Lazy<string> WebApiBaseUrlLazy = new(LoadWebApiBaseUrl);
+
     public static IConfigurationRoot Configuration => ConfigurationLazy.Value;
 
     public static string ConnectionString => ConnectionStringLazy.Value;
+
+    public static string WebApiBaseUrl => WebApiBaseUrlLazy.Value;
 
     public static readonly DateTime SqlMinimumDate = new DateTime(1753, 1, 1);
 
@@ -54,5 +61,23 @@ public static class AppSettings
         }
 
         return FallbackConnectionString;
+    }
+
+    private static string LoadWebApiBaseUrl()
+    {
+        try
+        {
+            var fromConfig = Configuration[WebApiBaseUrlKey];
+            if (!string.IsNullOrWhiteSpace(fromConfig))
+            {
+                return fromConfig;
+            }
+        }
+        catch
+        {
+            // Swallow: fall through to fallback so design-time tools never crash on config.
+        }
+
+        return FallbackWebApiBaseUrl;
     }
 }

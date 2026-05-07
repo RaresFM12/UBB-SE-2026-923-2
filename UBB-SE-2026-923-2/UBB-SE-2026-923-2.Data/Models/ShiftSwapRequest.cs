@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -20,8 +21,13 @@ namespace UBB_SE_2026_923_2.Models
         public ShiftSwapRequestStatus Status { get; set; } = ShiftSwapRequestStatus.PENDING;
 
         // ---- EF Core navigation properties (persisted) ----
+        // [JsonIgnore]: ShiftId/RequesterId/ColleagueId already carry the FKs;
+        // the full nested entities create cycles back through Staff.
+        [JsonIgnore]
         public Shift? Shift { get; set; }
+        [JsonIgnore]
         public Staff? Requester { get; set; }
+        [JsonIgnore]
         public Staff? Colleague { get; set; }
 
         public ShiftSwapRequest()
