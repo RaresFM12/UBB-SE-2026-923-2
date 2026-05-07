@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -15,6 +16,9 @@ namespace UBB_SE_2026_923_2.Models
         public string? AssignedDoctorName { get; set; }
 
         // ---- EF Core navigation property (persisted) ----
+        // Excluded from JSON: AssignedDoctorId/Name already carry the data
+        // callers need; the full Doctor entity would balloon payload size.
+        [JsonIgnore]
         public Doctor? AssignedDoctor { get; set; }
     }
 

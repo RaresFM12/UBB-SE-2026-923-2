@@ -39,6 +39,9 @@ builder.Services.AddScoped<IPharmacyStaffRepository>(sp => sp.GetRequiredService
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IHangoutRepository, HangoutRepository>();
 builder.Services.AddScoped<IHangoutParticipantRepository, HangoutParticipantRepository>();
+builder.Services.AddScoped<IERDispatchRepository, ERDispatchRepository>();
+builder.Services.AddScoped<IEvaluationsRepository, EvaluationsRepository>();
+builder.Services.AddScoped<IHighRiskMedicineRepository, HighRiskMedicineRepository>();
 
 var app = builder.Build();
 

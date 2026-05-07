@@ -108,9 +108,9 @@ namespace UBB_SE_2026_923_2
             services.AddSingleton<IAppointmentRepository, HttpAppointmentRepository>();
             services.AddSingleton<IHangoutRepository, HttpHangoutRepository>();
             services.AddSingleton<IHangoutParticipantRepository, HttpHangoutParticipantRepository>();
-            services.AddSingleton<IEvaluationsRepository, EvaluationsRepository>();
-            services.AddSingleton<IERDispatchRepository, ERDispatchRepository>();
-            services.AddSingleton<IHighRiskMedicineRepository, HighRiskMedicineRepository>();
+            services.AddSingleton<IEvaluationsRepository, HttpEvaluationsRepository>();
+            services.AddSingleton<IERDispatchRepository, HttpERDispatchRepository>();
+            services.AddSingleton<IHighRiskMedicineRepository, HttpHighRiskMedicineRepository>();
         }
 
         private static void RegisterServices(IServiceCollection services)
