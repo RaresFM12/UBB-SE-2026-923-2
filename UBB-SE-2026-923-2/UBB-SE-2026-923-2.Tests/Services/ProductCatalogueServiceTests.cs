@@ -11,7 +11,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
     [TestFixture]
     public class ProductCatalogueServiceTests
     {
-        private Mock<IItemsRepository> mockItemsRepo;
+        private Mock<IItemsRepository> mockItemsRepository;
         private ProductCatalogueService service;
 
         private List<Item> sampleItems;
@@ -19,8 +19,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [SetUp]
         public void Setup()
         {
-            mockItemsRepo = new Mock<IItemsRepository>();
-            service = new ProductCatalogueService(mockItemsRepo.Object);
+            mockItemsRepository = new Mock<IItemsRepository>();
+            service = new ProductCatalogueService(mockItemsRepository.Object);
 
             sampleItems = new List<Item>
             {
@@ -38,13 +38,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 CreateItem(12, "Collagen", "Beauty", "beauty", 30f, 60, 10, 0.1f, "beauty"),
             };
 
-            mockItemsRepo.Setup(r => r.GetAllItems()).Returns(sampleItems);
+            mockItemsRepository.Setup(r => r.GetAllItems()).Returns(sampleItems);
         }
 
         private static Item CreateItem(int id, string name, string producer, string label, float price, int pills, int qty, float discount, string category)
         {
             var item = new Item(id, name, producer, category, price, pills, label, "", "", discount: discount, quantity: 0);
-            // Set quantity via batches
             if (qty > 0)
             {
                 item.Batches[DateOnly.FromDateTime(System.DateTime.Now.AddDays(30))] = qty;

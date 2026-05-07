@@ -13,31 +13,31 @@ namespace UBB_SE_2026_923_2.Tests.Services
     [TestFixture]
     public class SalaryComputationServiceTests
     {
-        private Mock<IPharmacyHandoverRepository> mockHandoverRepo;
-        private Mock<IHangoutRepository> mockHangoutRepo;
-        private Mock<IHangoutParticipantRepository> mockParticipantRepo;
-        private Mock<IStaffRepository> mockStaffRepo;
-        private Mock<IShiftManagementShiftRepository> mockShiftRepo;
+        private Mock<IPharmacyHandoverRepository> mockHandoverRepository;
+        private Mock<IHangoutRepository> mockHangoutRepository;
+        private Mock<IHangoutParticipantRepository> mockParticipantRepository;
+        private Mock<IStaffRepository> mockStaffRepository;
+        private Mock<IShiftManagementShiftRepository> mockShiftRepository;
         private SalaryComputationService service;
 
         [SetUp]
         public void Setup()
         {
-            mockHandoverRepo = new Mock<IPharmacyHandoverRepository>();
-            mockHangoutRepo = new Mock<IHangoutRepository>();
-            mockParticipantRepo = new Mock<IHangoutParticipantRepository>();
-            mockStaffRepo = new Mock<IStaffRepository>();
-            mockShiftRepo = new Mock<IShiftManagementShiftRepository>();
+            mockHandoverRepository = new Mock<IPharmacyHandoverRepository>();
+            mockHangoutRepository = new Mock<IHangoutRepository>();
+            mockParticipantRepository = new Mock<IHangoutParticipantRepository>();
+            mockStaffRepository = new Mock<IStaffRepository>();
+            mockShiftRepository = new Mock<IShiftManagementShiftRepository>();
             service = new SalaryComputationService(
-                mockHandoverRepo.Object,
-                mockHangoutRepo.Object,
-                mockParticipantRepo.Object,
-                mockStaffRepo.Object,
-                mockShiftRepo.Object);
+                mockHandoverRepository.Object,
+                mockHangoutRepository.Object,
+                mockParticipantRepository.Object,
+                mockStaffRepository.Object,
+                mockShiftRepository.Object);
 
-            mockParticipantRepo.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
-            mockHangoutRepo.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>());
-            mockHandoverRepo.Setup(r => r.GetAllPharmacyHandovers()).Returns(new List<PharmacyHandover>());
+            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockHangoutRepository.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>());
+            mockHandoverRepository.Setup(r => r.GetAllPharmacyHandovers()).Returns(new List<PharmacyHandover>());
         }
 
         [Test]
@@ -52,13 +52,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task ComputeSalaryDoctorAsync_SingleWeekdayShift_CalculatesCorrectly()
         {
             var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 0);
-            // Wednesday shift, 8 hours, rate = 85
             var wednesday = new DateTime(2025, 1, 8, 9, 0, 0); // Wednesday
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
             Assert.That(result, Is.GreaterThan(0));
-            // Base: 8 * 85 = 680
             Assert.That(result, Is.GreaterThan(650));
         }
 
@@ -70,7 +68,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", saturday, saturday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 8 * 85 * 1.15 = 782
             Assert.That(result, Is.GreaterThan(750));
         }
 
@@ -82,7 +79,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", sunday, sunday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 8 * 85 * 1.25 = 850
             Assert.That(result, Is.GreaterThan(800));
         }
 
@@ -94,7 +90,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", nightStart, nightStart.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 8 * 85 * 1.20 = 816
             Assert.That(result, Is.GreaterThan(780));
         }
 
@@ -106,7 +101,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 680 + 680 * 0.20 = 816
             Assert.That(result, Is.GreaterThan(780));
         }
 
@@ -118,7 +112,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 680 + 680 * 0.15 = 782
             Assert.That(result, Is.GreaterThan(750));
         }
 
@@ -130,7 +123,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 680 + 680 * 10 * 0.02 = 680 + 136 = 816
             Assert.That(result, Is.GreaterThan(780));
         }
 
@@ -141,14 +133,13 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
-            mockParticipantRepo.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
-            mockHangoutRepo.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>
+            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
+            mockHangoutRepository.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>
             {
                 new Hangout(1, "Fun", "Desc", new DateTime(2025, 1, 15), 10)
             });
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 680 * 1.05 = 714
             Assert.That(result, Is.GreaterThan(700));
         }
 
@@ -168,7 +159,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, pharmacist, "Pharmacy", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
-            // 8 * 45 = 360
             Assert.That(result, Is.EqualTo(360).Within(1));
         }
 
@@ -179,7 +169,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
             var shift = new Shift(1, pharmacist, "Pharmacy", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
-            mockHandoverRepo.Setup(r => r.GetAllPharmacyHandovers()).Returns(
+            mockHandoverRepository.Setup(r => r.GetAllPharmacyHandovers()).Returns(
                 Enumerable.Range(0, 20).Select(i => new PharmacyHandover
                 {
                     PharmacistId = 1,
@@ -187,7 +177,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 }).ToList());
 
             var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
-            // 360 + 360 * (20/10 * 0.01) = 360 + 7.2 = 367.2
             Assert.That(result, Is.GreaterThan(360));
         }
 
@@ -195,7 +184,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetAllStaff_ReturnsFromRepo()
         {
             var doctor = new Doctor(1, "A", "B", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 0);
-            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor });
+            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor });
             var result = service.GetAllStaff();
             Assert.That(result.Count, Is.EqualTo(1));
         }
@@ -203,8 +192,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetAllStaff_NullRepo_ReturnsEmpty()
         {
-            var svc = new SalaryComputationService(mockHandoverRepo.Object, mockHangoutRepo.Object, mockParticipantRepo.Object);
-            var result = svc.GetAllStaff();
+            var serviceWithoutShiftRepository = new SalaryComputationService(mockHandoverRepository.Object, mockHangoutRepository.Object, mockParticipantRepository.Object);
+            var result = serviceWithoutShiftRepository.GetAllStaff();
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -213,7 +202,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var doctor = new Doctor(1, "A", "B", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 0);
             var shift = new Shift(1, doctor, "A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.ACTIVE);
-            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
             var result = service.GetAllShifts();
             Assert.That(result.Count, Is.EqualTo(1));
         }
@@ -221,8 +210,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetAllShifts_NullRepo_ReturnsEmpty()
         {
-            var svc = new SalaryComputationService(mockHandoverRepo.Object, mockHangoutRepo.Object, mockParticipantRepo.Object);
-            var result = svc.GetAllShifts();
+            var serviceWithoutShiftRepository = new SalaryComputationService(mockHandoverRepository.Object, mockHangoutRepository.Object, mockParticipantRepository.Object);
+            var result = serviceWithoutShiftRepository.GetAllShifts();
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -234,7 +223,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 680 + 680 * 0.10 = 748
             Assert.That(result, Is.GreaterThan(700));
         }
 
@@ -246,7 +234,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, pharmacist, "Pharmacy", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
-            // 360 + 360 * 5 * 0.02 = 360 + 36 = 396
             Assert.That(result, Is.EqualTo(396).Within(1));
         }
 
@@ -263,7 +250,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             };
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, shifts, 1, 2025);
-            // 2 * (8 * 85) = 1360
             Assert.That(result, Is.GreaterThan(1300));
         }
 
@@ -275,7 +261,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // Base pay with zero experience
             Assert.That(result, Is.GreaterThan(600));
         }
 
@@ -287,7 +272,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", fridayNight, fridayNight.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // Night multiplier should apply
             Assert.That(result, Is.GreaterThan(680));
         }
 
@@ -298,8 +282,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
-            mockParticipantRepo.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
-            mockHangoutRepo.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>());
+            mockParticipantRepository.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockHangoutRepository.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>());
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
             Assert.That(result, Is.GreaterThan(600));
@@ -313,7 +297,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, pharmacist, "Pharmacy", saturday, saturday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
-            // 8 * 45 * 1.15 = 414
             Assert.That(result, Is.GreaterThan(400));
         }
 
@@ -325,7 +308,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, pharmacist, "Pharmacy", sunday, sunday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
-            // 8 * 45 * 1.25 = 450
             Assert.That(result, Is.GreaterThan(440));
         }
 
@@ -337,7 +319,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, pharmacist, "Pharmacy", nightStart, nightStart.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
-            // 8 * 45 * 1.20 = 432
             Assert.That(result, Is.GreaterThan(420));
         }
 
@@ -354,7 +335,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             };
 
             var result = await service.ComputeSalaryPharmacistAsync(pharmacist, shifts, 1, 2025);
-            // 2 * 360 = 720
             Assert.That(result, Is.EqualTo(720).Within(5));
         }
 
@@ -366,7 +346,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // 680 + 680 * 25 * 0.02 = 680 + 340 = 1020
             Assert.That(result, Is.GreaterThan(950));
         }
 
@@ -378,7 +357,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
 
             var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            // Base 680, surgeon +20%, experience +20% => significant bonus
             Assert.That(result, Is.GreaterThan(900));
         }
     }

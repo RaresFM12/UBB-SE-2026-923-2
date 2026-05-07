@@ -39,8 +39,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 mockUserValidationService.Object);
         }
 
-        // ========== Login Tests ==========
-
         [Test]
         public void Login_ValidCredentials_SetsCurrentUser()
         {
@@ -114,10 +112,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(ex.Message, Is.EqualTo("Incorrect password"));
         }
 
-        // ========== Register Tests ==========
-
-        // Removed: Register_ValidData_SetsCurrentUser
-
         [Test]
         public void Register_InvalidEmailFormat_ThrowsException()
         {
@@ -159,8 +153,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 userAccountService.Register("a@b.c", "weak", "weak", "user", "0711111111"));
         }
 
-        // Removed: Register_EmailAlreadyExists_ThrowsException
-
         [Test]
         public void Register_InvalidUsername_ThrowsException()
         {
@@ -184,8 +176,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.Throws<Exception>(() =>
                 userAccountService.Register("a@b.c", "Pass1234!", "Pass1234!", "user", "abc"));
         }
-
-        // ========== UpdateProfile Tests ==========
 
         [Test]
         public void UpdateProfile_NotLoggedIn_ThrowsException()
@@ -216,8 +206,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             Assert.Throws<Exception>(() => userAccountService.UpdateProfile("bad!", "0711111111"));
         }
-
-        // ========== ChangePassword Tests ==========
 
         [Test]
         public void ChangePassword_NotLoggedIn_ThrowsException()
@@ -267,8 +255,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(userAccountService.CurrentUser!.PasswordHash, Is.EqualTo("newhash"));
             mockUsersRepository.Verify(r => r.UpdateUser(It.IsAny<User>()), Times.Once);
         }
-
-        // ========== SearchUsers Tests ==========
 
         [Test]
         public void SearchUsers_NotLoggedIn_ThrowsException()
@@ -340,8 +326,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result.Count, Is.EqualTo(2));
         }
 
-        // ========== PromoteToAdmin Tests ==========
-
         [Test]
         public void PromoteToAdmin_NotLoggedIn_ThrowsException()
         {
@@ -397,8 +381,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             mockUsersRepository.Verify(r => r.UpdateUser(It.IsAny<User>()), Times.Never);
         }
 
-        // ========== Helper ==========
-
         private void LoginAs(User user)
         {
             mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(user.Email)).Returns(true);
@@ -406,8 +388,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             mockSecurityService.Setup(s => s.VerifyPassword(user.PasswordHash, user.PasswordHash)).Returns(true);
             userAccountService.Login(user.Email, user.PasswordHash);
         }
-
-        // ========== Additional Login Tests ==========
 
         [Test]
         public void Login_NullEmail_ThrowsArgumentException()
@@ -448,8 +428,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(userAccountService.CurrentUser, Is.Not.Null);
         }
 
-        // ========== Additional Register Tests ==========
-
         [Test]
         public void Register_EmptyEmail_ThrowsException()
         {
@@ -465,8 +443,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.Throws<Exception>(() =>
                 userAccountService.Register(null, "Pass1234!", "Pass1234!", "user", "0711111111"));
         }
-
-        // ========== Additional ChangePassword Tests ==========
 
         [Test]
         public void ChangePassword_EmptyOldPassword_ThrowsException()
@@ -490,8 +466,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.Throws<Exception>(() =>
                 userAccountService.ChangePassword("old", "weak", "weak"));
         }
-
-        // ========== Additional UpdateProfile Tests ==========
 
         [Test]
         public void UpdateProfile_InvalidPhoneNumber_ThrowsException()
@@ -517,8 +491,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(userAccountService.CurrentUser!.PhoneNumber, Is.EqualTo("0722222222"));
         }
 
-        // ========== Additional SearchUsers Tests ==========
-
         [Test]
         public void SearchUsers_EmptyQuery_ReturnsAll()
         {
@@ -543,8 +515,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             Assert.That(result.Count, Is.EqualTo(0));
         }
-
-        // ========== Additional PromoteToAdmin Tests ==========
 
         [Test]
         public void PromoteToAdmin_NullClient_ThrowsException()

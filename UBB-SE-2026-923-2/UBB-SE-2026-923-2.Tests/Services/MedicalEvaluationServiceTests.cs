@@ -13,11 +13,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
     [TestFixture]
     public class MedicalEvaluationServiceTests
     {
-        private Mock<IEvaluationsRepository> mockEvalRepo;
-        private Mock<IHighRiskMedicineRepository> mockHighRiskRepo;
-        private Mock<IAppointmentRepository> mockAppointmentRepo;
-        private Mock<IStaffRepository> mockStaffRepo;
-        private Mock<IShiftRepository> mockShiftRepo;
+        private Mock<IEvaluationsRepository> mockEvaluationsRepository;
+        private Mock<IHighRiskMedicineRepository> mockHighRiskMedicineRepository;
+        private Mock<IAppointmentRepository> mockAppointmentRepository;
+        private Mock<IStaffRepository> mockStaffRepository;
+        private Mock<IShiftRepository> mockShiftRepository;
         private Mock<ICurrentUserService> mockCurrentUserService;
         private MedicalEvaluationService service;
         private Doctor doctor1;
@@ -25,32 +25,32 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [SetUp]
         public void Setup()
         {
-            mockEvalRepo = new Mock<IEvaluationsRepository>();
-            mockHighRiskRepo = new Mock<IHighRiskMedicineRepository>();
-            mockAppointmentRepo = new Mock<IAppointmentRepository>();
-            mockStaffRepo = new Mock<IStaffRepository>();
-            mockShiftRepo = new Mock<IShiftRepository>();
+            mockEvaluationsRepository = new Mock<IEvaluationsRepository>();
+            mockHighRiskMedicineRepository = new Mock<IHighRiskMedicineRepository>();
+            mockAppointmentRepository = new Mock<IAppointmentRepository>();
+            mockStaffRepository = new Mock<IStaffRepository>();
+            mockShiftRepository = new Mock<IShiftRepository>();
             mockCurrentUserService = new Mock<ICurrentUserService>();
 
             service = new MedicalEvaluationService(
-                mockEvalRepo.Object,
-                mockHighRiskRepo.Object,
-                mockAppointmentRepo.Object,
-                mockStaffRepo.Object,
-                mockShiftRepo.Object,
+                mockEvaluationsRepository.Object,
+                mockHighRiskMedicineRepository.Object,
+                mockAppointmentRepository.Object,
+                mockStaffRepository.Object,
+                mockShiftRepository.Object,
                 mockCurrentUserService.Object);
 
             doctor1 = new Doctor(1, "John", "Doe", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 5);
-            mockHighRiskRepo.Setup(r => r.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
-            mockEvalRepo.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
-            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+            mockHighRiskMedicineRepository.Setup(r => r.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
+            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
+            mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
         }
 
         [Test]
         public void GetAllDoctors_ReturnsDoctorsOnly()
         {
             var pharmacist = new Pharmacyst(2, "B", "C", "c", true, "Cert", 3);
-            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, pharmacist });
+            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1, pharmacist });
             var result = service.GetAllDoctors();
             Assert.That(result.Count, Is.EqualTo(1));
             Assert.That(result[0].StaffID, Is.EqualTo(1));
@@ -59,7 +59,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetAllDoctors_Empty_ReturnsEmpty()
         {
-            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff>());
+            mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff>());
             var result = service.GetAllDoctors();
             Assert.That(result.Count, Is.EqualTo(0));
         }
@@ -73,7 +73,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Appointment { DoctorId = 1, Status = "Cancelled", Date = DateTime.Now, StartTime = TimeSpan.FromHours(10) },
                 new Appointment { DoctorId = 2, Status = "Confirmed", Date = DateTime.Now, StartTime = TimeSpan.FromHours(11) },
             };
-            mockAppointmentRepo.Setup(r => r.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            mockAppointmentRepository.Setup(r => r.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
             var result = service.GetAppointmentsByDoctor(1);
             Assert.That(result.Count, Is.EqualTo(1));
@@ -84,7 +84,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var eval1 = new MedicalEvaluation { EvaluationID = 1, Evaluator = doctor1 };
             var eval2 = new MedicalEvaluation { EvaluationID = 2, Evaluator = new Doctor { StaffID = 2 } };
-            mockEvalRepo.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { eval1, eval2 });
+            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { eval1, eval2 });
 
             var result = service.GetEvaluationsByDoctor("1");
             Assert.That(result.Count, Is.EqualTo(1));
@@ -108,7 +108,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void SaveEvaluation_ValidRecord_CallsRepo()
         {
             mockCurrentUserService.Setup(s => s.UserId).Returns(1);
-            var eval = new MedicalEvaluation
+            var evaluation = new MedicalEvaluation
             {
                 PatientId = "5",
                 Symptoms = "Fever",
@@ -117,15 +117,15 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 Evaluator = doctor1
             };
 
-            service.SaveEvaluation(eval);
-            mockEvalRepo.Verify(r => r.AddEvaluation(1, 5, "Fever", "Note", "Aspirin", false), Times.Once);
+            service.SaveEvaluation(evaluation);
+            mockEvaluationsRepository.Verify(r => r.AddEvaluation(1, 5, "Fever", "Note", "Aspirin", false), Times.Once);
         }
 
         [Test]
         public void SaveEvaluation_RiskMarker_SetsAssumedRisk()
         {
             mockCurrentUserService.Setup(s => s.UserId).Returns(1);
-            var eval = new MedicalEvaluation
+            var evaluation = new MedicalEvaluation
             {
                 PatientId = "5",
                 Symptoms = "[RISK] Severe pain",
@@ -134,8 +134,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 Evaluator = doctor1
             };
 
-            service.SaveEvaluation(eval);
-            mockEvalRepo.Verify(r => r.AddEvaluation(1, 5, "[RISK] Severe pain", "", "", true), Times.Once);
+            service.SaveEvaluation(evaluation);
+            mockEvaluationsRepository.Verify(r => r.AddEvaluation(1, 5, "[RISK] Severe pain", "", "", true), Times.Once);
         }
 
         [Test]
@@ -147,16 +147,16 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void UpdateEvaluation_ZeroId_Throws()
         {
-            var eval = new MedicalEvaluation { EvaluationID = 0 };
-            Assert.Throws<ArgumentException>(() => service.UpdateEvaluation(eval));
+            var evaluation = new MedicalEvaluation { EvaluationID = 0 };
+            Assert.Throws<ArgumentException>(() => service.UpdateEvaluation(evaluation));
         }
 
         [Test]
         public void UpdateEvaluation_ValidRecord_CallsRepo()
         {
-            var eval = new MedicalEvaluation { EvaluationID = 1, Symptoms = "S", Notes = "N", MedicationsList = "M" };
-            service.UpdateEvaluation(eval);
-            mockEvalRepo.Verify(r => r.UpdateEvaluation(1, "S", "N", "M"), Times.Once);
+            var evaluation = new MedicalEvaluation { EvaluationID = 1, Symptoms = "S", Notes = "N", MedicationsList = "M" };
+            service.UpdateEvaluation(evaluation);
+            mockEvaluationsRepository.Verify(r => r.UpdateEvaluation(1, "S", "N", "M"), Times.Once);
         }
 
         [Test]
@@ -183,7 +183,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void CheckMedicineConflict_HighRiskMedicine_ReturnsWarning()
         {
-            mockHighRiskRepo.Setup(r => r.GetAllHighRiskMedicines())
+            mockHighRiskMedicineRepository.Setup(r => r.GetAllHighRiskMedicines())
                 .Returns(new List<(string, string)> { ("Warfarin", "High bleeding risk") });
 
             var result = service.CheckMedicineConflict("P1", "Warfarin");
@@ -193,8 +193,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void CheckMedicineConflict_HistoryAllergy_ReturnsAlert()
         {
-            mockHighRiskRepo.Setup(r => r.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
-            mockEvalRepo.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
+            mockHighRiskMedicineRepository.Setup(r => r.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
+            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
             {
                 new MedicalEvaluation
                 {
@@ -212,8 +212,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void CheckMedicineConflict_NoConflict_ReturnsNull()
         {
-            mockHighRiskRepo.Setup(r => r.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
-            mockEvalRepo.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
+            mockHighRiskMedicineRepository.Setup(r => r.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
+            mockEvaluationsRepository.Setup(r => r.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
 
             var result = service.CheckMedicineConflict("P1", "Aspirin");
             Assert.That(result, Is.Null);
@@ -223,7 +223,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void SaveEvaluation_NullPatientId_UsesDefault()
         {
             mockCurrentUserService.Setup(s => s.UserId).Returns(1);
-            var eval = new MedicalEvaluation
+            var evaluation = new MedicalEvaluation
             {
                 PatientId = null,
                 Symptoms = "",
@@ -232,15 +232,15 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 Evaluator = doctor1
             };
 
-            service.SaveEvaluation(eval);
-            mockEvalRepo.Verify(r => r.AddEvaluation(1, 0, "", "", "", false), Times.Once);
+            service.SaveEvaluation(evaluation);
+            mockEvaluationsRepository.Verify(r => r.AddEvaluation(1, 0, "", "", "", false), Times.Once);
         }
 
         [Test]
         public void SaveEvaluation_NoEvaluator_UsesCurrentUserId()
         {
             mockCurrentUserService.Setup(s => s.UserId).Returns(42);
-            var eval = new MedicalEvaluation
+            var evaluation = new MedicalEvaluation
             {
                 PatientId = "1",
                 Symptoms = "",
@@ -249,8 +249,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 Evaluator = null
             };
 
-            service.SaveEvaluation(eval);
-            mockEvalRepo.Verify(r => r.AddEvaluation(42, 1, "", "", "", false), Times.Once);
+            service.SaveEvaluation(evaluation);
+            mockEvaluationsRepository.Verify(r => r.AddEvaluation(42, 1, "", "", "", false), Times.Once);
         }
     }
 }

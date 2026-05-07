@@ -14,8 +14,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             validationService = new UserValidationService();
         }
 
-        // ========== Email Validation ==========
-
         [Test]
         public void IsCorrectEmailFormat_ValidEmail_ReturnsTrue()
         {
@@ -45,8 +43,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             Assert.That(validationService.IsCorrectEmailFormat("user@example"), Is.False);
         }
-
-        // ========== Password Validation ==========
 
         [Test]
         public void IsCorrectPasswordFormat_ValidPassword_ReturnsTrue()
@@ -84,8 +80,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(validationService.IsCorrectPasswordFormat("Abcdefg1"), Is.False);
         }
 
-        // ========== Phone Number Validation ==========
-
         [Test]
         public void IsCorrectPhoneNumberFormat_ValidNumber_ReturnsTrue()
         {
@@ -103,8 +97,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             Assert.That(validationService.IsCorrectPhoneNumberFormat(""), Is.False);
         }
-
-        // ========== Username Validation ==========
 
         [Test]
         public void IsCorrectUsernameFormat_ValidUsername_ReturnsTrue()
