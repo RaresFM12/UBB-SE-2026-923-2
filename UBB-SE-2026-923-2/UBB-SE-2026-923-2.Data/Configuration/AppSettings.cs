@@ -1,7 +1,7 @@
+namespace UBB_SE_2026_923_2.Configuration;
+
 using System;
 using Microsoft.Extensions.Configuration;
-
-namespace UBB_SE_2026_923_2.Configuration;
 
 /// <summary>
 /// Central configuration access for the app.

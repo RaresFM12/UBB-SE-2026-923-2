@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.Orders
+﻿namespace UBB_SE_2026_923_2.ViewModels.Orders
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public class ModifyIncompleteOrderViewModel : INotifyPropertyChanged
     {
-        private IOrderService orderService;
+        private readonly IOrderService orderService;
         public int CurrentOrderID;
 
         public ICommand RemoveItemCommand { get; set; }
@@ -20,6 +20,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
         public ObservableCollection<ItemDetail> OrderItems { get; set; }
 
         private string totalPriceString;
+
         public string TotalPriceString
         {
             get => this.totalPriceString;
@@ -29,22 +30,23 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
                 this.OnPropertyChanged();
             }
         }
+
         public DateOnly PickUpDate { get; private set; }
 
-        public ModifyIncompleteOrderViewModel(IOrderService _orderService, int currOrderID)
+        public ModifyIncompleteOrderViewModel(IOrderService orderService, int currOrderID)
         {
-            orderService = _orderService;
-            CurrentOrderID = currOrderID;
-            RemoveItemCommand = new RelayCommandWithOneParameter<ItemDetail>(RemoveItemFromUnsavedOrder);
+            this.orderService = orderService;
+            this.CurrentOrderID = currOrderID;
+            this.RemoveItemCommand = new RelayCommandWithOneParameter<ItemDetail>(this.RemoveItemFromUnsavedOrder);
 
-            Order currOrder = orderService.OrdersRepository.GetOrder(CurrentOrderID);
+            Order currOrder = this.orderService.OrdersRepository.GetOrder(this.CurrentOrderID);
             Dictionary<int, Tuple<int, float>> itemsInOrder = currOrder.ItemQuantitiesWithFinalPrice;
-            OrderItems = new ();
+            this.OrderItems = new();
             float totalPrice = 0f;
 
             foreach (KeyValuePair<int, Tuple<int, float>> orderEntry in itemsInOrder)
             {
-                Item currentItem = orderService.ItemsRepository.GetItemById(orderEntry.Key);
+                Item currentItem = this.orderService.ItemsRepository.GetItemById(orderEntry.Key);
 
                 string alteredImagePath = currentItem.ImagePath;
 
@@ -52,41 +54,42 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
                 int itemQuantity = orderEntry.Value.Item1;
                 float itemTotalPrice = orderEntry.Value.Item2;
 
-                OrderItems.Add(
+                this.OrderItems.Add(
                     new ItemDetail(currentItem.Id, alteredImagePath, itemDescription,
                                     itemQuantity, itemTotalPrice));
 
                 totalPrice += itemTotalPrice;
             }
 
-            TotalPriceString = totalPrice.ToString("0.00") + " RON";
+            this.TotalPriceString = totalPrice.ToString("0.00") + " RON";
 
-            PickUpDate = currOrder.PickUpDate;
+            this.PickUpDate = currOrder.PickUpDate;
         }
 
         private void RemoveItemFromUnsavedOrder(ItemDetail itemToRemove)
         {
-            OrderItems.Remove(itemToRemove);
+            this.OrderItems.Remove(itemToRemove);
 
-            UpdateTotalPrice();
+            this.UpdateTotalPrice();
         }
 
         private void UpdateTotalPrice()
         {
             float newTotalPrice = 0f;
 
-            foreach (ItemDetail item in OrderItems)
+            foreach (ItemDetail item in this.OrderItems)
             {
                 newTotalPrice += item.ItemFinalPrice;
             }
 
-            TotalPriceString = newTotalPrice.ToString("0.00") + " RON";
+            this.TotalPriceString = newTotalPrice.ToString("0.00") + " RON";
         }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

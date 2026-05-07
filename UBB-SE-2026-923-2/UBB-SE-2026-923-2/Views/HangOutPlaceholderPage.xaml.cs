@@ -1,10 +1,10 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
-using UBB_SE_2026_923_2.ViewModels.Doctor;
-
 namespace UBB_SE_2026_923_2.Views
 {
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using UBB_SE_2026_923_2.ViewModels.Doctor;
+
     public sealed partial class HangOutPlaceholderPage : Page
     {
         public HangoutViewModel ViewModel { get; }
@@ -13,15 +13,15 @@ namespace UBB_SE_2026_923_2.Views
         {
             this.InitializeComponent();
 
-            ViewModel = App.Services.GetRequiredService<HangoutViewModel>();
-            this.DataContext = ViewModel;
+            this.ViewModel = App.Services.GetRequiredService<HangoutViewModel>();
+            this.DataContext = this.ViewModel;
         }
 
         private void Join_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is int hangoutId)
             {
-                ViewModel.JoinHangoutById(hangoutId);
+                this.ViewModel.JoinHangoutById(hangoutId);
             }
         }
     }

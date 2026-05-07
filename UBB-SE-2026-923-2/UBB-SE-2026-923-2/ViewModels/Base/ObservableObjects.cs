@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿namespace UBB_SE_2026_923_2.ViewModels.Base;
+
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
-namespace UBB_SE_2026_923_2.ViewModels.Base;
 
 public abstract class ObservableObject : INotifyPropertyChanged
 {
@@ -16,10 +16,10 @@ public abstract class ObservableObject : INotifyPropertyChanged
         }
 
         field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         return true;
     }
 
     protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

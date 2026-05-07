@@ -1,10 +1,10 @@
-using System;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="INotificationRepository"/>.
     /// </summary>
@@ -19,7 +19,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void AddNotification(int recipientStaffId, string title, string message)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             db.Notifications.Add(new Notification
             {

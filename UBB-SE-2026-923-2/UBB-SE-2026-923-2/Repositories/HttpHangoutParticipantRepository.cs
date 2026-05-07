@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IHangoutParticipantRepository"/>.
     /// </summary>
@@ -23,7 +23,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<(int HangoutId, int StaffId)> GetAllParticipants()
         {
-            var summaries = httpClient
+            var summaries = this.httpClient
                 .GetFromJsonAsync<List<HangoutParticipantSummary>>(BasePath)
                 .GetAwaiter().GetResult();
             if (summaries is null)
@@ -39,7 +39,7 @@ namespace UBB_SE_2026_923_2.Repositories
         public void AddParticipant(int hangoutId, int staffId)
         {
             var payload = new { HangoutId = hangoutId, StaffId = staffId };
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
     }

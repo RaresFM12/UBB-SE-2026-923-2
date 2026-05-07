@@ -1,11 +1,11 @@
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
-using UBB_SE_2026_923_2.ViewModels.Admin;
-
 namespace UBB_SE_2026_923_2.Views.Admin
 {
+    using System;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using UBB_SE_2026_923_2.ViewModels.Admin;
+
     public sealed partial class FatigueAuditPage : Page
     {
         private readonly FatigueShiftAuditViewModel viewModel;
@@ -14,8 +14,8 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             InitializeComponent();
 
-            viewModel = App.Services.GetRequiredService<FatigueShiftAuditViewModel>();
-            DataContext = viewModel;
+            this.viewModel = App.Services.GetRequiredService<FatigueShiftAuditViewModel>();
+            this.DataContext = this.viewModel;
 
             WeekStartPicker.Date = new DateTimeOffset(DateTime.Today);
         }
@@ -24,7 +24,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             if (sender.Date.HasValue)
             {
-                viewModel.SelectedWeekStart = sender.Date.Value;
+                this.viewModel.SelectedWeekStart = sender.Date.Value;
             }
         }
 
@@ -32,32 +32,32 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             try
             {
-                viewModel.RunAutoAudit();
+                this.viewModel.RunAutoAudit();
             }
             catch (Exception exception)
             {
-                viewModel.StatusMessage = $"Error during audit: {exception.Message}";
+                this.viewModel.StatusMessage = $"Error during audit: {exception.Message}";
             }
         }
 
         private void Refresh_Click(object sender, RoutedEventArgs eventArgs)
         {
-            viewModel.Violations.Clear();
-            viewModel.Suggestions.Clear();
+            this.viewModel.Violations.Clear();
+            this.viewModel.Suggestions.Clear();
         }
 
         private async void ApplyReassignment_Click(object sender, RoutedEventArgs eventArgs)
         {
             if (sender is Button button && button.Tag is int shiftId)
             {
-                var result = viewModel.ApplyReassignment(shiftId);
+                var result = this.viewModel.ApplyReassignment(shiftId);
 
                 var dialog = new ContentDialog
                 {
-                    Title = result.title,
-                    Content = result.message,
+                    Title = result.Title,
+                    Content = result.Message,
                     CloseButtonText = "OK",
-                    XamlRoot = Content.XamlRoot
+                    XamlRoot = this.Content.XamlRoot,
                 };
                 await dialog.ShowAsync();
             }
@@ -65,14 +65,14 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
         private void PublishRoster_Click(object sender, RoutedEventArgs eventArgs)
         {
-            if (viewModel.CanPublish)
+            if (this.viewModel.CanPublish)
             {
                 var dialog = new ContentDialog
                 {
                     Title = "Roster Published",
-                    Content = $"The roster for the {viewModel.WeekLabel} has been published successfully.",
+                    Content = $"The roster for the {this.viewModel.WeekLabel} has been published successfully.",
                     CloseButtonText = "OK",
-                    XamlRoot = Content.XamlRoot
+                    XamlRoot = this.Content.XamlRoot,
                 };
                 _ = dialog.ShowAsync();
             }

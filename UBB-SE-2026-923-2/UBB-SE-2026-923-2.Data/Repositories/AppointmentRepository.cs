@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IAppointmentRepository"/>.
     /// </summary>
@@ -22,7 +22,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task<IReadOnlyList<Appointment>> GetAllAppointmentsAsync()
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync();
+            await using var db = await this.dbContextFactory.CreateDbContextAsync();
             var rows = await db.Appointments
                 .AsNoTracking()
                 .Select(a => new
@@ -60,7 +60,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task AddAppointmentAsync(int patientId, int doctorId, DateTime startTime, DateTime endTime, string status)
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync();
+            await using var db = await this.dbContextFactory.CreateDbContextAsync();
 
             var appointment = new Appointment
             {
@@ -78,7 +78,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task UpdateAppointmentStatusAsync(int id, string status)
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync();
+            await using var db = await this.dbContextFactory.CreateDbContextAsync();
             var appointment = await db.Appointments.FirstOrDefaultAsync(a => a.Id == id);
             if (appointment is null)
             {

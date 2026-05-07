@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.ViewModels.Pharmacy;
+
 using System;
 using System.Globalization;
 using UBB_SE_2026_923_2.Models;
-
-namespace UBB_SE_2026_923_2.ViewModels.Pharmacy;
 
 public sealed class PharmacyShiftItemViewModel
 {
@@ -14,33 +14,37 @@ public sealed class PharmacyShiftItemViewModel
 
     public PharmacyShiftItemViewModel(Shift shift)
     {
-        RotationAssignment = shift.Location;
-        ShiftStartTime = shift.StartTime;
-        ShiftEndTime = shift.EndTime;
-        Status = shift.Status;
+        this.RotationAssignment = shift.Location;
+        this.ShiftStartTime = shift.StartTime;
+        this.ShiftEndTime = shift.EndTime;
+        this.Status = shift.Status;
     }
 
     public string RotationAssignment { get; }
+
     public DateTime ShiftStartTime { get; }
+
     public DateTime? ShiftEndTime { get; }
 
-    public string ShiftStartTimeText => ShiftStartTime.ToString(TimeFormat);
-    public string ShiftEndTimeText => ShiftEndTime.HasValue ? ShiftEndTime.Value.ToString(TimeFormat) : "—";
-    public string DayLabel => ShiftStartTime.ToString(DayLabelFormat, EnglishCulture);
+    public string ShiftStartTimeText => this.ShiftStartTime.ToString(TimeFormat);
+
+    public string ShiftEndTimeText => this.ShiftEndTime.HasValue ? this.ShiftEndTime.Value.ToString(TimeFormat) : "—";
+
+    public string DayLabel => this.ShiftStartTime.ToString(DayLabelFormat, EnglishCulture);
 
     public string TimeRangeDetail =>
-        $"Shift start: {ShiftStartTimeText}  ·  Shift end: {ShiftEndTimeText}  ·  Duration: {DurationText}";
+        $"Shift start: {this.ShiftStartTimeText}  ·  Shift end: {this.ShiftEndTimeText}  ·  Duration: {this.DurationText}";
 
     public string DurationText
     {
         get
         {
-            if (!ShiftEndTime.HasValue)
+            if (!this.ShiftEndTime.HasValue)
             {
                 return "Open-ended";
             }
 
-            var span = ShiftEndTime.Value - ShiftStartTime;
+            var span = this.ShiftEndTime.Value - this.ShiftStartTime;
             if (span.TotalMinutes <= 0)
             {
                 return "—";
@@ -54,13 +58,13 @@ public sealed class PharmacyShiftItemViewModel
     {
         get
         {
-            return Status switch
+            return this.Status switch
             {
                 ShiftStatus.SCHEDULED => "Scheduled",
                 ShiftStatus.ACTIVE => "Active",
                 ShiftStatus.COMPLETED => "Completed",
                 ShiftStatus.CANCELLED => "Cancelled",
-                _ => Status.ToString(),
+                _ => this.Status.ToString(),
             };
         }
     }

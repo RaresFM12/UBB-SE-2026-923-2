@@ -1,11 +1,11 @@
-using UBB_SE_2026_923_2.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
-using UBB_SE_2026_923_2.ViewModels.Admin;
-
 namespace UBB_SE_2026_923_2.Views.Admin
 {
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.ViewModels.Admin;
+
     public sealed partial class AdminShiftView : Page
     {
         public AdminShiftViewModel ViewModel { get; set; }
@@ -14,25 +14,25 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             this.InitializeComponent();
 
-            ViewModel = App.Services.GetRequiredService<AdminShiftViewModel>();
+            this.ViewModel = App.Services.GetRequiredService<AdminShiftViewModel>();
         }
 
         private void LocationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ViewModel == null)
+            if (this.ViewModel == null)
             {
                 return;
             }
 
             if (LocationComboBox.SelectedItem is string selectedLocation)
             {
-                ViewModel.FilterSpecializationsAndCertificationsForLocation(selectedLocation);
+                this.ViewModel.FilterSpecializationsAndCertificationsForLocation(selectedLocation);
             }
         }
 
         private void SpecializationCertificationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ViewModel == null)
+            if (this.ViewModel == null)
             {
                 return;
             }
@@ -42,7 +42,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
             if (!string.IsNullOrEmpty(selectedSpecializationOrCertification) && !string.IsNullOrEmpty(selectedLocation))
             {
-                ViewModel.FilterStaffForShift(selectedLocation, selectedSpecializationOrCertification);
+                this.ViewModel.FilterStaffForShift(selectedLocation, selectedSpecializationOrCertification);
                 StaffComboBox.SelectedIndex = -1;
             }
         }
@@ -55,7 +55,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
                 !StartTimePicker.SelectedTime.HasValue ||
                 !EndTimePicker.SelectedTime.HasValue)
             {
-                ShowMessage("Please fill all the fields of the form!", InfoBarSeverity.Error);
+                this.ShowMessage("Please fill all the fields of the form!", InfoBarSeverity.Error);
                 return;
             }
 
@@ -65,13 +65,13 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
             if (end <= start)
             {
-                ShowMessage("Error: End hour must be chronologically after the start hour!", InfoBarSeverity.Warning);
+                this.ShowMessage("Error: End hour must be chronologically after the start hour!", InfoBarSeverity.Warning);
                 return;
             }
 
-            ViewModel.CreateNewShift(selectedStaff, start, end, location);
+            this.ViewModel.CreateNewShift(selectedStaff, start, end, location);
 
-            ShowMessage("The shift was scheduled successfuly!", InfoBarSeverity.Success);
+            this.ShowMessage("The shift was scheduled successfuly!", InfoBarSeverity.Success);
 
             StaffComboBox.SelectedIndex = -1;
             LocationComboBox.SelectedIndex = -1;
@@ -81,8 +81,8 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             if (sender is Button btn && btn.Tag is int shiftId)
             {
-                ViewModel.SetShiftActive(shiftId);
-                ShowMessage($"The shift #{shiftId} was marked as active.", InfoBarSeverity.Success);
+                this.ViewModel.SetShiftActive(shiftId);
+                this.ShowMessage($"The shift #{shiftId} was marked as active.", InfoBarSeverity.Success);
             }
         }
 
@@ -90,8 +90,8 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             if (sender is Button btn && btn.Tag is int shiftId)
             {
-                ViewModel.CancelShift(shiftId);
-                ShowMessage($"The shift #{shiftId} was cancelled.", InfoBarSeverity.Informational);
+                this.ViewModel.CancelShift(shiftId);
+                this.ShowMessage($"The shift #{shiftId} was cancelled.", InfoBarSeverity.Informational);
             }
         }
 
@@ -99,8 +99,8 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             if (sender is Button btn && btn.Tag is Shift shiftToReassign)
             {
-                ViewModel.AutoFindReplacement(shiftToReassign);
-                ShowMessage("The automatic searching of a replacement has been triggered.", InfoBarSeverity.Success);
+                this.ViewModel.AutoFindReplacement(shiftToReassign);
+                this.ShowMessage("The automatic searching of a replacement has been triggered.", InfoBarSeverity.Success);
             }
         }
 

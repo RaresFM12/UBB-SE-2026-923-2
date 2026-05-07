@@ -1,37 +1,38 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
-namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
+﻿namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
 {
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+
     public class ItemListViewModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
         private ObservableCollection<ItemViewModel> items;
+
         public ObservableCollection<ItemViewModel> Items
         {
-            get => items;
+            get => this.items;
             set
             {
-                if (items == value)
+                if (this.items == value)
                 {
                     return;
                 }
 
-                items = value;
-                OnPropertyChanged();
+                this.items = value;
+                this.OnPropertyChanged();
             }
         }
 
         public ItemListViewModel()
         {
-            Items = new ObservableCollection<ItemViewModel>();
+            this.Items = new ObservableCollection<ItemViewModel>();
         }
 
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

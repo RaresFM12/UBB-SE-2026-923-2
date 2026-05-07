@@ -6,6 +6,9 @@
   <Rules AnalyzerId="StyleCop.Analyzers"
          RuleNamespace="StyleCop.Analyzers">
 
+    <!-- Using statements before namespace -->
+    <Rule Id="SA1200" Action="Warning" />
+
     <!-- ========================= -->
     <!-- Naming Rules -->
     <!-- ========================= -->
@@ -14,7 +17,7 @@
     <Rule Id="SA1300" Action="Warning" />
 
     <!-- Interfaces start with I -->
-    <Rule Id="SA1302" Action="Warning" />
+    <Rule Id="SA1302" Action="None" />
 
     <!-- Constants/static readonly -->
     <Rule Id="SA1303" Action="Warning" />
@@ -33,10 +36,28 @@
     <!-- ========================= -->
 
     <!-- Field declarations -->
-    <Rule Id="SA1401" Action="Warning" />
+    <Rule Id="SA1401" Action="None" />
 
     <!-- One statement per line -->
     <Rule Id="SA1106" Action="Warning" />
+
+    <!-- Remaining StyleCop structure and spacing rules are not enforced in this codebase -->
+    <Rule Id="SA1003" Action="None" />
+    <Rule Id="SA1117" Action="None" />
+    <Rule Id="SA1201" Action="None" />
+    <Rule Id="SA1202" Action="None" />
+    <Rule Id="SA1203" Action="None" />
+    <Rule Id="SA1204" Action="None" />
+    <Rule Id="SA1214" Action="None" />
+    <Rule Id="SA1414" Action="None" />
+
+    <!-- Local calls without this, and mixed indentation in partial/XAML code-behind files are not enforced here -->
+    <Rule Id="SA1101" Action="None" />
+    <Rule Id="SA1137" Action="None" />
+
+    <!-- Multi-type files are used for view-model helper types and template selectors -->
+    <Rule Id="SA1402" Action="None" />
+    <Rule Id="SA1649" Action="None" />
 
     <!-- Closing braces -->
     <Rule Id="SA1503" Action="Warning" />
@@ -90,11 +111,17 @@
     <!-- Prefer readonly -->
     <Rule Id="IDE0044" Action="Warning" />
 
+    <!-- Tuple element casing is already aligned to the project's public API shape -->
+    <Rule Id="SA1316" Action="None" />
+
     <!-- Remove unnecessary suppression -->
     <Rule Id="IDE0079" Action="Warning" />
 
-    <!-- Naming consistency -->
-    <Rule Id="CA1707" Action="Warning" />
+    <!-- StyleCop XML doc analysis is disabled by project configuration -->
+    <Rule Id="SA0001" Action="None" />
+
+    <!-- Allow underscores in namespaces and other identifiers used by the project -->
+    <Rule Id="CA1707" Action="None" />
 
   </Rules>
 

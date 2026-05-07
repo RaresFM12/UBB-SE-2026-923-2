@@ -1,9 +1,9 @@
-using NUnit.Framework;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.Tests.Services
 {
+    using NUnit.Framework;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     [TestFixture]
     public class CurrentUserServiceTests
     {
@@ -12,43 +12,43 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [SetUp]
         public void Setup()
         {
-            service = new CurrentUserService();
-            service.UserId = 0;
-            service.RoleType = UserRole.Client;
+            this.service = new CurrentUserService();
+            this.service.UserId = 0;
+            this.service.RoleType = UserRole.Client;
         }
 
         [Test]
         public void UserId_SetAndGet_ReturnsCorrectValue()
         {
-            service.UserId = 42;
-            Assert.That(service.UserId, Is.EqualTo(42));
+            this.service.UserId = 42;
+            Assert.That(this.service.UserId, Is.EqualTo(42));
         }
 
         [Test]
         public void RoleType_SetAndGet_ReturnsCorrectValue()
         {
-            service.RoleType = UserRole.Admin;
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Admin));
+            this.service.RoleType = UserRole.Admin;
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
         }
 
         [Test]
         public void Role_WhenClient_ReturnsClientString()
         {
-            service.RoleType = UserRole.Client;
-            Assert.That(service.Role, Is.EqualTo("Client"));
+            this.service.RoleType = UserRole.Client;
+            Assert.That(this.service.Role, Is.EqualTo("Client"));
         }
 
         [Test]
         public void Role_WhenAdmin_ReturnsAdminString()
         {
-            service.RoleType = UserRole.Admin;
-            Assert.That(service.Role, Is.EqualTo("Admin"));
+            this.service.RoleType = UserRole.Admin;
+            Assert.That(this.service.Role, Is.EqualTo("Admin"));
         }
 
         [Test]
         public void SetFromUser_NullUser_DoesNotThrow()
         {
-            Assert.DoesNotThrow(() => service.SetFromUser(null));
+            Assert.DoesNotThrow(() => this.service.SetFromUser(null));
         }
 
         [Test]
@@ -56,9 +56,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = new User(1, "a@b.com", "123", "hash", false, false, "user1", false, 0);
             user.Role = "Client";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Client));
-            Assert.That(service.UserId, Is.EqualTo(1));
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Client));
+            Assert.That(this.service.UserId, Is.EqualTo(1));
         }
 
         [Test]
@@ -66,8 +66,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = new User(5, "a@b.com", "123", "hash", true, false, "admin1", false, 0);
             user.Role = "Admin";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Admin));
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
         }
 
         [Test]
@@ -75,8 +75,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = new User(3, "a@b.com", "123", "hash", true, false, "user1", false, 0);
             user.Role = "UnknownRole";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Admin));
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
         }
 
         [Test]
@@ -84,8 +84,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = new User(3, "a@b.com", "123", "hash", false, false, "user1", false, 0);
             user.Role = "UnknownRole";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Client));
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Client));
         }
 
         [Test]
@@ -93,56 +93,56 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = new User(99, "a@b.com", "123", "hash", false, false, "user1", false, 0);
             user.Role = "Client";
-            service.SetFromUser(user);
-            Assert.That(service.UserId, Is.EqualTo(99));
+            this.service.SetFromUser(user);
+            Assert.That(this.service.UserId, Is.EqualTo(99));
         }
 
         [Test]
         public void UserId_DefaultIsZero()
         {
-            Assert.That(service.UserId, Is.EqualTo(0));
+            Assert.That(this.service.UserId, Is.EqualTo(0));
         }
 
         [Test]
         public void RoleType_DefaultIsClient()
         {
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Client));
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Client));
         }
 
         [Test]
         public void Role_DefaultIsClientString()
         {
-            Assert.That(service.Role, Is.EqualTo("Client"));
+            Assert.That(this.service.Role, Is.EqualTo("Client"));
         }
 
         [Test]
         public void UserId_SetNegative_Works()
         {
-            service.UserId = -1;
-            Assert.That(service.UserId, Is.EqualTo(-1));
+            this.service.UserId = -1;
+            Assert.That(this.service.UserId, Is.EqualTo(-1));
         }
 
         [Test]
         public void UserId_SetMaxInt_Works()
         {
-            service.UserId = int.MaxValue;
-            Assert.That(service.UserId, Is.EqualTo(int.MaxValue));
+            this.service.UserId = int.MaxValue;
+            Assert.That(this.service.UserId, Is.EqualTo(int.MaxValue));
         }
 
         [Test]
         public void RoleType_SetDoctor_Works()
         {
-            service.RoleType = UserRole.Doctor;
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Doctor));
-            Assert.That(service.Role, Is.EqualTo("Doctor"));
+            this.service.RoleType = UserRole.Doctor;
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Doctor));
+            Assert.That(this.service.Role, Is.EqualTo("Doctor"));
         }
 
         [Test]
         public void RoleType_SetPharmacist_Works()
         {
-            service.RoleType = UserRole.Pharmacist;
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Pharmacist));
-            Assert.That(service.Role, Is.EqualTo("Pharmacist"));
+            this.service.RoleType = UserRole.Pharmacist;
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Pharmacist));
+            Assert.That(this.service.Role, Is.EqualTo("Pharmacist"));
         }
 
         [Test]
@@ -150,8 +150,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = new User(2, "a@b.com", "123", "hash", false, false, "user1", false, 0);
             user.Role = "Doctor";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Doctor));
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Doctor));
         }
 
         [Test]
@@ -159,8 +159,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = new User(2, "a@b.com", "123", "hash", false, false, "user1", false, 0);
             user.Role = "Pharmacist";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Pharmacist));
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Pharmacist));
         }
 
         [Test]
@@ -168,42 +168,42 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var user = new User(2, "a@b.com", "123", "hash", false, false, "user1", false, 0);
             user.Role = "admin";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Admin));
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
         }
 
         [Test]
         public void SetFromUser_NullUser_DoesNotChangeUserId()
         {
-            service.UserId = 42;
-            service.SetFromUser(null);
-            Assert.That(service.UserId, Is.EqualTo(42));
+            this.service.UserId = 42;
+            this.service.SetFromUser(null);
+            Assert.That(this.service.UserId, Is.EqualTo(42));
         }
 
         [Test]
         public void SetFromUser_NullUser_DoesNotChangeRole()
         {
-            service.RoleType = UserRole.Admin;
-            service.SetFromUser(null);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Admin));
+            this.service.RoleType = UserRole.Admin;
+            this.service.SetFromUser(null);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
         }
 
         [Test]
         public void SetFromUser_EmptyRole_NotAdmin_FallsBackToClient()
         {
             var user = new User(2, "a@b.com", "123", "hash", false, false, "user1", false, 0);
-            user.Role = "";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Client));
+            user.Role = string.Empty;
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Client));
         }
 
         [Test]
         public void SetFromUser_EmptyRole_IsAdmin_FallsBackToAdmin()
         {
             var user = new User(2, "a@b.com", "123", "hash", true, false, "user1", false, 0);
-            user.Role = "";
-            service.SetFromUser(user);
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Admin));
+            user.Role = string.Empty;
+            this.service.SetFromUser(user);
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
         }
 
         [Test]
@@ -213,12 +213,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
             user1.Role = "Client";
             var user2 = new User(2, "c@d.com", "456", "hash2", true, false, "user2", false, 0);
             user2.Role = "Admin";
-            service.SetFromUser(user1);
-            service.SetFromUser(user2);
-            Assert.That(service.UserId, Is.EqualTo(2));
-            Assert.That(service.RoleType, Is.EqualTo(UserRole.Admin));
+            this.service.SetFromUser(user1);
+            this.service.SetFromUser(user2);
+            Assert.That(this.service.UserId, Is.EqualTo(2));
+            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
         }
     }
 }
-
-

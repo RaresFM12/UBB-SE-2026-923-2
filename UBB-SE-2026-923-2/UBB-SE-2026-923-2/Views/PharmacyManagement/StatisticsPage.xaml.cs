@@ -1,35 +1,39 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
+namespace UBB_SE_2026_923_2.Views.PharmacyManagement;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using UBB_SE_2026_923_2.Services;
-
-
-namespace UBB_SE_2026_923_2.Views.PharmacyManagement;
 
 public sealed partial class StatisticsPage : Page
 {
     public List<Tuple<int, string, int>> TopItems { get; set; }
+
     public List<KeyValuePair<string, int>> TopSubstances { get; set; }
+
     public string ItemsWarning { get; set; } = string.Empty;
+
     public string SubstancesWarning { get; set; } = string.Empty;
-    private IAdminService adminService;
+
+    private readonly IAdminService adminService;
+
     public StatisticsPage()
     {
-        adminService = new AdminService();
-        TopItems = adminService.GetTop30Items();
-        TopSubstances = [.. adminService.GetTop30Substances()];
+        this.adminService = new AdminService();
+        this.TopItems = this.adminService.GetTop30Items();
+        this.TopSubstances =[.. this.adminService.GetTop30Substances()];
 
-        if (TopItems.Count < 30)
+        if (this.TopItems.Count < 30)
         {
-            ItemsWarning = $"Only {TopItems.Count} products were bought last month (fewer than 30).";
+            this.ItemsWarning = $"Only {this.TopItems.Count} products were bought last month (fewer than 30).";
         }
 
-        if (TopSubstances.Count < 30)
+        if (this.TopSubstances.Count < 30)
         {
-            SubstancesWarning = $"Only {TopSubstances.Count} active substances found last month (fewer than 30).";
+            this.SubstancesWarning = $"Only {this.TopSubstances.Count} active substances found last month (fewer than 30).";
         }
 
         InitializeComponent();

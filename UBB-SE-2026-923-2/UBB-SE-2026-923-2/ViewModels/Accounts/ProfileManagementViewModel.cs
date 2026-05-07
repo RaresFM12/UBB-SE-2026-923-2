@@ -1,12 +1,12 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.Accounts
+﻿namespace UBB_SE_2026_923_2.ViewModels.Accounts
 {
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+    using UBB_SE_2026_923_2.Services;
+
     public class ProfileManagementViewModel : INotifyPropertyChanged
     {
-        private IUserAccountService userAccountService;
+        private readonly IUserAccountService userAccountService;
 
         private string username;
         private string phoneNumber;
@@ -15,69 +15,69 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         public ProfileManagementViewModel(IUserAccountService userAccountService)
         {
             this.userAccountService = userAccountService;
-            LoadUserData();
+            this.LoadUserData();
         }
 
-        public string Email => userAccountService.CurrentUser?.Email ?? string.Empty;
+        public string Email => this.userAccountService.CurrentUser?.Email ?? string.Empty;
 
         public string Username
         {
-            get => username;
+            get => this.username;
             set
             {
-                username = value;
-                OnPropertyChanged();
+                this.username = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string PhoneNumber
         {
-            get => phoneNumber;
+            get => this.phoneNumber;
             set
             {
-                phoneNumber = value;
-                OnPropertyChanged();
+                this.phoneNumber = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string ErrorMessage
         {
-            get => errorMessage;
+            get => this.errorMessage;
             set
             {
-                errorMessage = value;
-                OnPropertyChanged();
+                this.errorMessage = value;
+                this.OnPropertyChanged();
             }
         }
 
         public void LoadUserData()
         {
-            var currentUser = userAccountService.CurrentUser;
+            var currentUser = this.userAccountService.CurrentUser;
             if (currentUser == null)
             {
                 return;
             }
 
-            Username = currentUser.Username;
-            PhoneNumber = currentUser.PhoneNumber;
+            this.Username = currentUser.Username;
+            this.PhoneNumber = currentUser.PhoneNumber;
         }
 
         public void SaveChanges()
         {
-            userAccountService.UpdateProfile(Username, PhoneNumber);
+            this.userAccountService.UpdateProfile(this.Username, this.PhoneNumber);
         }
 
         public void CancelChanges()
         {
-            LoadUserData();
-            ErrorMessage = null;
+            this.LoadUserData();
+            this.ErrorMessage = null;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

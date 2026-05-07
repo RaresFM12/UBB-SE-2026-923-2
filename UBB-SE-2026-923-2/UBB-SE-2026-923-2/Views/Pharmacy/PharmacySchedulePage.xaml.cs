@@ -1,9 +1,9 @@
-using UBB_SE_2026_923_2.Configuration;
+namespace UBB_SE_2026_923_2.Views.Pharmacy;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
+using UBB_SE_2026_923_2.Configuration;
 using UBB_SE_2026_923_2.ViewModels.Pharmacy;
-
-namespace UBB_SE_2026_923_2.Views.Pharmacy;
 
 public sealed partial class PharmacySchedulePage : Page
 {
@@ -13,16 +13,16 @@ public sealed partial class PharmacySchedulePage : Page
     {
         InitializeComponent();
 
-        ViewModel = App.Services.GetRequiredService<PharmacyScheduleViewModel>();
-        DataContext = ViewModel;
+        this.ViewModel = App.Services.GetRequiredService<PharmacyScheduleViewModel>();
+        this.DataContext = this.ViewModel;
 
-        Loaded += PharmacySchedulePage_Loaded;
+        this.Loaded += this.PharmacySchedulePage_Loaded;
     }
 
     private async void PharmacySchedulePage_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        Loaded -= PharmacySchedulePage_Loaded;
-        await ViewModel.InitializeAsync();
+        this.Loaded -= this.PharmacySchedulePage_Loaded;
+        await this.ViewModel.InitializeAsync();
     }
 
     private void DateCalendar_SelectedDatesChanged(CalendarView sender, CalendarViewSelectedDatesChangedEventArgs eventArgs)
@@ -39,6 +39,6 @@ public sealed partial class PharmacySchedulePage : Page
             return;
         }
 
-        ViewModel.AnchorDate = picked;
+        this.ViewModel.AnchorDate = picked;
     }
 }

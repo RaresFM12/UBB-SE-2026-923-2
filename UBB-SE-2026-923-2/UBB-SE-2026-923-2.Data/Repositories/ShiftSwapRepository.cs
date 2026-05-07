@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IShiftSwapRepository"/>.
     /// </summary>
@@ -21,7 +21,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public int AddShiftSwapRequest(ShiftSwapRequest request)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var entity = new ShiftSwapRequest
             {
@@ -39,19 +39,19 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<ShiftSwapRequest> GetAllShiftSwapRequests()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.ShiftSwapRequests.AsNoTracking().ToList();
         }
 
         public ShiftSwapRequest? GetShiftSwapRequestById(int swapId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.ShiftSwapRequests.AsNoTracking().FirstOrDefault(s => s.SwapId == swapId);
         }
 
         public void UpdateShiftSwapRequestStatus(int swapId, string status)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var swapRequest = db.ShiftSwapRequests.FirstOrDefault(s => s.SwapId == swapId);
             if (swapRequest is null)
             {

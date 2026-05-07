@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class HangoutService : IHangoutService
     {
         private const int MinHangoutTitleLength = 5;
@@ -53,24 +53,24 @@ namespace UBB_SE_2026_923_2.Services
                 throw new ArgumentException("The hangout date must be at least 1 week away from today.");
             }
 
-            if (HasConflictingAppointmentOnDate(creator.StaffID, date))
+            if (this.HasConflictingAppointmentOnDate(creator.StaffID, date))
             {
                 throw new InvalidOperationException("You cannot create a hangout on a day where you have active scheduled appointments.");
             }
 
-            if (HasMedicalEvaluationOnDate(creator.StaffID, date))
+            if (this.HasMedicalEvaluationOnDate(creator.StaffID, date))
             {
                 throw new InvalidOperationException("You cannot create a hangout on a day where you have a medical evaluation logged.");
             }
 
-            int newHangoutId = hangoutRepository.AddHangout(title, description ?? string.Empty, date, maxParticipants);
-            hangoutParticipantRepository.AddParticipant(newHangoutId, creator.StaffID);
+            int newHangoutId = this.hangoutRepository.AddHangout(title, description ?? string.Empty, date, maxParticipants);
+            this.hangoutParticipantRepository.AddParticipant(newHangoutId, creator.StaffID);
             return newHangoutId;
         }
 
         public void JoinHangout(int hangoutId, IStaff staff)
         {
-            var hangout = hangoutRepository.GetHangoutById(hangoutId);
+            var hangout = this.hangoutRepository.GetHangoutById(hangoutId);
             if (hangout == null)
             {
                 throw new ArgumentException("Hangout not found.");
@@ -79,7 +79,7 @@ namespace UBB_SE_2026_923_2.Services
             bool IsForCurrentHangout((int HangoutId, int StaffId) participant) => participant.HangoutId == hangoutId;
             bool IsCurrentStaffMember((int HangoutId, int StaffId) participant) => participant.StaffId == staff.StaffID;
 
-            var participantsForHangout = hangoutParticipantRepository.GetAllParticipants()
+            var participantsForHangout = this.hangoutParticipantRepository.GetAllParticipants()
                 .Where(IsForCurrentHangout)
                 .ToList();
 
@@ -93,26 +93,26 @@ namespace UBB_SE_2026_923_2.Services
                 throw new InvalidOperationException("You have already joined this hangout.");
             }
 
-            if (HasConflictingAppointmentOnDate(staff.StaffID, hangout.Date))
+            if (this.HasConflictingAppointmentOnDate(staff.StaffID, hangout.Date))
             {
                 throw new InvalidOperationException("You cannot join a hangout on a day where you have active scheduled appointments.");
             }
 
-            if (HasMedicalEvaluationOnDate(staff.StaffID, hangout.Date))
+            if (this.HasMedicalEvaluationOnDate(staff.StaffID, hangout.Date))
             {
                 throw new InvalidOperationException("You cannot join a hangout on a day where you have a medical evaluation logged.");
             }
 
-            hangoutParticipantRepository.AddParticipant(hangoutId, staff.StaffID);
+            this.hangoutParticipantRepository.AddParticipant(hangoutId, staff.StaffID);
         }
 
         public List<Hangout> GetAllHangouts()
         {
             int ByStaffId(IStaff staffMember) => staffMember.StaffID;
 
-            var hangouts = hangoutRepository.GetAllHangouts();
-            var allParticipants = hangoutParticipantRepository.GetAllParticipants();
-            var allStaffById = staffRepository.LoadAllStaff().ToDictionary(ByStaffId);
+            var hangouts = this.hangoutRepository.GetAllHangouts();
+            var allParticipants = this.hangoutParticipantRepository.GetAllParticipants();
+            var allStaffById = this.staffRepository.LoadAllStaff().ToDictionary(ByStaffId);
 
             foreach (var hangout in hangouts)
             {
@@ -130,12 +130,13 @@ namespace UBB_SE_2026_923_2.Services
                     }
                 }
             }
+
             return hangouts;
         }
 
         private bool HasConflictingAppointmentOnDate(int staffId, DateTime date)
         {
-            System.Threading.Tasks.Task<IReadOnlyList<Appointment>> LoadAllAppointments() => appointmentRepository.GetAllAppointmentsAsync();
+            System.Threading.Tasks.Task<IReadOnlyList<Appointment>> LoadAllAppointments() => this.appointmentRepository.GetAllAppointmentsAsync();
             var allAppointments = System.Threading.Tasks.Task.Run(LoadAllAppointments).GetAwaiter().GetResult();
 
             bool IsActiveStatus(string status) =>
@@ -153,7 +154,7 @@ namespace UBB_SE_2026_923_2.Services
 
         private bool HasMedicalEvaluationOnDate(int staffId, DateTime date)
         {
-            if (evaluationsRepository == null)
+            if (this.evaluationsRepository == null)
             {
                 return false;
             }
@@ -163,7 +164,7 @@ namespace UBB_SE_2026_923_2.Services
                 && evaluation.Evaluator.StaffID == staffId
                 && evaluation.EvaluationDate.Date == date.Date;
 
-            return evaluationsRepository.GetAllEvaluations().Any(IsForStaffOnDate);
+            return this.evaluationsRepository.GetAllEvaluations().Any(IsForStaffOnDate);
         }
     }
 }

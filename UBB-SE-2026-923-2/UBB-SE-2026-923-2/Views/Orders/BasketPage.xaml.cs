@@ -1,12 +1,12 @@
-using System;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Orders;
-
 namespace UBB_SE_2026_923_2.Views.Orders
 {
+    using System;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Orders;
+
     public sealed partial class BasketPage : Page
     {
         private OrderService basketServ;
@@ -22,22 +22,22 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             base.OnNavigatedTo(e);
 
-            basketServ = e.Parameter as OrderService ?? new OrderService();
-            ViewModel = new BasketViewModel(basketServ);
-            DataContext = ViewModel;
+            this.basketServ = e.Parameter as OrderService ?? new OrderService();
+            this.ViewModel = new BasketViewModel(this.basketServ);
+            this.DataContext = this.ViewModel;
 
-            ViewModel.BasketQuantityRemoved -= HandleCheckoutButton;
-            ViewModel.BasketQuantityRemoved += HandleCheckoutButton;
+            this.ViewModel.BasketQuantityRemoved -= this.HandleCheckoutButton;
+            this.ViewModel.BasketQuantityRemoved += this.HandleCheckoutButton;
 
             Bindings?.Update();
-            ViewModel.OnBasketQuantityRemoved();
+            this.ViewModel.OnBasketQuantityRemoved();
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            if (ViewModel != null)
+            if (this.ViewModel != null)
             {
-                ViewModel.BasketQuantityRemoved -= HandleCheckoutButton;
+                this.ViewModel.BasketQuantityRemoved -= this.HandleCheckoutButton;
             }
 
             base.OnNavigatedFrom(e);
@@ -45,7 +45,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
         private void NavigateToCheckout(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(CheckoutPage), basketServ);
+            this.Frame.Navigate(typeof(CheckoutPage), this.basketServ);
         }
 
         private void HandleCheckoutButton(int quantity)
@@ -63,7 +63,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
             try
             {
-                ViewModel.GetPrescription(prescriptionId);
+                this.ViewModel.GetPrescription(prescriptionId);
                 Bindings?.Update();
             }
             catch (ArgumentException exception)

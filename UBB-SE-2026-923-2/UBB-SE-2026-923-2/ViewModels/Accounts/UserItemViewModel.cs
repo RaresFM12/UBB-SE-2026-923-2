@@ -1,37 +1,40 @@
-﻿using UBB_SE_2026_923_2.Models;
-
-namespace UBB_SE_2026_923_2.ViewModels.Accounts
+﻿namespace UBB_SE_2026_923_2.ViewModels.Accounts
 {
+    using UBB_SE_2026_923_2.Models;
+
     public class UserItemViewModel
     {
-        private User user;
+        private readonly User user;
 
         public UserItemViewModel(User user)
         {
             this.user = user;
         }
 
-        public User User => user;
+        public User User => this.user;
 
-        public string Email => user.Email;
-        public string Username => string.IsNullOrEmpty(user.Username) ? "(no username)" : user.Username;
-        public string PhoneNumber => string.IsNullOrEmpty(user.PhoneNumber) ? "(no phone)" : user.PhoneNumber;
+        public string Email => this.user.Email;
 
-        public bool IsAdmin => user.IsAdmin;
-        public bool IsDisabled => user.IsDisabled;
+        public string Username => string.IsNullOrEmpty(this.user.Username) ? "(no username)" : this.user.Username;
 
-        public double Opacity => IsDisabled ? 0.7 : 1.0;
+        public string PhoneNumber => string.IsNullOrEmpty(this.user.PhoneNumber) ? "(no phone)" : this.user.PhoneNumber;
+
+        public bool IsAdmin => this.user.IsAdmin;
+
+        public bool IsDisabled => this.user.IsDisabled;
+
+        public double Opacity => this.IsDisabled ? 0.7 : 1.0;
 
         public string Background
         {
             get
             {
-                if (IsDisabled)
+                if (this.IsDisabled)
                 {
                     return "#E8F5E9";
                 }
 
-                if (IsAdmin)
+                if (this.IsAdmin)
                 {
                     return "#FFF8E1";
                 }
@@ -40,10 +43,10 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
             }
         }
 
-        public bool ShowPromote => !IsAdmin && !IsDisabled;
+        public bool ShowPromote => !this.IsAdmin && !this.IsDisabled;
 
-        public bool ShowDisable => !IsAdmin && !IsDisabled;
+        public bool ShowDisable => !this.IsAdmin && !this.IsDisabled;
 
-        public bool ShowDisabledLabel => IsDisabled;
+        public bool ShowDisabledLabel => this.IsDisabled;
     }
 }

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.Accounts
+﻿namespace UBB_SE_2026_923_2.ViewModels.Accounts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public class AdminAccountsManagementViewModel : INotifyPropertyChanged
     {
         private readonly IUserAccountService userService;
@@ -20,29 +20,29 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         public AdminAccountsManagementViewModel(IUserAccountService userService)
         {
             this.userService = userService;
-            Users = new ObservableCollection<UserItemViewModel>();
-            searchQuery = string.Empty;
+            this.Users = new ObservableCollection<UserItemViewModel>();
+            this.searchQuery = string.Empty;
 
-            LoadUsers();
+            this.LoadUsers();
         }
 
         public string SearchQuery
         {
-            get => searchQuery;
+            get => this.searchQuery;
             set
             {
-                searchQuery = value;
-                OnPropertyChanged();
+                this.searchQuery = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string ErrorMessage
         {
-            get => errorMessage;
+            get => this.errorMessage;
             set
             {
-                errorMessage = value;
-                OnPropertyChanged();
+                this.errorMessage = value;
+                this.OnPropertyChanged();
             }
         }
 
@@ -50,13 +50,13 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         {
             try
             {
-                ErrorMessage = null;
-                List<User> users = userService.SearchUsers(string.Empty);
-                UpdateUsers(users);
+                this.ErrorMessage = null;
+                List<User> users = this.userService.SearchUsers(string.Empty);
+                this.UpdateUsers(users);
             }
             catch (Exception exception)
             {
-                ErrorMessage = exception.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
 
@@ -64,13 +64,13 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         {
             try
             {
-                ErrorMessage = null;
-                List<User> result = userService.SearchUsers(SearchQuery ?? string.Empty);
-                UpdateUsers(result);
+                this.ErrorMessage = null;
+                List<User> result = this.userService.SearchUsers(this.SearchQuery ?? string.Empty);
+                this.UpdateUsers(result);
             }
             catch (Exception exception)
             {
-                ErrorMessage = exception.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
 
@@ -78,13 +78,13 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         {
             try
             {
-                ErrorMessage = null;
-                userService.PromoteToAdmin(userItem.User);
-                Refresh();
+                this.ErrorMessage = null;
+                this.userService.PromoteToAdmin(userItem.User);
+                this.Refresh();
             }
             catch (Exception exception)
             {
-                ErrorMessage = exception.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
 
@@ -92,28 +92,28 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         {
             try
             {
-                ErrorMessage = null;
-                userService.DisableAccount(userItem.User);
-                Refresh();
+                this.ErrorMessage = null;
+                this.userService.DisableAccount(userItem.User);
+                this.Refresh();
             }
             catch (Exception exception)
             {
-                ErrorMessage = exception.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
 
         private void Refresh()
         {
-            Search();
+            this.Search();
         }
 
         private void UpdateUsers(List<User> users)
         {
-            Users.Clear();
+            this.Users.Clear();
 
             foreach (User user in users)
             {
-                Users.Add(new UserItemViewModel(user));
+                this.Users.Add(new UserItemViewModel(user));
             }
         }
 
@@ -121,7 +121,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

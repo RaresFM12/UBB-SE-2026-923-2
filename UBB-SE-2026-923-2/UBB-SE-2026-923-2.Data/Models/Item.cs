@@ -1,24 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text.Json.Serialization;
-
-namespace UBB_SE_2026_923_2.Models
+﻿namespace UBB_SE_2026_923_2.Models
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
+    using System.Text.Json.Serialization;
+
     public class Item
     {
         public int Id { get; set; }
+
         public string Name { get; set; }
+
         public string Producer { get; set; }
+
         public float Price { get; set; }
+
         public string Category { get; set; }
+
         public string ImagePath { get; set; }
+
         public int NumberOfPills { get; set; }
+
         // Setter opened up so System.Text.Json can rehydrate Quantity over HTTP.
         public int Quantity { get; set; }
+
         public string Label { get; set; }
+
         public string Description { get; set; }
+
         public float DiscountPercentage { get; set; }
 
         private const string ImagePathDefault = "..\\..\\Assets\\placeholder.png";
@@ -27,6 +37,7 @@ namespace UBB_SE_2026_923_2.Models
         // onto the navigation collections below.
         [NotMapped]
         public Dictionary<string, float> ActiveSubstances { get; set; }
+
         [NotMapped]
         public Dictionary<DateOnly, int> Batches { get; set; }
 
@@ -36,19 +47,20 @@ namespace UBB_SE_2026_923_2.Models
         // back to Item over the wire.
         [JsonIgnore]
         public ICollection<ItemSubstance> ItemSubstanceEntries { get; set; } = new List<ItemSubstance>();
+
         [JsonIgnore]
         public ICollection<ItemBatch> ItemBatchEntries { get; set; } = new List<ItemBatch>();
 
         public Item()
         {
-            Name = string.Empty;
-            Producer = string.Empty;
-            Category = string.Empty;
-            ImagePath = ImagePathDefault;
-            Label = string.Empty;
-            Description = string.Empty;
-            ActiveSubstances = new Dictionary<string, float>();
-            Batches = new Dictionary<DateOnly, int>();
+            this.Name = string.Empty;
+            this.Producer = string.Empty;
+            this.Category = string.Empty;
+            this.ImagePath = ImagePathDefault;
+            this.Label = string.Empty;
+            this.Description = string.Empty;
+            this.ActiveSubstances = new Dictionary<string, float>();
+            this.Batches = new Dictionary<DateOnly, int>();
         }
 
         public Item(int id, string name, string producer, string category,
@@ -57,17 +69,17 @@ namespace UBB_SE_2026_923_2.Models
                     float discount = 0f)
             : this()
         {
-            Id = id;
-            Name = name;
-            Producer = producer;
-            Price = price;
-            NumberOfPills = numberOfPills;
-            Category = category;
-            ImagePath = imagePath;
-            Quantity = 0;
-            Label = label;
-            Description = description;
-            DiscountPercentage = discount;
+            this.Id = id;
+            this.Name = name;
+            this.Producer = producer;
+            this.Price = price;
+            this.NumberOfPills = numberOfPills;
+            this.Category = category;
+            this.ImagePath = imagePath;
+            this.Quantity = 0;
+            this.Label = label;
+            this.Description = description;
+            this.DiscountPercentage = discount;
         }
 
         public Item(int id, string name, string producer, string category,
@@ -76,7 +88,7 @@ namespace UBB_SE_2026_923_2.Models
                     float discount = 0f, int quantity = 0)
             : this(id, name, producer, category, price, numberOfPills, label, description, imagePath, discount)
         {
-            Quantity = quantity;
+            this.Quantity = quantity;
         }
 
         public Item(string name, string producer, string category,
@@ -86,7 +98,7 @@ namespace UBB_SE_2026_923_2.Models
             float discount = 0f)
             : this(0, name, producer, category, price, numberOfPills, label, description, imagePath, discount)
         {
-            Quantity = quantity;
+            this.Quantity = quantity;
         }
 
         public Item(string name, string producer, string category,
@@ -97,80 +109,80 @@ namespace UBB_SE_2026_923_2.Models
                     float discount = 0f)
             : this(name, producer, category, price, numberOfPills, quantity, label, description, imagePath, discount)
         {
-            ActiveSubstances = activeSubstances;
-            Batches = batches;
+            this.ActiveSubstances = activeSubstances;
+            this.Batches = batches;
         }
 
         public void AddActiveSubstanceToItem(string newSubstanceName, float concentration)
         {
-            if (ActiveSubstances.ContainsKey(newSubstanceName))
+            if (this.ActiveSubstances.ContainsKey(newSubstanceName))
             {
                 throw new ArgumentException(newSubstanceName + "is already inside the medication");
             }
 
-            ActiveSubstances[newSubstanceName] = concentration;
+            this.ActiveSubstances[newSubstanceName] = concentration;
         }
 
         public void ChangeActiveSubstanceConcentration(string newSubstanceName, float newConcentration)
         {
-            if (!ActiveSubstances.ContainsKey(newSubstanceName))
+            if (!this.ActiveSubstances.ContainsKey(newSubstanceName))
             {
                 throw new ArgumentException(newSubstanceName + "is not inside the medication");
             }
 
-            ActiveSubstances[newSubstanceName] = newConcentration;
+            this.ActiveSubstances[newSubstanceName] = newConcentration;
         }
 
         public void RemoveActiveSubstanceFromItem(string substanceName)
         {
-            if (!ActiveSubstances.ContainsKey(substanceName))
+            if (!this.ActiveSubstances.ContainsKey(substanceName))
             {
                 throw new ArgumentException(substanceName + "is not inside the medication");
             }
 
-            ActiveSubstances.Remove(substanceName);
+            this.ActiveSubstances.Remove(substanceName);
         }
-
 
         public void AddNewBatchToItem(DateOnly newExpirationDate, int numberOfPacks)
         {
-            if (Batches.ContainsKey(newExpirationDate))
+            if (this.Batches.ContainsKey(newExpirationDate))
             {
-                Batches[newExpirationDate] += numberOfPacks;
-                Quantity += numberOfPacks;
+                this.Batches[newExpirationDate] += numberOfPacks;
+                this.Quantity += numberOfPacks;
                 return;
             }
 
-            Batches[newExpirationDate] = numberOfPacks;
+            this.Batches[newExpirationDate] = numberOfPacks;
             this.Quantity += numberOfPacks;
         }
 
         public void ChangeNumberOfPacksForBatch(DateOnly expirationDate, int newNumberOfPacks)
         {
-            int oldNumberOfPacks = Batches[expirationDate];
+            int oldNumberOfPacks = this.Batches[expirationDate];
 
-            if (!Batches.ContainsKey(expirationDate))
+            if (!this.Batches.ContainsKey(expirationDate))
             {
                 throw new ArgumentException("A batch with expiration date " + expirationDate.ToString() + " doesn't exist");
             }
 
-            Batches[expirationDate] = newNumberOfPacks;
-            Quantity += newNumberOfPacks - oldNumberOfPacks;
+            this.Batches[expirationDate] = newNumberOfPacks;
+            this.Quantity += newNumberOfPacks - oldNumberOfPacks;
         }
 
         public void RemoveBatchFromItem(DateOnly expirationDate)
         {
-            if (!Batches.ContainsKey(expirationDate))
+            if (!this.Batches.ContainsKey(expirationDate))
             {
                 throw new ArgumentException("A batch with expiration date " + expirationDate.ToString() + " doesn't exist");
             }
 
-            Quantity -= Batches[expirationDate];
-            Batches.Remove(expirationDate);
+            this.Quantity -= this.Batches[expirationDate];
+            this.Batches.Remove(expirationDate);
         }
+
         public void RemoveQuantityFromItem(int quantityToRemove, DateOnly dateAfter)
         {
-            List<DateOnly> sortedExpirationDates = Batches.Keys.ToList<DateOnly>();
+            List<DateOnly> sortedExpirationDates = this.Batches.Keys.ToList<DateOnly>();
             sortedExpirationDates.Sort();
 
             int indexForDate = 0;
@@ -183,16 +195,16 @@ namespace UBB_SE_2026_923_2.Models
                     continue;
                 }
 
-                if (remainingQuantity > Batches[sortedExpirationDates[indexForDate]])
+                if (remainingQuantity > this.Batches[sortedExpirationDates[indexForDate]])
                 {
-                    remainingQuantity -= Batches[sortedExpirationDates[indexForDate]];
-                    RemoveBatchFromItem(sortedExpirationDates[indexForDate]);
+                    remainingQuantity -= this.Batches[sortedExpirationDates[indexForDate]];
+                    this.RemoveBatchFromItem(sortedExpirationDates[indexForDate]);
                     indexForDate++;
                     continue;
                 }
 
-                int newBatchQuantity = Batches[sortedExpirationDates[indexForDate]] - remainingQuantity;
-                ChangeNumberOfPacksForBatch(sortedExpirationDates[indexForDate], newBatchQuantity);
+                int newBatchQuantity = this.Batches[sortedExpirationDates[indexForDate]] - remainingQuantity;
+                this.ChangeNumberOfPacksForBatch(sortedExpirationDates[indexForDate], newBatchQuantity);
                 remainingQuantity = 0;
                 indexForDate++;
             }
@@ -202,7 +214,7 @@ namespace UBB_SE_2026_923_2.Models
         {
             int validatedQuantity = 0;
 
-            foreach (KeyValuePair<DateOnly, int> batchEntry in Batches)
+            foreach (KeyValuePair<DateOnly, int> batchEntry in this.Batches)
             {
                 DateOnly currentBatchExpirationDate = batchEntry.Key;
                 int currentBatchQuantity = batchEntry.Value;

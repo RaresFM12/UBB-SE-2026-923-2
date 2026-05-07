@@ -1,39 +1,40 @@
-using UBB_SE_2026_923_2.Configuration;
-using UBB_SE_2026_923_2.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml;
-using UBB_SE_2026_923_2.ViewModels.Admin;
-
 namespace UBB_SE_2026_923_2.Views.Admin
 {
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Controls.Primitives;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Configuration;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.ViewModels.Admin;
+
     public sealed partial class AdminSchedulePage : Page
     {
         public AdminShiftViewModel ViewModel { get; }
+
         private bool initialized;
 
         public AdminSchedulePage()
         {
             this.InitializeComponent();
 
-            ViewModel = App.Services.GetRequiredService<AdminShiftViewModel>();
-            DataContext = ViewModel;
+            this.ViewModel = App.Services.GetRequiredService<AdminShiftViewModel>();
+            this.DataContext = this.ViewModel;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
-            if (initialized)
+            if (this.initialized)
             {
                 return;
             }
 
-            initialized = true;
+            this.initialized = true;
 
-            ViewModel.LoadAndFilterShifts();
+            this.ViewModel.LoadAndFilterShifts();
             DateCalendar.SelectedDates.Add(System.DateTime.Today);
         }
 
@@ -48,15 +49,15 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
             if (picked >= AppSettings.SqlMinimumDate)
             {
-                ViewModel.SelectedDate = picked;
+                this.ViewModel.SelectedDate = picked;
             }
         }
 
         private void DepartmentFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DepartmentFilterComboBox.SelectedItem is string selectedDept && initialized)
+            if (DepartmentFilterComboBox.SelectedItem is string selectedDept && this.initialized)
             {
-                ViewModel.SelectedDepartment = selectedDept;
+                this.ViewModel.SelectedDepartment = selectedDept;
             }
         }
 
@@ -66,13 +67,13 @@ namespace UBB_SE_2026_923_2.Views.Admin
             {
                 DailyBtn.IsChecked = true;
                 WeeklyBtn.IsChecked = false;
-                ViewModel.IsWeeklyView = false;
+                this.ViewModel.IsWeeklyView = false;
             }
             else if (ReferenceEquals(sender, WeeklyBtn))
             {
                 WeeklyBtn.IsChecked = true;
                 DailyBtn.IsChecked = false;
-                ViewModel.IsWeeklyView = true;
+                this.ViewModel.IsWeeklyView = true;
             }
         }
 
@@ -80,8 +81,8 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             if (sender is Button btn && btn.Tag is int shiftId)
             {
-                ViewModel.SetShiftActive(shiftId);
-                ShowMessage($"The shift #{shiftId} was marked as active.", InfoBarSeverity.Success);
+                this.ViewModel.SetShiftActive(shiftId);
+                this.ShowMessage($"The shift #{shiftId} was marked as active.", InfoBarSeverity.Success);
             }
         }
 
@@ -89,8 +90,8 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             if (sender is Button btn && btn.Tag is int shiftId)
             {
-                ViewModel.CancelShift(shiftId);
-                ShowMessage($"The shift #{shiftId} was cancelled.", InfoBarSeverity.Informational);
+                this.ViewModel.CancelShift(shiftId);
+                this.ShowMessage($"The shift #{shiftId} was cancelled.", InfoBarSeverity.Informational);
             }
         }
 
@@ -98,8 +99,8 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             if (sender is Button btn && btn.Tag is Shift shiftToReassign)
             {
-                ViewModel.AutoFindReplacement(shiftToReassign);
-                ShowMessage("The automatic searching of a replacement has been triggered.", InfoBarSeverity.Success);
+                this.ViewModel.AutoFindReplacement(shiftToReassign);
+                this.ShowMessage("The automatic searching of a replacement has been triggered.", InfoBarSeverity.Success);
             }
         }
 

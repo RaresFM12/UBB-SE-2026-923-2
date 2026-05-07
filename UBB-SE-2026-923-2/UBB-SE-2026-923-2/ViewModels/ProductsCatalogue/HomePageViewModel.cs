@@ -1,41 +1,44 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using UBB_SE_2026_923_2.Models;
-
-namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
+﻿namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
 {
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+    using UBB_SE_2026_923_2.Models;
+
     public class HomePageViewModel : INotifyPropertyChanged
     {
         private User currentUser;
+
         public User CurrentUser
         {
-            get => currentUser;
+            get => this.currentUser;
             private set
             {
-                currentUser = value;
-                OnPropertyChanged();
+                this.currentUser = value;
+                this.OnPropertyChanged();
             }
         }
 
         public void Initialize(User user)
         {
-            CurrentUser = user;
+            this.CurrentUser = user;
 
-            OnPropertyChanged(nameof(IsAdminDashboardVisible));
-            OnPropertyChanged(nameof(IsMyAccountVisible));
-            OnPropertyChanged(nameof(IsLoginVisible));
-            OnPropertyChanged(nameof(IsRegisterVisible));
+            this.OnPropertyChanged(nameof(this.IsAdminDashboardVisible));
+            this.OnPropertyChanged(nameof(this.IsMyAccountVisible));
+            this.OnPropertyChanged(nameof(this.IsLoginVisible));
+            this.OnPropertyChanged(nameof(this.IsRegisterVisible));
         }
 
-        public bool IsAdminDashboardVisible => CurrentUser != null && CurrentUser.IsAdmin;
+        public bool IsAdminDashboardVisible => this.CurrentUser != null && this.CurrentUser.IsAdmin;
 
-        public bool IsMyAccountVisible => CurrentUser == null;
-        public bool IsLoginVisible => CurrentUser != null;
-        public bool IsRegisterVisible => CurrentUser != null;
+        public bool IsMyAccountVisible => this.CurrentUser == null;
+
+        public bool IsLoginVisible => this.CurrentUser != null;
+
+        public bool IsRegisterVisible => this.CurrentUser != null;
 
         public string HandleNavigationRequest(string requestedDestination)
         {
-            if (CurrentUser == null)
+            if (this.CurrentUser == null)
             {
                 bool isAllowed = requestedDestination == "Products" ||
                                  requestedDestination == "Home" ||
@@ -53,7 +56,8 @@ namespace UBB_SE_2026_923_2.ViewModels.ProductsCatalogue
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

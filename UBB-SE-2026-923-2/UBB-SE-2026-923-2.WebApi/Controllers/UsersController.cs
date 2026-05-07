@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.WebApi.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,19 +18,19 @@ public class UsersController : ControllerBase
     [HttpGet]
     public ActionResult<List<User>> GetAll()
     {
-        return Ok(repository.GetAllUsers());
+        return this.Ok(this.repository.GetAllUsers());
     }
 
     [HttpGet("{id:int}")]
     public ActionResult<User> GetById(int id)
     {
-        if (!repository.UserExists(id))
+        if (!this.repository.UserExists(id))
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        var user = repository.GetUserById(id);
-        return Ok(user);
+        var user = this.repository.GetUserById(id);
+        return this.Ok(user);
     }
 
     [HttpGet("by-email")]
@@ -38,22 +38,22 @@ public class UsersController : ControllerBase
     {
         if (string.IsNullOrEmpty(email))
         {
-            return BadRequest("email query parameter is required");
+            return this.BadRequest("email query parameter is required");
         }
 
-        if (!repository.UserExists(email))
+        if (!this.repository.UserExists(email))
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        var user = repository.GetUserByEmail(email);
-        return Ok(user);
+        var user = this.repository.GetUserByEmail(email);
+        return this.Ok(user);
     }
 
     [HttpGet("{id:int}/exists")]
     public ActionResult<bool> ExistsById(int id)
     {
-        return Ok(repository.UserExists(id));
+        return this.Ok(this.repository.UserExists(id));
     }
 
     [HttpGet("exists")]
@@ -61,22 +61,22 @@ public class UsersController : ControllerBase
     {
         if (string.IsNullOrEmpty(email))
         {
-            return BadRequest("email query parameter is required");
+            return this.BadRequest("email query parameter is required");
         }
 
-        return Ok(repository.UserExists(email));
+        return this.Ok(this.repository.UserExists(email));
     }
 
     [HttpGet("{id:int}/period-tracker")]
     public ActionResult<bool> HasPeriodTracker(int id)
     {
-        return Ok(repository.UserHasPeriodTracker(id));
+        return this.Ok(this.repository.UserHasPeriodTracker(id));
     }
 
     [HttpPost]
     public IActionResult Create([FromBody] CreateUserRequest request)
     {
-        repository.AddUser(
+        this.repository.AddUser(
             request.Email,
             request.PhoneNumber,
             request.PasswordHash,
@@ -86,7 +86,7 @@ public class UsersController : ControllerBase
             request.IsAdmin,
             request.LoyaltyPoints,
             request.Role);
-        return NoContent();
+        return this.NoContent();
     }
 
     [HttpPut("{id:int}")]
@@ -94,8 +94,8 @@ public class UsersController : ControllerBase
     {
         // Defend against id mismatch between URL and payload — URL wins.
         user.Id = id;
-        repository.UpdateUser(user);
-        return NoContent();
+        this.repository.UpdateUser(user);
+        return this.NoContent();
     }
 
     public record CreateUserRequest(

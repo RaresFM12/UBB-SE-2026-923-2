@@ -1,13 +1,13 @@
-using Moq;
-using NUnit.Framework;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.Tests.Services
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using Moq;
+    using NUnit.Framework;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+    using UBB_SE_2026_923_2.Services;
+
     [TestFixture]
     public class WellnessItemsServiceTests
     {
@@ -17,15 +17,15 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [SetUp]
         public void Setup()
         {
-            mockItemsRepository = new Mock<IItemsRepository>();
-            service = new WellnessItemsService(mockItemsRepository.Object);
+            this.mockItemsRepository = new Mock<IItemsRepository>();
+            this.service = new WellnessItemsService(this.mockItemsRepository.Object);
         }
 
         [Test]
         public void GetWellnessItems_NoItems_ReturnsEmpty()
         {
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item>());
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item>());
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -37,8 +37,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Item(1, "Aspirin", "Bayer", "pain", 10f, 20, quantity: 0),
                 new Item(2, "Ibuprofen", "Advil", "supplements", 15f, 30, quantity: 0),
             };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -51,8 +51,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Item(2, "Aspirin", "Bayer", "pain", 10f, 20, quantity: 0),
                 new Item(3, "Candle", "Zen", "wellness", 5f, 1, quantity: 0),
             };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result.All(item => item.Category == "wellness"), Is.True);
         }
@@ -65,8 +65,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Item(1, "Item1", "P", "Wellness", 10f, 1, quantity: 0),
                 new Item(2, "Item2", "P", "WELLNESS", 10f, 1, quantity: 0),
             };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(2));
         }
 
@@ -79,8 +79,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Item(2, "B", "P", "wellness", 10f, 1, quantity: 0),
                 new Item(8, "H", "P", "wellness", 10f, 1, quantity: 0),
             };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result[0].Id, Is.EqualTo(2));
             Assert.That(result[1].Id, Is.EqualTo(5));
             Assert.That(result[2].Id, Is.EqualTo(8));
@@ -90,10 +90,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_NullCategory_NotIncluded()
         {
             var item = new Item(1, "X", "P", "wellness", 10f, 1, quantity: 0);
-            var itemNull = new Item(2, "Y", "P", "", 10f, 1, quantity: 0);
+            var itemNull = new Item(2, "Y", "P", string.Empty, 10f, 1, quantity: 0);
             itemNull.Category = null;
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item, itemNull });
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { item, itemNull });
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(1));
         }
 
@@ -101,8 +101,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_SingleWellnessItem_ReturnsOne()
         {
             var items = new List<Item> { new Item(1, "Mat", "Fit", "wellness", 20f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(1));
             Assert.That(result[0].Name, Is.EqualTo("Mat"));
         }
@@ -111,8 +111,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_MixedCase_WeLlNeSs_Matches()
         {
             var items = new List<Item> { new Item(1, "X", "P", "WeLlNeSs", 10f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(1));
         }
 
@@ -120,8 +120,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_CategoryWithSpaces_NotIncluded()
         {
             var items = new List<Item> { new Item(1, "X", "P", " wellness ", 10f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -130,9 +130,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var items = new List<Item>();
             for (int itemIndex = 1; itemIndex <= 50; itemIndex++)
+            {
                 items.Add(new Item(itemIndex, $"Item{itemIndex}", "P", itemIndex % 2 == 0 ? "wellness" : "other", 10f, 1, quantity: 0));
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            }
+
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(25));
         }
 
@@ -145,8 +148,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Item(2, "B", "P", "wellness", 20f, 2, quantity: 0),
                 new Item(3, "C", "P", "wellness", 30f, 3, quantity: 0),
             };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(3));
         }
 
@@ -154,8 +157,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_PreservesItemProperties()
         {
             var items = new List<Item> { new Item(7, "Candle", "Zen", "wellness", 15.5f, 3, quantity: 10) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result[0].Id, Is.EqualTo(7));
             Assert.That(result[0].Name, Is.EqualTo("Candle"));
             Assert.That(result[0].Producer, Is.EqualTo("Zen"));
@@ -165,9 +168,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetWellnessItems_EmptyCategoryString_NotIncluded()
         {
-            var items = new List<Item> { new Item(1, "X", "P", "", 10f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            var items = new List<Item> { new Item(1, "X", "P", string.Empty, 10f, 1, quantity: 0) };
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -175,8 +178,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_CategoryWellnessSubstring_NotIncluded()
         {
             var items = new List<Item> { new Item(1, "X", "P", "wellnessplus", 10f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -189,8 +192,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Item(1, "A", "P", "wellness", 10f, 1, quantity: 0),
                 new Item(50, "M", "P", "wellness", 10f, 1, quantity: 0),
             };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result[0].Id, Is.EqualTo(1));
             Assert.That(result[1].Id, Is.EqualTo(50));
             Assert.That(result[2].Id, Is.EqualTo(100));
@@ -199,8 +202,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void GetWellnessItems_ReturnsList()
         {
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item>());
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item>());
+            var result = this.service.GetWellnessItems();
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.InstanceOf<List<Item>>());
         }
@@ -209,9 +212,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_CalledTwice_ReturnsSameData()
         {
             var items = new List<Item> { new Item(1, "A", "P", "wellness", 10f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result1 = service.GetWellnessItems();
-            var result2 = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result1 = this.service.GetWellnessItems();
+            var result2 = this.service.GetWellnessItems();
             Assert.That(result1.Count, Is.EqualTo(result2.Count));
         }
 
@@ -219,17 +222,17 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_DoesNotModifyRepository()
         {
             var items = new List<Item> { new Item(1, "A", "P", "wellness", 10f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            service.GetWellnessItems();
-            mockItemsRepository.Verify(repository => repository.GetAllItems(), Times.Once);
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            this.service.GetWellnessItems();
+            this.mockItemsRepository.Verify(repository => repository.GetAllItems(), Times.Once);
         }
 
         [Test]
         public void GetWellnessItems_ZeroPriceItem_StillReturned()
         {
             var items = new List<Item> { new Item(1, "Free", "P", "wellness", 0f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(1));
         }
 
@@ -237,12 +240,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_NegativePriceItem_StillReturned()
         {
             var items = new List<Item> { new Item(1, "Discount", "P", "wellness", -5f, 1, quantity: 0) };
-            mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
-            var result = service.GetWellnessItems();
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
+            var result = this.service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(1));
         }
     }
 }
-
-
-

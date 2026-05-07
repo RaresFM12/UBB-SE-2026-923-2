@@ -8,6 +8,7 @@ namespace UBB_SE_2026_923_2.Models
     public class HighRiskMedicine
     {
         public string MedicineName { get; set; } = string.Empty;
+
         public string WarningMessage { get; set; } = string.Empty;
     }
 }

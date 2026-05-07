@@ -1,12 +1,12 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
-
-#nullable disable
+﻿#nullable disable
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace UBB_SE_2026_923_2.Migrations
 {
+    using System;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
@@ -22,7 +22,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MaxParticipants = table.Column<int>(type: "int", nullable: false)
+                    MaxParticipants = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -34,7 +34,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 columns: table => new
                 {
                     MedicineName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    WarningMessage = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false)
+                    WarningMessage = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -56,7 +56,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     Label = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    DiscountPercentage = table.Column<float>(type: "real", nullable: false)
+                    DiscountPercentage = table.Column<float>(type: "real", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -83,7 +83,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     Certification = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     YearsOfExperience = table.Column<int>(type: "int", nullable: false),
                     HourlyRate = table.Column<double>(type: "float", nullable: false),
-                    DoctorStatus = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true)
+                    DoctorStatus = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
                 },
                 constraints: table =>
                 {
@@ -96,7 +96,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 {
                     Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     LethalDose = table.Column<float>(type: "real", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false)
+                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -120,7 +120,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     PeriodLasts = table.Column<int>(type: "int", nullable: false),
                     PremenstrualSyndromeOption = table.Column<int>(type: "int", nullable: false),
                     DiscountNotifications = table.Column<bool>(type: "bit", nullable: false),
-                    LoyaltyPoints = table.Column<int>(type: "int", nullable: false)
+                    LoyaltyPoints = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -133,7 +133,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 {
                     ItemId = table.Column<int>(type: "int", nullable: false),
                     ExpirationDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    NumberOfPacks = table.Column<int>(type: "int", nullable: false)
+                    NumberOfPacks = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -161,7 +161,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Type = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Location = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false)
+                    Notes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -185,7 +185,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     AssignedDoctorId = table.Column<int>(type: "int", nullable: true),
-                    AssignedDoctorName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
+                    AssignedDoctorName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                 },
                 constraints: table =>
                 {
@@ -203,7 +203,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 columns: table => new
                 {
                     HangoutId = table.Column<int>(type: "int", nullable: false),
-                    StaffId = table.Column<int>(type: "int", nullable: false)
+                    StaffId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -233,7 +233,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     MedicationsList = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                     EvaluationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DoctorId = table.Column<int>(type: "int", nullable: true)
+                    DoctorId = table.Column<int>(type: "int", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -257,7 +257,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     ActionButtonText = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     RecipientStaffId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false)
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -275,7 +275,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 columns: table => new
                 {
                     PharmacistId = table.Column<int>(type: "int", nullable: false),
-                    HandoverDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    HandoverDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -298,7 +298,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     Location = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false)
+                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -317,7 +317,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 {
                     ItemId = table.Column<int>(type: "int", nullable: false),
                     SubstanceName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Concentration = table.Column<float>(type: "real", nullable: false)
+                    Concentration = table.Column<float>(type: "real", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -345,7 +345,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     PickUpDate = table.Column<DateOnly>(type: "date", nullable: false),
                     IsCompleted = table.Column<bool>(type: "bit", nullable: false),
-                    IsExpired = table.Column<bool>(type: "bit", nullable: false)
+                    IsExpired = table.Column<bool>(type: "bit", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -365,7 +365,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     NoteId = table.Column<int>(type: "int", nullable: false),
                     NoteBody = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    IsDone = table.Column<bool>(type: "bit", nullable: false)
+                    IsDone = table.Column<bool>(type: "bit", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -384,7 +384,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ItemId = table.Column<int>(type: "int", nullable: false),
-                    DiscountPercentage = table.Column<float>(type: "real", nullable: false)
+                    DiscountPercentage = table.Column<float>(type: "real", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -410,7 +410,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ItemId = table.Column<int>(type: "int", nullable: false),
                     IsFavorite = table.Column<bool>(type: "bit", nullable: false),
-                    IsStockAlert = table.Column<bool>(type: "bit", nullable: false)
+                    IsStockAlert = table.Column<bool>(type: "bit", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -439,7 +439,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     RequesterId = table.Column<int>(type: "int", nullable: false),
                     ColleagueId = table.Column<int>(type: "int", nullable: false),
                     RequestedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false)
+                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -471,7 +471,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     ItemId = table.Column<int>(type: "int", nullable: false),
                     OrderQuantity = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<float>(type: "real", nullable: false)
+                    Price = table.Column<float>(type: "real", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -496,7 +496,7 @@ namespace UBB_SE_2026_923_2.Migrations
                 values: new object[,]
                 {
                     { "Methotrexate", "Hepatotoxic - confirm dosing and weekly schedule." },
-                    { "Warfarin", "Anticoagulant - check INR before prescribing." }
+                    { "Warfarin", "Anticoagulant - check INR before prescribing." },
                 });
 
             migrationBuilder.InsertData(
@@ -508,7 +508,7 @@ namespace UBB_SE_2026_923_2.Migrations
                     { "Ibuprofen", "Anti-inflammatory pain reliever", 3200f },
                     { "Magnesium", "Mineral supplement for muscle and nerve support", 2500f },
                     { "Paracetamol", "Pain reliever and fever reducer", 4000f },
-                    { "Vitamin C", "Vitamin supplement for immune support", 2000f }
+                    { "Vitamin C", "Vitamin supplement for immune support", 2000f },
                 });
 
             migrationBuilder.CreateIndex(

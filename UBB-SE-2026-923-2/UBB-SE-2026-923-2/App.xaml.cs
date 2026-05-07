@@ -1,18 +1,18 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
-using System;
-using System.Net.Http;
-using UBB_SE_2026_923_2.Configuration;
-using UBB_SE_2026_923_2.Repositories;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels;
-using UBB_SE_2026_923_2.ViewModels.Admin;
-using UBB_SE_2026_923_2.ViewModels.Doctor;
-using UBB_SE_2026_923_2.ViewModels.Pharmacy;
-using UBB_SE_2026_923_2.Views.Shell;
-
-namespace UBB_SE_2026_923_2
+﻿namespace UBB_SE_2026_923_2
 {
+    using System;
+    using System.Net.Http;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using UBB_SE_2026_923_2.Configuration;
+    using UBB_SE_2026_923_2.Repositories;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels;
+    using UBB_SE_2026_923_2.ViewModels.Admin;
+    using UBB_SE_2026_923_2.ViewModels.Doctor;
+    using UBB_SE_2026_923_2.ViewModels.Pharmacy;
+    using UBB_SE_2026_923_2.Views.Shell;
+
     public partial class App : Application
     {
         public static IServiceProvider Services { get; private set; } = null!;
@@ -24,6 +24,7 @@ namespace UBB_SE_2026_923_2
             try
             {
                 InitializeComponent();
+
                 // Build the DI container first so that ServiceWrapper.Initialize
                 // (and any other static-style entry points) can resolve EF Core
                 // repositories rather than falling back to the legacy ADO.NET ones.
@@ -41,8 +42,8 @@ namespace UBB_SE_2026_923_2
 
         protected override void OnLaunched(LaunchActivatedEventArgs eventArgs)
         {
-            window = new MainWindow();
-            window.Activate();
+            this.window = new MainWindow();
+            this.window.Activate();
         }
 
         private static IServiceCollection ConfigureServices()
@@ -105,6 +106,7 @@ namespace UBB_SE_2026_923_2
             services.AddSingleton<IPharmacyHandoverRepository, HttpPharmacyHandoverRepository>();
             services.AddSingleton<IShiftSwapRepository, HttpShiftSwapRepository>();
             services.AddSingleton<INotificationRepository, HttpNotificationRepository>();
+
             // Appointments now go through the Web API instead of EF Core directly.
             services.AddSingleton<IAppointmentRepository, HttpAppointmentRepository>();
             services.AddSingleton<IHangoutRepository, HttpHangoutRepository>();

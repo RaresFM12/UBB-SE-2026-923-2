@@ -13,7 +13,7 @@ namespace UBB_SE_2026_923_2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260505210252_adela")]
-    partial class adela
+    partial class Adela
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

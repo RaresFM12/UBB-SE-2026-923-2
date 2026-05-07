@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IHangoutParticipantRepository"/>.
     /// </summary>
@@ -21,7 +21,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<(int HangoutId, int StaffId)> GetAllParticipants()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.HangoutParticipants
                 .AsNoTracking()
                 .Select(p => new { p.HangoutId, p.StaffId })
@@ -32,7 +32,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void AddParticipant(int hangoutId, int staffId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             db.HangoutParticipants.Add(new HangoutParticipant
             {
                 HangoutId = hangoutId,

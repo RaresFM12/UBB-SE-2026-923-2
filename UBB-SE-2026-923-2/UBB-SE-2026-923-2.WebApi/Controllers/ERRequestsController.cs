@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.WebApi.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,33 +18,33 @@ public class ERRequestsController : ControllerBase
     [HttpGet]
     public ActionResult<IReadOnlyList<ERRequest>> GetAll()
     {
-        return Ok(repository.GetAllRequests());
+        return this.Ok(this.repository.GetAllRequests());
     }
 
     [HttpGet("{id:int}")]
     public ActionResult<ERRequest> GetById(int id)
     {
-        var request = repository.GetRequestById(id);
+        var request = this.repository.GetRequestById(id);
         if (request is null)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        return Ok(request);
+        return this.Ok(request);
     }
 
     [HttpPost]
     public ActionResult<int> Create([FromBody] CreateRequest request)
     {
-        var id = repository.AddRequest(request.Specialization, request.Location, request.Status);
-        return Ok(id);
+        var id = this.repository.AddRequest(request.Specialization, request.Location, request.Status);
+        return this.Ok(id);
     }
 
     [HttpPatch("{id:int}/status")]
     public IActionResult UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
     {
-        repository.UpdateRequestStatus(id, request.Status, request.AssignedDoctorId, request.AssignedDoctorName);
-        return NoContent();
+        this.repository.UpdateRequestStatus(id, request.Status, request.AssignedDoctorId, request.AssignedDoctorName);
+        return this.NoContent();
     }
 
     public record CreateRequest(string Specialization, string Location, string Status);

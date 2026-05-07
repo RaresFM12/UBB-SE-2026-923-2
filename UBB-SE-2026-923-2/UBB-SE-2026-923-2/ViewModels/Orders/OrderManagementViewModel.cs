@@ -1,22 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.Orders
+﻿namespace UBB_SE_2026_923_2.ViewModels.Orders
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public class OrderDetail
     {
         public int OrderID { get; set; }
+
         public string UserEmail { get; set; }
+
         public bool IsComplete { get; set; }
+
         public bool IsExpired { get; set; }
+
         public DateOnly PickUpDate { get; set; }
 
         public DateOnly ExpirationDate
@@ -41,11 +45,11 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
         public OrderDetail(Order orderDetails, string userEmail)
         {
-            OrderID = orderDetails.Id;
-            UserEmail = userEmail;
-            IsComplete = orderDetails.IsCompleted;
-            IsExpired = orderDetails.IsExpired;
-            PickUpDate = orderDetails.PickUpDate;
+            this.OrderID = orderDetails.Id;
+            this.UserEmail = userEmail;
+            this.IsComplete = orderDetails.IsCompleted;
+            this.IsExpired = orderDetails.IsExpired;
+            this.PickUpDate = orderDetails.PickUpDate;
         }
     }
 
@@ -57,7 +61,8 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
         // Changed to IOrderService
         private readonly IOrderService orderService;
 
-        private List<OrderDetail> baseOrderList;
+        private readonly List<OrderDetail> baseOrderList;
+
         public ObservableCollection<OrderDetail> FilteredOrderList { get; set; }
 
         public ICommand RedirectToDetailPageCommand { get; set; }
@@ -72,59 +77,62 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
             get => this.orderIDInput;
             set
             {
-                orderIDInput = value;
-                OnPropertyChanged();
-                ReapplyFilters();
+                this.orderIDInput = value;
+                this.OnPropertyChanged();
+                this.ReapplyFilters();
             }
         }
+
         public string UserEmailInput
         {
             get => this.userEmailInput;
             set
             {
-                userEmailInput = value;
-                OnPropertyChanged();
-                ReapplyFilters();
+                this.userEmailInput = value;
+                this.OnPropertyChanged();
+                this.ReapplyFilters();
             }
         }
+
         public bool IsIncompleteCheckbox
         {
             get => this.isIncompleteCheckbox;
             set
             {
-                isIncompleteCheckbox = value;
-                OnPropertyChanged();
-                ReapplyFilters();
+                this.isIncompleteCheckbox = value;
+                this.OnPropertyChanged();
+                this.ReapplyFilters();
             }
         }
+
         public bool IsExpiredCheckbox
         {
             get => this.isExpiredCheckbox;
             set
             {
-                isExpiredCheckbox = value;
-                OnPropertyChanged();
-                ReapplyFilters();
+                this.isExpiredCheckbox = value;
+                this.OnPropertyChanged();
+                this.ReapplyFilters();
             }
         }
 
         public OrderManagementViewModel(IOrderService newOrderServ)
         {
-            orderService = newOrderServ;
-            baseOrderList = new ();
-            FilteredOrderList = new ();
-            RedirectToDetailPageCommand = new RelayCommandWithOneParameter<OrderDetail>(OnClickDetailButton);
+            this.orderService = newOrderServ;
+            this.baseOrderList = new();
+            this.FilteredOrderList = new();
+            this.RedirectToDetailPageCommand = new RelayCommandWithOneParameter<OrderDetail>(this.OnClickDetailButton);
 
-            orderService.ExpireOverdueOrders();
-            foreach (Order currOrder in orderService.OrdersRepository.GetAllOrders())
+            this.orderService.ExpireOverdueOrders();
+            foreach (Order currOrder in this.orderService.OrdersRepository.GetAllOrders())
             {
-                int userID = orderService.OrdersRepository.GetOrder(currOrder.Id).ClientId;
-                string currUserEmail = orderService.UsersRepository.GetUserById(userID).Email;
+                int userID = this.orderService.OrdersRepository.GetOrder(currOrder.Id).ClientId;
+                string currUserEmail = this.orderService.UsersRepository.GetUserById(userID).Email;
 
-                OrderDetail currOrderDetail = new (currOrder, currUserEmail);
+                OrderDetail currOrderDetail = new(currOrder, currUserEmail);
 
-                baseOrderList.Add(currOrderDetail);
-                FilteredOrderList.Add(currOrderDetail);
+                this.baseOrderList.Add(currOrderDetail);
+                this.FilteredOrderList.Add(currOrderDetail);
             }
         }
 
@@ -132,21 +140,21 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
         public virtual void OnClickDetailButton(OrderDetail chosenOrder)
         {
-            ClickDetailButton?.Invoke(new Tuple<IOrderService, OrderDetail>(orderService, chosenOrder));
+            this.ClickDetailButton?.Invoke(new Tuple<IOrderService, OrderDetail>(this.orderService, chosenOrder));
         }
 
         private void ReapplyFilters()
         {
-            List<OrderDetail> intermediateFilteredOrderList = new ();
+            List<OrderDetail> intermediateFilteredOrderList = new();
 
-            foreach (OrderDetail iterOrderDetail in baseOrderList)
+            foreach (OrderDetail iterOrderDetail in this.baseOrderList)
             {
                 intermediateFilteredOrderList.Add(iterOrderDetail);
             }
 
             try
             {
-                int inputtedOrderID = int.Parse(orderIDInput);
+                int inputtedOrderID = int.Parse(this.orderIDInput);
                 List<OrderDetail> result = intermediateFilteredOrderList
                     .Where<OrderDetail>(order => order.OrderID == inputtedOrderID)
                     .ToList<OrderDetail>();
@@ -161,12 +169,12 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
             {
             }
 
-            if (userEmailInput is not null)
+            if (this.userEmailInput is not null)
             {
-                if (userEmailInput.Length != EmptyLength)
+                if (this.userEmailInput.Length != EmptyLength)
                 {
                     List<OrderDetail> result = intermediateFilteredOrderList
-                        .Where<OrderDetail>(order => order.UserEmail == userEmailInput)
+                        .Where<OrderDetail>(order => order.UserEmail == this.userEmailInput)
                         .ToList<OrderDetail>();
 
                     intermediateFilteredOrderList.Clear();
@@ -177,7 +185,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
                 }
             }
 
-            if (isIncompleteCheckbox)
+            if (this.isIncompleteCheckbox)
             {
                 List<OrderDetail> result = intermediateFilteredOrderList
                     .Where<OrderDetail>(order => !order.IsComplete && !order.IsExpired)
@@ -190,7 +198,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
                 }
             }
 
-            if (isExpiredCheckbox)
+            if (this.isExpiredCheckbox)
             {
                 List<OrderDetail> result = intermediateFilteredOrderList
                     .Where<OrderDetail>(order => order.IsExpired)
@@ -203,10 +211,10 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
                 }
             }
 
-            FilteredOrderList.Clear();
+            this.FilteredOrderList.Clear();
             foreach (OrderDetail resultOrder in intermediateFilteredOrderList)
             {
-                FilteredOrderList.Add(resultOrder);
+                this.FilteredOrderList.Add(resultOrder);
             }
         }
 
@@ -214,7 +222,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

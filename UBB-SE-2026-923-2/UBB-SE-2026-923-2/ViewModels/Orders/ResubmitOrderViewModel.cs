@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.Orders
+﻿namespace UBB_SE_2026_923_2.ViewModels.Orders
 {
+    using System;
+    using System.Collections.Generic;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public class ResubmitOrderViewModel : IResubmitOrderViewModel
     {
         private readonly IOrderService orderService;
@@ -17,16 +17,16 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
         public ResubmitOrderViewModel(IOrderService injectedOrderService, int currOrderID)
         {
-            orderService = injectedOrderService;
-            ShownOrderID = currOrderID;
+            this.orderService = injectedOrderService;
+            this.ShownOrderID = currOrderID;
 
-            Order currOrder = orderService.OrdersRepository.GetOrder(currOrderID);
+            Order currOrder = this.orderService.OrdersRepository.GetOrder(currOrderID);
             Dictionary<int, Tuple<int, float>> itemsInOrder = currOrder.ItemQuantitiesWithFinalPrice;
-            OrderItems = new ();
+            this.OrderItems = new();
 
             foreach (KeyValuePair<int, Tuple<int, float>> orderItemEntry in itemsInOrder)
             {
-                Item currentItem = orderService.ItemsRepository.GetItemById(orderItemEntry.Key);
+                Item currentItem = this.orderService.ItemsRepository.GetItemById(orderItemEntry.Key);
 
                 string alteredImagePath = currentItem.ImagePath;
 
@@ -37,17 +37,17 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
                         orderItemEntry.Value.Item1,
                         orderItemEntry.Value.Item2);
 
-                OrderItems.Add(itemRepresentation);
+                this.OrderItems.Add(itemRepresentation);
             }
 
             float totalPrice = 0f;
 
-            foreach (ItemDetail item in OrderItems)
+            foreach (ItemDetail item in this.OrderItems)
             {
                 totalPrice += item.ItemFinalPrice;
             }
 
-            TotalPriceString = totalPrice.ToString("0.00") + " RON";
+            this.TotalPriceString = totalPrice.ToString("0.00") + " RON";
         }
     }
 }

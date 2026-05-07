@@ -1,8 +1,8 @@
-﻿using System;
-using UBB_SE_2026_923_2.Models;
-
-namespace UBB_SE_2026_923_2.Services
+﻿namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using UBB_SE_2026_923_2.Models;
+
     public interface IFatigueAuditService
     {
         AutoAuditResult RunAutoAudit(DateTime weekStart);
@@ -10,4 +10,3 @@ namespace UBB_SE_2026_923_2.Services
         bool ReassignShift(int shiftId, int newStaffId);
     }
 }
-

@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-using UBB_SE_2026_923_2.ViewModels.Orders;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.Extensions.DependencyInjection;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+    using UBB_SE_2026_923_2.ViewModels.Orders;
+
     public class OrderService : IOrderService
     {
         private const float MinDiscount = 0f;
@@ -30,11 +30,11 @@ namespace UBB_SE_2026_923_2.Services
 
         public IPrescriptionService PrescriptionService { get; private set; }
 
-        private User injectedActiveUser;
+        private readonly User injectedActiveUser;
 
         public User ActiveUser
         {
-            get { return injectedActiveUser ?? ServiceWrapper.UserAccountService.CurrentUser; }
+            get { return this.injectedActiveUser ?? ServiceWrapper.UserAccountService.CurrentUser; }
         }
 
         public OrderService()
@@ -43,12 +43,12 @@ namespace UBB_SE_2026_923_2.Services
             // repositories from the application service provider; the
             // evaluations repository still uses the legacy ADO.NET connection
             // string until it is migrated in Phase 2.
-            SubstancesRepository = App.Services.GetRequiredService<ISubstancesRepository>();
-            ItemsRepository = App.Services.GetRequiredService<IItemsRepository>();
-            UsersRepository = App.Services.GetRequiredService<IUsersRepository>();
-            OrdersRepository = App.Services.GetRequiredService<IOrdersRepository>();
-            EvaluationsRepository = App.Services.GetRequiredService<IEvaluationsRepository>();
-            PrescriptionService = new PrescriptionService(ItemsRepository, EvaluationsRepository);
+            this.SubstancesRepository = App.Services.GetRequiredService<ISubstancesRepository>();
+            this.ItemsRepository = App.Services.GetRequiredService<IItemsRepository>();
+            this.UsersRepository = App.Services.GetRequiredService<IUsersRepository>();
+            this.OrdersRepository = App.Services.GetRequiredService<IOrdersRepository>();
+            this.EvaluationsRepository = App.Services.GetRequiredService<IEvaluationsRepository>();
+            this.PrescriptionService = new PrescriptionService(this.ItemsRepository, this.EvaluationsRepository);
         }
 
         public OrderService(
@@ -59,13 +59,13 @@ namespace UBB_SE_2026_923_2.Services
             User activeUser,
             IEvaluationsRepository? evaluationsRepository = null)
         {
-            SubstancesRepository = substancesRepository;
-            ItemsRepository = itemsRepository;
-            UsersRepository = usersRepository;
-            OrdersRepository = ordersRepository;
-            EvaluationsRepository = evaluationsRepository ?? App.Services.GetRequiredService<IEvaluationsRepository>();
-            PrescriptionService = new PrescriptionService(itemsRepository, EvaluationsRepository);
-            injectedActiveUser = activeUser;
+            this.SubstancesRepository = substancesRepository;
+            this.ItemsRepository = itemsRepository;
+            this.UsersRepository = usersRepository;
+            this.OrdersRepository = ordersRepository;
+            this.EvaluationsRepository = evaluationsRepository ?? App.Services.GetRequiredService<IEvaluationsRepository>();
+            this.PrescriptionService = new PrescriptionService(itemsRepository, this.EvaluationsRepository);
+            this.injectedActiveUser = activeUser;
         }
 
         private float NormalizeDiscount(float discount)
@@ -118,15 +118,15 @@ namespace UBB_SE_2026_923_2.Services
 
         private BasketItemViewModel BuildBasketItemViewModel(int itemId, BasketEntry basketEntry)
         {
-            Item currentItem = ItemsRepository.GetItemById(itemId);
+            Item currentItem = this.ItemsRepository.GetItemById(itemId);
 
-            float baseItemDiscount = NormalizeDiscount(currentItem.DiscountPercentage);
-            float extraItemDiscount = NormalizeDiscount(basketEntry.ExtraDiscountPercentage);
+            float baseItemDiscount = this.NormalizeDiscount(currentItem.DiscountPercentage);
+            float extraItemDiscount = this.NormalizeDiscount(basketEntry.ExtraDiscountPercentage);
             float userDiscount = NoExtraDiscount;
 
-            if (ActiveUser.UserDiscounts.ContainsKey(currentItem.Id))
+            if (this.ActiveUser.UserDiscounts.ContainsKey(currentItem.Id))
             {
-                userDiscount = NormalizeDiscount(ActiveUser.UserDiscounts[currentItem.Id]);
+                userDiscount = this.NormalizeDiscount(this.ActiveUser.UserDiscounts[currentItem.Id]);
             }
 
             BasketItemViewModel basketItem = new BasketItemViewModel(
@@ -140,63 +140,63 @@ namespace UBB_SE_2026_923_2.Services
                 userDiscount,
                 currentItem.Price);
 
-            RecalculateBasketItemPrices(basketItem);
+            this.RecalculateBasketItemPrices(basketItem);
 
             return basketItem;
         }
 
         public void AddToBasket(int itemId, int quantityToBuy)
         {
-            AddItemToBasket(itemId, quantityToBuy, NoExtraDiscount);
+            this.AddItemToBasket(itemId, quantityToBuy, NoExtraDiscount);
         }
 
         public void AddItemToBasket(int itemId, int quantityToBuy, float extraDiscountPercentage = NoExtraDiscount)
         {
-            if (ActiveUser.Basket.ContainsKey(itemId))
+            if (this.ActiveUser.Basket.ContainsKey(itemId))
             {
-                ActiveUser.Basket[itemId].Quantity += quantityToBuy;
+                this.ActiveUser.Basket[itemId].Quantity += quantityToBuy;
 
-                if (extraDiscountPercentage > ActiveUser.Basket[itemId].ExtraDiscountPercentage)
+                if (extraDiscountPercentage > this.ActiveUser.Basket[itemId].ExtraDiscountPercentage)
                 {
-                    ActiveUser.Basket[itemId].ExtraDiscountPercentage = extraDiscountPercentage;
+                    this.ActiveUser.Basket[itemId].ExtraDiscountPercentage = extraDiscountPercentage;
                 }
 
                 return;
             }
 
-            ActiveUser.AddItemToBasket(itemId, quantityToBuy, extraDiscountPercentage);
+            this.ActiveUser.AddItemToBasket(itemId, quantityToBuy, extraDiscountPercentage);
         }
 
         public void UpdateBasketItemQuantity(int itemId, int newQuantityToBuy)
         {
-            ActiveUser.Basket[itemId].Quantity = newQuantityToBuy;
+            this.ActiveUser.Basket[itemId].Quantity = newQuantityToBuy;
 
-            if (ActiveUser.Basket[itemId].Quantity <= EmptyQuantity)
+            if (this.ActiveUser.Basket[itemId].Quantity <= EmptyQuantity)
             {
-                ActiveUser.RemoveItemFromBasket(itemId);
+                this.ActiveUser.RemoveItemFromBasket(itemId);
             }
         }
 
         public void RemoveFromBasket(int itemIdToRemove)
         {
-            ActiveUser.RemoveItemFromBasket(itemIdToRemove);
+            this.ActiveUser.RemoveItemFromBasket(itemIdToRemove);
         }
 
         public List<BasketItemViewModel> GetBasketItems()
         {
-            List<BasketItemViewModel> basketItems = new ();
-            List<int> invalidItemIds = new ();
+            List<BasketItemViewModel> basketItems = new();
+            List<int> invalidItemIds = new();
 
-            if (ActiveUser == null)
+            if (this.ActiveUser == null)
             {
                 return basketItems;
             }
 
-            foreach (KeyValuePair<int, BasketEntry> item in ActiveUser.Basket)
+            foreach (KeyValuePair<int, BasketEntry> item in this.ActiveUser.Basket)
             {
                 try
                 {
-                    basketItems.Add(BuildBasketItemViewModel(item.Key, item.Value));
+                    basketItems.Add(this.BuildBasketItemViewModel(item.Key, item.Value));
                 }
                 catch
                 {
@@ -206,7 +206,7 @@ namespace UBB_SE_2026_923_2.Services
 
             foreach (int invalidItemId in invalidItemIds)
             {
-                ActiveUser.RemoveItemFromBasket(invalidItemId);
+                this.ActiveUser.RemoveItemFromBasket(invalidItemId);
             }
 
             return basketItems;
@@ -236,12 +236,12 @@ namespace UBB_SE_2026_923_2.Services
 
         public Dictionary<int, int> FillBasketFromPrescription(string prescriptionId)
         {
-            return PrescriptionService.GetItemsFromPrescription(prescriptionId, ActiveUser.UserDiscounts);
+            return this.PrescriptionService.GetItemsFromPrescription(prescriptionId, this.ActiveUser.UserDiscounts);
         }
 
         public void ApplyPrescriptionToBasket(string prescriptionId)
         {
-            Dictionary<int, int> prescriptionItems = FillBasketFromPrescription(prescriptionId);
+            Dictionary<int, int> prescriptionItems = this.FillBasketFromPrescription(prescriptionId);
 
             if (prescriptionItems.Count == 0)
             {
@@ -250,13 +250,13 @@ namespace UBB_SE_2026_923_2.Services
 
             foreach (KeyValuePair<int, int> itemEntry in prescriptionItems)
             {
-                AddItemToBasket(itemEntry.Key, itemEntry.Value, NoExtraDiscount);
+                this.AddItemToBasket(itemEntry.Key, itemEntry.Value, NoExtraDiscount);
             }
         }
 
         public void CompleteOrder(int orderId, Dictionary<int, Tuple<int, float>> updatedQuantities)
         {
-            Order orderToComplete = OrdersRepository.GetOrder(orderId);
+            Order orderToComplete = this.OrdersRepository.GetOrder(orderId);
             DateTime timeNow = DateTime.Now;
             DateOnly currentDate = new DateOnly(timeNow.Year, timeNow.Month, timeNow.Day);
 
@@ -264,7 +264,7 @@ namespace UBB_SE_2026_923_2.Services
             {
                 int currentItemId = itemQuantityEntry.Key;
                 int preferredItemQuantity = itemQuantityEntry.Value.Item1;
-                Item itemToVerify = ItemsRepository.GetItemById(currentItemId);
+                Item itemToVerify = this.ItemsRepository.GetItemById(currentItemId);
 
                 if (itemToVerify.GetQuantityAtSpecifiedDate(currentDate) < preferredItemQuantity)
                 {
@@ -290,16 +290,16 @@ namespace UBB_SE_2026_923_2.Services
                     itemQuantityEntry.Value.Item2);
             }
 
-            OrdersRepository.UpdateOrder(orderToComplete);
+            this.OrdersRepository.UpdateOrder(orderToComplete);
 
             foreach (KeyValuePair<int, Tuple<int, float>> itemQuantityEntry in updatedQuantities)
             {
                 int currentItemId = itemQuantityEntry.Key;
                 int itemQuantityToSubtract = itemQuantityEntry.Value.Item1;
-                Item itemToUpdate = ItemsRepository.GetItemById(currentItemId);
+                Item itemToUpdate = this.ItemsRepository.GetItemById(currentItemId);
 
                 itemToUpdate.RemoveQuantityFromItem(itemQuantityToSubtract, currentDate);
-                ItemsRepository.UpdateItemById(itemToUpdate);
+                this.ItemsRepository.UpdateItemById(itemToUpdate);
             }
         }
 
@@ -308,7 +308,7 @@ namespace UBB_SE_2026_923_2.Services
             Dictionary<int, Tuple<int, float>> updatedQuantities,
             DateOnly updatedPickUpDate)
         {
-            Order orderToModify = OrdersRepository.GetOrder(orderIdToModify);
+            Order orderToModify = this.OrdersRepository.GetOrder(orderIdToModify);
 
             DateOnly todayDate = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             if (updatedPickUpDate <= todayDate)
@@ -320,7 +320,7 @@ namespace UBB_SE_2026_923_2.Services
             {
                 int currentItemId = itemQuantityEntry.Key;
                 int preferredItemQuantity = itemQuantityEntry.Value.Item1;
-                Item itemToVerify = ItemsRepository.GetItemById(currentItemId);
+                Item itemToVerify = this.ItemsRepository.GetItemById(currentItemId);
 
                 if (itemToVerify.GetQuantityAtSpecifiedDate(updatedPickUpDate) < preferredItemQuantity)
                 {
@@ -346,12 +346,12 @@ namespace UBB_SE_2026_923_2.Services
                     itemQuantityEntry.Value.Item2);
             }
 
-            OrdersRepository.UpdateOrder(orderToModify);
+            this.OrdersRepository.UpdateOrder(orderToModify);
         }
 
         private void AddOrderWithItems(int clientId, DateOnly pickUpDate, Dictionary<int, Tuple<int, float>> items, bool isCompleted = false, bool isExpired = false)
         {
-            int newOrderId = OrdersRepository.AddOrder(clientId, pickUpDate, isCompleted, isExpired);
+            int newOrderId = this.OrdersRepository.AddOrder(clientId, pickUpDate, isCompleted, isExpired);
             Order newOrder = new Order(newOrderId, clientId, pickUpDate, isCompleted, isExpired);
 
             foreach (KeyValuePair<int, Tuple<int, float>> item in items)
@@ -362,18 +362,19 @@ namespace UBB_SE_2026_923_2.Services
 
                 newOrder.AddItemToOrder(itemId, itemQuantity, finalPrice);
             }
-            OrdersRepository.UpdateOrder(newOrder);
+
+            this.OrdersRepository.UpdateOrder(newOrder);
         }
 
         public void PlaceOrderFromBasket(DateOnly chosenPickUpDate)
         {
             Dictionary<int, Tuple<int, float>> itemInformationForOrder = new Dictionary<int, Tuple<int, float>>();
 
-            foreach (KeyValuePair<int, BasketEntry> basketItemEntry in ActiveUser.Basket)
+            foreach (KeyValuePair<int, BasketEntry> basketItemEntry in this.ActiveUser.Basket)
             {
-                Item currentItem = ItemsRepository.GetItemById(basketItemEntry.Key);
+                Item currentItem = this.ItemsRepository.GetItemById(basketItemEntry.Key);
                 int currentItemQuantity = basketItemEntry.Value.Quantity;
-                float extraDiscountAmount = NormalizeDiscount(basketItemEntry.Value.ExtraDiscountPercentage);
+                float extraDiscountAmount = this.NormalizeDiscount(basketItemEntry.Value.ExtraDiscountPercentage);
 
                 int itemQuantityAtPickUpDate = currentItem.GetQuantityAtSpecifiedDate(chosenPickUpDate);
 
@@ -386,12 +387,12 @@ namespace UBB_SE_2026_923_2.Services
                         "instead of " + currentItemQuantity + ".");
                 }
 
-                float itemDiscountAmount = NormalizeDiscount(currentItem.DiscountPercentage);
+                float itemDiscountAmount = this.NormalizeDiscount(currentItem.DiscountPercentage);
                 float userDiscountAmount = MinDiscount;
 
-                if (ActiveUser.UserDiscounts.ContainsKey(currentItem.Id))
+                if (this.ActiveUser.UserDiscounts.ContainsKey(currentItem.Id))
                 {
-                    userDiscountAmount = NormalizeDiscount(ActiveUser.UserDiscounts[currentItem.Id]);
+                    userDiscountAmount = this.NormalizeDiscount(this.ActiveUser.UserDiscounts[currentItem.Id]);
                 }
 
                 float finalPriceCalculation = currentItemQuantity * currentItem.Price;
@@ -404,18 +405,18 @@ namespace UBB_SE_2026_923_2.Services
                     new Tuple<int, float>(currentItemQuantity, finalPriceCalculation));
             }
 
-            AddOrderWithItems(ActiveUser.Id, chosenPickUpDate, itemInformationForOrder);
-            ActiveUser.Basket.Clear();
+            this.AddOrderWithItems(this.ActiveUser.Id, chosenPickUpDate, itemInformationForOrder);
+            this.ActiveUser.Basket.Clear();
         }
 
         public void ResubmitExpiredOrder(int orderIdToResubmit, DateOnly chosenPickUpDate)
         {
-            Order expiredOrder = OrdersRepository.GetOrder(orderIdToResubmit);
+            Order expiredOrder = this.OrdersRepository.GetOrder(orderIdToResubmit);
             Dictionary<int, Tuple<int, float>> itemInformationForOrder = expiredOrder.ItemQuantitiesWithFinalPrice;
 
             foreach (KeyValuePair<int, Tuple<int, float>> orderItemEntry in itemInformationForOrder)
             {
-                Item currentItem = ItemsRepository.GetItemById(orderItemEntry.Key);
+                Item currentItem = this.ItemsRepository.GetItemById(orderItemEntry.Key);
                 int currentItemQuantity = orderItemEntry.Value.Item1;
                 int itemQuantityAtPickUpDate = currentItem.GetQuantityAtSpecifiedDate(chosenPickUpDate);
 
@@ -429,32 +430,29 @@ namespace UBB_SE_2026_923_2.Services
                 }
             }
 
-            AddOrderWithItems(ActiveUser.Id, chosenPickUpDate, itemInformationForOrder);
-            OrdersRepository.RemoveOrder(orderIdToResubmit); // or mark as no longer expired
+            this.AddOrderWithItems(this.ActiveUser.Id, chosenPickUpDate, itemInformationForOrder);
+            this.OrdersRepository.RemoveOrder(orderIdToResubmit); // or mark as no longer expired
         }
 
         public void CancelOrder(int orderIdToCancel)
         {
-            Order orderToCancel = OrdersRepository.GetOrder(orderIdToCancel);
+            Order orderToCancel = this.OrdersRepository.GetOrder(orderIdToCancel);
             orderToCancel.IsExpired = true;
-            OrdersRepository.UpdateOrder(orderToCancel);
+            this.OrdersRepository.UpdateOrder(orderToCancel);
         }
 
         public void ExpireOverdueOrders()
         {
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-            List<Order> allOrders = OrdersRepository.GetAllOrders();
+            List<Order> allOrders = this.OrdersRepository.GetAllOrders();
             foreach (Order order in allOrders)
             {
                 if (!order.IsExpired && !order.IsCompleted && today > order.PickUpDate.AddDays(Order.OrderExpirationDays))
                 {
                     order.IsExpired = true;
-                    OrdersRepository.UpdateOrder(order);
+                    this.OrdersRepository.UpdateOrder(order);
                 }
             }
         }
     }
 }
-
-
-

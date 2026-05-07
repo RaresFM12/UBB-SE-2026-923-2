@@ -1,47 +1,54 @@
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.ViewModels.Base;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.ViewModels
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Base;
+
     public class SalaryComputationViewModel : ObservableObject
     {
         private readonly ISalaryComputationService salaryService;
 
         public ObservableCollection<IStaff> StaffList { get; } = new ObservableCollection<IStaff>();
+
         public ObservableCollection<Shift> ShiftList { get; } = new ObservableCollection<Shift>();
 
         private IStaff selectedStaff = default!;
+
         public IStaff SelectedStaff
         {
-            get => selectedStaff;
+            get => this.selectedStaff;
             set
             {
-                SetProperty(ref selectedStaff, value);
-                ComputeSalaryCommand.RaiseCanExecuteChanged();
+                this.SetProperty(ref this.selectedStaff, value);
+                this.ComputeSalaryCommand.RaiseCanExecuteChanged();
             }
         }
 
         private int selectedMonth = DateTime.Now.Month;
-        public int SelectedMonth { get => selectedMonth; set => SetProperty(ref selectedMonth, value); }
+
+        public int SelectedMonth { get => this.selectedMonth; set => this.SetProperty(ref this.selectedMonth, value); }
 
         private int selectedYear = DateTime.Now.Year;
-        public int SelectedYear { get => selectedYear; set => SetProperty(ref selectedYear, value); }
+
+        public int SelectedYear { get => this.selectedYear; set => this.SetProperty(ref this.selectedYear, value); }
 
         private bool isLoading;
-        public bool IsLoading { get => isLoading; set => SetProperty(ref isLoading, value); }
+
+        public bool IsLoading { get => this.isLoading; set => this.SetProperty(ref this.isLoading, value); }
 
         private string errorMessage = string.Empty;
-        public string ErrorMessage { get => errorMessage; set => SetProperty(ref errorMessage, value); }
+
+        public string ErrorMessage { get => this.errorMessage; set => this.SetProperty(ref this.errorMessage, value); }
 
         private string salaryResult = string.Empty;
-        public string SalaryResult { get => salaryResult; set => SetProperty(ref salaryResult, value); }
+
+        public string SalaryResult { get => this.salaryResult; set => this.SetProperty(ref this.salaryResult, value); }
 
         public AsyncRelayCommand ComputeSalaryCommand { get; }
 
@@ -49,72 +56,72 @@ namespace UBB_SE_2026_923_2.ViewModels
         {
             this.salaryService = salaryService;
 
-            ComputeSalaryCommand = new AsyncRelayCommand(ComputeSalaryAsync, CanComputeSalary);
+            this.ComputeSalaryCommand = new AsyncRelayCommand(this.ComputeSalaryAsync, this.CanComputeSalary);
 
-            LoadStaffList();
-            LoadShiftList();
+            this.LoadStaffList();
+            this.LoadShiftList();
         }
 
         public SalaryComputationViewModel(ISalaryComputationService salaryService, IEnumerable<IStaff> staffList, IEnumerable<Shift> shiftList)
         {
             this.salaryService = salaryService;
 
-            ComputeSalaryCommand = new AsyncRelayCommand(ComputeSalaryAsync, CanComputeSalary);
+            this.ComputeSalaryCommand = new AsyncRelayCommand(this.ComputeSalaryAsync, this.CanComputeSalary);
 
-            StaffList.ReplaceWith(staffList);
-            ShiftList.ReplaceWith(shiftList);
+            this.StaffList.ReplaceWith(staffList);
+            this.ShiftList.ReplaceWith(shiftList);
         }
 
-        private void LoadStaffList() => StaffList.ReplaceWith(salaryService.GetAllStaff());
+        private void LoadStaffList() => this.StaffList.ReplaceWith(this.salaryService.GetAllStaff());
 
-        private void LoadShiftList() => ShiftList.ReplaceWith(salaryService.GetAllShifts());
+        private void LoadShiftList() => this.ShiftList.ReplaceWith(this.salaryService.GetAllShifts());
 
         private bool CanComputeSalary()
         {
-            return SelectedStaff != null && SelectedStaff.StaffID > 0;
+            return this.SelectedStaff != null && this.SelectedStaff.StaffID > 0;
         }
 
         private async Task ComputeSalaryAsync()
         {
-            ErrorMessage = string.Empty;
-            SalaryResult = string.Empty;
-            IsLoading = true;
+            this.ErrorMessage = string.Empty;
+            this.SalaryResult = string.Empty;
+            this.IsLoading = true;
 
             try
             {
                 bool IsStaffShiftForPeriod(Shift shift) =>
-                    shift.AppointedStaff?.StaffID == SelectedStaff.StaffID
-                    && shift.StartTime.Month == SelectedMonth
-                    && shift.StartTime.Year == SelectedYear;
+                    shift.AppointedStaff?.StaffID == this.SelectedStaff.StaffID
+                    && shift.StartTime.Month == this.SelectedMonth
+                    && shift.StartTime.Year == this.SelectedYear;
 
-                var staffShiftsForPeriod = ShiftList
+                var staffShiftsForPeriod = this.ShiftList
                     .Where(IsStaffShiftForPeriod)
                     .ToList();
 
                 double computedSalary = 0;
 
-                if (SelectedStaff is Models.Doctor doctor)
+                if (this.SelectedStaff is Models.Doctor doctor)
                 {
-                    computedSalary = await salaryService.ComputeSalaryDoctorAsync(doctor, staffShiftsForPeriod, SelectedMonth, SelectedYear);
+                    computedSalary = await this.salaryService.ComputeSalaryDoctorAsync(doctor, staffShiftsForPeriod, this.SelectedMonth, this.SelectedYear);
                 }
-                else if (SelectedStaff is Models.Pharmacyst pharmacist)
+                else if (this.SelectedStaff is Models.Pharmacyst pharmacist)
                 {
-                    computedSalary = await salaryService.ComputeSalaryPharmacistAsync(pharmacist, staffShiftsForPeriod, SelectedMonth, SelectedYear);
+                    computedSalary = await this.salaryService.ComputeSalaryPharmacistAsync(pharmacist, staffShiftsForPeriod, this.SelectedMonth, this.SelectedYear);
                 }
                 else
                 {
                     throw new InvalidOperationException("Unsupported staff type for salary computation.");
                 }
 
-                SalaryResult = $"Computed Salary: ${computedSalary:F2}";
+                this.SalaryResult = $"Computed Salary: ${computedSalary:F2}";
             }
             catch (Exception exception)
             {
-                ErrorMessage = $"Computation failed: {exception.Message}";
+                this.ErrorMessage = $"Computation failed: {exception.Message}";
             }
             finally
             {
-                IsLoading = false;
+                this.IsLoading = false;
             }
         }
     }

@@ -1,10 +1,10 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
-using UBB_SE_2026_923_2.ViewModels.Admin;
-
 namespace UBB_SE_2026_923_2.Views.Admin
 {
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using UBB_SE_2026_923_2.ViewModels.Admin;
+
     public sealed partial class ERDispatchPage : Page
     {
         private const int SimulatedIncomingRequestCount = 3;
@@ -15,15 +15,15 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             InitializeComponent();
 
-            ViewModel = App.Services.GetRequiredService<ERDispatchViewModel>();
-            DataContext = ViewModel;
+            this.ViewModel = App.Services.GetRequiredService<ERDispatchViewModel>();
+            this.DataContext = this.ViewModel;
         }
 
         private async void RunDispatch_Click(object sender, RoutedEventArgs e)
         {
-            await ViewModel.RunDispatchAsync();
+            await this.ViewModel.RunDispatchAsync();
 
-            if (ViewModel.UnmatchedRequests.Count > 0)
+            if (this.ViewModel.UnmatchedRequests.Count > 0)
             {
                 UnmatchedRequestCombo.SelectedIndex = 0;
             }
@@ -31,21 +31,21 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.Refresh();
+            this.ViewModel.Refresh();
             UnmatchedRequestCombo.SelectedIndex = -1;
             OverrideDoctorCombo.SelectedIndex = -1;
         }
 
         private async void SimulateIncoming_Click(object sender, RoutedEventArgs e)
         {
-            await ViewModel.SimulateIncomingAsync(SimulatedIncomingRequestCount);
+            await this.ViewModel.SimulateIncomingAsync(SimulatedIncomingRequestCount);
         }
 
         private async void UnmatchedRequestCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (UnmatchedRequestCombo.SelectedItem is ERDispatchViewModel.UnmatchedRequestRow row)
             {
-                await ViewModel.LoadOverrideCandidatesAsync(row.RequestId);
+                await this.ViewModel.LoadOverrideCandidatesAsync(row.RequestId);
             }
         }
 
@@ -61,14 +61,14 @@ namespace UBB_SE_2026_923_2.Views.Admin
                 return;
             }
 
-            var success = await ViewModel.ApplyOverrideAsync(selectedRequest.RequestId, candidate.DoctorId);
+            var success = await this.ViewModel.ApplyOverrideAsync(selectedRequest.RequestId, candidate.DoctorId);
             if (!success)
             {
                 return;
             }
 
             OverrideDoctorCombo.SelectedIndex = -1;
-            if (ViewModel.UnmatchedRequests.Count > 0)
+            if (this.ViewModel.UnmatchedRequests.Count > 0)
             {
                 UnmatchedRequestCombo.SelectedIndex = 0;
             }

@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.WebApi.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,34 +18,34 @@ public class EvaluationsController : ControllerBase
     [HttpGet]
     public ActionResult<IReadOnlyList<MedicalEvaluation>> GetAll()
     {
-        return Ok(repository.GetAllEvaluations());
+        return this.Ok(this.repository.GetAllEvaluations());
     }
 
     [HttpPost]
     public IActionResult Create([FromBody] CreateEvaluationRequest request)
     {
-        repository.AddEvaluation(
+        this.repository.AddEvaluation(
             request.DoctorId,
             request.PatientId,
             request.Diagnosis,
             request.Notes,
             request.Medications,
             request.AssumedRisk);
-        return NoContent();
+        return this.NoContent();
     }
 
     [HttpPut("{id:int}")]
     public IActionResult Update(int id, [FromBody] UpdateEvaluationRequest request)
     {
-        repository.UpdateEvaluation(id, request.Diagnosis, request.Notes, request.Medications);
-        return NoContent();
+        this.repository.UpdateEvaluation(id, request.Diagnosis, request.Notes, request.Medications);
+        return this.NoContent();
     }
 
     [HttpDelete("{id:int}")]
     public IActionResult Delete(int id)
     {
-        repository.DeleteEvaluation(id);
-        return NoContent();
+        this.repository.DeleteEvaluation(id);
+        return this.NoContent();
     }
 
     public record CreateEvaluationRequest(

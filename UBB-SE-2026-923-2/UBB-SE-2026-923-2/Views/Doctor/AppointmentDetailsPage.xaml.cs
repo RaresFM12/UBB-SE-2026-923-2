@@ -1,13 +1,13 @@
-using System;
-using UBB_SE_2026_923_2.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.Views.Doctor
 {
+    using System;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public sealed partial class AppointmentDetailsPage : Page
     {
         private const string DateFormat = "yyyy-MM-dd";
@@ -21,7 +21,7 @@ namespace UBB_SE_2026_923_2.Views.Doctor
         {
             this.InitializeComponent();
 
-            service = App.Services.GetRequiredService<IDoctorAppointmentService>();
+            this.service = App.Services.GetRequiredService<IDoctorAppointmentService>();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs eventArgs)
@@ -30,43 +30,43 @@ namespace UBB_SE_2026_923_2.Views.Doctor
 
             if (eventArgs.Parameter is Appointment appointment)
             {
-                currentAppointment = appointment;
-                PopulateData();
+                this.currentAppointment = appointment;
+                this.PopulateData();
             }
         }
 
         private void PopulateData()
         {
-            if (currentAppointment == null)
+            if (this.currentAppointment == null)
             {
                 return;
             }
 
-            PatientNameText.Text = currentAppointment.PatientName;
-            DoctorNameText.Text = currentAppointment.DoctorName;
-            DateText.Text = currentAppointment.Date.ToString(DateFormat);
-            TimeText.Text = $"{currentAppointment.StartTime.ToString(TimeFormat)} - {currentAppointment.EndTime.ToString(TimeFormat)}";
-            StatusText.Text = currentAppointment.Status;
+            PatientNameText.Text = this.currentAppointment.PatientName;
+            DoctorNameText.Text = this.currentAppointment.DoctorName;
+            DateText.Text = this.currentAppointment.Date.ToString(DateFormat);
+            TimeText.Text = $"{this.currentAppointment.StartTime.ToString(TimeFormat)} - {this.currentAppointment.EndTime.ToString(TimeFormat)}";
+            StatusText.Text = this.currentAppointment.Status;
         }
 
         private async void FinishBtn_Click(object sender, RoutedEventArgs eventArgs)
         {
-            if (currentAppointment == null)
+            if (this.currentAppointment == null)
             {
                 return;
             }
 
             try
             {
-                await service.FinishAppointmentAsync(currentAppointment!);
+                await this.service.FinishAppointmentAsync(this.currentAppointment!);
 
-                currentAppointment!.Status = FinishedStatus;
-                PopulateData();
-                ShowMessage("Appointment finished successfully! Doctor status updated.", InfoBarSeverity.Success);
+                this.currentAppointment!.Status = FinishedStatus;
+                this.PopulateData();
+                this.ShowMessage("Appointment finished successfully! Doctor status updated.", InfoBarSeverity.Success);
             }
             catch (Exception exception)
             {
-                ShowMessage($"Error: {exception.Message}", InfoBarSeverity.Error);
+                this.ShowMessage($"Error: {exception.Message}", InfoBarSeverity.Error);
             }
         }
 

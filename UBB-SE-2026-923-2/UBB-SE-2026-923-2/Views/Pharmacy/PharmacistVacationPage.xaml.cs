@@ -1,10 +1,10 @@
-using UBB_SE_2026_923_2.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
-using UBB_SE_2026_923_2.ViewModels.Pharmacy;
-
 namespace UBB_SE_2026_923_2.Views.Pharmacy;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using UBB_SE_2026_923_2.Models;
+using UBB_SE_2026_923_2.ViewModels.Pharmacy;
 
 public sealed partial class PharmacistVacationPage : Page
 {
@@ -14,28 +14,28 @@ public sealed partial class PharmacistVacationPage : Page
     {
         InitializeComponent();
 
-        ViewModel = App.Services.GetRequiredService<PharmacistVacationViewModel>();
-        DataContext = ViewModel;
-        PharmacistComboBox.ItemsSource = ViewModel.Pharmacists;
+        this.ViewModel = App.Services.GetRequiredService<PharmacistVacationViewModel>();
+        this.DataContext = this.ViewModel;
+        PharmacistComboBox.ItemsSource = this.ViewModel.Pharmacists;
     }
 
     private void AddVacationShift_Click(object sender, RoutedEventArgs e)
     {
         var selected = PharmacistComboBox.SelectedItem as PharmacistVacationViewModel.PharmacistChoice;
 
-        var result = ViewModel.TryRegisterVacation(
+        var result = this.ViewModel.TryRegisterVacation(
             selected,
             StartDatePicker.Date,
             EndDatePicker.Date);
 
-        ShowMessage(result.message, MapSeverity(result.status));
+        this.ShowMessage(result.Message, MapSeverity(result.Status));
     }
 
     private static InfoBarSeverity MapSeverity(VacationRegistrationStatus status) => status switch
     {
         VacationRegistrationStatus.Success => InfoBarSeverity.Success,
         VacationRegistrationStatus.Warning => InfoBarSeverity.Warning,
-        _ => InfoBarSeverity.Error
+        _ => InfoBarSeverity.Error,
     };
 
     private void ShowMessage(string message, InfoBarSeverity severity)

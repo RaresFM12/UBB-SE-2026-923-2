@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-
-namespace UBB_SE_2026_923_2.Command
+﻿namespace UBB_SE_2026_923_2.Command
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Windows.Input;
+
     public class RelayCommandWithOneParameter<T> : ICommand
     {
-        private Action<T> function;
+        private readonly Action<T> function;
 
         public RelayCommandWithOneParameter(Action<T> execute)
         {
-            function = execute;
+            this.function = execute;
         }
 
         public event EventHandler CanExecuteChanged;
@@ -30,7 +30,7 @@ namespace UBB_SE_2026_923_2.Command
 
         public void Execute(object parameter)
         {
-            function((T)parameter);
+            this.function((T)parameter);
         }
     }
 }

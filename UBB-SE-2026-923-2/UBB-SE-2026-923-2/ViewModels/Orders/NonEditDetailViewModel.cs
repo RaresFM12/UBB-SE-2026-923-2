@@ -1,15 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.Orders
+﻿namespace UBB_SE_2026_923_2.ViewModels.Orders
 {
+    using System;
+    using System.Collections.Generic;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public class ItemDetail
     {
         public int ItemID { get; private set; }
+
         public string ItemThumbnailImagePath { get; private set; }
+
         public string ItemDescription { get; private set; }
+
         public string ItemQuantityString
         {
             get => $"Quantity: {this.ItemQuantity}";
@@ -19,27 +22,33 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
         {
             get => $"{this.ItemFinalPrice:0.00} RON";
         }
+
         public int ItemQuantity { get; private set; }
+
         public float ItemFinalPrice { get; private set; }
 
         public ItemDetail(int itemID, string imagePath, string description, int quantity, float finalPrice)
         {
-            ItemID = itemID;
-            ItemThumbnailImagePath = imagePath;
-            ItemDescription = description;
-            ItemQuantity = quantity;
-            ItemFinalPrice = finalPrice;
+            this.ItemID = itemID;
+            this.ItemThumbnailImagePath = imagePath;
+            this.ItemDescription = description;
+            this.ItemQuantity = quantity;
+            this.ItemFinalPrice = finalPrice;
         }
     }
 
     public class NonEditDetailViewModel : INonEditViewModel
     {
-        private IOrderService orderService;
+        private readonly IOrderService orderService;
 
         public List<ItemDetail> OrderItems { get; private set; }
+
         public string TotalPriceString { get; private set; }
+
         public string StatusString { get; private set; }
+
         public DateOnly PickUpDate { get; private set; }
+
         public string PickUpDateString
         {
             get => this.PickUpDate.ToString("yyyy.MM.dd");
@@ -47,10 +56,10 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
         public NonEditDetailViewModel(IOrderService orderServ, int orderID)
         {
-            orderService = orderServ;
-            OrderItems = new ();
+            this.orderService = orderServ;
+            this.OrderItems = new();
 
-            Order shownOrder = orderService.OrdersRepository.GetOrder(orderID);
+            Order shownOrder = this.orderService.OrdersRepository.GetOrder(orderID);
             float totalPrice = 0f;
 
             foreach (var currentOrderEntry in shownOrder.ItemQuantitiesWithFinalPrice)
@@ -65,29 +74,29 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
                 string itemDescription = currentItem.Name + " - " + currentItem.Producer;
 
-                OrderItems.Add(
+                this.OrderItems.Add(
                     new ItemDetail(itemID, alteredImagePath, itemDescription,
                                     itemQuantity, itemTotalPrice));
 
                 totalPrice += itemTotalPrice;
             }
 
-            TotalPriceString = totalPrice.ToString("0.00") + " RON";
+            this.TotalPriceString = totalPrice.ToString("0.00") + " RON";
 
             if (!shownOrder.IsExpired && !shownOrder.IsCompleted)
             {
-                StatusString = "Incomplete";
+                this.StatusString = "Incomplete";
             }
             else if (shownOrder.IsExpired)
             {
-                StatusString = "Expired";
+                this.StatusString = "Expired";
             }
             else
             {
-                StatusString = "Complete";
+                this.StatusString = "Complete";
             }
 
-            PickUpDate = shownOrder.PickUpDate;
+            this.PickUpDate = shownOrder.PickUpDate;
         }
     }
 }

@@ -1,14 +1,14 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Base;
-
 namespace UBB_SE_2026_923_2.ViewModels.Doctor
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Base;
+
     public class HangoutViewModel : ObservableObject
     {
         private const int MinHangoutTitleLength = 5;
@@ -22,75 +22,83 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
         public ObservableCollection<int> MaximumParticipantsOptions { get; } = new ObservableCollection<int> { 2, 3, 4, 5, 10, 15, 20 };
 
         public ObservableCollection<Hangout> Hangouts { get; } = new ObservableCollection<Hangout>();
+
         public ObservableCollection<DoctorScheduleViewModel.DoctorOption> Doctors { get; } = new ObservableCollection<DoctorScheduleViewModel.DoctorOption>();
 
         private DoctorScheduleViewModel.DoctorOption? selectedDoctor;
+
         public DoctorScheduleViewModel.DoctorOption? SelectedDoctor
         {
-            get => selectedDoctor;
+            get => this.selectedDoctor;
             set
             {
-                SetProperty(ref selectedDoctor, value);
-                CreateCommand.RaiseCanExecuteChanged();
+                this.SetProperty(ref this.selectedDoctor, value);
+                this.CreateCommand.RaiseCanExecuteChanged();
             }
         }
 
         private string title = string.Empty;
+
         public string Title
         {
-            get => title;
+            get => this.title;
             set
             {
-                SetProperty(ref title, value);
-                CreateCommand.RaiseCanExecuteChanged();
+                this.SetProperty(ref this.title, value);
+                this.CreateCommand.RaiseCanExecuteChanged();
             }
         }
 
         private string description = string.Empty;
+
         public string Description
         {
-            get => description;
+            get => this.description;
             set
             {
-                SetProperty(ref description, value);
-                CreateCommand.RaiseCanExecuteChanged();
+                this.SetProperty(ref this.description, value);
+                this.CreateCommand.RaiseCanExecuteChanged();
             }
         }
 
         private DateTimeOffset selectedDate = DateTimeOffset.Now.AddDays(MinDaysAheadForHangoutCreation);
+
         public DateTimeOffset SelectedDate
         {
-            get => selectedDate;
+            get => this.selectedDate;
             set
             {
-                SetProperty(ref selectedDate, value);
-                CreateCommand.RaiseCanExecuteChanged();
+                this.SetProperty(ref this.selectedDate, value);
+                this.CreateCommand.RaiseCanExecuteChanged();
             }
         }
 
         private int maximumParticipants = 5;
+
         public int MaximumParticipants
         {
-            get => maximumParticipants;
+            get => this.maximumParticipants;
             set
             {
-                SetProperty(ref maximumParticipants, value);
-                CreateCommand.RaiseCanExecuteChanged();
+                this.SetProperty(ref this.maximumParticipants, value);
+                this.CreateCommand.RaiseCanExecuteChanged();
             }
         }
 
         private string errorMessage = string.Empty;
+
         public string ErrorMessage
         {
-            get => errorMessage;
-            set => SetProperty(ref errorMessage, value);
+            get => this.errorMessage;
+            set => this.SetProperty(ref this.errorMessage, value);
         }
 
         private string successMessage = string.Empty;
+
         public string SuccessMessage
         {
-            get => successMessage;
-            set => SetProperty(ref successMessage, value);
+            get => this.successMessage;
+            set => this.SetProperty(ref this.successMessage, value);
         }
 
         public RelayCommand CreateCommand { get; }
@@ -100,102 +108,102 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
             this.hangoutService = hangoutService;
             this.doctorService = doctorService;
 
-            CreateCommand = new RelayCommand(CreateHangout, CanCreateHangout);
-            LoadHangouts();
-            _ = LoadDoctorsAsync();
+            this.CreateCommand = new RelayCommand(this.CreateHangout, this.CanCreateHangout);
+            this.LoadHangouts();
+            _ = this.LoadDoctorsAsync();
         }
 
         public HangoutViewModel(IHangoutService hangoutService)
         {
             this.hangoutService = hangoutService;
             this.doctorService = null;
-            CreateCommand = new RelayCommand(CreateHangout, CanCreateHangout);
-            LoadHangouts();
+            this.CreateCommand = new RelayCommand(this.CreateHangout, this.CanCreateHangout);
+            this.LoadHangouts();
         }
 
         private async Task LoadDoctorsAsync()
         {
-            if (doctorService == null)
+            if (this.doctorService == null)
             {
                 return;
             }
 
-            Doctors.Clear();
+            this.Doctors.Clear();
             try
             {
-                var allDoctors = await doctorService.GetAllDoctorsAsync();
+                var allDoctors = await this.doctorService.GetAllDoctorsAsync();
                 string GetDoctorName((int DoctorId, string DoctorName) doctor) => doctor.DoctorName;
                 foreach (var doctor in allDoctors.OrderBy(GetDoctorName))
                 {
-                    Doctors.Add(new DoctorScheduleViewModel.DoctorOption
+                    this.Doctors.Add(new DoctorScheduleViewModel.DoctorOption
                     {
                         DoctorId = doctor.DoctorId,
                         DoctorName = doctor.DoctorName,
                         FirstName = DoctorScheduleViewModel.DoctorOption.SplitFirstLast(doctor.DoctorName).FirstName,
-                        LastName = DoctorScheduleViewModel.DoctorOption.SplitFirstLast(doctor.DoctorName).LastName
+                        LastName = DoctorScheduleViewModel.DoctorOption.SplitFirstLast(doctor.DoctorName).LastName,
                     });
                 }
 
-                if (Doctors.Any())
+                if (this.Doctors.Any())
                 {
-                    SelectedDoctor = Doctors.First();
+                    this.SelectedDoctor = this.Doctors.First();
                 }
             }
             catch (Exception exception)
             {
-                ErrorMessage = $"Failed to load doctors: {exception.Message}";
+                this.ErrorMessage = $"Failed to load doctors: {exception.Message}";
             }
         }
 
         private void LoadHangouts()
         {
-            Hangouts.Clear();
-            foreach (var hangout in hangoutService.GetAllHangouts())
+            this.Hangouts.Clear();
+            foreach (var hangout in this.hangoutService.GetAllHangouts())
             {
-                Hangouts.Add(hangout);
+                this.Hangouts.Add(hangout);
             }
         }
 
         private bool CanCreateHangout() =>
-            Title.Length >= MinHangoutTitleLength &&
-            Title.Length <= MaxHangoutTitleLength &&
-            Description.Length <= MaxHangoutDescriptionLength &&
-            SelectedDoctor != null;
+            this.Title.Length >= MinHangoutTitleLength &&
+            this.Title.Length <= MaxHangoutTitleLength &&
+            this.Description.Length <= MaxHangoutDescriptionLength &&
+            this.SelectedDoctor != null;
 
         private void CreateHangout()
         {
-            ErrorMessage = string.Empty;
-            SuccessMessage = string.Empty;
+            this.ErrorMessage = string.Empty;
+            this.SuccessMessage = string.Empty;
             try
             {
                 var currentDoctor = new Models.Doctor
                 {
-                    StaffID = SelectedDoctor!.DoctorId,
-                    FirstName = SelectedDoctor.FirstName,
-                    LastName = SelectedDoctor.LastName,
+                    StaffID = this.SelectedDoctor!.DoctorId,
+                    FirstName = this.SelectedDoctor.FirstName,
+                    LastName = this.SelectedDoctor.LastName,
                 };
 
-                hangoutService.CreateHangout(Title, Description, SelectedDate.DateTime, MaximumParticipants, currentDoctor);
-                SuccessMessage = "Hangout created successfully!";
-                LoadHangouts();
+                this.hangoutService.CreateHangout(this.Title, this.Description, this.SelectedDate.DateTime, this.MaximumParticipants, currentDoctor);
+                this.SuccessMessage = "Hangout created successfully!";
+                this.LoadHangouts();
 
-                Title = string.Empty;
-                Description = string.Empty;
+                this.Title = string.Empty;
+                this.Description = string.Empty;
             }
             catch (Exception exception)
             {
-                ErrorMessage = exception.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
 
         public void JoinHangoutById(int hangoutId)
         {
-            ErrorMessage = string.Empty;
-            SuccessMessage = string.Empty;
+            this.ErrorMessage = string.Empty;
+            this.SuccessMessage = string.Empty;
 
-            if (SelectedDoctor == null)
+            if (this.SelectedDoctor == null)
             {
-                ErrorMessage = "Please select a doctor to join the hangout.";
+                this.ErrorMessage = "Please select a doctor to join the hangout.";
                 return;
             }
 
@@ -203,18 +211,18 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
             {
                 var currentDoctor = new Models.Doctor
                 {
-                    StaffID = SelectedDoctor.DoctorId,
-                    FirstName = SelectedDoctor.FirstName,
-                    LastName = SelectedDoctor.LastName,
+                    StaffID = this.SelectedDoctor.DoctorId,
+                    FirstName = this.SelectedDoctor.FirstName,
+                    LastName = this.SelectedDoctor.LastName,
                 };
 
-                hangoutService.JoinHangout(hangoutId, currentDoctor);
-                SuccessMessage = "Joined hangout successfully!";
-                LoadHangouts();
+                this.hangoutService.JoinHangout(hangoutId, currentDoctor);
+                this.SuccessMessage = "Joined hangout successfully!";
+                this.LoadHangouts();
             }
             catch (Exception exception)
             {
-                ErrorMessage = exception.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
     }

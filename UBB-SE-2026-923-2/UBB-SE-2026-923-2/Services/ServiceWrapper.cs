@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.Services
+﻿namespace UBB_SE_2026_923_2.Services
 {
+    using Microsoft.Extensions.DependencyInjection;
+    using UBB_SE_2026_923_2.Repositories;
+
     public static class ServiceWrapper
     {
         public static UserAccountService UserAccountService { get; private set; } = null!;

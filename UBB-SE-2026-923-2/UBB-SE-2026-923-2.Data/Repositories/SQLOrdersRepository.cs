@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IOrdersRepository"/>. Order line
     /// items are loaded through the <see cref="Order.OrderItemEntries"/>
@@ -25,7 +25,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public int AddOrder(int clientId, DateOnly pickUpDate, bool isCompleted = false, bool isExpired = false)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var order = new Order(0, clientId, pickUpDate, isCompleted, isExpired);
             db.Orders.Add(order);
@@ -35,7 +35,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void RemoveOrder(int orderIdToBeRemoved)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var order = db.Orders.FirstOrDefault(o => o.Id == orderIdToBeRemoved);
             if (order is null)
             {
@@ -49,7 +49,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateOrder(Order newOrder)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var existing = db.Orders
                 .Include(o => o.OrderItemEntries)
                 .FirstOrDefault(o => o.Id == newOrder.Id);
@@ -85,7 +85,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public Order GetOrder(int orderId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var order = db.Orders
                 .AsNoTracking()
                 .Include(o => o.OrderItemEntries)
@@ -96,7 +96,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Order> GetAllOrders()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var orders = db.Orders
                 .AsNoTracking()
                 .Include(o => o.OrderItemEntries)
@@ -112,7 +112,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Order> GetOrdersOfClient(int clientId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var orders = db.Orders
                 .AsNoTracking()
                 .Include(o => o.OrderItemEntries)
@@ -129,7 +129,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public bool OrderExists(int orderId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Orders.AsNoTracking().Any(o => o.Id == orderId);
         }
 

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using UBB_SE_2026_923_2.Repositories;
-using UBB_SE_2026_923_2.Models;
-
-namespace UBB_SE_2026_923_2.Services
+﻿namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.Extensions.DependencyInjection;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class AdminService : IAdminService
     {
         private const int EmptyQuantity = 0;
@@ -20,8 +20,8 @@ namespace UBB_SE_2026_923_2.Services
         private const string GoToProductsActionTextCapitalized = "Go to Products";
         private const string ProductExpiredBodyTemplate = "Product: {0} expired. Please remove it";
 
-        private IItemsRepository itemRepository;
-        private ISubstancesRepository substanceRepository;
+        private readonly IItemsRepository itemRepository;
+        private readonly ISubstancesRepository substanceRepository;
 
         public AdminService()
         {
@@ -34,36 +34,37 @@ namespace UBB_SE_2026_923_2.Services
 
         public List<Item> GetAllItems()
         {
-            return itemRepository.GetAllItems();
+            return this.itemRepository.GetAllItems();
         }
 
         public List<Substance> GetAllSubstances()
         {
-            return substanceRepository.GetAllSubstances();
+            return this.substanceRepository.GetAllSubstances();
         }
 
         public List<Item> SearchItemsByName(string query)
         {
             string loweredQuery = (query ?? string.Empty).ToLower();
-            return itemRepository.GetAllItems()
+            return this.itemRepository.GetAllItems()
                 .Where(item => item.Name.ToLower().Contains(loweredQuery))
                 .ToList();
         }
 
         public Item GetItemById(int id)
         {
-            return itemRepository.GetItemById(id);
+            return this.itemRepository.GetItemById(id);
         }
 
         public Substance GetSubstanceByName(string name)
         {
-            return substanceRepository.GetSubstanceByName(name);
+            return this.substanceRepository.GetSubstanceByName(name);
         }
 
         public bool SubstanceExists(string name)
         {
-            return substanceRepository.SubstanceExists(name);
+            return this.substanceRepository.SubstanceExists(name);
         }
+
         public AdminService(IItemsRepository itemRepo, ISubstancesRepository substanceRepo)
         {
             this.itemRepository = itemRepo;
@@ -74,8 +75,8 @@ namespace UBB_SE_2026_923_2.Services
         {
             try
             {
-                ValidateItemForAdd(newItem);
-                itemRepository.AddItemWithQuantity(newItem.Name, newItem.Producer, newItem.Category,
+                this.ValidateItemForAdd(newItem);
+                this.itemRepository.AddItemWithQuantity(newItem.Name, newItem.Producer, newItem.Category,
                                        newItem.Price, newItem.NumberOfPills, newItem.Quantity, newItem.ActiveSubstances, newItem.Batches,
                                        newItem.Label, newItem.Description, newItem.ImagePath,
                                        newItem.DiscountPercentage);
@@ -94,8 +95,8 @@ namespace UBB_SE_2026_923_2.Services
         {
             try
             {
-                ValidateItemForAdd(newItem);
-                itemRepository.AddItemWithQuantity(newItem.Name, newItem.Producer, newItem.Category,
+                this.ValidateItemForAdd(newItem);
+                this.itemRepository.AddItemWithQuantity(newItem.Name, newItem.Producer, newItem.Category,
                                        newItem.Price, newItem.NumberOfPills,
                                        newItem.Quantity, newItem.ActiveSubstances, newItem.Batches,
                                        newItem.Label, newItem.Description, newItem.ImagePath,
@@ -113,50 +114,54 @@ namespace UBB_SE_2026_923_2.Services
 
         public void RemoveItemById(int id)
         {
-            itemRepository.RemoveItemById(id);
+            this.itemRepository.RemoveItemById(id);
         }
 
         public void UpdateItemById(int id, Item updatedItem)
         {
-            if (!itemRepository.ItemExists(id))
+            if (!this.itemRepository.ItemExists(id))
             {
                 throw new ArgumentException("Item with the specified ID does not exist.");
             }
 
-            Item previousItem = itemRepository.GetItemById(id);
+            Item previousItem = this.itemRepository.GetItemById(id);
             if (previousItem.Quantity == EmptyQuantity && updatedItem.Quantity >= MinPositiveValue)
             {
-                SendNewStockNotification(updatedItem);
+                this.SendNewStockNotification(updatedItem);
             }
+
             updatedItem.Id = id;
-            itemRepository.UpdateItemById(updatedItem);
+            this.itemRepository.UpdateItemById(updatedItem);
         }
 
         public void AddSubstance(Substance newSubstance)
         {
-            if (substanceRepository.SubstanceExists(newSubstance.Name))
+            if (this.substanceRepository.SubstanceExists(newSubstance.Name))
             {
                 throw new ArgumentException("Substance " + newSubstance.Name + " exists already.");
             }
-            substanceRepository.AddSubstance(newSubstance.Name, newSubstance.LethalDose, newSubstance.Description);
+
+            this.substanceRepository.AddSubstance(newSubstance.Name, newSubstance.LethalDose, newSubstance.Description);
         }
 
         public void RemoveSubstanceByName(Substance substance)
         {
-            if (!substanceRepository.SubstanceExists(substance.Name))
+            if (!this.substanceRepository.SubstanceExists(substance.Name))
             {
                 throw new ArgumentException("Substance " + substance.Name + " does NOT exist.");
             }
-            substanceRepository.RemoveSubstanceByName(substance.Name);
+
+            this.substanceRepository.RemoveSubstanceByName(substance.Name);
         }
 
         public void UpdateSubstanceByName(string name, Substance substance)
         {
-            if (!substanceRepository.SubstanceExists(substance.Name))
+            if (!this.substanceRepository.SubstanceExists(substance.Name))
             {
                 throw new ArgumentException("Substance " + substance.Name + "does NOT exist.");
             }
-            substanceRepository.UpdateSubstanceByName(substance);
+
+            this.substanceRepository.UpdateSubstanceByName(substance);
         }
 
         public Notification SendNewStockNotification(Item item)
@@ -164,14 +169,14 @@ namespace UBB_SE_2026_923_2.Services
             string message = $"The item {item.Name} is back in stock with quantity {item.Quantity}," +
                 $"number of pills {item.NumberOfPills!}," +
                 $"producer {item.Producer}";
-            Notification notification = new (StockAlertTitle, NewItemBackInStockMessage);
+            Notification notification = new(StockAlertTitle, NewItemBackInStockMessage);
             return notification;
         }
 
         public List<Item> GetExpiredItems()
         {
-            List<Item> expiredItems = new ();
-            List<Item> allItems = itemRepository.GetAllItems();
+            List<Item> expiredItems = new();
+            List<Item> allItems = this.itemRepository.GetAllItems();
             DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
             foreach (Item item in allItems)
             {
@@ -184,13 +189,14 @@ namespace UBB_SE_2026_923_2.Services
                     }
                 }
             }
-            SendAboutToExpireNotification();
+
+            this.SendAboutToExpireNotification();
             return expiredItems;
         }
 
         public Notification SendAboutToExpireNotification()
         {
-            Notification notification = new (ProductExpiredTitle, ExpiredItemsMessage);
+            Notification notification = new(ProductExpiredTitle, ExpiredItemsMessage);
             return notification;
         }
 
@@ -207,7 +213,7 @@ namespace UBB_SE_2026_923_2.Services
                 throw new ArgumentException("Invalid item data. Please check the input and try again.");
             }
 
-            bool nameAlreadyExists = itemRepository.GetAllItems()
+            bool nameAlreadyExists = this.itemRepository.GetAllItems()
                 .Any(existingItem => string.Equals(existingItem.Name, item.Name, StringComparison.OrdinalIgnoreCase));
             if (nameAlreadyExists)
             {
@@ -217,19 +223,19 @@ namespace UBB_SE_2026_923_2.Services
 
         public List<Notification> GetNotificationsForUser(User user)
         {
-            List<Notification> notifications = new ();
+            List<Notification> notifications = new();
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
             if (user.IsAdmin)
             {
-                List<Item> items = itemRepository.GetAllItems();
+                List<Item> items = this.itemRepository.GetAllItems();
                 foreach (Item item in items)
                 {
                     foreach (KeyValuePair<DateOnly, int> batch in item.Batches)
                     {
                         if (batch.Key <= today)
                         {
-                            notifications.Add(new (
+                            notifications.Add(new(
                                 ProductExpiredTitle,
                                 string.Format(ProductExpiredBodyTemplate, item.Id),
                                 GoToProductsActionTextCapitalized));
@@ -241,14 +247,14 @@ namespace UBB_SE_2026_923_2.Services
 
             foreach (int itemId in user.StockAlerts)
             {
-                Item item = itemRepository.GetItemById(itemId);
+                Item item = this.itemRepository.GetItemById(itemId);
                 if (item.Quantity >= MinPositiveValue)
                 {
                     string concentrations = item.ActiveSubstances != null && item.ActiveSubstances.Any()
                         ? string.Join(", ", item.ActiveSubstances.Select(substance => $"{substance.Key} ({substance.Value})"))
                         : "None";
                     string body = $"{item.Name}, {item.NumberOfPills} pills, {concentrations}, {item.Producer}";
-                    notifications.Add(new (StockAlertTitle, body, GoToProductsActionText));
+                    notifications.Add(new(StockAlertTitle, body, GoToProductsActionText));
                 }
             }
 
@@ -257,12 +263,12 @@ namespace UBB_SE_2026_923_2.Services
 
         public List<Tuple<int, string, int>> GetTop30Items()
         {
-            return itemRepository.GetTop30Items();
+            return this.itemRepository.GetTop30Items();
         }
 
         public Dictionary<string, int> GetTop30Substances()
         {
-            return substanceRepository.GetTop30Substances();
+            return this.substanceRepository.GetTop30Substances();
         }
     }
 }

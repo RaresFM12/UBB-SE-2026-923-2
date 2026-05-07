@@ -8,9 +8,11 @@ namespace UBB_SE_2026_923_2.Models
     public class HangoutParticipant
     {
         public int HangoutId { get; set; }
+
         public int StaffId { get; set; }
 
         public Hangout? Hangout { get; set; }
+
         public Staff? Staff { get; set; }
     }
 }

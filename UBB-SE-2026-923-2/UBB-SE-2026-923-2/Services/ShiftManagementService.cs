@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class ShiftManagementService : IShiftManagementService
     {
         private const int DaysInWeek = 7;
@@ -24,29 +24,29 @@ namespace UBB_SE_2026_923_2.Services
         public void SetShiftActive(int shiftId)
         {
             bool HasMatchingId(Shift existingShift) => existingShift.Id == shiftId;
-            var shift = shiftRepository.GetAllShifts().FirstOrDefault(HasMatchingId);
+            var shift = this.shiftRepository.GetAllShifts().FirstOrDefault(HasMatchingId);
             if (shift != null)
             {
-                shiftRepository.UpdateShiftStatus(shiftId, ShiftStatus.ACTIVE);
-                staffRepository.UpdateStaffAvailability(shift.AppointedStaff.StaffID, true, DoctorStatus.AVAILABLE);
+                this.shiftRepository.UpdateShiftStatus(shiftId, ShiftStatus.ACTIVE);
+                this.staffRepository.UpdateStaffAvailability(shift.AppointedStaff.StaffID, true, DoctorStatus.AVAILABLE);
             }
         }
 
         public void CancelShift(int shiftId)
         {
             bool HasMatchingId(Shift existingShift) => existingShift.Id == shiftId;
-            var shift = shiftRepository.GetAllShifts().FirstOrDefault(HasMatchingId);
+            var shift = this.shiftRepository.GetAllShifts().FirstOrDefault(HasMatchingId);
             if (shift == null)
             {
                 return;
             }
 
             bool wasActive = shift.Status == ShiftStatus.ACTIVE;
-            shiftRepository.UpdateShiftStatus(shiftId, ShiftStatus.CANCELLED);
+            this.shiftRepository.UpdateShiftStatus(shiftId, ShiftStatus.CANCELLED);
 
             if (wasActive)
             {
-                staffRepository.UpdateStaffAvailability(shift.AppointedStaff.StaffID, false, DoctorStatus.OFF_DUTY);
+                this.staffRepository.UpdateStaffAvailability(shift.AppointedStaff.StaffID, false, DoctorStatus.OFF_DUTY);
             }
         }
 
@@ -59,20 +59,20 @@ namespace UBB_SE_2026_923_2.Services
                 && start < shift.EndTime
                 && end > shift.StartTime;
 
-            return !shiftRepository.GetAllShifts().Any(BlocksOverlap);
+            return !this.shiftRepository.GetAllShifts().Any(BlocksOverlap);
         }
 
-        public void AddShift(Shift shift) => shiftRepository.AddShift(shift);
+        public void AddShift(Shift shift) => this.shiftRepository.AddShift(shift);
 
         public bool TryAddShift(IStaff staff, DateTime start, DateTime end, string location)
         {
-            if (!ValidateNoOverlap(staff.StaffID, start, end))
+            if (!this.ValidateNoOverlap(staff.StaffID, start, end))
             {
                 return false;
             }
 
             var newShift = new Shift(NewShiftPlaceholderId, staff, location, start, end, ShiftStatus.SCHEDULED);
-            shiftRepository.AddShift(newShift);
+            this.shiftRepository.AddShift(newShift);
             return true;
         }
 
@@ -81,7 +81,7 @@ namespace UBB_SE_2026_923_2.Services
         public List<Shift> GetDailyShifts(DateTime date)
         {
             bool IsOnDate(Shift shift) => shift.StartTime.Date == date.Date;
-            return GetHydratedShifts().Where(IsOnDate).ToList();
+            return this.GetHydratedShifts().Where(IsOnDate).ToList();
         }
 
         public List<Shift> GetWeeklyShifts(DateTime date)
@@ -90,7 +90,7 @@ namespace UBB_SE_2026_923_2.Services
             var weekEnd = weekStart.AddDays(DaysInWeek);
 
             bool IsInWeek(Shift shift) => shift.StartTime >= weekStart && shift.StartTime < weekEnd;
-            return GetHydratedShifts().Where(IsInWeek).ToList();
+            return this.GetHydratedShifts().Where(IsInWeek).ToList();
         }
 
         public bool ReassignShift(Shift shift, IStaff newStaff)
@@ -110,19 +110,19 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            if (!ValidateNoOverlap(newStaff.StaffID, shift.StartTime, shift.EndTime))
+            if (!this.ValidateNoOverlap(newStaff.StaffID, shift.StartTime, shift.EndTime))
             {
                 return false;
             }
 
-            shiftRepository.UpdateShiftStaffId(shift.Id, newStaff.StaffID);
+            this.shiftRepository.UpdateShiftStaffId(shift.Id, newStaff.StaffID);
             shift.AppointedStaff = newStaff;
             return true;
         }
 
         public List<IStaff> GetFilteredStaff(string location, string requiredSpecializationOrCertification)
         {
-            var allStaff = staffRepository.LoadAllStaff();
+            var allStaff = this.staffRepository.LoadAllStaff();
             var filteredStaff = new List<IStaff>();
 
             bool PharmacistHasCertification(Pharmacyst pharmacist) =>
@@ -150,12 +150,12 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             var currentStaff = shift.AppointedStaff;
-            var allStaff = staffRepository.LoadAllStaff();
+            var allStaff = this.staffRepository.LoadAllStaff();
 
             bool IsEligibleReplacement(IStaff staffMember) =>
                 staffMember.GetType() == currentStaff.GetType() &&
                 staffMember.StaffID != currentStaff.StaffID &&
-                ValidateNoOverlap(staffMember.StaffID, shift.StartTime, shift.EndTime);
+                this.ValidateNoOverlap(staffMember.StaffID, shift.StartTime, shift.EndTime);
 
             return allStaff.Where(IsEligibleReplacement).ToList();
         }
@@ -163,7 +163,7 @@ namespace UBB_SE_2026_923_2.Services
         public List<string> GetSpecializationsAndCertificationsForLocation(string location)
         {
             var qualificationNames = new List<string>();
-            var allStaff = staffRepository.LoadAllStaff();
+            var allStaff = this.staffRepository.LoadAllStaff();
 
             bool HasCertification(Pharmacyst pharmacist) => !string.IsNullOrEmpty(pharmacist.Certification);
             string ToCertification(Pharmacyst pharmacist) => pharmacist.Certification;
@@ -197,7 +197,7 @@ namespace UBB_SE_2026_923_2.Services
             bool IsForStaffInWeek(Shift shift) => shift.AppointedStaff.StaffID == staffId && shift.StartTime >= weekStart && shift.StartTime < weekEnd;
             float ToShiftHours(Shift shift) => (float)(shift.EndTime - shift.StartTime).TotalHours;
 
-            return shiftRepository.GetAllShifts()
+            return this.shiftRepository.GetAllShifts()
                 .Where(IsForStaffInWeek)
                 .Sum(ToShiftHours);
         }
@@ -205,22 +205,23 @@ namespace UBB_SE_2026_923_2.Services
         public List<Shift> GetActiveShifts()
         {
             bool IsActiveShift(Shift shift) => shift.Status == ShiftStatus.ACTIVE;
-            return GetHydratedShifts().Where(IsActiveShift).ToList();
+            return this.GetHydratedShifts().Where(IsActiveShift).ToList();
         }
 
         private List<Shift> GetHydratedShifts()
         {
             int ByStaffId(IStaff staffMember) => staffMember.StaffID;
-            var staffById = (staffRepository.LoadAllStaff() ?? new List<IStaff>())
+            var staffById = (this.staffRepository.LoadAllStaff() ?? new List<IStaff>())
                 .ToDictionary(ByStaffId);
             var hydratedShifts = new List<Shift>();
-            foreach (var shift in shiftRepository.GetAllShifts() ?? new List<Shift>())
+            foreach (var shift in this.shiftRepository.GetAllShifts() ?? new List<Shift>())
             {
                 IStaff appointedStaff = staffById.TryGetValue(shift.AppointedStaff.StaffID, out var resolvedStaff)
                     ? resolvedStaff
                     : shift.AppointedStaff;
                 hydratedShifts.Add(new Shift(shift.Id, appointedStaff, shift.Location, shift.StartTime, shift.EndTime, shift.Status));
             }
+
             return hydratedShifts;
         }
 
@@ -232,7 +233,7 @@ namespace UBB_SE_2026_923_2.Services
                 shift.EndTime > startTime &&
                 (shift.Status == ShiftStatus.SCHEDULED || shift.Status == ShiftStatus.ACTIVE);
 
-            return shiftRepository.GetAllShifts().Any(IsWorkingDuring);
+            return this.shiftRepository.GetAllShifts().Any(IsWorkingDuring);
         }
     }
 }

@@ -1,36 +1,37 @@
-﻿using System;
-using Microsoft.UI.Xaml.Controls;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Accounts;
-
-namespace UBB_SE_2026_923_2.Views.Accounts
+﻿namespace UBB_SE_2026_923_2.Views.Accounts
 {
+    using System;
+    using Microsoft.UI.Xaml.Controls;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Accounts;
+
     public sealed partial class ChangePasswordView : ContentDialog
     {
-        private IUserAccountService accountService;
+        private readonly IUserAccountService accountService;
+
         public ChangePasswordViewModel ViewModel { get; }
 
         public ChangePasswordView(IUserAccountService service)
         {
             this.InitializeComponent();
 
-            accountService = service;
-            ViewModel = new ChangePasswordViewModel(service);
+            this.accountService = service;
+            this.ViewModel = new ChangePasswordViewModel(service);
 
-            this.DataContext = ViewModel;
+            this.DataContext = this.ViewModel;
         }
 
         private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            ViewModel.OldPassword = OldPasswordBox.Password;
-            ViewModel.NewPassword = NewPasswordBox.Password;
-            ViewModel.ConfirmPassword = ConfirmPasswordBox.Password;
+            this.ViewModel.OldPassword = OldPasswordBox.Password;
+            this.ViewModel.NewPassword = NewPasswordBox.Password;
+            this.ViewModel.ConfirmPassword = ConfirmPasswordBox.Password;
 
-            ViewModel.ErrorMessage = null;
+            this.ViewModel.ErrorMessage = null;
 
-            ViewModel.ChangePasswordCommand.Execute(null);
+            this.ViewModel.ChangePasswordCommand.Execute(null);
 
-            if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+            if (!string.IsNullOrEmpty(this.ViewModel.ErrorMessage))
             {
                 args.Cancel = true;
             }

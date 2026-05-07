@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.Command;
+
+using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System;
-
-namespace UBB_SE_2026_923_2.Command;
 
 public class AsyncRelayCommand : ICommand
 {
@@ -19,33 +19,33 @@ public class AsyncRelayCommand : ICommand
     public event EventHandler? CanExecuteChanged;
 
     public bool CanExecute(object? parameter)
-        => !isRunning && (canExecute?.Invoke() ?? true);
+        => !this.isRunning && (this.canExecute?.Invoke() ?? true);
 
     public async void Execute(object? parameter)
     {
-        await ExecuteAsync();
+        await this.ExecuteAsync();
     }
 
     public async Task ExecuteAsync()
     {
-        if (!CanExecute(null))
+        if (!this.CanExecute(null))
         {
             return;
         }
 
         try
         {
-            isRunning = true;
-            RaiseCanExecuteChanged();
-            await execute();
+            this.isRunning = true;
+            this.RaiseCanExecuteChanged();
+            await this.execute();
         }
         finally
         {
-            isRunning = false;
-            RaiseCanExecuteChanged();
+            this.isRunning = false;
+            this.RaiseCanExecuteChanged();
         }
     }
 
     public void RaiseCanExecuteChanged()
-        => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }

@@ -1,18 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Base;
-
 namespace UBB_SE_2026_923_2.ViewModels
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.UI;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Media;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Base;
+
     public partial class MedicalEvaluationViewModel : ObservableObject
     {
         private readonly IMedicalEvaluationService evaluationService;
@@ -20,228 +20,244 @@ namespace UBB_SE_2026_923_2.ViewModels
         private List<MedicalEvaluation> allRecords = new List<MedicalEvaluation>();
 
         public ObservableCollection<MedicalEvaluation> PastEvaluations { get; } = new ObservableCollection<MedicalEvaluation>();
+
         public ObservableCollection<Appointment> AvailableAppointments { get; } = new ObservableCollection<Appointment>();
+
         public ObservableCollection<Models.Doctor> AllDoctors { get; } = new ObservableCollection<Models.Doctor>();
 
-        #region Properties
-
         private Models.Doctor? selectedDoctor;
+
         public Models.Doctor? SelectedDoctor
         {
-            get => selectedDoctor;
+            get => this.selectedDoctor;
             set
             {
-                if (SetProperty(ref selectedDoctor, value))
+                if (this.SetProperty(ref this.selectedDoctor, value))
                 {
                     if (value != null)
                     {
-                        CurrentDoctorName = $"Dr. {value.FirstName} {value.LastName}";
-                        InitializeSession();
+                        this.CurrentDoctorName = $"Dr. {value.FirstName} {value.LastName}";
+                        this.InitializeSession();
                     }
                 }
             }
         }
 
         private string currentDoctorName = "Physician";
+
         public string CurrentDoctorName
         {
-            get => currentDoctorName;
-            set => SetProperty(ref currentDoctorName, value);
+            get => this.currentDoctorName;
+            set => this.SetProperty(ref this.currentDoctorName, value);
         }
 
         private Appointment? selectedAppointment;
+
         public Appointment? SelectedAppointment
         {
-            get => selectedAppointment;
+            get => this.selectedAppointment;
             set
             {
-                if (SetProperty(ref selectedAppointment, value))
+                if (this.SetProperty(ref this.selectedAppointment, value))
                 {
                     if (value != null)
                     {
-                        PatientId = value.Notes;
-                        ResetFormForNewSelection();
+                        this.PatientId = value.Notes;
+                        this.ResetFormForNewSelection();
                     }
                 }
             }
         }
 
         private string patientId = string.Empty;
+
         public string PatientId
         {
-            get => patientId;
-            set => SetProperty(ref patientId, value);
+            get => this.patientId;
+            set => this.SetProperty(ref this.patientId, value);
         }
 
         private MedicalEvaluation? selectedEvaluation;
+
         public MedicalEvaluation? SelectedEvaluation
         {
-            get => selectedEvaluation;
+            get => this.selectedEvaluation;
             set
             {
-                if (SetProperty(ref selectedEvaluation, value))
+                if (this.SetProperty(ref this.selectedEvaluation, value))
                 {
                     if (value != null)
                     {
-                        Symptoms = value.Symptoms;
-                        MedicationsList = value.MedicationsList;
-                        DoctorNotes = value.Notes;
-                        PatientId = value.PatientId;
+                        this.Symptoms = value.Symptoms;
+                        this.MedicationsList = value.MedicationsList;
+                        this.DoctorNotes = value.Notes;
+                        this.PatientId = value.PatientId;
                     }
                     else
                     {
-                        ResetForm();
+                        this.ResetForm();
                     }
 
-                    RaisePropertyChanged(nameof(IsEditing));
-                    DeleteEvaluationCommand.RaiseCanExecuteChanged();
-                    SaveDiagnosisCommand.RaiseCanExecuteChanged();
+                    this.RaisePropertyChanged(nameof(this.IsEditing));
+                    this.DeleteEvaluationCommand.RaiseCanExecuteChanged();
+                    this.SaveDiagnosisCommand.RaiseCanExecuteChanged();
                 }
             }
         }
 
-        public bool IsEditing => SelectedEvaluation != null;
+        public bool IsEditing => this.SelectedEvaluation != null;
 
         private string searchText = string.Empty;
+
         public string SearchText
         {
-            get => searchText;
+            get => this.searchText;
             set
             {
-                if (SetProperty(ref searchText, value))
+                if (this.SetProperty(ref this.searchText, value))
                 {
-                    ApplyFilter();
+                    this.ApplyFilter();
                 }
             }
         }
 
         private string symptoms = string.Empty;
+
         public string Symptoms
         {
-            get => symptoms;
+            get => this.symptoms;
             set
             {
-                if (SetProperty(ref symptoms, value))
+                if (this.SetProperty(ref this.symptoms, value))
                 {
-                    RefreshButtonState();
+                    this.RefreshButtonState();
                 }
             }
         }
 
         private string medsList = string.Empty;
+
         public string MedicationsList
         {
-            get => medsList;
+            get => this.medsList;
             set
             {
-                if (SetProperty(ref medsList, value))
+                if (this.SetProperty(ref this.medsList, value))
                 {
-                    ValidateMedsConflict(value);
-                    RefreshButtonState();
+                    this.ValidateMedsConflict(value);
+                    this.RefreshButtonState();
                 }
             }
         }
 
         private string doctorNotes = string.Empty;
+
         public string DoctorNotes
         {
-            get => doctorNotes;
+            get => this.doctorNotes;
             set
             {
-                if (SetProperty(ref doctorNotes, value))
+                if (this.SetProperty(ref this.doctorNotes, value))
                 {
-                    RefreshButtonState();
+                    this.RefreshButtonState();
                 }
             }
         }
 
         private string validationError = string.Empty;
+
         public string ValidationError
         {
-            get => validationError;
-            set => SetProperty(ref validationError, value);
+            get => this.validationError;
+            set => this.SetProperty(ref this.validationError, value);
         }
 
         private string conflictWarning = string.Empty;
+
         public string ConflictWarning
         {
-            get => conflictWarning;
-            set => SetProperty(ref conflictWarning, value);
+            get => this.conflictWarning;
+            set => this.SetProperty(ref this.conflictWarning, value);
         }
 
         private bool isConflictVisible;
+
         public bool IsConflictVisible
         {
-            get => isConflictVisible;
+            get => this.isConflictVisible;
             set
             {
-                if (SetProperty(ref isConflictVisible, value))
+                if (this.SetProperty(ref this.isConflictVisible, value))
                 {
-                    RaisePropertyChanged(nameof(NotesBackground));
-                    RaisePropertyChanged(nameof(ConflictVisibility));
-                    IsRiskAssumed = false;
-                    RefreshButtonState();
+                    this.RaisePropertyChanged(nameof(this.NotesBackground));
+                    this.RaisePropertyChanged(nameof(this.ConflictVisibility));
+                    this.IsRiskAssumed = false;
+                    this.RefreshButtonState();
                 }
             }
         }
 
-        public Visibility ConflictVisibility => IsConflictVisible ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility ConflictVisibility => this.IsConflictVisible ? Visibility.Visible : Visibility.Collapsed;
 
         private bool isRiskAssumed;
+
         public bool IsRiskAssumed
         {
-            get => isRiskAssumed;
+            get => this.isRiskAssumed;
             set
             {
-                if (SetProperty(ref isRiskAssumed, value))
+                if (this.SetProperty(ref this.isRiskAssumed, value))
                 {
-                    RefreshButtonState();
+                    this.RefreshButtonState();
                 }
             }
         }
 
-        public Brush NotesBackground => IsConflictVisible
+        public Brush NotesBackground => this.IsConflictVisible
             ? new SolidColorBrush(Windows.UI.Color.FromArgb(100, 255, 255, 0))
             : new SolidColorBrush(Colors.Transparent);
 
         private bool isFatigued;
+
         public bool IsFatigued
         {
-            get => isFatigued;
+            get => this.isFatigued;
             set
             {
-                if (SetProperty(ref isFatigued, value))
+                if (this.SetProperty(ref this.isFatigued, value))
                 {
-                    RaisePropertyChanged(nameof(IsFormEnabled));
-                    RaisePropertyChanged(nameof(LockoutVisibility));
-                    RefreshButtonState();
+                    this.RaisePropertyChanged(nameof(this.IsFormEnabled));
+                    this.RaisePropertyChanged(nameof(this.LockoutVisibility));
+                    this.RefreshButtonState();
                 }
             }
         }
 
-        public bool IsFormEnabled => !IsFatigued;
-        public Visibility LockoutVisibility => IsFatigued ? Visibility.Visible : Visibility.Collapsed;
+        public bool IsFormEnabled => !this.IsFatigued;
+
+        public Visibility LockoutVisibility => this.IsFatigued ? Visibility.Visible : Visibility.Collapsed;
 
         private bool isLoading;
+
         public bool IsLoading
         {
-            get => isLoading;
+            get => this.isLoading;
             set
             {
-                if (SetProperty(ref isLoading, value))
+                if (this.SetProperty(ref this.isLoading, value))
                 {
-                    RaisePropertyChanged(nameof(IsEmptyStateVisible));
-                    RaisePropertyChanged(nameof(EmptyStateVisibility));
+                    this.RaisePropertyChanged(nameof(this.IsEmptyStateVisible));
+                    this.RaisePropertyChanged(nameof(this.EmptyStateVisibility));
                 }
             }
         }
 
-        public bool IsEmptyStateVisible => !IsLoading && PastEvaluations.Count == 0;
-        public Visibility EmptyStateVisibility => IsEmptyStateVisible ? Visibility.Visible : Visibility.Collapsed;
+        public bool IsEmptyStateVisible => !this.IsLoading && this.PastEvaluations.Count == 0;
 
-        #endregion
+        public Visibility EmptyStateVisibility => this.IsEmptyStateVisible ? Visibility.Visible : Visibility.Collapsed;
 
         public RelayCommand SaveDiagnosisCommand { get; }
+
         public RelayCommand DeleteEvaluationCommand { get; }
 
         public MedicalEvaluationViewModel(IMedicalEvaluationService evaluationService, ICurrentUserService currentUserService)
@@ -249,222 +265,222 @@ namespace UBB_SE_2026_923_2.ViewModels
             this.evaluationService = evaluationService;
             this.currentUserService = currentUserService;
 
-            bool CanDelete() => IsEditing;
-            SaveDiagnosisCommand = new RelayCommand(SaveDiagnosis, CanSaveDiagnosis);
-            DeleteEvaluationCommand = new RelayCommand(ExecuteDeletion, CanDelete);
+            bool CanDelete() => this.IsEditing;
+            this.SaveDiagnosisCommand = new RelayCommand(this.SaveDiagnosis, this.CanSaveDiagnosis);
+            this.DeleteEvaluationCommand = new RelayCommand(this.ExecuteDeletion, CanDelete);
 
-            LoadDoctorList();
-            InitializeSession();
+            this.LoadDoctorList();
+            this.InitializeSession();
         }
 
         private void InitializeSession()
         {
-            LoadAppointments();
-            PopulateHistory();
-            CheckDoctorFatigue();
+            this.LoadAppointments();
+            this.PopulateHistory();
+            this.CheckDoctorFatigue();
         }
 
         private void LoadDoctorList()
         {
-            AllDoctors.ReplaceWith(evaluationService.GetAllDoctors());
+            this.AllDoctors.ReplaceWith(this.evaluationService.GetAllDoctors());
 
-            bool IsCurrentUser(Models.Doctor doctor) => doctor.StaffID == currentUserService.UserId;
-            selectedDoctor = AllDoctors.FirstOrDefault(IsCurrentUser);
-            if (selectedDoctor != null)
+            bool IsCurrentUser(Models.Doctor doctor) => doctor.StaffID == this.currentUserService.UserId;
+            this.selectedDoctor = this.AllDoctors.FirstOrDefault(IsCurrentUser);
+            if (this.selectedDoctor != null)
             {
-                CurrentDoctorName = $"Dr. {selectedDoctor.FirstName} {selectedDoctor.LastName}";
+                this.CurrentDoctorName = $"Dr. {this.selectedDoctor.FirstName} {this.selectedDoctor.LastName}";
             }
         }
 
         private void LoadAppointments()
         {
-            AvailableAppointments.ReplaceWith(evaluationService.GetAppointmentsByDoctor(currentUserService.UserId));
+            this.AvailableAppointments.ReplaceWith(this.evaluationService.GetAppointmentsByDoctor(this.currentUserService.UserId));
         }
 
         private void ValidateMedsConflict(string currentMeds)
         {
-            if (string.IsNullOrWhiteSpace(currentMeds) || string.IsNullOrWhiteSpace(PatientId))
+            if (string.IsNullOrWhiteSpace(currentMeds) || string.IsNullOrWhiteSpace(this.PatientId))
             {
-                IsConflictVisible = false;
+                this.IsConflictVisible = false;
                 return;
             }
 
-            string? warning = evaluationService.CheckMedicineConflict(PatientId, currentMeds);
+            string? warning = this.evaluationService.CheckMedicineConflict(this.PatientId, currentMeds);
 
             if (!string.IsNullOrEmpty(warning))
             {
-                ConflictWarning = warning;
-                IsConflictVisible = true;
+                this.ConflictWarning = warning;
+                this.IsConflictVisible = true;
             }
             else
             {
-                IsConflictVisible = false;
+                this.IsConflictVisible = false;
             }
         }
 
         private bool CanSaveDiagnosis()
         {
-            if (IsFatigued)
+            if (this.IsFatigued)
             {
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(PatientId) || PatientId == "N/A" || PatientId == string.Empty)
+            if (string.IsNullOrWhiteSpace(this.PatientId) || this.PatientId == "N/A" || this.PatientId == string.Empty)
             {
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(Symptoms) || string.IsNullOrWhiteSpace(DoctorNotes))
+            if (string.IsNullOrWhiteSpace(this.Symptoms) || string.IsNullOrWhiteSpace(this.DoctorNotes))
             {
-                ValidationError = "?? Symptoms and Doctor Notes are required.";
+                this.ValidationError = "?? Symptoms and Doctor Notes are required.";
                 return false;
             }
 
-            if (IsConflictVisible && !IsRiskAssumed)
+            if (this.IsConflictVisible && !this.IsRiskAssumed)
             {
-                ValidationError = "?? You must acknowledge the clinical risk.";
+                this.ValidationError = "?? You must acknowledge the clinical risk.";
                 return false;
             }
 
-            ValidationError = string.Empty;
+            this.ValidationError = string.Empty;
             return true;
         }
 
         private void SaveDiagnosis()
         {
-            if (IsEditing && SelectedEvaluation != null)
+            if (this.IsEditing && this.SelectedEvaluation != null)
             {
-                SelectedEvaluation.Symptoms = Symptoms;
-                SelectedEvaluation.MedicationsList = MedicationsList;
-                SelectedEvaluation.Notes = DoctorNotes;
+                this.SelectedEvaluation.Symptoms = this.Symptoms;
+                this.SelectedEvaluation.MedicationsList = this.MedicationsList;
+                this.SelectedEvaluation.Notes = this.DoctorNotes;
 
-                evaluationService.UpdateEvaluation(SelectedEvaluation);
+                this.evaluationService.UpdateEvaluation(this.SelectedEvaluation);
             }
             else
             {
                 var newRecord = new MedicalEvaluation
                 {
                     PatientId = this.PatientId,
-                    Symptoms = Symptoms,
+                    Symptoms = this.Symptoms,
                     MedicationsList = this.MedicationsList,
                     Notes = this.DoctorNotes,
                     EvaluationDate = DateTime.Now,
                     Evaluator = new Models.Doctor(
-                        currentUserService.UserId,
+                        this.currentUserService.UserId,
                         string.Empty, string.Empty, string.Empty,
                         true, string.Empty, "Available", DoctorStatus.AVAILABLE, 0),
                 };
 
-                evaluationService.SaveEvaluation(newRecord);
+                this.evaluationService.SaveEvaluation(newRecord);
             }
 
-            ResetForm();
-            PopulateHistory();
+            this.ResetForm();
+            this.PopulateHistory();
         }
 
         public void ResetForm()
         {
-            Symptoms = string.Empty;
-            MedicationsList = string.Empty;
-            DoctorNotes = string.Empty;
-            IsRiskAssumed = false;
-            IsConflictVisible = false;
-            selectedEvaluation = null;
-            SelectedAppointment = null;
-            PatientId = string.Empty;
+            this.Symptoms = string.Empty;
+            this.MedicationsList = string.Empty;
+            this.DoctorNotes = string.Empty;
+            this.IsRiskAssumed = false;
+            this.IsConflictVisible = false;
+            this.selectedEvaluation = null;
+            this.SelectedAppointment = null;
+            this.PatientId = string.Empty;
 
-            NotifyAllProperties();
-            RefreshButtonState();
+            this.NotifyAllProperties();
+            this.RefreshButtonState();
         }
 
         private void ResetFormForNewSelection()
         {
-            Symptoms = string.Empty;
-            MedicationsList = string.Empty;
-            DoctorNotes = string.Empty;
-            IsRiskAssumed = false;
-            IsConflictVisible = false;
-            selectedEvaluation = null;
+            this.Symptoms = string.Empty;
+            this.MedicationsList = string.Empty;
+            this.DoctorNotes = string.Empty;
+            this.IsRiskAssumed = false;
+            this.IsConflictVisible = false;
+            this.selectedEvaluation = null;
 
-            NotifyAllProperties();
-            RefreshButtonState();
+            this.NotifyAllProperties();
+            this.RefreshButtonState();
         }
 
         private void NotifyAllProperties()
         {
-            RaisePropertyChanged(nameof(Symptoms));
-            RaisePropertyChanged(nameof(MedicationsList));
-            RaisePropertyChanged(nameof(DoctorNotes));
-            RaisePropertyChanged(nameof(IsRiskAssumed));
-            RaisePropertyChanged(nameof(IsConflictVisible));
-            RaisePropertyChanged(nameof(ConflictVisibility));
-            RaisePropertyChanged(nameof(NotesBackground));
-            RaisePropertyChanged(nameof(SelectedEvaluation));
-            RaisePropertyChanged(nameof(IsEditing));
-            RaisePropertyChanged(nameof(PatientId));
-            RaisePropertyChanged(nameof(CurrentDoctorName));
-            RaisePropertyChanged(nameof(SelectedDoctor));
-            RaisePropertyChanged(nameof(SelectedAppointment));
+            this.RaisePropertyChanged(nameof(this.Symptoms));
+            this.RaisePropertyChanged(nameof(this.MedicationsList));
+            this.RaisePropertyChanged(nameof(this.DoctorNotes));
+            this.RaisePropertyChanged(nameof(this.IsRiskAssumed));
+            this.RaisePropertyChanged(nameof(this.IsConflictVisible));
+            this.RaisePropertyChanged(nameof(this.ConflictVisibility));
+            this.RaisePropertyChanged(nameof(this.NotesBackground));
+            this.RaisePropertyChanged(nameof(this.SelectedEvaluation));
+            this.RaisePropertyChanged(nameof(this.IsEditing));
+            this.RaisePropertyChanged(nameof(this.PatientId));
+            this.RaisePropertyChanged(nameof(this.CurrentDoctorName));
+            this.RaisePropertyChanged(nameof(this.SelectedDoctor));
+            this.RaisePropertyChanged(nameof(this.SelectedAppointment));
 
-            DeleteEvaluationCommand.RaiseCanExecuteChanged();
+            this.DeleteEvaluationCommand.RaiseCanExecuteChanged();
         }
 
         private void RefreshButtonState()
         {
-            SaveDiagnosisCommand.RaiseCanExecuteChanged();
-            DeleteEvaluationCommand.RaiseCanExecuteChanged();
-            RaisePropertyChanged(nameof(ValidationError));
+            this.SaveDiagnosisCommand.RaiseCanExecuteChanged();
+            this.DeleteEvaluationCommand.RaiseCanExecuteChanged();
+            this.RaisePropertyChanged(nameof(this.ValidationError));
         }
 
         public async void PopulateHistory()
         {
-            IsLoading = true;
-            PastEvaluations.Clear();
+            this.IsLoading = true;
+            this.PastEvaluations.Clear();
             const int SimulatedLoadingDelayMs = 500;
             await Task.Delay(SimulatedLoadingDelayMs);
 
-            allRecords = evaluationService.GetEvaluationsByDoctor(currentUserService.UserId.ToString());
+            this.allRecords = this.evaluationService.GetEvaluationsByDoctor(this.currentUserService.UserId.ToString());
 
-            ApplyFilter();
-            IsLoading = false;
+            this.ApplyFilter();
+            this.IsLoading = false;
         }
 
         private void ApplyFilter()
         {
             bool RecordMatchesSearch(MedicalEvaluation record) =>
-                record.PatientId.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+                record.PatientId.Contains(this.SearchText, StringComparison.OrdinalIgnoreCase);
 
-            var filteredRecords = string.IsNullOrWhiteSpace(SearchText)
-                ? allRecords
-                : allRecords.Where(RecordMatchesSearch);
+            var filteredRecords = string.IsNullOrWhiteSpace(this.SearchText)
+                ? this.allRecords
+                : this.allRecords.Where(RecordMatchesSearch);
 
-            PastEvaluations.ReplaceWith(filteredRecords);
+            this.PastEvaluations.ReplaceWith(filteredRecords);
 
-            RaisePropertyChanged(nameof(IsEmptyStateVisible));
-            RaisePropertyChanged(nameof(EmptyStateVisibility));
+            this.RaisePropertyChanged(nameof(this.IsEmptyStateVisible));
+            this.RaisePropertyChanged(nameof(this.EmptyStateVisibility));
         }
 
         private void CheckDoctorFatigue()
         {
-            bool wasFatigued = IsFatigued;
-            IsFatigued = evaluationService.IsDoctorFatigued(currentUserService.UserId.ToString());
+            bool wasFatigued = this.IsFatigued;
+            this.IsFatigued = this.evaluationService.IsDoctorFatigued(this.currentUserService.UserId.ToString());
 
-            if (IsFatigued && !wasFatigued)
+            if (this.IsFatigued && !wasFatigued)
             {
-                evaluationService.RaiseFatigueIntervention(currentUserService.UserId, CurrentDoctorName);
+                this.evaluationService.RaiseFatigueIntervention(this.currentUserService.UserId, this.CurrentDoctorName);
             }
         }
 
         public void ExecuteDeletion()
         {
-            if (SelectedEvaluation == null)
+            if (this.SelectedEvaluation == null)
             {
                 return;
             }
 
-            evaluationService.DeleteEvaluation(SelectedEvaluation.EvaluationID);
-            ResetForm();
-            PopulateHistory();
+            this.evaluationService.DeleteEvaluation(this.SelectedEvaluation.EvaluationID);
+            this.ResetForm();
+            this.PopulateHistory();
         }
     }
 }

@@ -1,72 +1,78 @@
-using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Base;
-
 namespace UBB_SE_2026_923_2.ViewModels.Doctor
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Base;
+
     public sealed class MyScheduleViewModel : INotifyPropertyChanged
     {
         private readonly IShiftSwapService staffAndShiftService;
 
         public ObservableCollection<DoctorOptionViewModel> Doctors { get; } = new ObservableCollection<DoctorOptionViewModel>();
+
         public ObservableCollection<DoctorShiftItemViewModel> FutureShifts { get; } = new ObservableCollection<DoctorShiftItemViewModel>();
+
         public ObservableCollection<StaffOptionViewModel> EligibleColleagues { get; } = new ObservableCollection<StaffOptionViewModel>();
 
         private DoctorOptionViewModel? selectedDoctor;
+
         public DoctorOptionViewModel? SelectedDoctor
         {
-            get => selectedDoctor;
+            get => this.selectedDoctor;
             set
             {
-                if (SetProperty(ref selectedDoctor, value))
+                if (this.SetProperty(ref this.selectedDoctor, value))
                 {
-                    SelectedShift = null;
-                    SelectedColleague = null;
-                    LoadFutureShifts();
-                    ((RelayCommand)RequestSwapCommand).RaiseCanExecuteChanged();
+                    this.SelectedShift = null;
+                    this.SelectedColleague = null;
+                    this.LoadFutureShifts();
+                    ((RelayCommand)this.RequestSwapCommand).RaiseCanExecuteChanged();
                 }
             }
         }
 
         private DoctorShiftItemViewModel? selectedShift;
+
         public DoctorShiftItemViewModel? SelectedShift
         {
-            get => selectedShift;
+            get => this.selectedShift;
             set
             {
-                if (SetProperty(ref selectedShift, value))
+                if (this.SetProperty(ref this.selectedShift, value))
                 {
-                    LoadEligibleColleagues();
-                    ((RelayCommand)RequestSwapCommand).RaiseCanExecuteChanged();
+                    this.LoadEligibleColleagues();
+                    ((RelayCommand)this.RequestSwapCommand).RaiseCanExecuteChanged();
                 }
             }
         }
 
         private StaffOptionViewModel? selectedColleague;
+
         public StaffOptionViewModel? SelectedColleague
         {
-            get => selectedColleague;
+            get => this.selectedColleague;
             set
             {
-                if (SetProperty(ref selectedColleague, value))
+                if (this.SetProperty(ref this.selectedColleague, value))
                 {
-                    ((RelayCommand)RequestSwapCommand).RaiseCanExecuteChanged();
+                    ((RelayCommand)this.RequestSwapCommand).RaiseCanExecuteChanged();
                 }
             }
         }
 
         private string statusMessage = string.Empty;
+
         public string StatusMessage
         {
-            get => statusMessage;
-            set => SetProperty(ref statusMessage, value);
+            get => this.statusMessage;
+            set => this.SetProperty(ref this.statusMessage, value);
         }
 
         public ICommand RequestSwapCommand { get; }
@@ -75,103 +81,103 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
         {
             this.staffAndShiftService = staffAndShiftService;
 
-            RequestSwapCommand = new RelayCommand(RequestSwap, CanRequestSwap);
+            this.RequestSwapCommand = new RelayCommand(this.RequestSwap, this.CanRequestSwap);
 
-            LoadDoctors();
+            this.LoadDoctors();
         }
 
         private void LoadDoctors()
         {
-            Doctors.ReplaceWith(staffAndShiftService.GetAllDoctors().Select(DoctorOptionViewModel.From));
+            this.Doctors.ReplaceWith(this.staffAndShiftService.GetAllDoctors().Select(DoctorOptionViewModel.From));
 
-            if (Doctors.Count == 0)
+            if (this.Doctors.Count == 0)
             {
-                StatusMessage = "No doctors found in database.";
+                this.StatusMessage = "No doctors found in database.";
                 return;
             }
 
-            SelectedDoctor = Doctors.FirstOrDefault();
+            this.SelectedDoctor = this.Doctors.FirstOrDefault();
         }
 
         private void LoadFutureShifts()
         {
-            FutureShifts.Clear();
-            EligibleColleagues.Clear();
+            this.FutureShifts.Clear();
+            this.EligibleColleagues.Clear();
 
-            if (SelectedDoctor == null)
+            if (this.SelectedDoctor == null)
             {
-                StatusMessage = "Select a doctor first.";
+                this.StatusMessage = "Select a doctor first.";
                 return;
             }
 
             DoctorShiftItemViewModel ToShiftItemViewModel(Shift shift) => new DoctorShiftItemViewModel(shift);
-            FutureShifts.ReplaceWith(staffAndShiftService
-                .GetFutureShiftsForStaff(SelectedDoctor.StaffId)
+            this.FutureShifts.ReplaceWith(this.staffAndShiftService
+                .GetFutureShiftsForStaff(this.SelectedDoctor.StaffId)
                 .Select(ToShiftItemViewModel));
 
-            StatusMessage = FutureShifts.Count == 0
+            this.StatusMessage = this.FutureShifts.Count == 0
                 ? "Selected doctor has no future shifts available for swap requests."
                 : string.Empty;
         }
 
         private void LoadEligibleColleagues()
         {
-            EligibleColleagues.Clear();
+            this.EligibleColleagues.Clear();
 
-            if (SelectedDoctor == null)
+            if (this.SelectedDoctor == null)
             {
-                StatusMessage = "Select a doctor first.";
+                this.StatusMessage = "Select a doctor first.";
                 return;
             }
 
-            if (SelectedShift == null)
+            if (this.SelectedShift == null)
             {
-                StatusMessage = "Select a future shift first.";
+                this.StatusMessage = "Select a future shift first.";
                 return;
             }
 
-            var colleagues = staffAndShiftService.GetEligibleSwapColleaguesForShift(
-                SelectedDoctor.StaffId,
-                SelectedShift.Id,
+            var colleagues = this.staffAndShiftService.GetEligibleSwapColleaguesForShift(
+                this.SelectedDoctor.StaffId,
+                this.SelectedShift.Id,
                 out var error);
 
             if (!string.IsNullOrWhiteSpace(error))
             {
-                StatusMessage = error;
+                this.StatusMessage = error;
                 return;
             }
 
-            EligibleColleagues.ReplaceWith(colleagues.Select(StaffOptionViewModel.From));
+            this.EligibleColleagues.ReplaceWith(colleagues.Select(StaffOptionViewModel.From));
 
-            StatusMessage = EligibleColleagues.Count == 0
+            this.StatusMessage = this.EligibleColleagues.Count == 0
                 ? "No colleagues available in the same role/department profile."
                 : string.Empty;
         }
 
         private bool CanRequestSwap()
         {
-            return SelectedDoctor != null && SelectedShift != null && SelectedColleague != null;
+            return this.SelectedDoctor != null && this.SelectedShift != null && this.SelectedColleague != null;
         }
 
         private void RequestSwap()
         {
-            if (SelectedDoctor == null || SelectedShift == null || SelectedColleague == null)
+            if (this.SelectedDoctor == null || this.SelectedShift == null || this.SelectedColleague == null)
             {
-                StatusMessage = "Please select doctor, shift and colleague.";
+                this.StatusMessage = "Please select doctor, shift and colleague.";
                 return;
             }
 
-            var success = staffAndShiftService.RequestShiftSwap(
-                SelectedDoctor.StaffId,
-                SelectedShift.Id,
-                SelectedColleague.StaffId,
+            var success = this.staffAndShiftService.RequestShiftSwap(
+                this.SelectedDoctor.StaffId,
+                this.SelectedShift.Id,
+                this.SelectedColleague.StaffId,
                 out var message);
 
-            StatusMessage = message;
+            this.StatusMessage = message;
 
             if (success)
             {
-                SelectedColleague = null;
+                this.SelectedColleague = null;
             }
         }
 
@@ -185,7 +191,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
             }
 
             field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             return true;
         }
     }
@@ -193,6 +199,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
     public sealed class DoctorOptionViewModel
     {
         public int StaffId { get; set; }
+
         public string DisplayName { get; set; } = string.Empty;
 
         public static DoctorOptionViewModel From(Models.Doctor doctor) =>
@@ -206,6 +213,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
     public sealed class StaffOptionViewModel
     {
         public int StaffId { get; set; }
+
         public string DisplayName { get; set; } = string.Empty;
 
         public static StaffOptionViewModel From(IStaff staffMember) =>

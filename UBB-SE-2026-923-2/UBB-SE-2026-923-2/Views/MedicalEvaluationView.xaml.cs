@@ -1,11 +1,11 @@
-using System;
-using UBB_SE_2026_923_2.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
-
 namespace UBB_SE_2026_923_2.Views
 {
+    using System;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using UBB_SE_2026_923_2.ViewModels;
+
     public sealed partial class MedicalEvaluationView : Page
     {
         public MedicalEvaluationViewModel ViewModel { get; }
@@ -14,8 +14,8 @@ namespace UBB_SE_2026_923_2.Views
         {
             this.InitializeComponent();
 
-            ViewModel = App.Services.GetRequiredService<MedicalEvaluationViewModel>();
-            this.DataContext = ViewModel;
+            this.ViewModel = App.Services.GetRequiredService<MedicalEvaluationViewModel>();
+            this.DataContext = this.ViewModel;
         }
 
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
@@ -28,14 +28,14 @@ namespace UBB_SE_2026_923_2.Views
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Close,
 
-                XamlRoot = this.Content.XamlRoot
+                XamlRoot = this.Content.XamlRoot,
             };
 
             ContentDialogResult result = await deleteDialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)
             {
-                ViewModel.ExecuteDeletion();
+                this.ViewModel.ExecuteDeletion();
             }
         }
     }

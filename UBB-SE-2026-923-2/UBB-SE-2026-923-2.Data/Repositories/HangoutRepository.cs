@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IHangoutRepository"/>. Participants
     /// are managed through <see cref="IHangoutParticipantRepository"/> and the
@@ -23,7 +23,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public int AddHangout(string title, string description, DateTime date, int maxParticipants)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var hangout = new Hangout
             {
@@ -40,13 +40,13 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Hangout> GetAllHangouts()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Hangouts.AsNoTracking().ToList();
         }
 
         public Hangout? GetHangoutById(int hangoutId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Hangouts.AsNoTracking().FirstOrDefault(h => h.HangoutID == hangoutId);
         }
     }

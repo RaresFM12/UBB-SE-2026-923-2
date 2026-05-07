@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public sealed class MedicalEvaluationService : IMedicalEvaluationService
     {
         private const double FatigueThresholdHours = 12.0;
@@ -48,11 +48,11 @@ namespace UBB_SE_2026_923_2.Services
         }
 
         public List<Doctor> GetAllDoctors() =>
-            staffRepository.LoadAllStaff().OfType<Doctor>().ToList();
+            this.staffRepository.LoadAllStaff().OfType<Doctor>().ToList();
 
         public List<Appointment> GetAppointmentsByDoctor(int doctorId)
         {
-            Task<IReadOnlyList<Appointment>> LoadAllAppointments() => appointmentRepository.GetAllAppointmentsAsync();
+            Task<IReadOnlyList<Appointment>> LoadAllAppointments() => this.appointmentRepository.GetAllAppointmentsAsync();
             var allAppointments = Task.Run(LoadAllAppointments).GetAwaiter().GetResult();
 
             bool IsConfirmedForDoctor(Appointment appointment) =>
@@ -79,7 +79,7 @@ namespace UBB_SE_2026_923_2.Services
                 evaluation.Evaluator != null && evaluation.Evaluator.StaffID == parsedDoctorId;
             int ByEvaluationId(MedicalEvaluation evaluation) => evaluation.EvaluationID;
 
-            return evaluationsRepository.GetAllEvaluations()
+            return this.evaluationsRepository.GetAllEvaluations()
                 .Where(IsForDoctor)
                 .OrderByDescending(ByEvaluationId)
                 .ToList();
@@ -94,9 +94,9 @@ namespace UBB_SE_2026_923_2.Services
 
             int patientId = int.TryParse(record.PatientId, out var parsedPatientId) ? parsedPatientId : DefaultPatientId;
             bool assumedRisk = ContainsRiskMarker(record.Symptoms);
-            int doctorId = record.Evaluator?.StaffID ?? currentUserService.UserId;
+            int doctorId = record.Evaluator?.StaffID ?? this.currentUserService.UserId;
 
-            evaluationsRepository.AddEvaluation(
+            this.evaluationsRepository.AddEvaluation(
                 doctorId,
                 patientId,
                 record.Symptoms ?? string.Empty,
@@ -117,7 +117,7 @@ namespace UBB_SE_2026_923_2.Services
                 throw new ArgumentException("EvaluationID is required to update.", nameof(record));
             }
 
-            evaluationsRepository.UpdateEvaluation(
+            this.evaluationsRepository.UpdateEvaluation(
                 record.EvaluationID,
                 record.Symptoms ?? string.Empty,
                 record.Notes ?? string.Empty,
@@ -125,11 +125,11 @@ namespace UBB_SE_2026_923_2.Services
         }
 
         public void DeleteEvaluation(int evaluationId) =>
-            evaluationsRepository.DeleteEvaluation(evaluationId);
+            this.evaluationsRepository.DeleteEvaluation(evaluationId);
 
         public void RaiseFatigueIntervention(int doctorId, string doctorName)
         {
-            if (notificationRepository == null)
+            if (this.notificationRepository == null)
             {
                 return;
             }
@@ -138,7 +138,7 @@ namespace UBB_SE_2026_923_2.Services
                 ? $"Doctor #{doctorId} exceeded the {FatigueThresholdHours:F0}h duty limit. Reassign active cases."
                 : $"{doctorName} (Doctor #{doctorId}) exceeded the {FatigueThresholdHours:F0}h duty limit. Reassign active cases.";
 
-            notificationRepository.AddNotification(AdminBroadcastRecipientId, FatigueAlertTitle, message);
+            this.notificationRepository.AddNotification(AdminBroadcastRecipientId, FatigueAlertTitle, message);
         }
 
         public bool IsDoctorFatigued(string doctorId)
@@ -154,7 +154,7 @@ namespace UBB_SE_2026_923_2.Services
                 shift.AppointedStaff.StaffID == parsedDoctorId && shift.EndTime >= lookbackStart;
             double ToShiftHours(Shift shift) => (shift.EndTime - shift.StartTime).TotalHours;
 
-            double recentHours = shiftRepository.GetAllShifts()
+            double recentHours = this.shiftRepository.GetAllShifts()
                 .Where(IsRecentShiftForDoctor)
                 .Sum(ToShiftHours);
 
@@ -172,14 +172,14 @@ namespace UBB_SE_2026_923_2.Services
             bool MatchesMedicineName((string MedicineName, string WarningMessage) medicine) =>
                 string.Equals(medicine.MedicineName, trimmedMedicineName, StringComparison.OrdinalIgnoreCase);
 
-            var matchingMedicine = highRiskMedicineRepository.GetAllHighRiskMedicines()
+            var matchingMedicine = this.highRiskMedicineRepository.GetAllHighRiskMedicines()
                 .FirstOrDefault(MatchesMedicineName);
             if (!string.IsNullOrEmpty(matchingMedicine.WarningMessage))
             {
                 return matchingMedicine.WarningMessage;
             }
 
-            return CheckPatientHistoryForRisk(patientId, medications);
+            return this.CheckPatientHistoryForRisk(patientId, medications);
         }
 
         private string? CheckPatientHistoryForRisk(string patientId, string currentMedicines)
@@ -206,7 +206,7 @@ namespace UBB_SE_2026_923_2.Services
                 return currentDrugs.FirstOrDefault(MatchesAnyHistoricalDrug);
             }
 
-            foreach (var evaluation in evaluationsRepository.GetAllEvaluations())
+            foreach (var evaluation in this.evaluationsRepository.GetAllEvaluations())
             {
                 if (!MatchesPatient(evaluation) || !MentionsAllergyOrAdverse(evaluation))
                 {

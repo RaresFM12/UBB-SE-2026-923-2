@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IOrdersRepository"/>.
     /// </summary>
@@ -30,20 +30,20 @@ namespace UBB_SE_2026_923_2.Repositories
                 IsCompleted = isCompleted,
                 IsExpired = isExpired,
             };
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
             return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
         }
 
         public void RemoveOrder(int orderIdToBeRemoved)
         {
-            var response = httpClient.DeleteAsync($"{BasePath}/{orderIdToBeRemoved}").GetAwaiter().GetResult();
+            var response = this.httpClient.DeleteAsync($"{BasePath}/{orderIdToBeRemoved}").GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
 
         public Order GetOrder(int orderId)
         {
-            var response = httpClient.GetAsync($"{BasePath}/{orderId}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{orderId}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
@@ -55,13 +55,13 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Order> GetAllOrders()
         {
-            var orders = httpClient.GetFromJsonAsync<List<Order>>(BasePath).GetAwaiter().GetResult();
+            var orders = this.httpClient.GetFromJsonAsync<List<Order>>(BasePath).GetAwaiter().GetResult();
             return orders ?? new List<Order>();
         }
 
         public List<Order> GetOrdersOfClient(int clientId)
         {
-            var orders = httpClient
+            var orders = this.httpClient
                 .GetFromJsonAsync<List<Order>>($"{BasePath}?clientId={clientId}")
                 .GetAwaiter().GetResult();
             return orders ?? new List<Order>();
@@ -69,7 +69,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateOrder(Order newOrder)
         {
-            var response = httpClient
+            var response = this.httpClient
                 .PutAsJsonAsync($"{BasePath}/{newOrder.Id}", newOrder)
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
@@ -77,7 +77,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public bool OrderExists(int orderId)
         {
-            return httpClient
+            return this.httpClient
                 .GetFromJsonAsync<bool>($"{BasePath}/{orderId}/exists")
                 .GetAwaiter().GetResult();
         }

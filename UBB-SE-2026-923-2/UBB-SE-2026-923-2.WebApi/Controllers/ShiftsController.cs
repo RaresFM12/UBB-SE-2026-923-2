@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.WebApi.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,7 +18,7 @@ public class ShiftsController : ControllerBase
     [HttpGet]
     public ActionResult<IReadOnlyList<Shift>> GetAll()
     {
-        return Ok(repository.GetAllShifts());
+        return this.Ok(this.repository.GetAllShifts());
     }
 
     [HttpPost]
@@ -32,29 +32,29 @@ public class ShiftsController : ControllerBase
             EndTime = request.EndTime,
             Status = request.Status,
         };
-        repository.AddShift(shift);
-        return NoContent();
+        this.repository.AddShift(shift);
+        return this.NoContent();
     }
 
     [HttpPatch("{id:int}/status")]
     public IActionResult UpdateStatus(int id, [FromBody] UpdateShiftStatusRequest request)
     {
-        repository.UpdateShiftStatus(id, request.Status);
-        return NoContent();
+        this.repository.UpdateShiftStatus(id, request.Status);
+        return this.NoContent();
     }
 
     [HttpPatch("{id:int}/staff")]
     public IActionResult UpdateStaff(int id, [FromBody] UpdateShiftStaffRequest request)
     {
-        repository.UpdateShiftStaffId(id, request.StaffId);
-        return NoContent();
+        this.repository.UpdateShiftStaffId(id, request.StaffId);
+        return this.NoContent();
     }
 
     [HttpDelete("{id:int}")]
     public IActionResult Delete(int id)
     {
-        repository.DeleteShift(id);
-        return NoContent();
+        this.repository.DeleteShift(id);
+        return this.NoContent();
     }
 
     public record CreateShiftRequest(

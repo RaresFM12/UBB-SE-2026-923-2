@@ -1,7 +1,7 @@
-using System.Windows.Input;
-using System;
-
 namespace UBB_SE_2026_923_2.Command;
+
+using System;
+using System.Windows.Input;
 
 public class RelayCommand : ICommand
 {
@@ -16,10 +16,10 @@ public class RelayCommand : ICommand
 
     public event EventHandler? CanExecuteChanged;
 
-    public bool CanExecute(object? parameter) => canExecute?.Invoke() ?? true;
+    public bool CanExecute(object? parameter) => this.canExecute?.Invoke() ?? true;
 
-    public void Execute(object? parameter) => execute();
+    public void Execute(object? parameter) => this.execute();
 
     public void RaiseCanExecuteChanged()
-        => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }

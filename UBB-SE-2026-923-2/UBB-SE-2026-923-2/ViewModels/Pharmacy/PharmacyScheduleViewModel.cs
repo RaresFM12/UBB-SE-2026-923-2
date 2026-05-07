@@ -1,13 +1,13 @@
+namespace UBB_SE_2026_923_2.ViewModels.Pharmacy;
+
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Command;
+using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Services;
 using UBB_SE_2026_923_2.ViewModels.Base;
-
-namespace UBB_SE_2026_923_2.ViewModels.Pharmacy;
 
 public class PharmacyScheduleViewModel : ObservableObject
 {
@@ -23,62 +23,68 @@ public class PharmacyScheduleViewModel : ObservableObject
     private bool isInitializing;
 
     public ObservableCollection<PharmacyShiftItemViewModel> Shifts { get; } = new ObservableCollection<PharmacyShiftItemViewModel>();
+
     public ObservableCollection<PharmacistOption> Pharmacists { get; } = new ObservableCollection<PharmacistOption>();
 
     private PharmacistOption? selectedPharmacist;
+
     public PharmacistOption? SelectedPharmacist
     {
-        get => selectedPharmacist;
+        get => this.selectedPharmacist;
         set
         {
-            if (SetProperty(ref selectedPharmacist, value) && !isInitializing)
+            if (this.SetProperty(ref this.selectedPharmacist, value) && !this.isInitializing)
             {
-                _ = LoadAsync();
+                _ = this.LoadAsync();
             }
         }
     }
 
     private bool isLoading;
-    public bool IsLoading { get => isLoading; set => SetProperty(ref isLoading, value); }
+
+    public bool IsLoading { get => this.isLoading; set => this.SetProperty(ref this.isLoading, value); }
 
     private string errorMessage = string.Empty;
-    public string ErrorMessage { get => errorMessage; set => SetProperty(ref errorMessage, value); }
+
+    public string ErrorMessage { get => this.errorMessage; set => this.SetProperty(ref this.errorMessage, value); }
 
     private DateTime anchorDate = DateTime.Today;
+
     public DateTime AnchorDate
     {
-        get => anchorDate;
+        get => this.anchorDate;
         set
         {
-            if (SetProperty(ref anchorDate, value))
+            if (this.SetProperty(ref this.anchorDate, value))
             {
-                RaisePropertyChanged(nameof(HeaderSubtitle));
-                RaisePropertyChanged(nameof(SelectedDateText));
-                _ = LoadAsync();
+                this.RaisePropertyChanged(nameof(this.HeaderSubtitle));
+                this.RaisePropertyChanged(nameof(this.SelectedDateText));
+                _ = this.LoadAsync();
             }
         }
     }
 
     private bool isWeeklyView = true;
+
     public bool IsWeeklyView
     {
-        get => isWeeklyView;
+        get => this.isWeeklyView;
         set
         {
-            if (SetProperty(ref isWeeklyView, value))
+            if (this.SetProperty(ref this.isWeeklyView, value))
             {
-                RaisePropertyChanged(nameof(IsDailyView));
-                RaisePropertyChanged(nameof(HeaderSubtitle));
-                RaisePropertyChanged(nameof(SelectedDateText));
-                _ = LoadAsync();
+                this.RaisePropertyChanged(nameof(this.IsDailyView));
+                this.RaisePropertyChanged(nameof(this.HeaderSubtitle));
+                this.RaisePropertyChanged(nameof(this.SelectedDateText));
+                _ = this.LoadAsync();
             }
         }
     }
 
     public bool IsDailyView
     {
-        get => !isWeeklyView;
-        set => IsWeeklyView = !value;
+        get => !this.isWeeklyView;
+        set => this.IsWeeklyView = !value;
     }
 
     public string HeaderSubtitle
@@ -86,27 +92,34 @@ public class PharmacyScheduleViewModel : ObservableObject
         get
         {
             const int LastDayOfWeekOffset = DaysInWeek - 1;
-            return IsWeeklyView
-                ? $"Week of {StartOfWeek(AnchorDate).ToString(WeeklyDateFormat)} – {StartOfWeek(AnchorDate).AddDays(LastDayOfWeekOffset).ToString(WeeklyDateFormat)}"
-                : AnchorDate.ToString(DailyDateFormat);
+            return this.IsWeeklyView
+                ? $"Week of {StartOfWeek(this.AnchorDate).ToString(WeeklyDateFormat)} – {StartOfWeek(this.AnchorDate).AddDays(LastDayOfWeekOffset).ToString(WeeklyDateFormat)}"
+                : this.AnchorDate.ToString(DailyDateFormat);
         }
     }
 
     public string SelectedDateText =>
-        IsWeeklyView
-            ? $"Week of {StartOfWeek(AnchorDate).ToString(WeeklyDateFormat)}"
-            : AnchorDate.ToString(DailyDateFormat);
+        this.IsWeeklyView
+            ? $"Week of {StartOfWeek(this.AnchorDate).ToString(WeeklyDateFormat)}"
+            : this.AnchorDate.ToString(DailyDateFormat);
 
-    public bool IsPharmacist => string.Equals(currentUser.Role, PharmacistRoleLabel, StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(currentUser.Role, AdminRoleLabel, StringComparison.OrdinalIgnoreCase);
-    public bool IsAccessDenied => !IsPharmacist;
-    public bool IsEmpty => !IsLoading && string.IsNullOrWhiteSpace(ErrorMessage) && Shifts.Count == 0;
+    public bool IsPharmacist => string.Equals(this.currentUser.Role, PharmacistRoleLabel, StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(this.currentUser.Role, AdminRoleLabel, StringComparison.OrdinalIgnoreCase);
+
+    public bool IsAccessDenied => !this.IsPharmacist;
+
+    public bool IsEmpty => !this.IsLoading && string.IsNullOrWhiteSpace(this.ErrorMessage) && this.Shifts.Count == 0;
 
     public AsyncRelayCommand RefreshCommand { get; }
+
     public RelayCommand TodayCommand { get; }
+
     public RelayCommand NextPeriodCommand { get; }
+
     public RelayCommand PreviousPeriodCommand { get; }
+
     public RelayCommand ShowDailyCommand { get; }
+
     public RelayCommand ShowWeeklyCommand { get; }
 
     public PharmacyScheduleViewModel(
@@ -116,38 +129,38 @@ public class PharmacyScheduleViewModel : ObservableObject
         this.currentUser = currentUser;
         this.scheduleService = scheduleService;
 
-        bool CanExecuteAsPharmacist() => IsPharmacist;
-        RefreshCommand = new AsyncRelayCommand(LoadAsync, CanExecuteAsPharmacist);
+        bool CanExecuteAsPharmacist() => this.IsPharmacist;
+        this.RefreshCommand = new AsyncRelayCommand(this.LoadAsync, CanExecuteAsPharmacist);
 
-        void SetToday() => AnchorDate = DateTime.Today;
-        TodayCommand = new RelayCommand(SetToday, CanExecuteAsPharmacist);
+        void SetToday() => this.AnchorDate = DateTime.Today;
+        this.TodayCommand = new RelayCommand(SetToday, CanExecuteAsPharmacist);
 
-        void GoToNextPeriod() => AnchorDate = IsWeeklyView ? AnchorDate.AddDays(DaysInWeek) : AnchorDate.AddDays(OneDay);
-        NextPeriodCommand = new RelayCommand(GoToNextPeriod, CanExecuteAsPharmacist);
+        void GoToNextPeriod() => this.AnchorDate = this.IsWeeklyView ? this.AnchorDate.AddDays(DaysInWeek) : this.AnchorDate.AddDays(OneDay);
+        this.NextPeriodCommand = new RelayCommand(GoToNextPeriod, CanExecuteAsPharmacist);
 
-        void GoToPreviousPeriod() => AnchorDate = IsWeeklyView ? AnchorDate.AddDays(-DaysInWeek) : AnchorDate.AddDays(-OneDay);
-        PreviousPeriodCommand = new RelayCommand(GoToPreviousPeriod, CanExecuteAsPharmacist);
+        void GoToPreviousPeriod() => this.AnchorDate = this.IsWeeklyView ? this.AnchorDate.AddDays(-DaysInWeek) : this.AnchorDate.AddDays(-OneDay);
+        this.PreviousPeriodCommand = new RelayCommand(GoToPreviousPeriod, CanExecuteAsPharmacist);
 
-        void ShowDaily() => IsWeeklyView = false;
-        ShowDailyCommand = new RelayCommand(ShowDaily, CanExecuteAsPharmacist);
+        void ShowDaily() => this.IsWeeklyView = false;
+        this.ShowDailyCommand = new RelayCommand(ShowDaily, CanExecuteAsPharmacist);
 
-        void ShowWeekly() => IsWeeklyView = true;
-        ShowWeeklyCommand = new RelayCommand(ShowWeekly, CanExecuteAsPharmacist);
+        void ShowWeekly() => this.IsWeeklyView = true;
+        this.ShowWeeklyCommand = new RelayCommand(ShowWeekly, CanExecuteAsPharmacist);
     }
 
     public async Task InitializeAsync()
     {
-        isInitializing = true;
+        this.isInitializing = true;
         try
         {
-            await LoadPharmacistsAsync();
+            await this.LoadPharmacistsAsync();
         }
         finally
         {
-            isInitializing = false;
+            this.isInitializing = false;
         }
 
-        await LoadAsync();
+        await this.LoadAsync();
     }
 
     private static DateTime StartOfWeek(DateTime date)
@@ -159,56 +172,56 @@ public class PharmacyScheduleViewModel : ObservableObject
 
     public async Task LoadAsync()
     {
-        if (!IsPharmacist)
+        if (!this.IsPharmacist)
         {
-            ErrorMessage = string.Empty;
-            Shifts.Clear();
-            RaisePropertyChanged(nameof(IsAccessDenied));
-            RaisePropertyChanged(nameof(IsEmpty));
+            this.ErrorMessage = string.Empty;
+            this.Shifts.Clear();
+            this.RaisePropertyChanged(nameof(this.IsAccessDenied));
+            this.RaisePropertyChanged(nameof(this.IsEmpty));
             return;
         }
 
         try
         {
-            IsLoading = true;
-            ErrorMessage = string.Empty;
-            Shifts.Clear();
+            this.IsLoading = true;
+            this.ErrorMessage = string.Empty;
+            this.Shifts.Clear();
 
-            if (SelectedPharmacist is null)
+            if (this.SelectedPharmacist is null)
             {
-                IsLoading = false;
-                RaisePropertyChanged(nameof(IsEmpty));
+                this.IsLoading = false;
+                this.RaisePropertyChanged(nameof(this.IsEmpty));
                 return;
             }
 
-            var rangeStart = IsWeeklyView ? StartOfWeek(AnchorDate) : AnchorDate.Date;
-            var rangeEnd = IsWeeklyView ? rangeStart.AddDays(DaysInWeek) : rangeStart.AddDays(OneDay);
+            var rangeStart = this.IsWeeklyView ? StartOfWeek(this.AnchorDate) : this.AnchorDate.Date;
+            var rangeEnd = this.IsWeeklyView ? rangeStart.AddDays(DaysInWeek) : rangeStart.AddDays(OneDay);
 
-            var staffId = SelectedPharmacist.StaffId;
-            var rawShifts = await scheduleService.GetShiftsAsync(staffId, rangeStart, rangeEnd);
+            var staffId = this.SelectedPharmacist.StaffId;
+            var rawShifts = await this.scheduleService.GetShiftsAsync(staffId, rangeStart, rangeEnd);
 
             PharmacyShiftItemViewModel ToShiftViewModel(Shift rawShift) => new PharmacyShiftItemViewModel(rawShift);
             foreach (var shiftViewModel in rawShifts.Select(ToShiftViewModel))
             {
-                Shifts.Add(shiftViewModel);
+                this.Shifts.Add(shiftViewModel);
             }
         }
         catch (Exception exception)
         {
-            ErrorMessage = $"Failed to load pharmacy schedule: {exception.Message}";
+            this.ErrorMessage = $"Failed to load pharmacy schedule: {exception.Message}";
         }
         finally
         {
-            IsLoading = false;
-            RaisePropertyChanged(nameof(IsAccessDenied));
-            RaisePropertyChanged(nameof(IsEmpty));
+            this.IsLoading = false;
+            this.RaisePropertyChanged(nameof(this.IsAccessDenied));
+            this.RaisePropertyChanged(nameof(this.IsEmpty));
         }
     }
 
     private async Task LoadPharmacistsAsync()
     {
-        Pharmacists.Clear();
-        var allPharmacists = await Task.Run(() => scheduleService.GetPharmacists());
+        this.Pharmacists.Clear();
+        var allPharmacists = await Task.Run(() => this.scheduleService.GetPharmacists());
 
         string GetPharmacistFirstName(Pharmacyst pharmacist) => pharmacist.FirstName;
         string GetPharmacistLastName(Pharmacyst pharmacist) => pharmacist.LastName;
@@ -218,7 +231,7 @@ public class PharmacyScheduleViewModel : ObservableObject
             .OrderBy(GetPharmacistFirstName)
             .ThenBy(GetPharmacistLastName))
         {
-            Pharmacists.Add(new PharmacistOption
+            this.Pharmacists.Add(new PharmacistOption
             {
                 StaffId = pharmacist.StaffID,
                 PharmacistName = string.Join(" ", new[] { pharmacist.FirstName?.Trim(), pharmacist.LastName?.Trim() }
@@ -226,21 +239,22 @@ public class PharmacyScheduleViewModel : ObservableObject
             });
         }
 
-        if (Pharmacists.Count == 0)
+        if (this.Pharmacists.Count == 0)
         {
-            ErrorMessage = "No pharmacists available.";
-            SelectedPharmacist = null;
+            this.ErrorMessage = "No pharmacists available.";
+            this.SelectedPharmacist = null;
             return;
         }
 
-        bool IsCurrentUser(PharmacistOption pharmacist) => pharmacist.StaffId == currentUser.UserId;
-        SelectedPharmacist = Pharmacists.FirstOrDefault(IsCurrentUser)
-            ?? Pharmacists.First();
+        bool IsCurrentUser(PharmacistOption pharmacist) => pharmacist.StaffId == this.currentUser.UserId;
+        this.SelectedPharmacist = this.Pharmacists.FirstOrDefault(IsCurrentUser)
+            ?? this.Pharmacists.First();
     }
 
     public sealed class PharmacistOption
     {
         public int StaffId { get; set; }
+
         public string PharmacistName { get; set; } = string.Empty;
     }
 }

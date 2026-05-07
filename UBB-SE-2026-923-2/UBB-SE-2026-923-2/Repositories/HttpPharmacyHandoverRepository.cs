@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IPharmacyHandoverRepository"/>.
     /// </summary>
@@ -22,7 +22,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<PharmacyHandover> GetAllPharmacyHandovers()
         {
-            var handovers = httpClient
+            var handovers = this.httpClient
                 .GetFromJsonAsync<List<PharmacyHandover>>(BasePath)
                 .GetAwaiter().GetResult();
             return handovers ?? new List<PharmacyHandover>();

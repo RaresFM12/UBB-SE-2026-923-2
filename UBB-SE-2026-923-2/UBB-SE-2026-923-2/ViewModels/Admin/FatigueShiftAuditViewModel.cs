@@ -1,13 +1,13 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Base;
-
 namespace UBB_SE_2026_923_2.ViewModels.Admin
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.Globalization;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Base;
+
     public sealed class FatigueShiftAuditViewModel : ObservableObject
     {
         private const string EnglishCultureCode = "en-US";
@@ -19,50 +19,54 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
         private readonly IFatigueAuditService auditService;
 
         public ObservableCollection<AuditViolationRow> Violations { get; } = new ObservableCollection<AuditViolationRow>();
+
         public ObservableCollection<AutoSuggestRow> Suggestions { get; } = new ObservableCollection<AutoSuggestRow>();
 
         private DateTimeOffset selectedWeekStart = new DateTimeOffset(StartOfWeek(DateTime.Today));
+
         public DateTimeOffset SelectedWeekStart
         {
-            get => selectedWeekStart;
+            get => this.selectedWeekStart;
             set
             {
                 var normalized = new DateTimeOffset(StartOfWeek(value.Date));
-                if (SetProperty(ref selectedWeekStart, normalized))
+                if (this.SetProperty(ref this.selectedWeekStart, normalized))
                 {
-                    RaisePropertyChanged(nameof(WeekLabel));
-                    RunAutoAuditCommand.RaiseCanExecuteChanged();
+                    this.RaisePropertyChanged(nameof(this.WeekLabel));
+                    this.RunAutoAuditCommand.RaiseCanExecuteChanged();
                 }
             }
         }
 
         public string WeekLabel =>
-            $"Week of {SelectedWeekStart.ToString(WeeklyDateFormat, EnglishCulture)}";
+            $"Week of {this.SelectedWeekStart.ToString(WeeklyDateFormat, EnglishCulture)}";
 
         private string statusMessage = "Run Auto-Audit to validate this roster.";
+
         public string StatusMessage
         {
-            get => statusMessage;
-            set => SetProperty(ref statusMessage, value);
+            get => this.statusMessage;
+            set => this.SetProperty(ref this.statusMessage, value);
         }
 
         private bool canPublish;
+
         public bool CanPublish
         {
-            get => canPublish;
+            get => this.canPublish;
             private set
             {
-                if (SetProperty(ref canPublish, value))
+                if (this.SetProperty(ref this.canPublish, value))
                 {
-                    RaisePropertyChanged(nameof(PublishStatus));
-                    RaisePropertyChanged(nameof(PublishStatusDescription));
+                    this.RaisePropertyChanged(nameof(this.PublishStatus));
+                    this.RaisePropertyChanged(nameof(this.PublishStatusDescription));
                 }
             }
         }
 
-        public string PublishStatus => CanPublish ? "Publish status: READY" : "Publish status: BLOCKED";
+        public string PublishStatus => this.CanPublish ? "Publish status: READY" : "Publish status: BLOCKED";
 
-        public string PublishStatusDescription => CanPublish
+        public string PublishStatusDescription => this.CanPublish
             ? "? No violations detected. Roster is ready to publish."
             : "Roster cannot be published while violations exist. Run audit and resolve all conflicts.";
 
@@ -71,35 +75,35 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
         public FatigueShiftAuditViewModel(IFatigueAuditService auditService)
         {
             this.auditService = auditService;
-   
-            RunAutoAuditCommand = new RelayCommand(RunAutoAudit, () => true);
 
-            RunAutoAudit();
+            this.RunAutoAuditCommand = new RelayCommand(this.RunAutoAudit, () => true);
+
+            this.RunAutoAudit();
         }
 
         public void RunAutoAudit()
         {
-            var auditResult = auditService.RunAutoAudit(SelectedWeekStart.Date);
+            var auditResult = this.auditService.RunAutoAudit(this.SelectedWeekStart.Date);
 
-            Violations.Clear();
+            this.Violations.Clear();
             DateTime GetViolationShiftStart(Models.AuditViolation violation) => violation.ShiftStart;
             foreach (var violation in auditResult.Violations.OrderBy(GetViolationShiftStart))
             {
-                Violations.Add(new AuditViolationRow
+                this.Violations.Add(new AuditViolationRow
                 {
                     ShiftId = violation.ShiftId,
                     Staff = violation.StaffName,
                     Window = $"{violation.ShiftStart.ToString(ShiftTimeFormat, EnglishCulture)} - {violation.ShiftEnd.ToString(ShiftTimeFormat, EnglishCulture)}",
                     Rule = violation.Rule,
-                    Message = violation.Message
+                    Message = violation.Message,
                 });
             }
 
-            Suggestions.Clear();
+            this.Suggestions.Clear();
             int GetSuggestionShiftId(Models.AutoSuggestRecommendation suggestion) => suggestion.ShiftId;
             foreach (var suggestion in auditResult.Suggestions.OrderBy(GetSuggestionShiftId))
             {
-                Suggestions.Add(new AutoSuggestRow
+                this.Suggestions.Add(new AutoSuggestRow
                 {
                     ShiftId = suggestion.ShiftId,
                     ReassignmentLabel = suggestion.SuggestedStaffId.HasValue
@@ -107,21 +111,21 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
                         : $"Shift #{suggestion.ShiftId}: no replacement candidate",
                     Reason = suggestion.Reason,
                     SuggestedStaffId = suggestion.SuggestedStaffId,
-                    SuggestedStaffName = suggestion.SuggestedStaffName
+                    SuggestedStaffName = suggestion.SuggestedStaffName,
                 });
             }
 
-            CanPublish = auditResult.CanPublish;
-            StatusMessage = auditResult.Summary;
-            RaisePropertyChanged(nameof(HasConflicts));
+            this.CanPublish = auditResult.CanPublish;
+            this.StatusMessage = auditResult.Summary;
+            this.RaisePropertyChanged(nameof(this.HasConflicts));
         }
 
-        public bool HasConflicts => Violations.Any();
+        public bool HasConflicts => this.Violations.Any();
 
         public ReassignmentResult ApplyReassignment(int shiftId)
         {
             bool IsMatchingShift(AutoSuggestRow auditSuggestion) => auditSuggestion.ShiftId == shiftId;
-            var matchedSuggestion = Suggestions.FirstOrDefault(IsMatchingShift);
+            var matchedSuggestion = this.Suggestions.FirstOrDefault(IsMatchingShift);
             if (matchedSuggestion == null || !matchedSuggestion.SuggestedStaffId.HasValue)
             {
                 return new ReassignmentResult(
@@ -130,7 +134,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
                     "No valid reassignment candidate found for this shift.");
             }
 
-            bool reassignmentSucceeded = auditService.ReassignShift(shiftId, matchedSuggestion.SuggestedStaffId.Value);
+            bool reassignmentSucceeded = this.auditService.ReassignShift(shiftId, matchedSuggestion.SuggestedStaffId.Value);
             if (!reassignmentSucceeded)
             {
                 return new ReassignmentResult(
@@ -139,7 +143,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
                     "Could not reassign shift. Please try again.");
             }
 
-            RunAutoAudit();
+            this.RunAutoAudit();
 
             return new ReassignmentResult(
                 true,
@@ -147,7 +151,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
                 $"Shift #{shiftId} has been reassigned to {matchedSuggestion.SuggestedStaffName}.\n\nAudit was re-run to verify changes.");
         }
 
-        public sealed record ReassignmentResult(bool isSuccess, string title, string message);
+        public sealed record ReassignmentResult(bool IsSuccess, string Title, string Message);
 
         private static DateTime StartOfWeek(DateTime date)
         {
@@ -159,18 +163,26 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
         public sealed class AuditViolationRow
         {
             public int ShiftId { get; set; }
+
             public string Staff { get; set; } = string.Empty;
+
             public string Window { get; set; } = string.Empty;
+
             public string Rule { get; set; } = string.Empty;
+
             public string Message { get; set; } = string.Empty;
         }
 
         public sealed class AutoSuggestRow
         {
             public int ShiftId { get; set; }
+
             public string ReassignmentLabel { get; set; } = string.Empty;
+
             public string Reason { get; set; } = string.Empty;
+
             public int? SuggestedStaffId { get; set; }
+
             public string SuggestedStaffName { get; set; } = string.Empty;
         }
     }

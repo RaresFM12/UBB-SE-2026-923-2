@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.Accounts
+﻿namespace UBB_SE_2026_923_2.ViewModels.Accounts
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Services;
+
     public class RegisterViewModel : INotifyPropertyChanged
     {
-        private IUserAccountService userAccountService;
+        private readonly IUserAccountService userAccountService;
         private string email;
         private string password;
         private string username;
@@ -20,108 +20,113 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         private string selectedRole;
 
         public event Action RegisterSucceded;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public List<string> RoleOptions { get; } = new List<string> { "Admin", "Client", "Doctor", "Pharmacist" };
 
         public string SelectedRole
         {
-            get => selectedRole;
+            get => this.selectedRole;
             set
             {
-                selectedRole = value;
-                OnPropertyChanged();
+                this.selectedRole = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string Email
         {
-            get => email;
+            get => this.email;
             set
             {
-                email = value;
-                OnPropertyChanged();
+                this.email = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string Password
         {
-            get => password;
+            get => this.password;
             set
             {
-                password = value;
-                OnPropertyChanged();
+                this.password = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string ConfirmPassword
         {
-            get => confirmPassword;
+            get => this.confirmPassword;
             set
             {
-                confirmPassword = value;
-                OnPropertyChanged();
+                this.confirmPassword = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string Username
         {
-            get => username;
+            get => this.username;
             set
             {
-                username = value;
-                OnPropertyChanged();
+                this.username = value;
+                this.OnPropertyChanged();
             }
         }
+
         public string PhoneNumber
         {
-            get => phoneNumber;
+            get => this.phoneNumber;
             set
             {
-                phoneNumber = value;
-                OnPropertyChanged();
+                this.phoneNumber = value;
+                this.OnPropertyChanged();
             }
         }
+
         public string ErrorMessage
         {
-            get => errorMessage;
+            get => this.errorMessage;
             set
             {
-                errorMessage = value;
-                OnPropertyChanged();
+                this.errorMessage = value;
+                this.OnPropertyChanged();
             }
         }
 
         public ICommand RegisterCommand { get; }
+
         public RegisterViewModel(IUserAccountService userAccountService)
         {
             this.userAccountService = userAccountService;
-            selectedRole = "Client";
-            RegisterCommand = new RelayCommand(Register);
+            this.selectedRole = "Client";
+            this.RegisterCommand = new RelayCommand(this.Register);
         }
+
         private void Register()
         {
             try
             {
-                userAccountService.Register(
-                    Email,
-                    Password,
-                    ConfirmPassword,
-                    Username,
-                    PhoneNumber,
-                    SelectedRole);
+                this.userAccountService.Register(
+                    this.Email,
+                    this.Password,
+                    this.ConfirmPassword,
+                    this.Username,
+                    this.PhoneNumber,
+                    this.SelectedRole);
 
-                RegisterSucceded?.Invoke();
+                this.RegisterSucceded?.Invoke();
             }
             catch (Exception ex)
             {
-                ErrorMessage = ex.Message;
+                this.ErrorMessage = ex.Message;
             }
         }
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

@@ -1,23 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.PharmacyManagement
+﻿namespace UBB_SE_2026_923_2.ViewModels.PharmacyManagement
 {
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public class NotificationsViewModel : INotifyPropertyChanged
     {
         private ObservableCollection<NotificationViewModel> notifications;
 
         public ObservableCollection<NotificationViewModel> Notifications
         {
-            get => notifications;
+            get => this.notifications;
             set
             {
-                notifications = value;
-                OnPropertyChanged();
+                this.notifications = value;
+                this.OnPropertyChanged();
             }
         }
 
@@ -25,7 +25,7 @@ namespace UBB_SE_2026_923_2.ViewModels.PharmacyManagement
 
         public NotificationsViewModel(IAdminService adminService)
         {
-            Notifications = new ObservableCollection<NotificationViewModel>();
+            this.Notifications = new ObservableCollection<NotificationViewModel>();
             this.adminService = adminService;
         }
 
@@ -36,13 +36,14 @@ namespace UBB_SE_2026_923_2.ViewModels.PharmacyManagement
             {
                 return;
             }
-            List<Notification> notificationData = adminService.GetNotificationsForUser(currentUser);
 
-            Notifications.Clear();
+            List<Notification> notificationData = this.adminService.GetNotificationsForUser(currentUser);
+
+            this.Notifications.Clear();
 
             foreach (Notification notification in notificationData)
             {
-                Notifications.Add(new NotificationViewModel(notification.Title, notification.Message, notification.ActionButtonText));
+                this.Notifications.Add(new NotificationViewModel(notification.Title, notification.Message, notification.ActionButtonText));
             }
         }
 
@@ -51,7 +52,7 @@ namespace UBB_SE_2026_923_2.ViewModels.PharmacyManagement
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

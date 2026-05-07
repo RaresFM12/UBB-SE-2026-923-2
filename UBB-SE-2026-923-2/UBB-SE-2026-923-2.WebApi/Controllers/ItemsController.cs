@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.WebApi.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -20,42 +20,42 @@ public class ItemsController : ControllerBase
     {
         if (!string.IsNullOrEmpty(name))
         {
-            return Ok(repository.GetItemsByName(name));
+            return this.Ok(this.repository.GetItemsByName(name));
         }
 
-        return Ok(repository.GetAllItems());
+        return this.Ok(this.repository.GetAllItems());
     }
 
     [HttpGet("{id:int}")]
     public ActionResult<Item> GetById(int id)
     {
-        if (!repository.ItemExists(id))
+        if (!this.repository.ItemExists(id))
         {
-            return NotFound();
+            return this.NotFound();
         }
 
-        return Ok(repository.GetItemById(id));
+        return this.Ok(this.repository.GetItemById(id));
     }
 
     [HttpGet("{id:int}/exists")]
     public ActionResult<bool> Exists(int id)
     {
-        return Ok(repository.ItemExists(id));
+        return this.Ok(this.repository.ItemExists(id));
     }
 
     [HttpGet("top")]
     public ActionResult<List<ItemPopularitySummary>> GetTop()
     {
-        var top = repository.GetTop30Items()
+        var top = this.repository.GetTop30Items()
             .Select(t => new ItemPopularitySummary(t.Item1, t.Item2, t.Item3))
             .ToList();
-        return Ok(top);
+        return this.Ok(top);
     }
 
     [HttpPost]
     public IActionResult Create([FromBody] CreateItemRequest request)
     {
-        repository.AddItem(
+        this.repository.AddItem(
             request.Name,
             request.Producer,
             request.Category,
@@ -65,13 +65,13 @@ public class ItemsController : ControllerBase
             request.Description,
             request.ImagePath,
             request.Discount);
-        return NoContent();
+        return this.NoContent();
     }
 
     [HttpPost("with-quantity")]
     public IActionResult CreateWithQuantity([FromBody] CreateItemWithQuantityRequest request)
     {
-        repository.AddItemWithQuantity(
+        this.repository.AddItemWithQuantity(
             request.Name,
             request.Producer,
             request.Category,
@@ -84,22 +84,22 @@ public class ItemsController : ControllerBase
             request.Description,
             request.ImagePath,
             request.Discount);
-        return NoContent();
+        return this.NoContent();
     }
 
     [HttpPut("{id:int}")]
     public IActionResult Update(int id, [FromBody] Item item)
     {
         item.Id = id;
-        repository.UpdateItemById(item);
-        return NoContent();
+        this.repository.UpdateItemById(item);
+        return this.NoContent();
     }
 
     [HttpDelete("{id:int}")]
     public IActionResult Delete(int id)
     {
-        repository.RemoveItemById(id);
-        return NoContent();
+        this.repository.RemoveItemById(id);
+        return this.NoContent();
     }
 
     public record CreateItemRequest(

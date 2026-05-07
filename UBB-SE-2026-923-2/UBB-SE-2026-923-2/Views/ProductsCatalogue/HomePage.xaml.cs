@@ -1,10 +1,10 @@
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.ViewModels.ProductsCatalogue;
-
 namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
 {
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.ViewModels.ProductsCatalogue;
+
     public sealed partial class HomePage : Page
     {
         // 1. Expose the ViewModel to the XAML
@@ -15,7 +15,7 @@ namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
             InitializeComponent();
 
             // 2. Set the DataContext so XAML bindings work automatically
-            DataContext = ViewModel;
+            this.DataContext = this.ViewModel;
         }
 
         // 3. Catch the User object when the app navigates to this page
@@ -26,12 +26,12 @@ namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
             // If the app passes a User object, initialize the ViewModel with it.
             if (e.Parameter is User currentUser)
             {
-                ViewModel.Initialize(currentUser);
+                this.ViewModel.Initialize(currentUser);
             }
             else
             {
                 // If no parameter is passed, treat them as a logged-out guest.
-                ViewModel.Initialize(null);
+                this.ViewModel.Initialize(null);
             }
         }
     }

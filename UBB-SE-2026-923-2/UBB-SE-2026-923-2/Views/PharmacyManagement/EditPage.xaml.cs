@@ -1,73 +1,79 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.ViewModels.PharmacyManagement;
-
-
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.UI;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Media;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.PharmacyManagement;
+
     public sealed partial class EditPage : Page
     {
         public EditPageViewModel ViewModel { get; }
+
         private bool isGetItemDataClicked = false;
 
         public class ActiveSubstance
         {
             public string Name { get; set; }
+
             public float Concentration { get; set; }
         }
+
         public Dictionary<string, float> ActiveSubstancesDict { get; set; } = new Dictionary<string, float>();
 
         public class BatchItem
         {
             public DateOnly Date { get; set; }
+
             public int Packs { get; set; }
         }
+
         public Dictionary<DateOnly, int> BatchesDict { get; set; } = new Dictionary<DateOnly, int>();
+
         public EditPage()
         {
             InitializeComponent();
-            NavigationCacheMode = NavigationCacheMode.Disabled;
-            ViewModel = new EditPageViewModel();
-            DataContext = ViewModel;
-            ApplyUiStateFromViewModel();
-            ResetUiValidationState();
+            this.NavigationCacheMode = NavigationCacheMode.Disabled;
+            this.ViewModel = new EditPageViewModel();
+            this.DataContext = this.ViewModel;
+            this.ApplyUiStateFromViewModel();
+            this.ResetUiValidationState();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            ResetUiValidationState();
+            this.ResetUiValidationState();
         }
 
         private void ApplyUiStateFromViewModel()
         {
-            ItemListButtons.Visibility = ViewModel.ItemListButtonsVisibility;
-            ItemBottomButtons.Visibility = ViewModel.ItemBottomButtonsVisibility;
-            ShowExpiredItemsToggle.Visibility = ViewModel.ShowExpiredItemsToggleVisibility;
+            ItemListButtons.Visibility = this.ViewModel.ItemListButtonsVisibility;
+            ItemBottomButtons.Visibility = this.ViewModel.ItemBottomButtonsVisibility;
+            ShowExpiredItemsToggle.Visibility = this.ViewModel.ShowExpiredItemsToggleVisibility;
 
-            SubstanceListButtons.Visibility = ViewModel.SubstanceListButtonsVisibility;
-            SubstanceBottomButtons.Visibility = ViewModel.SubstanceBottomButtonsVisibility;
-            AddSubstanceGrid.Visibility = ViewModel.AddSubstanceGridVisibility;
-            UpdateSubstanceGrid.Visibility = ViewModel.UpdateSubstanceGridVisibility;
+            SubstanceListButtons.Visibility = this.ViewModel.SubstanceListButtonsVisibility;
+            SubstanceBottomButtons.Visibility = this.ViewModel.SubstanceBottomButtonsVisibility;
+            AddSubstanceGrid.Visibility = this.ViewModel.AddSubstanceGridVisibility;
+            UpdateSubstanceGrid.Visibility = this.ViewModel.UpdateSubstanceGridVisibility;
         }
+
         private void ResetUiValidationState()
         {
-            isGetItemDataClicked = false;
+            this.isGetItemDataClicked = false;
 
-            ViewModel.ActivateItemsSection();
-            ViewModel.AddSubstanceGridVisibility = Visibility.Collapsed;
-            ViewModel.UpdateSubstanceGridVisibility = Visibility.Collapsed;
-            ApplyUiStateFromViewModel();
+            this.ViewModel.ActivateItemsSection();
+            this.ViewModel.AddSubstanceGridVisibility = Visibility.Collapsed;
+            this.ViewModel.UpdateSubstanceGridVisibility = Visibility.Collapsed;
+            this.ApplyUiStateFromViewModel();
 
             AddItemGrid.Visibility = Visibility.Collapsed;
             UpdateItemGrid.Visibility = Visibility.Collapsed;
@@ -75,17 +81,17 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             SearchBox.Text = string.Empty;
             ShowExpiredToggle.IsOn = false;
 
-            ClearItemAddBoxes();
-            ClearItemUpdateBoxes();
-            ClearSubstanceBoxes();
-            ClearSubstanceUpdateBoxes();
+            this.ClearItemAddBoxes();
+            this.ClearItemUpdateBoxes();
+            this.ClearSubstanceBoxes();
+            this.ClearSubstanceUpdateBoxes();
 
-            ActiveSubstancesDict.Clear();
-            BatchesDict.Clear();
-            RefreshActiveSubstancesList();
-            RefreshActiveSubstancesListUpdate();
-            RefreshBatchesList();
-            RefreshBatchesListUpdate();
+            this.ActiveSubstancesDict.Clear();
+            this.BatchesDict.Clear();
+            this.RefreshActiveSubstancesList();
+            this.RefreshActiveSubstancesListUpdate();
+            this.RefreshBatchesList();
+            this.RefreshBatchesListUpdate();
 
             ItemList.SelectedItem = null;
             SubstanceList.SelectedItem = null;
@@ -93,11 +99,11 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             RemoveItemError.Visibility = Visibility.Collapsed;
             RemoveSubstanceError.Visibility = Visibility.Collapsed;
 
-            ResetAddItemErrors();
-            ResetUpdateItemErrors();
-            ResetSubstanceErrors();
-            ResetActiveSubstanceErrors();
-            ResetAddBatchErrors();
+            this.ResetAddItemErrors();
+            this.ResetUpdateItemErrors();
+            this.ResetSubstanceErrors();
+            this.ResetActiveSubstanceErrors();
+            this.ResetAddBatchErrors();
         }
 
         private void GoToStatisticsClick(object sender, RoutedEventArgs e)
@@ -107,21 +113,21 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ViewModel.SearchItems(SearchBox.Text);
-            ItemList.ItemsSource = ViewModel.Items;
+            this.ViewModel.SearchItems(SearchBox.Text);
+            ItemList.ItemsSource = this.ViewModel.Items;
         }
 
         private void OnItemClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.ActivateItemsSection();
-            ApplyUiStateFromViewModel();
-            ResetSubstanceErrors();
+            this.ViewModel.ActivateItemsSection();
+            this.ApplyUiStateFromViewModel();
+            this.ResetSubstanceErrors();
         }
 
         private void OnSubstancesClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.ActivateSubstancesSection();
-            ApplyUiStateFromViewModel();
+            this.ViewModel.ActivateSubstancesSection();
+            this.ApplyUiStateFromViewModel();
 
             AddItemGrid.Visibility = Visibility.Collapsed;
             UpdateItemGrid.Visibility = Visibility.Collapsed;
@@ -130,20 +136,20 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void OnOrdersClick(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(Views.Orders.OrderManagementPage), new OrderService());
+            this.Frame.Navigate(typeof(Views.Orders.OrderManagementPage), new OrderService());
         }
 
         private void ShowExpiredToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (ShowExpiredToggle.IsOn)
             {
-                ViewModel.ShowExpiredItems();
-                ItemList.ItemsSource = ViewModel.Items;
+                this.ViewModel.ShowExpiredItems();
+                ItemList.ItemsSource = this.ViewModel.Items;
             }
             else
             {
-                ViewModel.RefreshItems();
-                ItemList.ItemsSource = ViewModel.Items;
+                this.ViewModel.RefreshItems();
+                ItemList.ItemsSource = this.ViewModel.Items;
             }
         }
 
@@ -204,17 +210,19 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             {
                 AddItemGrid.Visibility = Visibility.Visible;
                 UpdateItemGrid.Visibility = Visibility.Collapsed;
-                ResetAddItemErrors();
-                ResetActiveSubstanceErrors();
-                ResetAddBatchErrors();
+                this.ResetAddItemErrors();
+                this.ResetActiveSubstanceErrors();
+                this.ResetAddBatchErrors();
             }
         }
+
         private void OnAddItemClick(object sender, RoutedEventArgs e)
         {
-            if (!ValidateAddItem())
+            if (!this.ValidateAddItem())
             {
                 return;
             }
+
             float discount = 0f;
             int quantity = 0;
 
@@ -234,21 +242,21 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
             Item newItem = new Item(name, producer, category, price, numberOfPills, quantity, label, description, imagePath, discount);
 
-            for (int i = 0; i < BatchesDict.Count; i++)
+            for (int i = 0; i < this.BatchesDict.Count; i++)
             {
-                newItem.AddNewBatchToItem(BatchesDict.ElementAt(i).Key, BatchesDict.ElementAt(i).Value);
-                System.Diagnostics.Debug.WriteLine("Added batch: " + BatchesDict.ElementAt(i).Key + " " + BatchesDict.ElementAt(i).Value);
+                newItem.AddNewBatchToItem(this.BatchesDict.ElementAt(i).Key, this.BatchesDict.ElementAt(i).Value);
+                System.Diagnostics.Debug.WriteLine("Added batch: " + this.BatchesDict.ElementAt(i).Key + " " + this.BatchesDict.ElementAt(i).Value);
             }
 
-            for (int i = 0; i < ActiveSubstancesDict.Count; i++)
+            for (int i = 0; i < this.ActiveSubstancesDict.Count; i++)
             {
-                newItem.AddActiveSubstanceToItem(ActiveSubstancesDict.ElementAt(i).Key, ActiveSubstancesDict.ElementAt(i).Value);
-                System.Diagnostics.Debug.WriteLine("Added active substance: " + ActiveSubstancesDict.ElementAt(i).Key + " " + ActiveSubstancesDict.ElementAt(i).Value);
+                newItem.AddActiveSubstanceToItem(this.ActiveSubstancesDict.ElementAt(i).Key, this.ActiveSubstancesDict.ElementAt(i).Value);
+                System.Diagnostics.Debug.WriteLine("Added active substance: " + this.ActiveSubstancesDict.ElementAt(i).Key + " " + this.ActiveSubstancesDict.ElementAt(i).Value);
             }
 
             try
             {
-                ViewModel.AddItemWithQuantity(newItem);
+                this.ViewModel.AddItemWithQuantity(newItem);
             }
             catch (ArgumentException ex)
             {
@@ -257,17 +265,17 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            ViewModel.RefreshItems();
-            ItemList.ItemsSource = ViewModel.Items;
+            this.ViewModel.RefreshItems();
+            ItemList.ItemsSource = this.ViewModel.Items;
 
             System.Diagnostics.Debug.WriteLine("Added item");
 
-            ClearItemAddBoxes();
-            ActiveSubstancesDict.Clear();
-            RefreshActiveSubstancesList();
-            BatchesDict.Clear();
-            RefreshBatchesList();
-            ResetAddItemErrors();
+            this.ClearItemAddBoxes();
+            this.ActiveSubstancesDict.Clear();
+            this.RefreshActiveSubstancesList();
+            this.BatchesDict.Clear();
+            this.RefreshBatchesList();
+            this.ResetAddItemErrors();
         }
 
         private bool ValidateAddItem()
@@ -288,6 +296,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 AddItemMandatoryError.Visibility = Visibility.Visible;
                 isValid = false;
             }
+
             if (CategoryBox.Text == string.Empty)
             {
                 CategoryBox.Background = new SolidColorBrush(Colors.LightPink);
@@ -295,6 +304,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 AddItemMandatoryError.Visibility = Visibility.Visible;
                 isValid = false;
             }
+
             if (PriceBox.Text == string.Empty)
             {
                 PriceBox.Background = new SolidColorBrush(Colors.LightPink);
@@ -302,6 +312,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 AddItemMandatoryError.Visibility = Visibility.Visible;
                 isValid = false;
             }
+
             if (NumberOfPillsBox.Text == string.Empty)
             {
                 NumberOfPillsBox.Background = new SolidColorBrush(Colors.LightPink);
@@ -334,7 +345,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 isValid = false;
             }
 
-            if (ActiveSubstancesDict.Count == 0)
+            if (this.ActiveSubstancesDict.Count == 0)
             {
                 SubstanceNameBox.Background = new SolidColorBrush(Colors.LightPink);
                 SubstanceNameBox.Text = string.Empty;
@@ -364,11 +375,11 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void RefreshActiveSubstancesList()
         {
-            var list = ActiveSubstancesDict
+            var list = this.ActiveSubstancesDict
                 .Select(kvp => new ActiveSubstance
                 {
                     Name = kvp.Key,
-                    Concentration = kvp.Value
+                    Concentration = kvp.Value,
                 })
                 .ToList();
 
@@ -377,7 +388,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void AddSubstance_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidateAddItemSubstance())
+            if (!this.ValidateAddItemSubstance())
             {
                 return;
             }
@@ -385,13 +396,13 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             string name = SubstanceNameBox.Text;
             float concentration = float.Parse(ConcentrationBox.Text);
 
-            ActiveSubstancesDict[name] = concentration;
+            this.ActiveSubstancesDict[name] = concentration;
 
-            RefreshActiveSubstancesList();
+            this.RefreshActiveSubstancesList();
 
             SubstanceNameBox.Text = string.Empty;
             ConcentrationBox.Text = string.Empty;
-            ResetActiveSubstanceErrors();
+            this.ResetActiveSubstanceErrors();
         }
 
         private bool ValidateAddItemSubstance()
@@ -422,7 +433,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 isValid = false;
             }
 
-            if (ActiveSubstancesDict.ContainsKey(SubstanceNameBox.Text))
+            if (this.ActiveSubstancesDict.ContainsKey(SubstanceNameBox.Text))
             {
                 SubstanceNameBox.Background = new SolidColorBrush(Colors.LightPink);
                 SubstanceNameBox.Text = string.Empty;
@@ -430,7 +441,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 isValid = false;
             }
 
-            if (!ViewModel.SubstanceExists(SubstanceNameBox.Text))
+            if (!this.ViewModel.SubstanceExists(SubstanceNameBox.Text))
             {
                 SubstanceNameBox.Background = new SolidColorBrush(Colors.LightPink);
                 SubstanceNameBox.Text = string.Empty;
@@ -442,7 +453,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
             if (isValid)
             {
-                Substance substance = ViewModel.GetSubstanceByName(SubstanceNameBox.Text);
+                Substance substance = this.ViewModel.GetSubstanceByName(SubstanceNameBox.Text);
 
                 if (concentration >= substance.LethalDose)
                 {
@@ -468,9 +479,9 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            if (ActiveSubstancesDict.ContainsKey(name))
+            if (this.ActiveSubstancesDict.ContainsKey(name))
             {
-                ActiveSubstancesDict.Remove(name);
+                this.ActiveSubstancesDict.Remove(name);
             }
             else
             {
@@ -478,11 +489,11 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            RefreshActiveSubstancesListUpdate();
+            this.RefreshActiveSubstancesListUpdate();
 
             SubstanceNameBox.Text = string.Empty;
             ConcentrationBox.Text = string.Empty;
-            ResetActiveSubstanceErrors();
+            this.ResetActiveSubstanceErrors();
         }
 
         private void ResetActiveSubstanceErrors()
@@ -494,13 +505,14 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             RemoveActiveSubstanceFromItemError.Visibility = Visibility.Collapsed;
             AddActiveSubstanceToItemInvalidError.Visibility = Visibility.Collapsed;
         }
+
         private void RefreshBatchesList()
         {
-            var list = BatchesDict
+            var list = this.BatchesDict
                 .Select(kvp => new BatchItem
                 {
                     Date = kvp.Key,
-                    Packs = kvp.Value
+                    Packs = kvp.Value,
                 })
                 .OrderBy(x => x.Date)
                 .ToList();
@@ -510,7 +522,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void AddBatch_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidateAddBatch())
+            if (!this.ValidateAddBatch())
             {
                 return;
             }
@@ -518,12 +530,12 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             int packs = int.Parse(PacksBox.Text);
             DateOnly date = DateOnly.FromDateTime(BatchDatePicker.Date.Date);
 
-            BatchesDict[date] = packs;
+            this.BatchesDict[date] = packs;
 
-            RefreshBatchesList();
+            this.RefreshBatchesList();
 
             PacksBox.Text = string.Empty;
-            ResetAddBatchErrors();
+            this.ResetAddBatchErrors();
         }
 
         private bool ValidateAddBatch()
@@ -557,6 +569,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 PacksBox.Text = string.Empty;
                 isValid = false;
             }
+
             return isValid;
         }
 
@@ -575,11 +588,11 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
             if (selectedBatch != null)
             {
-                if (BatchesDict.ContainsKey(selectedBatch.Date))
+                if (this.BatchesDict.ContainsKey(selectedBatch.Date))
                 {
-                    BatchesDict.Remove(selectedBatch.Date);
+                    this.BatchesDict.Remove(selectedBatch.Date);
 
-                    RefreshBatchesList();
+                    this.RefreshBatchesList();
                 }
             }
             else
@@ -590,20 +603,20 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void OnItemCancelClick(object sender, RoutedEventArgs e)
         {
-            ClearItemAddBoxes();
-            ClearItemUpdateBoxes();
-            ActiveSubstancesDict.Clear();
-            BatchesDict.Clear();
-            RefreshActiveSubstancesList();
-            RefreshActiveSubstancesListUpdate();
-            RefreshBatchesList();
-            RefreshBatchesListUpdate();
-            isGetItemDataClicked = false;
+            this.ClearItemAddBoxes();
+            this.ClearItemUpdateBoxes();
+            this.ActiveSubstancesDict.Clear();
+            this.BatchesDict.Clear();
+            this.RefreshActiveSubstancesList();
+            this.RefreshActiveSubstancesListUpdate();
+            this.RefreshBatchesList();
+            this.RefreshBatchesListUpdate();
+            this.isGetItemDataClicked = false;
 
-            ResetAddItemErrors();
-            ResetUpdateItemErrors();
-            ResetActiveSubstanceErrors();
-            ResetAddBatchErrors();
+            this.ResetAddItemErrors();
+            this.ResetUpdateItemErrors();
+            this.ResetActiveSubstanceErrors();
+            this.ResetAddBatchErrors();
 
             AddItemGrid.Visibility = Visibility.Collapsed;
             UpdateItemGrid.Visibility = Visibility.Collapsed;
@@ -620,9 +633,9 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
             int id = selectedItem.Id;
 
-            ViewModel.RemoveItemById(id);
-            ViewModel.RefreshItems();
-            ItemList.ItemsSource = ViewModel.Items;
+            this.ViewModel.RemoveItemById(id);
+            this.ViewModel.RefreshItems();
+            ItemList.ItemsSource = this.ViewModel.Items;
             RemoveItemError.Visibility = Visibility.Collapsed;
         }
 
@@ -638,13 +651,13 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             {
                 UpdateItemGrid.Visibility = Visibility.Visible;
                 AddItemGrid.Visibility = Visibility.Collapsed;
-                ResetUpdateItemErrors();
+                this.ResetUpdateItemErrors();
             }
         }
 
         private void OnGetItemDataClick(object sender, RoutedEventArgs e)
         {
-            if (!ValidateGetItemData())
+            if (!this.ValidateGetItemData())
             {
                 return;
             }
@@ -652,7 +665,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             Item item;
             try
             {
-                item = ViewModel.GetItemById(int.Parse(IdBox.Text));
+                item = this.ViewModel.GetItemById(int.Parse(IdBox.Text));
             }
             catch (Exception)
             {
@@ -661,6 +674,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 UpdateInvalidIdError.Visibility = Visibility.Visible;
                 return;
             }
+
             NameBoxUpdate.Text = item.Name;
             ProducerBoxUpdate.Text = item.Producer;
             PriceBoxUpdate.Text = item.Price.ToString();
@@ -671,13 +685,13 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             DescriptionBoxUpdate.Text = item.Description;
             DiscountBoxUpdate.Text = item.DiscountPercentage.ToString();
 
-            ActiveSubstancesDict = item.ActiveSubstances;
-            RefreshActiveSubstancesListUpdate();
-            BatchesDict = item.Batches;
-            RefreshBatchesListUpdate();
+            this.ActiveSubstancesDict = item.ActiveSubstances;
+            this.RefreshActiveSubstancesListUpdate();
+            this.BatchesDict = item.Batches;
+            this.RefreshBatchesListUpdate();
 
-            ResetUpdateItemErrors();
-            isGetItemDataClicked = true;
+            this.ResetUpdateItemErrors();
+            this.isGetItemDataClicked = true;
         }
 
         private bool ValidateGetItemData()
@@ -700,7 +714,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             }
             else
             {
-                if (ViewModel.GetItemById(id) is null)
+                if (this.ViewModel.GetItemById(id) is null)
                 {
                     IdBox.Background = new SolidColorBrush(Colors.LightPink);
                     IdBox.Text = string.Empty;
@@ -714,7 +728,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void OnUpdateItemClick(object sender, RoutedEventArgs e)
         {
-            if (!ValidateUpdateItem())
+            if (!this.ValidateUpdateItem())
             {
                 return;
             }
@@ -733,30 +747,32 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             {
                 discount = float.Parse(DiscountBoxUpdate.Text);
             }
+
             int numberOfPills = int.Parse(NumberOfPillsBoxUpdate.Text);
             int quantity = 0;
 
-            for (int i = 0; i < BatchesDict.Count; i++)
+            for (int i = 0; i < this.BatchesDict.Count; i++)
             {
-                quantity += BatchesDict.ElementAt(i).Value;
+                quantity += this.BatchesDict.ElementAt(i).Value;
             }
 
-            ViewModel.UpdateItemById(id, new Item(name, producer, category, price, numberOfPills, ActiveSubstancesDict, BatchesDict, quantity, label, description, imagePath, discount));
+            this.ViewModel.UpdateItemById(id, new Item(name, producer, category, price, numberOfPills, this.ActiveSubstancesDict, this.BatchesDict, quantity, label, description, imagePath, discount));
 
-            ViewModel.RefreshItems();
-            ItemList.ItemsSource = ViewModel.Items;
-            ClearItemUpdateBoxes();
-            ActiveSubstancesDict.Clear();
-            RefreshActiveSubstancesListUpdate();
-            BatchesDict.Clear();
-            RefreshBatchesListUpdate();
-            ResetUpdateItemErrors();
+            this.ViewModel.RefreshItems();
+            ItemList.ItemsSource = this.ViewModel.Items;
+            this.ClearItemUpdateBoxes();
+            this.ActiveSubstancesDict.Clear();
+            this.RefreshActiveSubstancesListUpdate();
+            this.BatchesDict.Clear();
+            this.RefreshBatchesListUpdate();
+            this.ResetUpdateItemErrors();
         }
+
         private bool ValidateUpdateItem()
         {
             bool isValid = true;
 
-            if (!isGetItemDataClicked)
+            if (!this.isGetItemDataClicked)
             {
                 UpdateItemGetDataError.Visibility = Visibility.Visible;
                 isValid = false;
@@ -777,6 +793,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 UpdateItemMandatoryError.Visibility = Visibility.Visible;
                 isValid = false;
             }
+
             if (CategoryBoxUpdate.Text == string.Empty)
             {
                 CategoryBoxUpdate.Background = new SolidColorBrush(Colors.LightPink);
@@ -830,7 +847,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 isValid = false;
             }
 
-            if (ActiveSubstancesDict.Count == 0)
+            if (this.ActiveSubstancesDict.Count == 0)
             {
                 SubstanceNameBoxUpdate.Background = new SolidColorBrush(Colors.LightPink);
                 SubstanceNameBoxUpdate.Text = string.Empty;
@@ -871,43 +888,43 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void OnSubstanceAddClick(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.AddSubstanceGridVisibility == Visibility.Visible)
+            if (this.ViewModel.AddSubstanceGridVisibility == Visibility.Visible)
             {
-                ViewModel.AddSubstanceGridVisibility = Visibility.Collapsed;
+                this.ViewModel.AddSubstanceGridVisibility = Visibility.Collapsed;
             }
             else
             {
-                ViewModel.AddSubstanceGridVisibility = Visibility.Visible;
-                ViewModel.UpdateSubstanceGridVisibility = Visibility.Collapsed;
-                ResetSubstanceErrors();
+                this.ViewModel.AddSubstanceGridVisibility = Visibility.Visible;
+                this.ViewModel.UpdateSubstanceGridVisibility = Visibility.Collapsed;
+                this.ResetSubstanceErrors();
             }
 
-            ApplyUiStateFromViewModel();
+            this.ApplyUiStateFromViewModel();
         }
 
         private void OnSubstanceUpdateClick(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.UpdateSubstanceGridVisibility == Visibility.Visible)
+            if (this.ViewModel.UpdateSubstanceGridVisibility == Visibility.Visible)
             {
-                ViewModel.UpdateSubstanceGridVisibility = Visibility.Collapsed;
+                this.ViewModel.UpdateSubstanceGridVisibility = Visibility.Collapsed;
             }
             else
             {
-                ViewModel.UpdateSubstanceGridVisibility = Visibility.Visible;
-                ViewModel.AddSubstanceGridVisibility = Visibility.Collapsed;
-                ResetSubstanceErrors();
+                this.ViewModel.UpdateSubstanceGridVisibility = Visibility.Visible;
+                this.ViewModel.AddSubstanceGridVisibility = Visibility.Collapsed;
+                this.ResetSubstanceErrors();
             }
 
-            ApplyUiStateFromViewModel();
+            this.ApplyUiStateFromViewModel();
         }
 
         private void RefreshActiveSubstancesListUpdate()
         {
-            var list = ActiveSubstancesDict
+            var list = this.ActiveSubstancesDict
                 .Select(kvp => new ActiveSubstance
                 {
                     Name = kvp.Key,
-                    Concentration = kvp.Value
+                    Concentration = kvp.Value,
                 })
                 .ToList();
 
@@ -916,7 +933,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void AddSubstanceUpdate_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidateUpdateItemSubstance())
+            if (!this.ValidateUpdateItemSubstance())
             {
                 return;
             }
@@ -924,13 +941,13 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             string name = SubstanceNameBoxUpdate.Text;
             float concentration = float.Parse(ConcentrationBoxUpdate.Text);
 
-            ActiveSubstancesDict[name] = concentration;
+            this.ActiveSubstancesDict[name] = concentration;
 
-            RefreshActiveSubstancesListUpdate();
+            this.RefreshActiveSubstancesListUpdate();
 
             SubstanceNameBoxUpdate.Text = string.Empty;
             ConcentrationBoxUpdate.Text = string.Empty;
-            ResetUpdateItemErrors();
+            this.ResetUpdateItemErrors();
         }
 
         private bool ValidateUpdateItemSubstance()
@@ -961,7 +978,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 isValid = false;
             }
 
-            if (ActiveSubstancesDict.ContainsKey(SubstanceNameBoxUpdate.Text))
+            if (this.ActiveSubstancesDict.ContainsKey(SubstanceNameBoxUpdate.Text))
             {
                 SubstanceNameBoxUpdate.Background = new SolidColorBrush(Colors.LightPink);
                 SubstanceNameBoxUpdate.Text = string.Empty;
@@ -969,7 +986,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 isValid = false;
             }
 
-            if (!ViewModel.SubstanceExists(SubstanceNameBoxUpdate.Text))
+            if (!this.ViewModel.SubstanceExists(SubstanceNameBoxUpdate.Text))
             {
                 SubstanceNameBoxUpdate.Background = new SolidColorBrush(Colors.LightPink);
                 SubstanceNameBoxUpdate.Text = string.Empty;
@@ -981,7 +998,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
             if (isValid)
             {
-                Substance substance = ViewModel.GetSubstanceByName(SubstanceNameBoxUpdate.Text);
+                Substance substance = this.ViewModel.GetSubstanceByName(SubstanceNameBoxUpdate.Text);
 
                 if (concentration >= substance.LethalDose)
                 {
@@ -1007,9 +1024,9 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            if (ActiveSubstancesDict.ContainsKey(name))
+            if (this.ActiveSubstancesDict.ContainsKey(name))
             {
-                ActiveSubstancesDict.Remove(name);
+                this.ActiveSubstancesDict.Remove(name);
             }
             else
             {
@@ -1017,20 +1034,20 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            RefreshActiveSubstancesListUpdate();
+            this.RefreshActiveSubstancesListUpdate();
 
             SubstanceNameBoxUpdate.Text = string.Empty;
             ConcentrationBoxUpdate.Text = string.Empty;
-            ResetUpdateItemErrors();
+            this.ResetUpdateItemErrors();
         }
 
         private void RefreshBatchesListUpdate()
         {
-            var list = BatchesDict
+            var list = this.BatchesDict
                 .Select(kvp => new BatchItem
                 {
                     Date = kvp.Key,
-                    Packs = kvp.Value
+                    Packs = kvp.Value,
                 })
                 .OrderBy(x => x.Date)
                 .ToList();
@@ -1040,7 +1057,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void AddBatchUpdate_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidateUpdateBatch())
+            if (!this.ValidateUpdateBatch())
             {
                 return;
             }
@@ -1048,12 +1065,12 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             int packs = int.Parse(PacksBoxUpdate.Text);
             DateOnly date = DateOnly.FromDateTime(BatchDatePickerUpdate.Date.Date);
 
-            BatchesDict[date] = packs;
+            this.BatchesDict[date] = packs;
 
-            RefreshBatchesListUpdate();
+            this.RefreshBatchesListUpdate();
 
             PacksBoxUpdate.Text = string.Empty;
-            ResetUpdateItemErrors();
+            this.ResetUpdateItemErrors();
         }
 
         private bool ValidateUpdateBatch()
@@ -1087,6 +1104,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 PacksBoxUpdate.Text = string.Empty;
                 isValid = false;
             }
+
             return isValid;
         }
 
@@ -1096,11 +1114,11 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
             if (selectedBatch != null)
             {
-                if (BatchesDict.ContainsKey(selectedBatch.Date))
+                if (this.BatchesDict.ContainsKey(selectedBatch.Date))
                 {
-                    BatchesDict.Remove(selectedBatch.Date);
+                    this.BatchesDict.Remove(selectedBatch.Date);
 
-                    RefreshBatchesListUpdate();
+                    this.RefreshBatchesListUpdate();
                 }
             }
             else
@@ -1124,6 +1142,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             UpdateSubstanceMandatoryError.Visibility = Visibility.Collapsed;
             UpdateSubstanceInvalidError.Visibility = Visibility.Collapsed;
         }
+
         private void OnSubstanceRemoveClick(object sender, RoutedEventArgs e)
         {
             var selectedItem = SubstanceList.SelectedItem as Substance;
@@ -1133,25 +1152,25 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            ViewModel.RemoveSubstanceByName(selectedItem);
-            ViewModel.RefreshSubstances();
-            SubstanceList.ItemsSource = ViewModel.Substances;
-            ResetSubstanceErrors();
+            this.ViewModel.RemoveSubstanceByName(selectedItem);
+            this.ViewModel.RefreshSubstances();
+            SubstanceList.ItemsSource = this.ViewModel.Substances;
+            this.ResetSubstanceErrors();
         }
 
         private void OnSubstanceCancelClick(object sender, RoutedEventArgs e)
         {
-            ClearSubstanceBoxes();
-            ClearSubstanceUpdateBoxes();
-            ViewModel.AddSubstanceGridVisibility = Visibility.Collapsed;
-            ViewModel.UpdateSubstanceGridVisibility = Visibility.Collapsed;
-            ApplyUiStateFromViewModel();
-            ResetSubstanceErrors();
+            this.ClearSubstanceBoxes();
+            this.ClearSubstanceUpdateBoxes();
+            this.ViewModel.AddSubstanceGridVisibility = Visibility.Collapsed;
+            this.ViewModel.UpdateSubstanceGridVisibility = Visibility.Collapsed;
+            this.ApplyUiStateFromViewModel();
+            this.ResetSubstanceErrors();
         }
 
         private void OnAddSubstanceClick(object sender, RoutedEventArgs e)
         {
-            if (!ValidateAddSubstance())
+            if (!this.ValidateAddSubstance())
             {
                 return;
             }
@@ -1164,7 +1183,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
             try
             {
-                ViewModel.AddSubstance(newSubstance);
+                this.ViewModel.AddSubstance(newSubstance);
             }
             catch (ArgumentException ex)
             {
@@ -1173,10 +1192,10 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            ClearSubstanceBoxes();
-            ViewModel.RefreshSubstances();
-            SubstanceList.ItemsSource = ViewModel.Substances;
-            ResetSubstanceErrors();
+            this.ClearSubstanceBoxes();
+            this.ViewModel.RefreshSubstances();
+            SubstanceList.ItemsSource = this.ViewModel.Substances;
+            this.ResetSubstanceErrors();
         }
 
         private bool ValidateAddSubstance()
@@ -1189,6 +1208,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 AddSubstanceMandatoryError.Visibility = Visibility.Visible;
                 isValid = false;
             }
+
             if (LethalDoseBoxSubstance.Text == string.Empty)
             {
                 LethalDoseBoxSubstance.Background = new SolidColorBrush(Colors.LightPink);
@@ -1218,24 +1238,25 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 
         private void OnUpdateSubstanceClick(object sender, RoutedEventArgs e)
         {
-            if (!ValidateUpdateSubstance())
+            if (!this.ValidateUpdateSubstance())
             {
                 return;
             }
+
             string name = NameBoxSubstanceUpdate.Text;
             int lethalDose = int.Parse(LethalDoseBoxSubstanceUpdate.Text);
             string description = DescriptionBoxSubstanceUpdate.Text;
 
             Substance updatedSubstance = new Substance(name, lethalDose, description);
 
-            ViewModel.UpdateSubstanceByName(name, updatedSubstance);
+            this.ViewModel.UpdateSubstanceByName(name, updatedSubstance);
 
             System.Diagnostics.Debug.WriteLine("Updated substance");
 
-            ClearSubstanceUpdateBoxes();
-            ViewModel.RefreshSubstances();
-            SubstanceList.ItemsSource = ViewModel.Substances;
-            ResetSubstanceErrors();
+            this.ClearSubstanceUpdateBoxes();
+            this.ViewModel.RefreshSubstances();
+            SubstanceList.ItemsSource = this.ViewModel.Substances;
+            this.ResetSubstanceErrors();
         }
 
         private bool ValidateUpdateSubstance()
@@ -1249,7 +1270,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 isValid = false;
             }
 
-            if (!ViewModel.SubstanceExists(NameBoxSubstanceUpdate.Text))
+            if (!this.ViewModel.SubstanceExists(NameBoxSubstanceUpdate.Text))
             {
                 NameBoxSubstanceUpdate.Background = new SolidColorBrush(Colors.LightPink);
                 NameBoxSubstanceUpdate.Text = string.Empty;
@@ -1264,6 +1285,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 UpdateSubstanceMandatoryError.Visibility = Visibility.Visible;
                 isValid = false;
             }
+
             if (!int.TryParse(LethalDoseBoxSubstanceUpdate.Text, out int lethalDose))
             {
                 LethalDoseBoxSubstanceUpdate.Background = new SolidColorBrush(Colors.LightPink);
@@ -1271,9 +1293,8 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 UpdateSubstanceFormatError.Visibility = Visibility.Visible;
                 isValid = false;
             }
+
             return isValid;
         }
     }
 }
-
-

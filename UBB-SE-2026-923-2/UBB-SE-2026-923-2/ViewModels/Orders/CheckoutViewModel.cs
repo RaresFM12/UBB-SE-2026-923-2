@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Windows.Input;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.ViewModels.Orders
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Windows.Input;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Services;
+
     public class CheckoutViewModel : ICheckoutViewModel
     {
         private readonly IOrderService orderService;
@@ -22,13 +22,13 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
 
         public CheckoutViewModel(IOrderService injectedOrderService)
         {
-            orderService = injectedOrderService;
-            BasketItems = orderService.GetBasketItems();
+            this.orderService = injectedOrderService;
+            this.BasketItems = this.orderService.GetBasketItems();
 
-            Tuple<float, float> totals = orderService.CalculateBasketTotalSum(BasketItems);
-            TotalPriceString = totals.Item2.ToString("0.00") + " RON";
+            Tuple<float, float> totals = this.orderService.CalculateBasketTotalSum(this.BasketItems);
+            this.TotalPriceString = totals.Item2.ToString("0.00") + " RON";
 
-            PlaceOrderCommand = new RelayCommandWithOneParameter<DateTimeOffset>(ExecutePlaceOrder);
+            this.PlaceOrderCommand = new RelayCommandWithOneParameter<DateTimeOffset>(this.ExecutePlaceOrder);
         }
 
         private void ExecutePlaceOrder(DateTimeOffset selectedDateOffset)
@@ -36,12 +36,12 @@ namespace UBB_SE_2026_923_2.ViewModels.Orders
             try
             {
                 DateOnly selectedDate = DateOnly.FromDateTime(selectedDateOffset.Date);
-                orderService.PlaceOrderFromBasket(selectedDate);
-                OrderPlacedSuccessfully?.Invoke();
+                this.orderService.PlaceOrderFromBasket(selectedDate);
+                this.OrderPlacedSuccessfully?.Invoke();
             }
             catch (ArgumentException exception)
             {
-                OrderPlacementFailed?.Invoke(exception.Message);
+                this.OrderPlacementFailed?.Invoke(exception.Message);
             }
         }
     }
