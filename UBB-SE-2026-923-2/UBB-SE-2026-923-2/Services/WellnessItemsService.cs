@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.Services
+﻿namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class WellnessItemsService : IWellnessItemsService
     {
         private const string WellnessCategoryName = "wellness";
@@ -19,7 +19,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public List<Item> GetWellnessItems()
         {
-            return itemsRepository
+            return this.itemsRepository
                 .GetAllItems()
                 .Where(IsWellnessItem)
                 .OrderBy(item => item.Id)

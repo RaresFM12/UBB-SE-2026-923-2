@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class ShiftSwapService : IShiftSwapService
     {
         private const string AcceptedStatus = "ACCEPTED";
@@ -36,7 +36,7 @@ namespace UBB_SE_2026_923_2.Services
             bool IsFutureShiftForStaff(Shift shift) =>
                 shift.AppointedStaff.StaffID == staffId && shift.StartTime > DateTime.Now;
             DateTime SortKey(Shift shift) => shift.StartTime;
-            return shiftRepository.GetAllShifts()
+            return this.shiftRepository.GetAllShifts()
                 .Where(IsFutureShiftForStaff)
                 .OrderBy(SortKey)
                 .ToList();
@@ -48,7 +48,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             error = string.Empty;
 
-            var allShifts = shiftRepository.GetAllShifts();
+            var allShifts = this.shiftRepository.GetAllShifts();
             bool HasMatchingShiftId(Shift existingShift) => existingShift.Id == shiftId;
             var shift = allShifts.FirstOrDefault(HasMatchingShiftId);
             if (shift == null)
@@ -69,7 +69,7 @@ namespace UBB_SE_2026_923_2.Services
                 return new List<IStaff>();
             }
 
-            var allStaff = staffRepository.LoadAllStaff();
+            var allStaff = this.staffRepository.LoadAllStaff();
             bool HasRequesterId(IStaff staffMember) => staffMember.StaffID == requesterId;
             var requester = allStaff.FirstOrDefault(HasRequesterId);
             if (requester == null)
@@ -127,7 +127,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             message = string.Empty;
 
-            var eligibleColleagues = GetEligibleSwapColleaguesForShift(requesterId, shiftId, out var validationError);
+            var eligibleColleagues = this.GetEligibleSwapColleaguesForShift(requesterId, shiftId, out var validationError);
             if (!string.IsNullOrWhiteSpace(validationError))
             {
                 message = validationError;
@@ -142,8 +142,8 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             bool HasMatchingShiftIdInLookup(Shift existingShift) => existingShift.Id == shiftId;
-            var shift = shiftRepository.GetAllShifts().FirstOrDefault(HasMatchingShiftIdInLookup);
-            var requester = staffRepository.GetStaffById(requesterId);
+            var shift = this.shiftRepository.GetAllShifts().FirstOrDefault(HasMatchingShiftIdInLookup);
+            var requester = this.staffRepository.GetStaffById(requesterId);
             if (requester == null)
             {
                 message = "Requester not found.";
@@ -159,14 +159,14 @@ namespace UBB_SE_2026_923_2.Services
                 Status = ShiftSwapRequestStatus.PENDING,
             };
 
-            var swapId = shiftSwapRepository.AddShiftSwapRequest(swapRequest);
+            var swapId = this.shiftSwapRepository.AddShiftSwapRequest(swapRequest);
             if (swapId <= 0)
             {
                 message = "Failed to create shift swap request.";
                 return false;
             }
 
-            notificationRepository.AddNotification(
+            this.notificationRepository.AddNotification(
                 colleagueId,
                 SwapRequestNotificationTitle,
                 $"You received a shift swap request from {requester.FirstName} {requester.LastName} for shift #{shiftId} ({shift!.StartTime:yyyy-MM-dd HH:mm} - {shift.EndTime:HH:mm}).");
@@ -181,7 +181,7 @@ namespace UBB_SE_2026_923_2.Services
                 swapRequest.ColleagueId == colleagueId && swapRequest.Status == ShiftSwapRequestStatus.PENDING;
             DateTime ByRequestedAt(ShiftSwapRequest swapRequest) => swapRequest.RequestedAt;
 
-            return shiftSwapRepository.GetAllShiftSwapRequests()
+            return this.shiftSwapRepository.GetAllShiftSwapRequests()
                 .Where(IsPendingForColleague)
                 .OrderByDescending(ByRequestedAt)
                 .ToList();
@@ -191,7 +191,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             message = string.Empty;
 
-            var swapRequest = shiftSwapRepository.GetShiftSwapRequestById(swapId);
+            var swapRequest = this.shiftSwapRepository.GetShiftSwapRequestById(swapId);
             if (swapRequest == null)
             {
                 message = "Swap request not found.";
@@ -210,7 +210,7 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            var allShifts = shiftRepository.GetAllShifts();
+            var allShifts = this.shiftRepository.GetAllShifts();
             bool HasTargetShiftId(Shift existingShift) => existingShift.Id == swapRequest.ShiftId;
             var shift = allShifts.FirstOrDefault(HasTargetShiftId);
             if (shift == null)
@@ -234,9 +234,9 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            shiftRepository.UpdateShiftStaffId(swapRequest.ShiftId, colleagueId);
-            shiftSwapRepository.UpdateShiftSwapRequestStatus(swapId, AcceptedStatus);
-            notificationRepository.AddNotification(
+            this.shiftRepository.UpdateShiftStaffId(swapRequest.ShiftId, colleagueId);
+            this.shiftSwapRepository.UpdateShiftSwapRequestStatus(swapId, AcceptedStatus);
+            this.notificationRepository.AddNotification(
                 swapRequest.RequesterId,
                 SwapAcceptedNotificationTitle,
                 $"Your swap request #{swapId} was accepted.");
@@ -250,7 +250,7 @@ namespace UBB_SE_2026_923_2.Services
             string ByFirstName(Doctor doctor) => doctor.FirstName;
             string ByLastName(Doctor doctor) => doctor.LastName;
 
-            return staffRepository.LoadAllStaff()
+            return this.staffRepository.LoadAllStaff()
                 .OfType<Doctor>()
                 .OrderBy(ByFirstName)
                 .ThenBy(ByLastName)
@@ -261,7 +261,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             message = string.Empty;
 
-            var swapRequest = shiftSwapRepository.GetShiftSwapRequestById(swapId);
+            var swapRequest = this.shiftSwapRepository.GetShiftSwapRequestById(swapId);
             if (swapRequest == null)
             {
                 message = "Swap request not found.";
@@ -280,8 +280,8 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            shiftSwapRepository.UpdateShiftSwapRequestStatus(swapId, RejectedStatus);
-            notificationRepository.AddNotification(
+            this.shiftSwapRepository.UpdateShiftSwapRequestStatus(swapId, RejectedStatus);
+            this.notificationRepository.AddNotification(
                 swapRequest.RequesterId,
                 SwapRejectedNotificationTitle,
                 $"Your swap request #{swapId} was rejected.");

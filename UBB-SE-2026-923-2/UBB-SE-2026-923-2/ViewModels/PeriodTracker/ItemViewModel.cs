@@ -1,13 +1,13 @@
-﻿using System.ComponentModel;
-using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using UBB_SE_2026_923_2.Models;
-using Syncfusion.UI.Xaml.Core;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
+﻿namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
 {
+    using System.ComponentModel;
+    using System.Globalization;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using Syncfusion.UI.Xaml.Core;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public class ItemViewModel : INotifyPropertyChanged
     {
         private const float PercentageDivisor = 100.0f;
@@ -27,7 +27,7 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
 
         private readonly IBasketService basketService;
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
         public int Id { get; }
 
@@ -36,98 +36,104 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
         public float ExtraDiscountPercentage { get; }
 
         private string name;
+
         public string Name
         {
-            get => name;
+            get => this.name;
             set
             {
-                if (name == value)
+                if (this.name == value)
                 {
                     return;
                 }
 
-                name = value;
-                OnPropertyChanged();
+                this.name = value;
+                this.OnPropertyChanged();
             }
         }
 
         private string priceString;
+
         public string PriceString
         {
-            get => priceString;
+            get => this.priceString;
             set
             {
-                if (priceString == value)
+                if (this.priceString == value)
                 {
                     return;
                 }
 
-                priceString = value;
-                OnPropertyChanged();
+                this.priceString = value;
+                this.OnPropertyChanged();
             }
         }
 
         private string priceDiscountedString;
+
         public string PriceDiscountedString
         {
-            get => priceDiscountedString;
+            get => this.priceDiscountedString;
             set
             {
-                if (priceDiscountedString == value)
+                if (this.priceDiscountedString == value)
                 {
                     return;
                 }
 
-                priceDiscountedString = value;
-                OnPropertyChanged();
+                this.priceDiscountedString = value;
+                this.OnPropertyChanged();
             }
         }
 
         private string priceColor;
+
         public string PriceColor
         {
-            get => priceColor;
+            get => this.priceColor;
             set
             {
-                if (priceColor == value)
+                if (this.priceColor == value)
                 {
                     return;
                 }
 
-                priceColor = value;
-                OnPropertyChanged();
+                this.priceColor = value;
+                this.OnPropertyChanged();
             }
         }
 
         private string finalPriceColor;
+
         public string FinalPriceColor
         {
-            get => finalPriceColor;
+            get => this.finalPriceColor;
             set
             {
-                if (finalPriceColor == value)
+                if (this.finalPriceColor == value)
                 {
                     return;
                 }
 
-                finalPriceColor = value;
-                OnPropertyChanged();
+                this.finalPriceColor = value;
+                this.OnPropertyChanged();
             }
         }
 
         private string imagePath;
+
         public string ImagePath
         {
-            get => imagePath;
+            get => this.imagePath;
             set
             {
-                if (imagePath == value)
+                if (this.imagePath == value)
                 {
                     return;
                 }
 
-                imagePath = value;
-                OnPropertyChanged();
+                this.imagePath = value;
+                this.OnPropertyChanged();
             }
         }
 
@@ -135,36 +141,36 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
         {
             this.basketService = basketService;
 
-            Id = item.Id;
-            Name = item.Name;
-            ExtraDiscountPercentage = extraDiscountPercentage;
+            this.Id = item.Id;
+            this.Name = item.Name;
+            this.ExtraDiscountPercentage = extraDiscountPercentage;
 
             float originalPrice = item.Price;
-            float finalPrice = CalculateFinalPrice(item.Price, item.DiscountPercentage, ExtraDiscountPercentage);
+            float finalPrice = CalculateFinalPrice(item.Price, item.DiscountPercentage, this.ExtraDiscountPercentage);
 
             if (finalPrice < originalPrice)
             {
-                PriceDiscountedString = originalPrice.ToString("C", CultureInfo.CurrentCulture);
-                PriceColor = DiscountedPriceColorName;
-                FinalPriceColor = FinalDiscountedPriceColorName;
+                this.PriceDiscountedString = originalPrice.ToString("C", CultureInfo.CurrentCulture);
+                this.PriceColor = DiscountedPriceColorName;
+                this.FinalPriceColor = FinalDiscountedPriceColorName;
             }
             else
             {
-                PriceDiscountedString = string.Empty;
-                PriceColor = RegularPriceColorName;
-                FinalPriceColor = RegularFinalPriceColorName;
+                this.PriceDiscountedString = string.Empty;
+                this.PriceColor = RegularPriceColorName;
+                this.FinalPriceColor = RegularFinalPriceColorName;
             }
 
-            PriceString = finalPrice.ToString("C", CultureInfo.CurrentCulture);
-            ImagePath = BuildImagePath(item.ImagePath);
+            this.PriceString = finalPrice.ToString("C", CultureInfo.CurrentCulture);
+            this.ImagePath = BuildImagePath(item.ImagePath);
 
-            AddToBasketCommand = new DelegateCommand(
-                ignoredParameter => this.basketService.AddToBasket(Id, DefaultBasketQuantity, ExtraDiscountPercentage));
+            this.AddToBasketCommand = new DelegateCommand(
+                ignoredParameter => this.basketService.AddToBasket(this.Id, DefaultBasketQuantity, this.ExtraDiscountPercentage));
         }
 
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private static float CalculateFinalPrice(

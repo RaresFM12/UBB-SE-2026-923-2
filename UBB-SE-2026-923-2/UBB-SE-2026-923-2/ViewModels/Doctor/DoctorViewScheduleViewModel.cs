@@ -1,16 +1,16 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Command;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Base;
-using UBB_SE_2026_923_2.Views.Shell;
-
 namespace UBB_SE_2026_923_2.ViewModels.Doctor
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.Globalization;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Base;
+    using UBB_SE_2026_923_2.Views.Shell;
+
     public class DoctorScheduleViewModel : ObservableObject
     {
         private const string EnglishCultureCode = "en-US";
@@ -33,7 +33,9 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
         private bool isInitializing;
 
         public ObservableCollection<AppointmentItemViewModel> Appointments { get; } = new ObservableCollection<AppointmentItemViewModel>();
+
         public ObservableCollection<DoctorShiftItemViewModel> Shifts { get; } = new ObservableCollection<DoctorShiftItemViewModel>();
+
         public ObservableCollection<DoctorOption> Doctors { get; } = new ObservableCollection<DoctorOption>();
 
         public enum ScheduleViewMode
@@ -43,96 +45,110 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
         }
 
         private ScheduleViewMode viewMode = ScheduleViewMode.Daily;
+
         public ScheduleViewMode ViewMode
         {
-            get => viewMode;
+            get => this.viewMode;
             set
             {
-                if (SetProperty(ref viewMode, value))
+                if (this.SetProperty(ref this.viewMode, value))
                 {
-                    RaisePropertyChanged(nameof(IsDaily));
-                    RaisePropertyChanged(nameof(IsWeekly));
-                    RaisePropertyChanged(nameof(SelectedDateText));
-                    RaisePropertyChanged(nameof(PreviousButtonText));
-                    RaisePropertyChanged(nameof(NextButtonText));
-                    _ = LoadAsync();
+                    this.RaisePropertyChanged(nameof(this.IsDaily));
+                    this.RaisePropertyChanged(nameof(this.IsWeekly));
+                    this.RaisePropertyChanged(nameof(this.SelectedDateText));
+                    this.RaisePropertyChanged(nameof(this.PreviousButtonText));
+                    this.RaisePropertyChanged(nameof(this.NextButtonText));
+                    _ = this.LoadAsync();
                 }
             }
         }
 
-        public bool IsDaily => ViewMode == ScheduleViewMode.Daily;
-        public bool IsWeekly => ViewMode == ScheduleViewMode.Weekly;
+        public bool IsDaily => this.ViewMode == ScheduleViewMode.Daily;
 
-        public string PreviousButtonText => IsWeekly ? "Previous Week" : "Previous";
-        public string NextButtonText => IsWeekly ? "Next Week" : "Next";
+        public bool IsWeekly => this.ViewMode == ScheduleViewMode.Weekly;
+
+        public string PreviousButtonText => this.IsWeekly ? "Previous Week" : "Previous";
+
+        public string NextButtonText => this.IsWeekly ? "Next Week" : "Next";
 
         private DoctorOption? selectedDoctor;
+
         public DoctorOption? SelectedDoctor
         {
-            get => selectedDoctor;
+            get => this.selectedDoctor;
             set
             {
-                if (SetProperty(ref selectedDoctor, value) && !isInitializing)
+                if (this.SetProperty(ref this.selectedDoctor, value) && !this.isInitializing)
                 {
-                    _ = LoadAsync();
+                    _ = this.LoadAsync();
                 }
             }
         }
 
         private bool isLoading;
+
         public bool IsLoading
         {
-            get => isLoading;
+            get => this.isLoading;
             set
             {
-                if (SetProperty(ref isLoading, value))
+                if (this.SetProperty(ref this.isLoading, value))
                 {
-                    RaisePropertyChanged(nameof(IsEmpty));
+                    this.RaisePropertyChanged(nameof(this.IsEmpty));
                 }
             }
         }
 
         private string errorMessage = string.Empty;
+
         public string ErrorMessage
         {
-            get => errorMessage;
+            get => this.errorMessage;
             set
             {
-                if (SetProperty(ref errorMessage, value))
+                if (this.SetProperty(ref this.errorMessage, value))
                 {
-                    RaisePropertyChanged(nameof(IsEmpty));
+                    this.RaisePropertyChanged(nameof(this.IsEmpty));
                 }
             }
         }
 
         private DateTime selectedDate = DateTime.Today;
+
         public DateTime SelectedDate
         {
-            get => selectedDate;
+            get => this.selectedDate;
             set
             {
-                if (SetProperty(ref selectedDate, value))
+                if (this.SetProperty(ref this.selectedDate, value))
                 {
-                    RaisePropertyChanged(nameof(SelectedDateText));
-                    _ = LoadAsync();
+                    this.RaisePropertyChanged(nameof(this.SelectedDateText));
+                    _ = this.LoadAsync();
                 }
             }
         }
 
-        public string SelectedDateText => IsDaily
-            ? SelectedDate.ToString(DailyDateFormat, EnglishCulture)
-            : $"Week of {StartOfWeek(SelectedDate).ToString(WeeklyDateFormat, EnglishCulture)}";
+        public string SelectedDateText => this.IsDaily
+            ? this.SelectedDate.ToString(DailyDateFormat, EnglishCulture)
+            : $"Week of {StartOfWeek(this.SelectedDate).ToString(WeeklyDateFormat, EnglishCulture)}";
 
-        public bool IsDoctor => string.Equals(currentUser.Role, DoctorRoleLabel, StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(currentUser.Role, AdminRoleLabel, StringComparison.OrdinalIgnoreCase);
-        public bool IsAccessDenied => !IsDoctor;
-        public bool IsEmpty => !IsLoading && string.IsNullOrWhiteSpace(ErrorMessage) && Appointments.Count == 0 && Shifts.Count == 0;
+        public bool IsDoctor => string.Equals(this.currentUser.Role, DoctorRoleLabel, StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(this.currentUser.Role, AdminRoleLabel, StringComparison.OrdinalIgnoreCase);
+
+        public bool IsAccessDenied => !this.IsDoctor;
+
+        public bool IsEmpty => !this.IsLoading && string.IsNullOrWhiteSpace(this.ErrorMessage) && this.Appointments.Count == 0 && this.Shifts.Count == 0;
 
         public AsyncRelayCommand RefreshCommand { get; }
+
         public RelayCommand TodayCommand { get; }
+
         public RelayCommand NextDayCommand { get; }
+
         public RelayCommand PreviousDayCommand { get; }
+
         public RelayCommand DailyModeCommand { get; }
+
         public RelayCommand WeeklyModeCommand { get; }
 
         public DoctorScheduleViewModel(
@@ -144,111 +160,111 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
             this.appointmentService = appointmentService;
             this.dialogPresenter = dialogPresenter;
 
-            bool CanExecuteAsDoctor() => IsDoctor;
-            RefreshCommand = new AsyncRelayCommand(LoadAsync, CanExecuteAsDoctor);
+            bool CanExecuteAsDoctor() => this.IsDoctor;
+            this.RefreshCommand = new AsyncRelayCommand(this.LoadAsync, CanExecuteAsDoctor);
 
-            void SetToday() => SelectedDate = DateTime.Today;
-            TodayCommand = new RelayCommand(SetToday, CanExecuteAsDoctor);
+            void SetToday() => this.SelectedDate = DateTime.Today;
+            this.TodayCommand = new RelayCommand(SetToday, CanExecuteAsDoctor);
 
-            void GoToNextDay() => SelectedDate = IsWeekly ? SelectedDate.AddDays(DaysInWeek) : SelectedDate.AddDays(OneDay);
-            NextDayCommand = new RelayCommand(GoToNextDay, CanExecuteAsDoctor);
+            void GoToNextDay() => this.SelectedDate = this.IsWeekly ? this.SelectedDate.AddDays(DaysInWeek) : this.SelectedDate.AddDays(OneDay);
+            this.NextDayCommand = new RelayCommand(GoToNextDay, CanExecuteAsDoctor);
 
-            void GoToPreviousDay() => SelectedDate = IsWeekly ? SelectedDate.AddDays(-DaysInWeek) : SelectedDate.AddDays(-OneDay);
-            PreviousDayCommand = new RelayCommand(GoToPreviousDay, CanExecuteAsDoctor);
+            void GoToPreviousDay() => this.SelectedDate = this.IsWeekly ? this.SelectedDate.AddDays(-DaysInWeek) : this.SelectedDate.AddDays(-OneDay);
+            this.PreviousDayCommand = new RelayCommand(GoToPreviousDay, CanExecuteAsDoctor);
 
-            void SetDailyMode() => ViewMode = ScheduleViewMode.Daily;
-            DailyModeCommand = new RelayCommand(SetDailyMode, CanExecuteAsDoctor);
+            void SetDailyMode() => this.ViewMode = ScheduleViewMode.Daily;
+            this.DailyModeCommand = new RelayCommand(SetDailyMode, CanExecuteAsDoctor);
 
-            void SetWeeklyMode() => ViewMode = ScheduleViewMode.Weekly;
-            WeeklyModeCommand = new RelayCommand(SetWeeklyMode, CanExecuteAsDoctor);
+            void SetWeeklyMode() => this.ViewMode = ScheduleViewMode.Weekly;
+            this.WeeklyModeCommand = new RelayCommand(SetWeeklyMode, CanExecuteAsDoctor);
         }
 
         public async Task InitializeAsync()
         {
-            isInitializing = true;
-            IsLoading = true;
-            ErrorMessage = string.Empty;
-            Appointments.Clear();
-            Shifts.Clear();
+            this.isInitializing = true;
+            this.IsLoading = true;
+            this.ErrorMessage = string.Empty;
+            this.Appointments.Clear();
+            this.Shifts.Clear();
 
             try
             {
-                await LoadDoctorsAsync();
+                await this.LoadDoctorsAsync();
             }
             catch (Exception exception)
             {
-                ErrorMessage = $"Failed to initialize: {exception.Message}";
+                this.ErrorMessage = $"Failed to initialize: {exception.Message}";
             }
             finally
             {
-                isInitializing = false;
+                this.isInitializing = false;
             }
 
-            await LoadAsync();
+            await this.LoadAsync();
         }
 
         private async Task LoadDoctorsAsync()
         {
             try
             {
-                var allDoctors = await appointmentService.GetAllDoctorsAsync();
-                Doctors.ReplaceWith(allDoctors.Select(DoctorOption.From));
+                var allDoctors = await this.appointmentService.GetAllDoctorsAsync();
+                this.Doctors.ReplaceWith(allDoctors.Select(DoctorOption.From));
 
-                if (Doctors.Count == 0)
+                if (this.Doctors.Count == 0)
                 {
-                    ErrorMessage = "No doctors available.";
-                    SelectedDoctor = null;
+                    this.ErrorMessage = "No doctors available.";
+                    this.SelectedDoctor = null;
                     return;
                 }
 
-                bool IsCurrentUserDoctor(DoctorOption doctor) => doctor.DoctorId == currentUser.UserId;
-                SelectedDoctor = Doctors.FirstOrDefault(IsCurrentUserDoctor) ?? Doctors.FirstOrDefault();
+                bool IsCurrentUserDoctor(DoctorOption doctor) => doctor.DoctorId == this.currentUser.UserId;
+                this.SelectedDoctor = this.Doctors.FirstOrDefault(IsCurrentUserDoctor) ?? this.Doctors.FirstOrDefault();
             }
             catch (Exception exception)
             {
-                ErrorMessage = $"Failed to load doctors: {exception.Message}";
-                SelectedDoctor = null;
+                this.ErrorMessage = $"Failed to load doctors: {exception.Message}";
+                this.SelectedDoctor = null;
             }
         }
 
         public async Task LoadAsync()
         {
-            int capturedLoadVersion = ++loadVersion;
+            int capturedLoadVersion = ++this.loadVersion;
 
-            if (!IsDoctor)
+            if (!this.IsDoctor)
             {
-                ErrorMessage = "Access denied. Only doctors can view schedule.";
-                Appointments.Clear();
-                Shifts.Clear();
-                IsLoading = false;
-                RaisePropertyChanged(nameof(IsAccessDenied));
-                RaisePropertyChanged(nameof(IsEmpty));
+                this.ErrorMessage = "Access denied. Only doctors can view schedule.";
+                this.Appointments.Clear();
+                this.Shifts.Clear();
+                this.IsLoading = false;
+                this.RaisePropertyChanged(nameof(this.IsAccessDenied));
+                this.RaisePropertyChanged(nameof(this.IsEmpty));
                 return;
             }
 
             try
             {
-                IsLoading = true;
+                this.IsLoading = true;
 
-                if (SelectedDoctor is null)
+                if (this.SelectedDoctor is null)
                 {
-                    Appointments.Clear();
-                    Shifts.Clear();
-                    IsLoading = false;
-                    RaisePropertyChanged(nameof(IsEmpty));
+                    this.Appointments.Clear();
+                    this.Shifts.Clear();
+                    this.IsLoading = false;
+                    this.RaisePropertyChanged(nameof(this.IsEmpty));
                     return;
                 }
 
-                ErrorMessage = string.Empty;
+                this.ErrorMessage = string.Empty;
 
-                var doctorId = SelectedDoctor.DoctorId;
-                DateTime from = IsDaily ? SelectedDate.Date : StartOfWeek(SelectedDate);
-                DateTime to = IsDaily ? from.AddDays(OneDay) : from.AddDays(DaysInWeek);
+                var doctorId = this.SelectedDoctor.DoctorId;
+                DateTime from = this.IsDaily ? this.SelectedDate.Date : StartOfWeek(this.SelectedDate);
+                DateTime to = this.IsDaily ? from.AddDays(OneDay) : from.AddDays(DaysInWeek);
 
-                var filteredAppointments = await appointmentService.GetAppointmentsInRangeAsync(doctorId, from, to);
-                var filteredShifts = await appointmentService.GetShiftsForStaffInRangeAsync(doctorId, from, to);
+                var filteredAppointments = await this.appointmentService.GetAppointmentsInRangeAsync(doctorId, from, to);
+                var filteredShifts = await this.appointmentService.GetShiftsForStaffInRangeAsync(doctorId, from, to);
 
-                if (capturedLoadVersion != loadVersion)
+                if (capturedLoadVersion != this.loadVersion)
                 {
                     return;
                 }
@@ -256,23 +272,23 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
                 AppointmentItemViewModel ToAppointmentItem(Appointment appointment) => new AppointmentItemViewModel(appointment);
                 DoctorShiftItemViewModel ToShiftItem(Shift shift) => new DoctorShiftItemViewModel(shift);
 
-                Appointments.ReplaceWith(filteredAppointments.Select(ToAppointmentItem));
-                Shifts.ReplaceWith(filteredShifts.Select(ToShiftItem));
+                this.Appointments.ReplaceWith(filteredAppointments.Select(ToAppointmentItem));
+                this.Shifts.ReplaceWith(filteredShifts.Select(ToShiftItem));
             }
             catch (Exception exception)
             {
-                if (capturedLoadVersion == loadVersion)
+                if (capturedLoadVersion == this.loadVersion)
                 {
-                    ErrorMessage = $"Failed to load schedule: {exception.Message}";
+                    this.ErrorMessage = $"Failed to load schedule: {exception.Message}";
                 }
             }
             finally
             {
-                if (capturedLoadVersion == loadVersion)
+                if (capturedLoadVersion == this.loadVersion)
                 {
-                    IsLoading = false;
-                    RaisePropertyChanged(nameof(IsAccessDenied));
-                    RaisePropertyChanged(nameof(IsEmpty));
+                    this.IsLoading = false;
+                    this.RaisePropertyChanged(nameof(this.IsAccessDenied));
+                    this.RaisePropertyChanged(nameof(this.IsEmpty));
                 }
             }
         }
@@ -286,10 +302,10 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
 
             try
             {
-                var appointmentDetails = await appointmentService.GetAppointmentDetailsAsync(item.Id);
+                var appointmentDetails = await this.appointmentService.GetAppointmentDetailsAsync(item.Id);
                 if (appointmentDetails is null)
                 {
-                    await dialogPresenter.ShowMessageAsync("Details", "Appointment not found.");
+                    await this.dialogPresenter.ShowMessageAsync("Details", "Appointment not found.");
                     return;
                 }
 
@@ -308,11 +324,11 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
                     $"Time: {formattedDate} {formattedStartTime}-{formattedEndTime}\n" +
                     $"Status: {statusLine}";
 
-                await dialogPresenter.ShowMessageAsync("Appointment Details", text);
+                await this.dialogPresenter.ShowMessageAsync("Appointment Details", text);
             }
             catch (Exception exception)
             {
-                await dialogPresenter.ShowMessageAsync("Details", $"Failed to load details: {exception.Message}");
+                await this.dialogPresenter.ShowMessageAsync("Details", $"Failed to load details: {exception.Message}");
             }
         }
 
@@ -327,8 +343,11 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
             private const char NameSeparator = ' ';
 
             public int DoctorId { get; set; }
+
             public string DoctorName { get; set; } = string.Empty;
+
             public string FirstName { get; set; } = string.Empty;
+
             public string LastName { get; set; } = string.Empty;
 
             public static DoctorOption From((int DoctorId, string DoctorName) doctor) =>
@@ -343,7 +362,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
                 get
                 {
                     bool IsNonEmpty(string? namePart) => !string.IsNullOrWhiteSpace(namePart);
-                    return string.Join(NameSeparator, new[] { FirstName?.Trim(), LastName?.Trim() }.Where(IsNonEmpty));
+                    return string.Join(NameSeparator, new[] { this.FirstName?.Trim(), this.LastName?.Trim() }.Where(IsNonEmpty));
                 }
             }
 

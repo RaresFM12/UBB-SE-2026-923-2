@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IShiftRepository"/>,
     /// <see cref="IShiftManagementShiftRepository"/> and
@@ -25,7 +25,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<Shift> GetAllShifts()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Shifts
                 .AsNoTracking()
                 .Include(s => s.Staff)
@@ -34,7 +34,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void AddShift(Shift newShift)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             int staffId = newShift.StaffId != 0 ? newShift.StaffId : newShift.AppointedStaff.StaffID;
 
@@ -53,7 +53,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateShiftStatus(int shiftId, ShiftStatus status)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var shift = db.Shifts.FirstOrDefault(s => s.Id == shiftId);
             if (shift is null)
             {
@@ -66,7 +66,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateShiftStaffId(int shiftId, int newStaffId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var shift = db.Shifts.FirstOrDefault(s => s.Id == shiftId);
             if (shift is null)
             {
@@ -79,7 +79,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void DeleteShift(int shiftId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var shift = db.Shifts.FirstOrDefault(s => s.Id == shiftId);
             if (shift is null)
             {

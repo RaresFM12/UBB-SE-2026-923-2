@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class UserAccountService : IUserAccountService
     {
         private const string IdSearchPrefix = "id:";
@@ -24,7 +24,7 @@ namespace UBB_SE_2026_923_2.Services
             ISecurityService securityService,
             IUserValidationService userValidationService)
         {
-            CurrentUser = null;
+            this.CurrentUser = null;
             this.UsersRepository = usersRepository;
             this.securityService = securityService;
             this.userValidationService = userValidationService;
@@ -42,12 +42,12 @@ namespace UBB_SE_2026_923_2.Services
                 throw new ArgumentException("Password cannot be empty.");
             }
 
-            if (!userValidationService.IsCorrectEmailFormat(email))
+            if (!this.userValidationService.IsCorrectEmailFormat(email))
             {
                 throw new Exception("Not a valid e-mail");
             }
 
-            User foundUser = UsersRepository.GetUserByEmail(email);
+            User foundUser = this.UsersRepository.GetUserByEmail(email);
 
             if (foundUser == null)
             {
@@ -59,12 +59,12 @@ namespace UBB_SE_2026_923_2.Services
                 throw new Exception("Account disabled");
             }
 
-            if (!securityService.VerifyPassword(password, foundUser.PasswordHash))
+            if (!this.securityService.VerifyPassword(password, foundUser.PasswordHash))
             {
                 throw new Exception("Incorrect password");
             }
 
-            CurrentUser = foundUser;
+            this.CurrentUser = foundUser;
         }
 
         public void Register(
@@ -75,7 +75,7 @@ namespace UBB_SE_2026_923_2.Services
             string phoneNumber,
             string role = "Client")
         {
-            if (!userValidationService.IsCorrectEmailFormat(email))
+            if (!this.userValidationService.IsCorrectEmailFormat(email))
             {
                 throw new Exception("Not a valid email format\nmust be <text>@<text>.<text>");
             }
@@ -90,75 +90,75 @@ namespace UBB_SE_2026_923_2.Services
                 throw new Exception("Passwords don't match.");
             }
 
-            if (!userValidationService.IsCorrectPasswordFormat(password))
+            if (!this.userValidationService.IsCorrectPasswordFormat(password))
             {
                 throw new Exception("Password must be 8+ characters and include uppercase, lowercase, digit, and a special character (!@#%^*).");
             }
 
-            if (username != null && !userValidationService.IsCorrectUsernameFormat(username))
+            if (username != null && !this.userValidationService.IsCorrectUsernameFormat(username))
             {
                 throw new Exception("Username is not valid, must contain only letters and/or _");
             }
 
             phoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? string.Empty : phoneNumber;
 
-            if (!string.IsNullOrEmpty(phoneNumber) && !userValidationService.IsCorrectPhoneNumberFormat(phoneNumber))
+            if (!string.IsNullOrEmpty(phoneNumber) && !this.userValidationService.IsCorrectPhoneNumberFormat(phoneNumber))
             {
                 throw new Exception("Phone number must contain only digits");
             }
 
-            User user = UsersRepository.GetUserByEmail(email);
+            User user = this.UsersRepository.GetUserByEmail(email);
             if (user != null)
             {
                 throw new Exception("Email already linked to an account");
             }
 
-            string hashedPassword = securityService.HashPassword(password);
+            string hashedPassword = this.securityService.HashPassword(password);
             bool discountNotificationsSetting = false;
             bool isAdmin = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase);
-            UsersRepository.AddUser(email, phoneNumber, hashedPassword, username, discountNotificationsSetting, isAdmin: isAdmin, role: role);
-            CurrentUser = UsersRepository.GetUserByEmail(email);
+            this.UsersRepository.AddUser(email, phoneNumber, hashedPassword, username, discountNotificationsSetting, isAdmin: isAdmin, role: role);
+            this.CurrentUser = this.UsersRepository.GetUserByEmail(email);
         }
 
         public void UpdateProfile(string newUsername, string newPhoneNumber)
         {
-            if (CurrentUser == null)
+            if (this.CurrentUser == null)
             {
                 throw new Exception("Not logged in");
             }
 
             if (string.IsNullOrEmpty(newUsername))
             {
-                newUsername = CurrentUser.Email.Split("@")[0];
+                newUsername = this.CurrentUser.Email.Split("@")[0];
             }
-            else if (!userValidationService.IsCorrectUsernameFormat(newUsername))
+            else if (!this.userValidationService.IsCorrectUsernameFormat(newUsername))
             {
                 throw new Exception("Invalid new username");
             }
 
             if (!string.IsNullOrEmpty(newPhoneNumber) &&
-                !userValidationService.IsCorrectPhoneNumberFormat(newPhoneNumber))
+                !this.userValidationService.IsCorrectPhoneNumberFormat(newPhoneNumber))
             {
                 throw new Exception("Invalid new phone number");
             }
 
             newPhoneNumber = string.IsNullOrEmpty(newPhoneNumber)
-                ? CurrentUser.PhoneNumber
+                ? this.CurrentUser.PhoneNumber
                 : newPhoneNumber;
 
-            CurrentUser.PhoneNumber = newPhoneNumber;
-            CurrentUser.Username = newUsername;
-            UsersRepository.UpdateUser(CurrentUser);
+            this.CurrentUser.PhoneNumber = newPhoneNumber;
+            this.CurrentUser.Username = newUsername;
+            this.UsersRepository.UpdateUser(this.CurrentUser);
         }
 
         public void ChangePassword(string oldPassword, string newPassword, string confirmNewPassword)
         {
-            if (CurrentUser == null)
+            if (this.CurrentUser == null)
             {
                 throw new Exception("Not logged in");
             }
 
-            if (!securityService.VerifyPassword(oldPassword, CurrentUser.PasswordHash))
+            if (!this.securityService.VerifyPassword(oldPassword, this.CurrentUser.PasswordHash))
             {
                 throw new Exception("Incorrect password");
             }
@@ -168,7 +168,7 @@ namespace UBB_SE_2026_923_2.Services
                 throw new Exception("New password cannot be empty.");
             }
 
-            if (!userValidationService.IsCorrectPasswordFormat(newPassword))
+            if (!this.userValidationService.IsCorrectPasswordFormat(newPassword))
             {
                 throw new Exception("Password must be 8+ characters and include uppercase, lowercase, digit, and a special character (!@#%^*).");
             }
@@ -178,26 +178,26 @@ namespace UBB_SE_2026_923_2.Services
                 throw new Exception("Passwords don't match");
             }
 
-            string newPasswordHash = securityService.HashPassword(newPassword);
+            string newPasswordHash = this.securityService.HashPassword(newPassword);
 
-            CurrentUser.PasswordHash = newPasswordHash;
-            UsersRepository.UpdateUser(CurrentUser);
+            this.CurrentUser.PasswordHash = newPasswordHash;
+            this.UsersRepository.UpdateUser(this.CurrentUser);
         }
 
         public List<User> SearchUsers(string query)
         {
-            if (CurrentUser == null)
+            if (this.CurrentUser == null)
             {
                 throw new Exception("Not logged in");
             }
 
-            if (!CurrentUser.IsAdmin)
+            if (!this.CurrentUser.IsAdmin)
             {
-                throw new Exception($"Current user with id={CurrentUser.Id} not an admin");
+                throw new Exception($"Current user with id={this.CurrentUser.Id} not an admin");
             }
 
             query = query.Trim();
-            List<User> queriedUsers = UsersRepository.GetAllUsers();
+            List<User> queriedUsers = this.UsersRepository.GetAllUsers();
 
             if (query.StartsWith(IdSearchPrefix))
             {
@@ -228,14 +228,14 @@ namespace UBB_SE_2026_923_2.Services
 
         public void PromoteToAdmin(User client)
         {
-            if (CurrentUser == null)
+            if (this.CurrentUser == null)
             {
                 throw new Exception("Not logged in");
             }
 
-            if (!CurrentUser.IsAdmin)
+            if (!this.CurrentUser.IsAdmin)
             {
-                throw new Exception($"Current user with id={CurrentUser.Id} not an admin");
+                throw new Exception($"Current user with id={this.CurrentUser.Id} not an admin");
             }
 
             if (client.IsAdmin || client.IsDisabled)
@@ -244,19 +244,19 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             client.IsAdmin = true;
-            UsersRepository.UpdateUser(client);
+            this.UsersRepository.UpdateUser(client);
         }
 
         public void DisableAccount(User client)
         {
-            if (CurrentUser == null)
+            if (this.CurrentUser == null)
             {
                 throw new Exception("Not logged in");
             }
 
-            if (!CurrentUser.IsAdmin)
+            if (!this.CurrentUser.IsAdmin)
             {
-                throw new Exception($"Current user with id={CurrentUser.Id} not an admin");
+                throw new Exception($"Current user with id={this.CurrentUser.Id} not an admin");
             }
 
             if (client.IsAdmin || client.IsDisabled)
@@ -265,12 +265,12 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             client.IsDisabled = true;
-            UsersRepository.UpdateUser(client);
+            this.UsersRepository.UpdateUser(client);
         }
 
         public void Logout()
         {
-            CurrentUser = null;
+            this.CurrentUser = null;
         }
     }
 }

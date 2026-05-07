@@ -1,12 +1,12 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.Command;
-
-namespace UBB_SE_2026_923_2.ViewModels.Accounts
+﻿namespace UBB_SE_2026_923_2.ViewModels.Accounts
 {
+    using System;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Services;
+
     public class ChangePasswordViewModel : INotifyPropertyChanged
     {
         private readonly IUserAccountService userAccountService;
@@ -17,49 +17,50 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         private string errorMessage;
 
         public ICommand ChangePasswordCommand;
+
         public ChangePasswordViewModel(IUserAccountService service)
         {
-            userAccountService = service;
-            ChangePasswordCommand = new RelayCommand(ChangePassword);
+            this.userAccountService = service;
+            this.ChangePasswordCommand = new RelayCommand(this.ChangePassword);
         }
 
         public string OldPassword
         {
-            get => oldPassword;
+            get => this.oldPassword;
             set
             {
-                oldPassword = value;
-                OnPropertyChanged();
+                this.oldPassword = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string NewPassword
         {
-            get => newPassword;
+            get => this.newPassword;
             set
             {
-                newPassword = value;
-                OnPropertyChanged();
+                this.newPassword = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string ConfirmPassword
         {
-            get => confirmPassword;
+            get => this.confirmPassword;
             set
             {
-                confirmPassword = value;
-                OnPropertyChanged();
+                this.confirmPassword = value;
+                this.OnPropertyChanged();
             }
         }
 
         public string ErrorMessage
         {
-            get => errorMessage;
+            get => this.errorMessage;
             set
             {
-                errorMessage = value;
-                OnPropertyChanged();
+                this.errorMessage = value;
+                this.OnPropertyChanged();
             }
         }
 
@@ -67,11 +68,11 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
         {
             try
             {
-                userAccountService.ChangePassword(OldPassword, NewPassword, ConfirmPassword);
+                this.userAccountService.ChangePassword(this.OldPassword, this.NewPassword, this.ConfirmPassword);
             }
             catch (Exception exception)
             {
-                ErrorMessage = exception.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
 
@@ -79,7 +80,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Accounts
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

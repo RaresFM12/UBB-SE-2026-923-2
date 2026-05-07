@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class PrescriptionService : IPrescriptionService
     {
         private const float MinimumDiscount = 0f;
@@ -61,6 +61,7 @@ namespace UBB_SE_2026_923_2.Services
                 {
                     return false;
                 }
+
                 if (candidate.ActiveSubstances[substance.Key] != substance.Value)
                 {
                     return false;
@@ -77,7 +78,7 @@ namespace UBB_SE_2026_923_2.Services
                 throw new ArgumentException("Invalid prescription ID");
             }
 
-            MedicalEvaluation? evaluation = evaluationsRepository
+            MedicalEvaluation? evaluation = this.evaluationsRepository
                 .GetAllEvaluations()
                 .FirstOrDefault(record => record.EvaluationID == evaluationId);
 
@@ -88,12 +89,12 @@ namespace UBB_SE_2026_923_2.Services
 
             userDiscounts ??= new Dictionary<int, float>();
             List<string> medicineNames = ParseMedicineNames(evaluation.MedicationsList);
-            List<Item> allItems = itemsRepository.GetAllItems();
+            List<Item> allItems = this.itemsRepository.GetAllItems();
             Dictionary<int, int> mergedItems = new Dictionary<int, int>();
 
             foreach (string medicineName in medicineNames)
             {
-                Dictionary<int, int> filledItems = FillSingleMedicine(medicineName, allItems, userDiscounts);
+                Dictionary<int, int> filledItems = this.FillSingleMedicine(medicineName, allItems, userDiscounts);
                 foreach (KeyValuePair<int, int> entry in filledItems)
                 {
                     if (mergedItems.ContainsKey(entry.Key))
@@ -131,7 +132,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             Dictionary<int, int> result = new Dictionary<int, int>();
 
-            List<Item> preferredItems = itemsRepository.GetItemsByName(medicineName);
+            List<Item> preferredItems = this.itemsRepository.GetItemsByName(medicineName);
             if (preferredItems.Count == 0)
             {
                 return result;
@@ -155,7 +156,7 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             var exactSubstitutes = allItems
-                .Where(item => item.NumberOfPills == requiredPills && SubstancesMatch(preferredItem, item))
+                .Where(item => item.NumberOfPills == requiredPills && this.SubstancesMatch(preferredItem, item))
                 .OrderBy(item => item.Price)
                 .ToList();
 
@@ -188,7 +189,7 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             var multipliedSubstitutes = allItems
-                .Where(item => item.NumberOfPills < requiredPills && SubstancesMatch(preferredItem, item))
+                .Where(item => item.NumberOfPills < requiredPills && this.SubstancesMatch(preferredItem, item))
                 .OrderBy(item => item.Price)
                 .ToList();
 
@@ -233,7 +234,7 @@ namespace UBB_SE_2026_923_2.Services
         public Dictionary<int, int> GetCheapestPrescriptionItems(string prescriptionName, int requiredPills)
         {
             Dictionary<int, int> items = new Dictionary<int, int>();
-            List<Item> allItems = itemsRepository.GetAllItems();
+            List<Item> allItems = this.itemsRepository.GetAllItems();
 
             var exactMatches = allItems
                 .Where(item => item.Name == prescriptionName && item.NumberOfPills == requiredPills)
@@ -250,15 +251,16 @@ namespace UBB_SE_2026_923_2.Services
                 }
             }
 
-            List<Item> preferredItems = itemsRepository.GetItemsByName(prescriptionName);
+            List<Item> preferredItems = this.itemsRepository.GetItemsByName(prescriptionName);
             if (preferredItems.Count == 0)
             {
                 return items;
             }
+
             Item preferredItem = preferredItems[0];
 
             var exactSubstitutes = allItems
-                .Where(i => i.NumberOfPills == requiredPills && SubstancesMatch(preferredItem, i))
+                .Where(i => i.NumberOfPills == requiredPills && this.SubstancesMatch(preferredItem, i))
                 .OrderBy(item => item.Price)
                 .ToList();
 
@@ -269,7 +271,7 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             var multipliedSubstitutes = allItems
-                .Where(i => i.NumberOfPills < requiredPills && SubstancesMatch(preferredItem, i))
+                .Where(i => i.NumberOfPills < requiredPills && this.SubstancesMatch(preferredItem, i))
                 .OrderBy(item => item.Price)
                 .ToList();
 

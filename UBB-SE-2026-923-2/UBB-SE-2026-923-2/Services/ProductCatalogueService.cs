@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.Services
+﻿namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class ProductCatalogueService : IProductCatalogueService
     {
         public const string StockFilterInStock = "in_stock";
@@ -34,20 +34,20 @@ namespace UBB_SE_2026_923_2.Services
             int pageSize = DefaultPageSize,
             string sortBy = null)
         {
-            var items = SearchItems(search);
-            items = FilterByCategory(items, categories);
-            items = FilterByPrice(items, priceRanges);
-            items = FilterByStock(items, stockFilter);
-            items = FilterByDiscount(items, discounted);
-            items = FilterBySubstance(items, substances);
-            items = SortItems(items, sortBy, ascending);
-            items = Paginate(items, page, pageSize);
+            var items = this.SearchItems(search);
+            items = this.FilterByCategory(items, categories);
+            items = this.FilterByPrice(items, priceRanges);
+            items = this.FilterByStock(items, stockFilter);
+            items = this.FilterByDiscount(items, discounted);
+            items = this.FilterBySubstance(items, substances);
+            items = this.SortItems(items, sortBy, ascending);
+            items = this.Paginate(items, page, pageSize);
             return items;
         }
 
         private List<Item> SearchItems(string productName)
         {
-            var items = itemsRepository.GetAllItems();
+            var items = this.itemsRepository.GetAllItems();
 
             if (string.IsNullOrWhiteSpace(productName))
             {
@@ -142,12 +142,12 @@ namespace UBB_SE_2026_923_2.Services
         {
             if (sortBy == SortByPrice)
             {
-                return SortByPriceValue(items, ascending);
+                return this.SortByPriceValue(items, ascending);
             }
 
             if (sortBy == SortByNewest)
             {
-                return SortByNewestDate(items, ascending);
+                return this.SortByNewestDate(items, ascending);
             }
 
             return items;
@@ -167,10 +167,10 @@ namespace UBB_SE_2026_923_2.Services
         {
             if (ascending)
             {
-                return items.OrderBy(item => GetLatestValidDate(item) ?? DateOnly.MinValue).ToList();
+                return items.OrderBy(item => this.GetLatestValidDate(item) ?? DateOnly.MinValue).ToList();
             }
 
-            return items.OrderByDescending(item => GetLatestValidDate(item) ?? DateOnly.MinValue).ToList();
+            return items.OrderByDescending(item => this.GetLatestValidDate(item) ?? DateOnly.MinValue).ToList();
         }
 
         private DateOnly? GetLatestValidDate(Item item)

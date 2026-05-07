@@ -1,15 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using System.Text.Json;
+    using System.Threading.Tasks;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of all three staff-repository interfaces.
     /// Polymorphic Staff JSON ($type discriminator) is decoded by
@@ -28,7 +28,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<IStaff> LoadAllStaff()
         {
-            var staff = httpClient.GetFromJsonAsync<List<Staff>>(BasePath).GetAwaiter().GetResult();
+            var staff = this.httpClient.GetFromJsonAsync<List<Staff>>(BasePath).GetAwaiter().GetResult();
             return staff is null
                 ? new List<IStaff>()
                 : staff.Cast<IStaff>().ToList();
@@ -36,7 +36,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IStaff? GetStaffById(int staffId)
         {
-            var response = httpClient.GetAsync($"{BasePath}/{staffId}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{staffId}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
@@ -51,7 +51,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Pharmacyst> GetPharmacists()
         {
-            var pharmacists = httpClient
+            var pharmacists = this.httpClient
                 .GetFromJsonAsync<List<Pharmacyst>>($"{BasePath}/pharmacists")
                 .GetAwaiter().GetResult();
             return pharmacists ?? new List<Pharmacyst>();
@@ -59,7 +59,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task<IReadOnlyList<(int DoctorId, string FirstName, string LastName)>> GetAllDoctorsAsync()
         {
-            var summaries = await httpClient.GetFromJsonAsync<List<DoctorSummary>>($"{BasePath}/doctors");
+            var summaries = await this.httpClient.GetFromJsonAsync<List<DoctorSummary>>($"{BasePath}/doctors");
             if (summaries is null)
             {
                 return Array.Empty<(int, string, string)>();
@@ -72,7 +72,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task UpdateStatusAsync(int staffId, string status)
         {
-            var response = await httpClient.PatchAsJsonAsync(
+            var response = await this.httpClient.PatchAsJsonAsync(
                 $"{BasePath}/{staffId}/status",
                 new { Status = status });
             response.EnsureSuccessStatusCode();
@@ -81,7 +81,7 @@ namespace UBB_SE_2026_923_2.Repositories
         public void UpdateStaffAvailability(int staffId, bool isAvailable, DoctorStatus status = DoctorStatus.OFF_DUTY)
         {
             var payload = new { IsAvailable = isAvailable, Status = status };
-            var response = httpClient
+            var response = this.httpClient
                 .PatchAsJsonAsync($"{BasePath}/{staffId}/availability", payload)
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();

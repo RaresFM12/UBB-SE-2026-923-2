@@ -1,59 +1,61 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using Syncfusion.UI.Xaml.Core;
-using Windows.UI.Text;
-
-namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
+﻿namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
 {
+    using System;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using Syncfusion.UI.Xaml.Core;
+    using Windows.UI.Text;
+
     public class NoteViewModel : INotifyPropertyChanged
     {
         private readonly Action<NoteViewModel> deleteNoteAction;
         private readonly Action<NoteViewModel> updateNoteAction;
 
-        private bool shouldSuppressPersistenceNotifications;
+        private readonly bool shouldSuppressPersistenceNotifications;
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
         public ICommand DeleteNoteCommand { get; }
 
         public int NoteId { get; }
 
         private string noteBody;
+
         public string NoteBody
         {
-            get => noteBody;
+            get => this.noteBody;
             set
             {
-                if (noteBody == value)
+                if (this.noteBody == value)
                 {
                     return;
                 }
 
-                noteBody = value;
-                OnPropertyChanged();
+                this.noteBody = value;
+                this.OnPropertyChanged();
             }
         }
 
         private bool noteIsDone;
+
         public bool NoteIsDone
         {
-            get => noteIsDone;
+            get => this.noteIsDone;
             set
             {
-                if (noteIsDone == value)
+                if (this.noteIsDone == value)
                 {
                     return;
                 }
 
-                noteIsDone = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(NoteBodyFontStyle));
+                this.noteIsDone = value;
+                this.OnPropertyChanged();
+                this.OnPropertyChanged(nameof(this.NoteBodyFontStyle));
             }
         }
 
-        public FontStyle NoteBodyFontStyle => NoteIsDone ? FontStyle.Italic : FontStyle.Normal;
+        public FontStyle NoteBodyFontStyle => this.NoteIsDone ? FontStyle.Italic : FontStyle.Normal;
 
         public NoteViewModel(
             int noteId,
@@ -65,28 +67,28 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
             this.deleteNoteAction = deleteNoteAction;
             this.updateNoteAction = updateNoteAction;
 
-            DeleteNoteCommand = new DelegateCommand(
+            this.DeleteNoteCommand = new DelegateCommand(
                 ignoredParameter => this.deleteNoteAction?.Invoke(this));
 
-            NoteId = noteId;
+            this.NoteId = noteId;
 
-            shouldSuppressPersistenceNotifications = true;
-            NoteBody = noteBody;
-            NoteIsDone = noteIsDone;
-            shouldSuppressPersistenceNotifications = false;
+            this.shouldSuppressPersistenceNotifications = true;
+            this.NoteBody = noteBody;
+            this.NoteIsDone = noteIsDone;
+            this.shouldSuppressPersistenceNotifications = false;
         }
 
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
             bool isPersistedProperty =
-                propertyName == nameof(NoteBody) ||
-                propertyName == nameof(NoteIsDone);
+                propertyName == nameof(this.NoteBody) ||
+                propertyName == nameof(this.NoteIsDone);
 
-            if (!shouldSuppressPersistenceNotifications && isPersistedProperty)
+            if (!this.shouldSuppressPersistenceNotifications && isPersistedProperty)
             {
-                updateNoteAction?.Invoke(this);
+                this.updateNoteAction?.Invoke(this);
             }
         }
     }

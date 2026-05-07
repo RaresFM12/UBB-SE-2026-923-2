@@ -1,169 +1,177 @@
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.ViewModels.Base;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.ViewModels.Admin
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Base;
+
     public class AdminShiftViewModel : INotifyPropertyChanged
     {
         private readonly IShiftManagementService staffAndShiftService;
-        private const int DAYS_IN_WEEK = 7;
+        private const int DAYSINWEEK = 7;
+
         public ObservableCollection<Shift> Shifts { get; set; } = new ObservableCollection<Shift>();
+
         public ObservableCollection<IStaff> AvailableStaff { get; set; } = new ObservableCollection<IStaff>();
+
         public ObservableCollection<string> SpecializationsAndCertifications { get; set; } = new ObservableCollection<string>();
 
         private DateTime selectedDate = DateTime.Today;
+
         public DateTime SelectedDate
         {
-            get => selectedDate;
+            get => this.selectedDate;
             set
             {
-                if (selectedDate != value)
+                if (this.selectedDate != value)
                 {
-                    selectedDate = value;
-                    OnPropertyChanged(nameof(SelectedDate));
-                    LoadAndFilterShifts();
+                    this.selectedDate = value;
+                    this.OnPropertyChanged(nameof(this.SelectedDate));
+                    this.LoadAndFilterShifts();
                 }
             }
         }
 
         private string selectedDepartment = "All Departments";
+
         public string SelectedDepartment
         {
-            get => selectedDepartment;
+            get => this.selectedDepartment;
             set
             {
-                if (selectedDepartment != value)
+                if (this.selectedDepartment != value)
                 {
-                    selectedDepartment = value;
-                    OnPropertyChanged(nameof(SelectedDepartment));
-                    LoadAndFilterShifts();
+                    this.selectedDepartment = value;
+                    this.OnPropertyChanged(nameof(this.SelectedDepartment));
+                    this.LoadAndFilterShifts();
                 }
             }
         }
 
         private bool isWeeklyView;
+
         public bool IsWeeklyView
         {
-            get => isWeeklyView;
+            get => this.isWeeklyView;
             set
             {
-                if (isWeeklyView != value)
+                if (this.isWeeklyView != value)
                 {
-                    isWeeklyView = value;
-                    OnPropertyChanged(nameof(IsWeeklyView));
-                    LoadAndFilterShifts();
+                    this.isWeeklyView = value;
+                    this.OnPropertyChanged(nameof(this.IsWeeklyView));
+                    this.LoadAndFilterShifts();
                 }
             }
         }
 
         private string scheduleTitle = string.Empty;
+
         public string ScheduleTitle
         {
-            get => scheduleTitle;
+            get => this.scheduleTitle;
             set
             {
-                if (scheduleTitle != value)
+                if (this.scheduleTitle != value)
                 {
-                    scheduleTitle = value;
-                    OnPropertyChanged(nameof(ScheduleTitle));
+                    this.scheduleTitle = value;
+                    this.OnPropertyChanged(nameof(this.ScheduleTitle));
                 }
             }
         }
 
         public AdminShiftViewModel(IShiftManagementService service)
         {
-            staffAndShiftService = service;
-            LoadAndFilterShifts();
+            this.staffAndShiftService = service;
+            this.LoadAndFilterShifts();
         }
 
         public void LoadAndFilterShifts()
         {
-            var rawShifts = staffAndShiftService.GetWeeklyShifts(SelectedDate);
+            var rawShifts = this.staffAndShiftService.GetWeeklyShifts(this.SelectedDate);
             IEnumerable<Shift> filtered = rawShifts;
             var englishCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 
-            if (IsWeeklyView)
+            if (this.IsWeeklyView)
             {
-                int diff = (DAYS_IN_WEEK + (SelectedDate.DayOfWeek - DayOfWeek.Monday)) % DAYS_IN_WEEK;
-                DateTime startOfWeek = SelectedDate.Date.AddDays(-diff);
-                ScheduleTitle = $"Weekly Roster (Week of {startOfWeek.ToString("dd MMM yyyy", englishCulture)})";
+                int diff = (DAYSINWEEK + (this.SelectedDate.DayOfWeek - DayOfWeek.Monday)) % DAYSINWEEK;
+                DateTime startOfWeek = this.SelectedDate.Date.AddDays(-diff);
+                this.ScheduleTitle = $"Weekly Roster (Week of {startOfWeek.ToString("dd MMM yyyy", englishCulture)})";
             }
             else
             {
-                bool IsShiftOnSelectedDate(Shift shift) => shift.StartTime.Date == SelectedDate.Date;
+                bool IsShiftOnSelectedDate(Shift shift) => shift.StartTime.Date == this.SelectedDate.Date;
                 filtered = filtered.Where(IsShiftOnSelectedDate);
-                ScheduleTitle = $"Daily Roster ({SelectedDate.ToString("dddd, dd MMM yyyy", englishCulture)})";
+                this.ScheduleTitle = $"Daily Roster ({this.SelectedDate.ToString("dddd, dd MMM yyyy", englishCulture)})";
             }
 
-            if (!string.IsNullOrEmpty(SelectedDepartment) && SelectedDepartment != "All Departments")
+            if (!string.IsNullOrEmpty(this.SelectedDepartment) && this.SelectedDepartment != "All Departments")
             {
-                bool IsShiftInSelectedDepartment(Shift shift) => shift.Location == SelectedDepartment;
+                bool IsShiftInSelectedDepartment(Shift shift) => shift.Location == this.SelectedDepartment;
                 filtered = filtered.Where(IsShiftInSelectedDepartment);
             }
 
             DateTime SortByStartTime(Shift shift) => shift.StartTime;
-            Shifts.ReplaceWith(filtered.OrderBy(SortByStartTime));
+            this.Shifts.ReplaceWith(filtered.OrderBy(SortByStartTime));
         }
 
         public void FilterSpecializationsAndCertificationsForLocation(string location)
         {
-            SpecializationsAndCertifications.ReplaceWith(
-                staffAndShiftService.GetSpecializationsAndCertificationsForLocation(location));
+            this.SpecializationsAndCertifications.ReplaceWith(
+                this.staffAndShiftService.GetSpecializationsAndCertificationsForLocation(location));
         }
 
         public void FilterStaffForShift(string location, string requiredSpecializationOrCertification)
         {
-            AvailableStaff.ReplaceWith(
-                staffAndShiftService.GetFilteredStaff(location, requiredSpecializationOrCertification));
+            this.AvailableStaff.ReplaceWith(
+                this.staffAndShiftService.GetFilteredStaff(location, requiredSpecializationOrCertification));
         }
 
         public void CreateNewShift(IStaff staff, DateTime start, DateTime end, string location)
         {
-            bool isAdded = staffAndShiftService.TryAddShift(staff, start, end, location);
+            bool isAdded = this.staffAndShiftService.TryAddShift(staff, start, end, location);
             if (isAdded)
             {
-                LoadAndFilterShifts();
+                this.LoadAndFilterShifts();
             }
         }
 
         public void SetShiftActive(int shiftID)
         {
-            staffAndShiftService.SetShiftActive(shiftID);
-            LoadAndFilterShifts();
+            this.staffAndShiftService.SetShiftActive(shiftID);
+            this.LoadAndFilterShifts();
         }
 
         public void ReassignShift(Shift shift, IStaff newStaff)
         {
-            bool isSuccessful = staffAndShiftService.ReassignShift(shift, newStaff);
+            bool isSuccessful = this.staffAndShiftService.ReassignShift(shift, newStaff);
             if (isSuccessful)
             {
-                LoadAndFilterShifts();
+                this.LoadAndFilterShifts();
             }
         }
 
         public void CancelShift(int shiftID)
         {
-            staffAndShiftService.CancelShift(shiftID);
-            LoadAndFilterShifts();
+            this.staffAndShiftService.CancelShift(shiftID);
+            this.LoadAndFilterShifts();
         }
 
         public void AutoFindReplacement(Shift shift)
         {
-            var replacementsList = staffAndShiftService.FindStaffReplacements(shift);
+            var replacementsList = this.staffAndShiftService.FindStaffReplacements(shift);
             if (replacementsList != null && replacementsList.Count > 0)
             {
-                ReassignShift(shift, replacementsList.First());
+                this.ReassignShift(shift, replacementsList.First());
             }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
         protected void OnPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IItemsRepository"/>.
     /// </summary>
@@ -40,7 +40,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 ImagePath = imagePath,
                 Discount = discount,
             };
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
 
@@ -65,19 +65,19 @@ namespace UBB_SE_2026_923_2.Repositories
                 ImagePath = imagePath,
                 Discount = discount,
             };
-            var response = httpClient.PostAsJsonAsync($"{BasePath}/with-quantity", payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync($"{BasePath}/with-quantity", payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
 
         public void RemoveItemById(int idToBeRemoved)
         {
-            var response = httpClient.DeleteAsync($"{BasePath}/{idToBeRemoved}").GetAwaiter().GetResult();
+            var response = this.httpClient.DeleteAsync($"{BasePath}/{idToBeRemoved}").GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
 
         public Item GetItemById(int id)
         {
-            var response = httpClient.GetAsync($"{BasePath}/{id}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{id}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
@@ -89,20 +89,20 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Item> GetAllItems()
         {
-            var items = httpClient.GetFromJsonAsync<List<Item>>(BasePath).GetAwaiter().GetResult();
+            var items = this.httpClient.GetFromJsonAsync<List<Item>>(BasePath).GetAwaiter().GetResult();
             return items ?? new List<Item>();
         }
 
         public List<Item> GetItemsByName(string name)
         {
             var url = $"{BasePath}?name={Uri.EscapeDataString(name)}";
-            var items = httpClient.GetFromJsonAsync<List<Item>>(url).GetAwaiter().GetResult();
+            var items = this.httpClient.GetFromJsonAsync<List<Item>>(url).GetAwaiter().GetResult();
             return items ?? new List<Item>();
         }
 
         public void UpdateItemById(Item newItem)
         {
-            var response = httpClient
+            var response = this.httpClient
                 .PutAsJsonAsync($"{BasePath}/{newItem.Id}", newItem)
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
@@ -110,14 +110,14 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public bool ItemExists(int id)
         {
-            return httpClient
+            return this.httpClient
                 .GetFromJsonAsync<bool>($"{BasePath}/{id}/exists")
                 .GetAwaiter().GetResult();
         }
 
         public List<Tuple<int, string, int>> GetTop30Items()
         {
-            var summaries = httpClient
+            var summaries = this.httpClient
                 .GetFromJsonAsync<List<ItemPopularitySummary>>($"{BasePath}/top")
                 .GetAwaiter().GetResult();
             if (summaries is null)

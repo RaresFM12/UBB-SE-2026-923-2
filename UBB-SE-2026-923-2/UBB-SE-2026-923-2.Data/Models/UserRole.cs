@@ -5,6 +5,6 @@
         Admin,
         Doctor,
         Pharmacist,
-        Client
+        Client,
     }
 }

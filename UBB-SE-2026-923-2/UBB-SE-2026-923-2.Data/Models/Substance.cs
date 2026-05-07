@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
-
-namespace UBB_SE_2026_923_2.Models
+﻿namespace UBB_SE_2026_923_2.Models
 {
+    using System.Collections.Generic;
+    using System.Text.Json.Serialization;
+
     public class Substance
     {
         public string Name { get; set; } = string.Empty;
+
         public float LethalDose { get; set; }
+
         public string Description { get; set; } = string.Empty;
 
         // ---- EF Core navigation collection (persisted) ----
@@ -21,9 +23,9 @@ namespace UBB_SE_2026_923_2.Models
 
         public Substance(string name, float lethalDose, string description)
         {
-            Name = name;
-            LethalDose = lethalDose;
-            Description = description;
+            this.Name = name;
+            this.LethalDose = lethalDose;
+            this.Description = description;
         }
     }
 }

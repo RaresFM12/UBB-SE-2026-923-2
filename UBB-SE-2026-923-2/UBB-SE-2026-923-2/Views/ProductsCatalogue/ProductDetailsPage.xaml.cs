@@ -1,16 +1,15 @@
-using System;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Imaging;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.ProductsCatalogue;
-using UBB_SE_2026_923_2.Views.Accounts;
-
-
 namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
 {
+    using System;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Media.Imaging;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.ProductsCatalogue;
+    using UBB_SE_2026_923_2.Views.Accounts;
+
     public sealed partial class ProductDetailsPage : Page
     {
         public IProductDetailsPageViewModel ViewModel { get; }
@@ -18,8 +17,8 @@ namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
         public ProductDetailsPage()
         {
             InitializeComponent();
-            ViewModel = new ProductDetailsPageViewModel();
-            DataContext = ViewModel;
+            this.ViewModel = new ProductDetailsPageViewModel();
+            this.DataContext = this.ViewModel;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -28,8 +27,8 @@ namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
 
             if (e.Parameter is ValueTuple<Item, User, IOrderService> tuple)
             {
-                ViewModel.Initialize(tuple.Item1, tuple.Item2, tuple.Item3);
-                LoadProductImage(tuple.Item1.ImagePath);
+                this.ViewModel.Initialize(tuple.Item1, tuple.Item2, tuple.Item3);
+                this.LoadProductImage(tuple.Item1.ImagePath);
             }
         }
 
@@ -49,24 +48,24 @@ namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
 
         private void OnAddToBasket(object sender, RoutedEventArgs e)
         {
-            var (success, navigateToLogin) = ViewModel.TryAddToBasket(QuantityBox.Text);
+            var (success, navigateToLogin) = this.ViewModel.TryAddToBasket(QuantityBox.Text);
 
             if (navigateToLogin)
             {
-                Frame.Navigate(typeof(LoginView));
+                this.Frame.Navigate(typeof(LoginView));
             }
         }
 
         private void OnToggleStockAlert(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            ViewModel.ToggleStockAlert();
+            this.ViewModel.ToggleStockAlert();
         }
 
         private void OnBackClick(object sender, RoutedEventArgs e)
         {
-            if (Frame.CanGoBack)
+            if (this.Frame.CanGoBack)
             {
-                Frame.GoBack();
+                this.Frame.GoBack();
             }
         }
     }

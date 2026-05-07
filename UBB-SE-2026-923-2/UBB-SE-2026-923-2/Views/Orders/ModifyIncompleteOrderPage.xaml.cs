@@ -1,16 +1,17 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Orders;
-
 namespace UBB_SE_2026_923_2.Views.Orders
 {
+    using System;
+    using System.Collections.Generic;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Orders;
+
     public sealed partial class ModifyIncompleteOrderPage : Page
     {
         private IOrderService orderService;
+
         public ModifyIncompleteOrderViewModel ViewModel { get; set; }
 
         public ModifyIncompleteOrderPage()
@@ -22,10 +23,10 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             var extractedArgs = (Tuple<IOrderService, int>)e.Parameter;
 
-            orderService = extractedArgs.Item1;
+            this.orderService = extractedArgs.Item1;
             int orderID = extractedArgs.Item2;
-            ViewModel = new (orderService, orderID);
-            DataContext = ViewModel;
+            this.ViewModel = new(this.orderService, orderID);
+            this.DataContext = this.ViewModel;
 
             base.OnNavigatedTo(e);
         }
@@ -34,7 +35,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             PickUpDateSelector.MinDate = new DateTimeOffset(DateTime.Now.Date.AddDays(1));
             DateTimeOffset chosenPickUpDate = new DateTimeOffset(
-                ViewModel.PickUpDate.ToDateTime(new TimeOnly(12, 0)),
+                this.ViewModel.PickUpDate.ToDateTime(new TimeOnly(12, 0)),
                 new TimeSpan(0, 0, 0));
             PickUpDateSelector.SelectedDates.Add(chosenPickUpDate);
         }
@@ -49,14 +50,14 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
         private void CancelChanges(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.OrderHistoryPage), orderService);
+            this.Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.OrderHistoryPage), this.orderService);
         }
 
         private async void ModifyOrder(object sender, RoutedEventArgs e)
         {
-            Dictionary<int, Tuple<int, float>> updatedQuantities = new ();
+            Dictionary<int, Tuple<int, float>> updatedQuantities = new();
 
-            foreach (var entry in ViewModel.OrderItems)
+            foreach (var entry in this.ViewModel.OrderItems)
             {
                 updatedQuantities.Add(entry.ItemID, new Tuple<int, float>(entry.ItemQuantity, entry.ItemFinalPrice));
             }
@@ -65,15 +66,15 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
             try
             {
-                orderService.ModifyIncompleteOrder(ViewModel.CurrentOrderID, updatedQuantities, selectedDate);
+                this.orderService.ModifyIncompleteOrder(this.ViewModel.CurrentOrderID, updatedQuantities, selectedDate);
 
                 ContentDialog confirmationMessage = new ContentDialog();
 
                 confirmationMessage.XamlRoot = this.XamlRoot;
-                confirmationMessage.Title = "Order#" + ViewModel.CurrentOrderID + " was successfully modified";
+                confirmationMessage.Title = "Order#" + this.ViewModel.CurrentOrderID + " was successfully modified";
                 confirmationMessage.CloseButtonText = "Ok";
 
-                Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.OrderHistoryPage), orderService);
+                this.Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.OrderHistoryPage), this.orderService);
                 var result = await confirmationMessage.ShowAsync();
             }
             catch (ArgumentException exception)

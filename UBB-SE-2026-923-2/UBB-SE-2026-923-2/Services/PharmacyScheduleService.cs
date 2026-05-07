@@ -1,11 +1,11 @@
+namespace UBB_SE_2026_923_2.Services;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.Services;
 
 public sealed class PharmacyScheduleService : IPharmacyScheduleService
 {
@@ -26,7 +26,7 @@ public sealed class PharmacyScheduleService : IPharmacyScheduleService
             && shift.EndTime > rangeStart;
         DateTime ByStartTime(Shift shift) => shift.StartTime;
 
-        IReadOnlyList<Shift> LoadAndFilter() => shiftRepository.GetAllShifts()
+        IReadOnlyList<Shift> LoadAndFilter() => this.shiftRepository.GetAllShifts()
             .Where(IsForStaffInRange)
             .OrderBy(ByStartTime)
             .ToList();
@@ -34,5 +34,5 @@ public sealed class PharmacyScheduleService : IPharmacyScheduleService
         return Task.Run(LoadAndFilter);
     }
 
-    public List<Pharmacyst> GetPharmacists() => staffRepository.GetPharmacists();
+    public List<Pharmacyst> GetPharmacists() => this.staffRepository.GetPharmacists();
 }

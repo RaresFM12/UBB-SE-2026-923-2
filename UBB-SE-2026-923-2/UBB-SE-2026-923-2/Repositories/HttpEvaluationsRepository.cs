@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IEvaluationsRepository"/>.
     /// </summary>
@@ -22,7 +22,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<MedicalEvaluation> GetAllEvaluations()
         {
-            var evaluations = httpClient
+            var evaluations = this.httpClient
                 .GetFromJsonAsync<List<MedicalEvaluation>>(BasePath)
                 .GetAwaiter().GetResult();
             return evaluations ?? new List<MedicalEvaluation>();
@@ -39,14 +39,14 @@ namespace UBB_SE_2026_923_2.Repositories
                 Medications = medications,
                 AssumedRisk = assumedRisk,
             };
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
 
         public void UpdateEvaluation(int evaluationId, string diagnosis, string notes, string medications)
         {
             var payload = new { Diagnosis = diagnosis, Notes = notes, Medications = medications };
-            var response = httpClient
+            var response = this.httpClient
                 .PutAsJsonAsync($"{BasePath}/{evaluationId}", payload)
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
@@ -54,7 +54,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void DeleteEvaluation(int evaluationId)
         {
-            var response = httpClient
+            var response = this.httpClient
                 .DeleteAsync($"{BasePath}/{evaluationId}")
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();

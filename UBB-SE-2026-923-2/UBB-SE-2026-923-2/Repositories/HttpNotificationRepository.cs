@@ -1,9 +1,9 @@
-using System;
-using System.Net.Http;
-using System.Net.Http.Json;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="INotificationRepository"/>.
     /// </summary>
@@ -26,7 +26,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 Title = title,
                 Message = message,
             };
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
     }

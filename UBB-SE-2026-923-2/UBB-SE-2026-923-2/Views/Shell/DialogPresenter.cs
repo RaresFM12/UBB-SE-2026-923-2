@@ -1,10 +1,10 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-
 namespace UBB_SE_2026_923_2.Views.Shell
 {
+    using System;
+    using System.Threading.Tasks;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+
     public sealed class DialogPresenter
     {
         private const string CloseButtonLabel = "OK";
@@ -15,7 +15,7 @@ namespace UBB_SE_2026_923_2.Views.Shell
 
         public async Task ShowMessageAsync(string title, string message)
         {
-            if (xamlRoot == null)
+            if (this.xamlRoot == null)
             {
                 return;
             }
@@ -25,7 +25,7 @@ namespace UBB_SE_2026_923_2.Views.Shell
                 Title = title,
                 Content = message,
                 CloseButtonText = CloseButtonLabel,
-                XamlRoot = xamlRoot,
+                XamlRoot = this.xamlRoot,
             };
 
             await dialog.ShowAsync();

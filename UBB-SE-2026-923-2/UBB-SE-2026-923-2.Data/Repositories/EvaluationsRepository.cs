@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IEvaluationsRepository"/>. The
     /// legacy SQL schema had <c>diagnosis</c>, <c>doctor_notes</c>,
@@ -27,7 +27,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<MedicalEvaluation> GetAllEvaluations()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.MedicalEvaluations
                 .AsNoTracking()
                 .Include(e => e.Evaluator)
@@ -36,7 +36,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void AddEvaluation(int doctorId, int patientId, string diagnosis, string notes, string medications, bool assumedRisk)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var evaluation = new MedicalEvaluation
             {
@@ -54,7 +54,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateEvaluation(int evaluationId, string diagnosis, string notes, string medications)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var evaluation = db.MedicalEvaluations.FirstOrDefault(e => e.EvaluationID == evaluationId);
             if (evaluation is null)
             {
@@ -69,7 +69,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void DeleteEvaluation(int evaluationId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var evaluation = db.MedicalEvaluations.FirstOrDefault(e => e.EvaluationID == evaluationId);
             if (evaluation is null)
             {

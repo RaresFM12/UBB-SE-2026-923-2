@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public sealed class PharmacyVacationService : IPharmacyVacationService
     {
         private const int OneDay = 1;
@@ -28,7 +28,7 @@ namespace UBB_SE_2026_923_2.Services
             string ByFirstName(Pharmacyst pharmacist) => pharmacist.FirstName;
             string ByLastName(Pharmacyst pharmacist) => pharmacist.LastName;
 
-            return staffRepository
+            return this.staffRepository
                 .GetPharmacists()
                 .OrderBy(ByFirstName)
                 .ThenBy(ByLastName)
@@ -46,13 +46,13 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             bool HasMatchingStaffId(Pharmacyst existingPharmacist) => existingPharmacist.StaffID == pharmacistStaffId;
-            var pharmacist = staffRepository
+            var pharmacist = this.staffRepository
                 .GetPharmacists()
                 .FirstOrDefault(HasMatchingStaffId)
                 ?? throw new ArgumentException("Pharmacist not found.");
 
             bool IsForPharmacist(Shift existingShift) => existingShift.AppointedStaff.StaffID == pharmacistStaffId;
-            var pharmacistShifts = shiftRepository.GetAllShifts().Where(IsForPharmacist).ToList();
+            var pharmacistShifts = this.shiftRepository.GetAllShifts().Where(IsForPharmacist).ToList();
 
             bool OverlapsVacationPeriod(Shift shift) => start < shift.EndTime && endExclusive > shift.StartTime;
             var overlappingShift = pharmacistShifts.FirstOrDefault(OverlapsVacationPeriod);
@@ -66,7 +66,7 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             int ByShiftId(Shift shift) => shift.Id;
-            var allShifts = shiftRepository.GetAllShifts();
+            var allShifts = this.shiftRepository.GetAllShifts();
             var nextId = allShifts.Count == EmptyShiftCollectionCount
                 ? FirstShiftId
                 : allShifts.Max(ByShiftId) + IdIncrement;
@@ -79,8 +79,7 @@ namespace UBB_SE_2026_923_2.Services
                 endExclusive,
                 ShiftStatus.VACATION);
 
-            shiftRepository.AddShift(vacationShift);
+            this.shiftRepository.AddShift(vacationShift);
         }
-
     }
 }

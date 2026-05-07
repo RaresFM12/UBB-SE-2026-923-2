@@ -1,16 +1,16 @@
-using System.Collections.Generic;
-using System;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml;
-
 namespace UBB_SE_2026_923_2.Views
 {
+    using System;
+    using System.Collections.Generic;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+
     public sealed partial class CreateShiftPage : UserControl
     {
         public CreateShiftPage()
         {
             this.InitializeComponent();
-            LoadStaffData();
+            this.LoadStaffData();
         }
 
         private void LoadStaffData()
@@ -24,7 +24,7 @@ namespace UBB_SE_2026_923_2.Views
             if (EmployeeComboBox.SelectedItem == null || ShiftDatePicker.Date == null ||
                 StartTimePicker.SelectedTime == null || EndTimePicker.SelectedTime == null)
             {
-                ShowMessage("Eroare: Te rugam sa completezi toate c�mpurile.", InfoBarSeverity.Error);
+                this.ShowMessage("Eroare: Te rugam sa completezi toate c�mpurile.", InfoBarSeverity.Error);
                 return;
             }
 
@@ -33,11 +33,11 @@ namespace UBB_SE_2026_923_2.Views
 
             if (end <= start)
             {
-                ShowMessage("Aten?ie: Ora de final trebuie sa fie dupa ora de �nceput.", InfoBarSeverity.Warning);
+                this.ShowMessage("Aten?ie: Ora de final trebuie sa fie dupa ora de �nceput.", InfoBarSeverity.Warning);
                 return;
             }
 
-            ShowMessage("Tura a fost salvata cu succes!", InfoBarSeverity.Success);
+            this.ShowMessage("Tura a fost salvata cu succes!", InfoBarSeverity.Success);
 
             EmployeeComboBox.SelectedIndex = -1;
         }

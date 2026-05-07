@@ -1,15 +1,16 @@
-using System;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Accounts;
-
 namespace UBB_SE_2026_923_2.Views.Accounts
 {
+    using System;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Accounts;
+
     public sealed partial class AdminAccountsManagementView : Page
     {
         private IUserAccountService accountService;
+
         public AdminAccountsManagementViewModel ViewModel { get; private set; }
 
         public AdminAccountsManagementView()
@@ -21,15 +22,15 @@ namespace UBB_SE_2026_923_2.Views.Accounts
         {
             base.OnNavigatedTo(e);
 
-            accountService = ServiceWrapper.UserAccountService;
-            ViewModel = new AdminAccountsManagementViewModel(accountService);
+            this.accountService = ServiceWrapper.UserAccountService;
+            this.ViewModel = new AdminAccountsManagementViewModel(this.accountService);
 
-            this.DataContext = ViewModel;
+            this.DataContext = this.ViewModel;
         }
 
         private void OnSearchClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.Search();
+            this.ViewModel.Search();
         }
 
         private async void OnPromoteClick(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
@@ -42,14 +43,14 @@ namespace UBB_SE_2026_923_2.Views.Accounts
                     Content = "This action cannot be undone. Proceed?",
                     PrimaryButtonText = "Proceed",
                     CloseButtonText = "Cancel",
-                    XamlRoot = this.XamlRoot
+                    XamlRoot = this.XamlRoot,
                 };
 
                 var result = await dialog.ShowAsync();
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    ViewModel.Promote(userItem);
+                    this.ViewModel.Promote(userItem);
                 }
                 else
                 {
@@ -68,14 +69,14 @@ namespace UBB_SE_2026_923_2.Views.Accounts
                     Content = "Disable this account?",
                     PrimaryButtonText = "Yes",
                     CloseButtonText = "No",
-                    XamlRoot = this.XamlRoot
+                    XamlRoot = this.XamlRoot,
                 };
 
                 var result = await dialog.ShowAsync();
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    ViewModel.Disable(userItem);
+                    this.ViewModel.Disable(userItem);
                 }
             }
         }

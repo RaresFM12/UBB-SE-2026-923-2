@@ -1,14 +1,14 @@
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.Repositories;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Orders;
-
 namespace UBB_SE_2026_923_2.Views.Orders
 {
+    using System;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.Repositories;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Orders;
+
     public sealed partial class CheckoutPage : Page
     {
         private CheckoutViewModel viewModel;
@@ -23,13 +23,13 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             base.OnNavigatedTo(e);
 
-            currentOrderService = e.Parameter as IOrderService ?? new OrderService();
-            viewModel = new CheckoutViewModel(currentOrderService);
+            this.currentOrderService = e.Parameter as IOrderService ?? new OrderService();
+            this.viewModel = new CheckoutViewModel(this.currentOrderService);
 
-            viewModel.OrderPlacedSuccessfully += OnOrderSuccess;
-            viewModel.OrderPlacementFailed += OnOrderFailure;
+            this.viewModel.OrderPlacedSuccessfully += this.OnOrderSuccess;
+            this.viewModel.OrderPlacementFailed += this.OnOrderFailure;
 
-            DataContext = viewModel;
+            this.DataContext = this.viewModel;
             Bindings?.Update();
         }
 
@@ -37,10 +37,10 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             base.OnNavigatedFrom(e);
 
-            if (viewModel != null)
+            if (this.viewModel != null)
             {
-                viewModel.OrderPlacedSuccessfully -= OnOrderSuccess;
-                viewModel.OrderPlacementFailed -= OnOrderFailure;
+                this.viewModel.OrderPlacedSuccessfully -= this.OnOrderSuccess;
+                this.viewModel.OrderPlacementFailed -= this.OnOrderFailure;
             }
         }
 
@@ -68,9 +68,9 @@ namespace UBB_SE_2026_923_2.Views.Orders
             {
                 DateTimeOffset selectedDate = PickUpDateSelector.SelectedDates[PickUpDateSelector.SelectedDates.Count - 1];
 
-                if (viewModel.PlaceOrderCommand.CanExecute(selectedDate))
+                if (this.viewModel.PlaceOrderCommand.CanExecute(selectedDate))
                 {
-                    viewModel.PlaceOrderCommand.Execute(selectedDate);
+                    this.viewModel.PlaceOrderCommand.Execute(selectedDate);
                 }
             }
         }
@@ -79,12 +79,12 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             ContentDialog confirmationMessage = new ContentDialog
             {
-                XamlRoot = XamlRoot,
+                XamlRoot = this.XamlRoot,
                 Title = "Your order was placed",
-                CloseButtonText = "Ok"
+                CloseButtonText = "Ok",
             };
 
-            Frame.Navigate(
+            this.Frame.Navigate(
                 typeof(ProductsCatalogue.HomePage),
                 new ProductCatalogueService(App.Services.GetRequiredService<IItemsRepository>()));
 
@@ -95,10 +95,10 @@ namespace UBB_SE_2026_923_2.Views.Orders
         {
             ContentDialog causeOfErrorDialog = new ContentDialog
             {
-                XamlRoot = XamlRoot,
+                XamlRoot = this.XamlRoot,
                 Title = "Error",
                 Content = errorMessage,
-                CloseButtonText = "Ok"
+                CloseButtonText = "Ok",
             };
 
             await causeOfErrorDialog.ShowAsync();
@@ -106,7 +106,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
         private void NavigateToBasket(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(BasketPage), currentOrderService);
+            this.Frame.Navigate(typeof(BasketPage), this.currentOrderService);
         }
     }
 }

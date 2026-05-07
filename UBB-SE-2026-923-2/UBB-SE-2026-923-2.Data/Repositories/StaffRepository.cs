@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IStaffRepository"/>,
     /// <see cref="IShiftManagementStaffRepository"/> and
@@ -17,8 +17,6 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class StaffRepository : IShiftManagementStaffRepository, IStaffRepository, IPharmacyStaffRepository
     {
-        private const string DoctorRoleLabel = "Doctor";
-
         private readonly IDbContextFactory<AppDbContext> dbContextFactory;
 
         public StaffRepository(IDbContextFactory<AppDbContext> dbContextFactory)
@@ -28,7 +26,8 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<IStaff> LoadAllStaff()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
+
             // TPH: query the base set, return only the concrete subtypes the
             // legacy code surfaced (Doctor / Pharmacyst). EF picks the right
             // .NET type based on the Role discriminator.
@@ -42,7 +41,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IStaff? GetStaffById(int staffId)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.StaffMembers
                 .AsNoTracking()
                 .Where(s => s.StaffID == staffId && (s is Doctor || s is Pharmacyst))
@@ -51,13 +50,13 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Pharmacyst> GetPharmacists()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Pharmacysts.AsNoTracking().ToList();
         }
 
         public async Task<IReadOnlyList<(int DoctorId, string FirstName, string LastName)>> GetAllDoctorsAsync()
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync();
+            await using var db = await this.dbContextFactory.CreateDbContextAsync();
             var rows = await db.Doctors
                 .AsNoTracking()
                 .Select(d => new { d.StaffID, d.FirstName, d.LastName })
@@ -70,7 +69,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task UpdateStatusAsync(int staffId, string status)
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync();
+            await using var db = await this.dbContextFactory.CreateDbContextAsync();
             var staff = await db.StaffMembers.FirstOrDefaultAsync(s => s.StaffID == staffId);
             if (staff is null)
             {
@@ -83,7 +82,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateStaffAvailability(int staffId, bool isAvailable, DoctorStatus status = DoctorStatus.OFF_DUTY)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var staff = db.StaffMembers.FirstOrDefault(s => s.StaffID == staffId);
             if (staff is null)
             {
@@ -102,7 +101,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateStaff(IStaff staff)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var existing = db.StaffMembers.FirstOrDefault(s => s.StaffID == staff.StaffID);
             if (existing is null)
             {

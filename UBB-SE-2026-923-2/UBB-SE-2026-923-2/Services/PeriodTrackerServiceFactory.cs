@@ -1,7 +1,7 @@
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using UBB_SE_2026_923_2.Repositories;
+
     public class PeriodTrackerServiceFactory : IPeriodTrackerServiceFactory
     {
         private readonly IUsersRepository usersRepository;
@@ -23,17 +23,17 @@ namespace UBB_SE_2026_923_2.Services
 
         public IPeriodTrackerService CreatePeriodTrackerService()
         {
-            return new PeriodTrackerService(usersRepository, currentUserService);
+            return new PeriodTrackerService(this.usersRepository, this.currentUserService);
         }
 
         public IWellnessItemsService CreateWellnessItemsService()
         {
-            return new WellnessItemsService(itemsRepository);
+            return new WellnessItemsService(this.itemsRepository);
         }
 
         public IBasketService CreateBasketService()
         {
-            return new BasketService(orderService);
+            return new BasketService(this.orderService);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace UBB_SE_2026_923_2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260504225802_tiberia")]
-    partial class tiberia
+    partial class Tiberia
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

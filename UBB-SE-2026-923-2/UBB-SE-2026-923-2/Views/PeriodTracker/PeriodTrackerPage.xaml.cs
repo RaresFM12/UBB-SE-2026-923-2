@@ -1,9 +1,9 @@
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
-using UBB_SE_2026_923_2.ViewModels.PeriodTracker;
-
 namespace UBB_SE_2026_923_2.Views.PeriodTracker
 {
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Navigation;
+    using UBB_SE_2026_923_2.ViewModels.PeriodTracker;
+
     public sealed partial class PeriodTrackerPage : Page
     {
         public PeriodTrackerViewModel ViewModel { get; private set; }
@@ -19,8 +19,8 @@ namespace UBB_SE_2026_923_2.Views.PeriodTracker
 
             if (navigationEventArguments.Parameter is PeriodTrackerViewModel periodTrackerViewModel)
             {
-                ViewModel = periodTrackerViewModel;
-                DataContext = ViewModel;
+                this.ViewModel = periodTrackerViewModel;
+                this.DataContext = this.ViewModel;
                 Bindings.Update();
             }
         }

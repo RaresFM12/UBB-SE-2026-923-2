@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using System.Threading.Tasks;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IAppointmentRepository"/> that
     /// delegates persistence to the Web API.
@@ -24,7 +24,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task<IReadOnlyList<Appointment>> GetAllAppointmentsAsync()
         {
-            var appointments = await httpClient.GetFromJsonAsync<List<Appointment>>(BasePath);
+            var appointments = await this.httpClient.GetFromJsonAsync<List<Appointment>>(BasePath);
             return appointments ?? new List<Appointment>();
         }
 
@@ -39,14 +39,14 @@ namespace UBB_SE_2026_923_2.Repositories
                 Status = status,
             };
 
-            var response = await httpClient.PostAsJsonAsync(BasePath, payload);
+            var response = await this.httpClient.PostAsJsonAsync(BasePath, payload);
             response.EnsureSuccessStatusCode();
         }
 
         public async Task UpdateAppointmentStatusAsync(int id, string status)
         {
             var payload = new { Status = status };
-            var response = await httpClient.PatchAsJsonAsync($"{BasePath}/{id}/status", payload);
+            var response = await this.httpClient.PatchAsJsonAsync($"{BasePath}/{id}/status", payload);
             response.EnsureSuccessStatusCode();
         }
     }

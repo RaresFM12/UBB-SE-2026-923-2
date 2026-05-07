@@ -1,57 +1,66 @@
-﻿using System;
-using UBB_SE_2026_923_2.Models;
-
-namespace UBB_SE_2026_923_2.ViewModels.Doctor
+﻿namespace UBB_SE_2026_923_2.ViewModels.Doctor
 {
+    using System;
+    using UBB_SE_2026_923_2.Models;
+
     public class AppointmentItemViewModel
     {
         public int Id { get; set; }
+
         public string PatientName { get; set; } = string.Empty;
+
         public DateTime Date { get; set; }
-        public string DateText => Date.ToString("dd MMM yyyy");
+
+        public string DateText => this.Date.ToString("dd MMM yyyy");
+
         public string Notes { get; set; } = string.Empty;
 
         public int DoctorId { get; set; }
+
         public string DoctorName { get; set; } = string.Empty;
 
         public string Type { get; set; } = string.Empty;
+
         public string Location { get; set; } = string.Empty;
+
         public string Status { get; set; } = string.Empty;
 
         public TimeSpan StartTime { get; set; }
+
         public TimeSpan EndTime { get; set; }
 
-        public string TimeRangeText => $"{StartTime:hh\\:mm} - {EndTime:hh\\:mm}";
-        public string LocationSafe => string.IsNullOrWhiteSpace(Location) ? "Location TBD" : Location;
+        public string TimeRangeText => $"{this.StartTime:hh\\:mm} - {this.EndTime:hh\\:mm}";
+
+        public string LocationSafe => string.IsNullOrWhiteSpace(this.Location) ? "Location TBD" : this.Location;
 
         public AppointmentItemViewModel(Appointment item)
         {
-            Id = item.Id;
-            PatientName = item.PatientName ?? string.Empty;
-            Date = item.Date;
-            Notes = item.Notes ?? string.Empty;
-            DoctorId = item.DoctorId;
-            DoctorName = item.DoctorName ?? string.Empty;
-            Type = item.Type ?? string.Empty;
-            Location = item.Location ?? string.Empty;
-            Status = item.Status ?? string.Empty;
-            StartTime = item.StartTime;
-            EndTime = item.EndTime;
+            this.Id = item.Id;
+            this.PatientName = item.PatientName ?? string.Empty;
+            this.Date = item.Date;
+            this.Notes = item.Notes ?? string.Empty;
+            this.DoctorId = item.DoctorId;
+            this.DoctorName = item.DoctorName ?? string.Empty;
+            this.Type = item.Type ?? string.Empty;
+            this.Location = item.Location ?? string.Empty;
+            this.Status = item.Status ?? string.Empty;
+            this.StartTime = item.StartTime;
+            this.EndTime = item.EndTime;
         }
 
         public Appointment ToAppointment() => new Appointment
         {
-            Id = Id,
-            PatientName = PatientName,
-            DoctorId = DoctorId,
-            DoctorName = DoctorName,
-            Date = Date,
-            StartTime = StartTime,
-            EndTime = EndTime,
-            Status = Status,
-            Type = Type,
-            Location = Location,
-            Notes = Notes
+            Id = this.Id,
+            PatientName = this.PatientName,
+            DoctorId = this.DoctorId,
+            DoctorName = this.DoctorName,
+            Date = this.Date,
+            StartTime = this.StartTime,
+            EndTime = this.EndTime,
+            Status = this.Status,
+            Type = this.Type,
+            Location = this.Location,
+            Notes = this.Notes,
         };
     }
 }

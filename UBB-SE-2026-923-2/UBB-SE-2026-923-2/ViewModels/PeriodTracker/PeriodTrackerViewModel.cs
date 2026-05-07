@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using Microsoft.UI.Xaml;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-using Syncfusion.UI.Xaml.Core;
-
-namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
+﻿namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Input;
+    using Microsoft.UI.Xaml;
+    using Syncfusion.UI.Xaml.Core;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public class PeriodTrackerViewModel : INotifyPropertyChanged
     {
         private const int MaximumNotesCount = 4;
@@ -23,7 +23,7 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
         private readonly IWellnessItemsService wellnessItemsService;
         private readonly IBasketService basketService;
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
         public CalendarsViewModel Calendars { get; }
 
@@ -32,127 +32,137 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
         public ObservableCollection<ItemListViewModel> ItemsLists { get; }
 
         public ICommand CalculateCommand { get; }
+
         public ICommand NextCycleCommand { get; }
+
         public ICommand PreviousCycleCommand { get; }
+
         public ICommand AddNoteCommand { get; }
 
-        public bool CanAddNote => Notes.Count < MaximumNotesCount;
+        public bool CanAddNote => this.Notes.Count < MaximumNotesCount;
 
         public Visibility AddNoteVisibility =>
-            CanAddNote ? Visibility.Visible : Visibility.Collapsed;
+            this.CanAddNote ? Visibility.Visible : Visibility.Collapsed;
 
         private Visibility calendarsVisibility = Visibility.Collapsed;
+
         public Visibility CalendarsVisibility
         {
-            get => calendarsVisibility;
+            get => this.calendarsVisibility;
             set
             {
-                if (calendarsVisibility == value)
+                if (this.calendarsVisibility == value)
                 {
                     return;
                 }
 
-                calendarsVisibility = value;
-                OnPropertyChanged();
+                this.calendarsVisibility = value;
+                this.OnPropertyChanged();
             }
         }
 
         private Visibility shopVisibility = Visibility.Collapsed;
+
         public Visibility ShopVisibility
         {
-            get => shopVisibility;
+            get => this.shopVisibility;
             set
             {
-                if (shopVisibility == value)
+                if (this.shopVisibility == value)
                 {
                     return;
                 }
 
-                shopVisibility = value;
-                OnPropertyChanged();
+                this.shopVisibility = value;
+                this.OnPropertyChanged();
             }
         }
 
         private DateTimeOffset startPeriodDate;
+
         public DateTimeOffset StartPeriodDate
         {
-            get => startPeriodDate;
+            get => this.startPeriodDate;
             set
             {
-                if (startPeriodDate == value)
+                if (this.startPeriodDate == value)
                 {
                     return;
                 }
 
-                startPeriodDate = value;
-                OnPropertyChanged();
+                this.startPeriodDate = value;
+                this.OnPropertyChanged();
             }
         }
 
         private string cycleDaysInputText = string.Empty;
+
         public string CycleDaysInputText
         {
-            get => cycleDaysInputText;
+            get => this.cycleDaysInputText;
             set
             {
-                if (cycleDaysInputText == value)
+                if (this.cycleDaysInputText == value)
                 {
                     return;
                 }
 
-                cycleDaysInputText = value;
-                OnPropertyChanged();
+                this.cycleDaysInputText = value;
+                this.OnPropertyChanged();
             }
         }
 
         private string periodLastsInputText = string.Empty;
+
         public string PeriodLastsInputText
         {
-            get => periodLastsInputText;
+            get => this.periodLastsInputText;
             set
             {
-                if (periodLastsInputText == value)
+                if (this.periodLastsInputText == value)
                 {
                     return;
                 }
 
-                periodLastsInputText = value;
-                OnPropertyChanged();
+                this.periodLastsInputText = value;
+                this.OnPropertyChanged();
             }
         }
 
         private string validationErrorMessage = string.Empty;
+
         public string ValidationErrorMessage
         {
-            get => validationErrorMessage;
+            get => this.validationErrorMessage;
             set
             {
-                if (validationErrorMessage == value)
+                if (this.validationErrorMessage == value)
                 {
                     return;
                 }
 
-                validationErrorMessage = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(HasValidationError));
+                this.validationErrorMessage = value;
+                this.OnPropertyChanged();
+                this.OnPropertyChanged(nameof(this.HasValidationError));
             }
         }
 
-        public bool HasValidationError => !string.IsNullOrEmpty(validationErrorMessage);
+        public bool HasValidationError => !string.IsNullOrEmpty(this.validationErrorMessage);
 
         private int premenstrualSyndromeOptionInput;
+
         public int PremenstrualSyndromeOptionInput
         {
-            get => premenstrualSyndromeOptionInput;
+            get => this.premenstrualSyndromeOptionInput;
             set
             {
-                if (premenstrualSyndromeOptionInput == value)
+                if (this.premenstrualSyndromeOptionInput == value)
                 {
                     return;
                 }
 
-                premenstrualSyndromeOptionInput = value;
-                OnPropertyChanged();
+                this.premenstrualSyndromeOptionInput = value;
+                this.OnPropertyChanged();
             }
         }
 
@@ -165,132 +175,132 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
             this.wellnessItemsService = wellnessItemsService;
             this.basketService = basketService;
 
-            Calendars = new CalendarsViewModel();
-            Notes = new ObservableCollection<NoteViewModel>();
-            ItemsLists = new ObservableCollection<ItemListViewModel>();
+            this.Calendars = new CalendarsViewModel();
+            this.Notes = new ObservableCollection<NoteViewModel>();
+            this.ItemsLists = new ObservableCollection<ItemListViewModel>();
 
-            CalculateCommand = new DelegateCommand(ignoredParameter => CalculatePeriodTracker());
-            NextCycleCommand = new DelegateCommand(ignoredParameter => UpdatePeriodTracker(true));
-            PreviousCycleCommand = new DelegateCommand(ignoredParameter => UpdatePeriodTracker(false));
-            AddNoteCommand = new DelegateCommand(ignoredParameter => AddNewNote());
+            this.CalculateCommand = new DelegateCommand(ignoredParameter => this.CalculatePeriodTracker());
+            this.NextCycleCommand = new DelegateCommand(ignoredParameter => this.UpdatePeriodTracker(true));
+            this.PreviousCycleCommand = new DelegateCommand(ignoredParameter => this.UpdatePeriodTracker(false));
+            this.AddNoteCommand = new DelegateCommand(ignoredParameter => this.AddNewNote());
 
-            LoadInitialState();
+            this.LoadInitialState();
         }
 
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void LoadInitialState()
         {
-            PeriodTrackerState trackerState = periodTrackerService.GetTrackerState();
+            PeriodTrackerState trackerState = this.periodTrackerService.GetTrackerState();
 
-            StartPeriodDate = trackerState.StartPeriodDate;
-            CycleDaysInputText = trackerState.CycleDays > 0 ? trackerState.CycleDays.ToString() : string.Empty;
-            PeriodLastsInputText = trackerState.PeriodLasts > 0 ? trackerState.PeriodLasts.ToString() : string.Empty;
-            PremenstrualSyndromeOptionInput = trackerState.PremenstrualSyndromeOption;
+            this.StartPeriodDate = trackerState.StartPeriodDate;
+            this.CycleDaysInputText = trackerState.CycleDays > 0 ? trackerState.CycleDays.ToString() : string.Empty;
+            this.PeriodLastsInputText = trackerState.PeriodLasts > 0 ? trackerState.PeriodLasts.ToString() : string.Empty;
+            this.PremenstrualSyndromeOptionInput = trackerState.PremenstrualSyndromeOption;
 
-            LoadNotes();
+            this.LoadNotes();
 
             if (trackerState.HasPeriodTracker)
             {
-                Calendars.CalculatePeriodTracker(
-                    StartPeriodDate.Date,
+                this.Calendars.CalculatePeriodTracker(
+                    this.StartPeriodDate.Date,
                     trackerState.CycleDays,
                     trackerState.PeriodLasts,
-                    PremenstrualSyndromeOptionInput);
+                    this.PremenstrualSyndromeOptionInput);
 
-                CalendarsVisibility = Visibility.Visible;
-                BuildItems();
+                this.CalendarsVisibility = Visibility.Visible;
+                this.BuildItems();
             }
             else
             {
-                CalendarsVisibility = Visibility.Collapsed;
-                ShopVisibility = Visibility.Collapsed;
+                this.CalendarsVisibility = Visibility.Collapsed;
+                this.ShopVisibility = Visibility.Collapsed;
             }
         }
 
         private void LoadNotes()
         {
-            Notes.Clear();
+            this.Notes.Clear();
 
-            foreach (KeyValuePair<int, Tuple<string, bool>> noteEntry in periodTrackerService
+            foreach (KeyValuePair<int, Tuple<string, bool>> noteEntry in this.periodTrackerService
                          .GetNotes()
                          .OrderBy(note => note.Key)
                          .Take(MaximumNotesCount))
             {
-                Notes.Add(new NoteViewModel(
+                this.Notes.Add(new NoteViewModel(
                     noteEntry.Key,
                     noteEntry.Value.Item1,
                     noteEntry.Value.Item2,
-                    DeleteNote,
-                    UpdateNote));
+                    this.DeleteNote,
+                    this.UpdateNote));
             }
 
-            OnPropertyChanged(nameof(CanAddNote));
-            OnPropertyChanged(nameof(AddNoteVisibility));
+            this.OnPropertyChanged(nameof(this.CanAddNote));
+            this.OnPropertyChanged(nameof(this.AddNoteVisibility));
         }
 
         private void CalculatePeriodTracker()
         {
-            if (!int.TryParse(PeriodLastsInputText, out int periodLasts) || periodLasts < 1 || periodLasts > 9)
+            if (!int.TryParse(this.PeriodLastsInputText, out int periodLasts) || periodLasts < 1 || periodLasts > 9)
             {
-                ValidationErrorMessage = "Period length must be a whole number between 1 and 9.";
+                this.ValidationErrorMessage = "Period length must be a whole number between 1 and 9.";
                 return;
             }
 
-            if (!int.TryParse(CycleDaysInputText, out int cycleDays) || cycleDays < 20 || cycleDays > 45)
+            if (!int.TryParse(this.CycleDaysInputText, out int cycleDays) || cycleDays < 20 || cycleDays > 45)
             {
-                ValidationErrorMessage = "Cycle length must be a whole number between 20 and 45.";
+                this.ValidationErrorMessage = "Cycle length must be a whole number between 20 and 45.";
                 return;
             }
 
-            ValidationErrorMessage = string.Empty;
+            this.ValidationErrorMessage = string.Empty;
 
-            periodTrackerService.UpdatePeriodTracker(
-                StartPeriodDate,
+            this.periodTrackerService.UpdatePeriodTracker(
+                this.StartPeriodDate,
                 cycleDays,
                 periodLasts,
-                PremenstrualSyndromeOptionInput);
+                this.PremenstrualSyndromeOptionInput);
 
-            Calendars.CalculatePeriodTracker(
-                StartPeriodDate.Date,
+            this.Calendars.CalculatePeriodTracker(
+                this.StartPeriodDate.Date,
                 cycleDays,
                 periodLasts,
-                PremenstrualSyndromeOptionInput);
+                this.PremenstrualSyndromeOptionInput);
 
-            CalendarsVisibility = Visibility.Visible;
-            BuildItems();
+            this.CalendarsVisibility = Visibility.Visible;
+            this.BuildItems();
         }
 
         private void UpdatePeriodTracker(bool shouldMoveToNextCycle)
         {
-            if (CalendarsVisibility != Visibility.Visible)
+            if (this.CalendarsVisibility != Visibility.Visible)
             {
                 return;
             }
 
-            Calendars.UpdatePeriodTracker(shouldMoveToNextCycle);
-            BuildItems();
+            this.Calendars.UpdatePeriodTracker(shouldMoveToNextCycle);
+            this.BuildItems();
         }
 
         private void BuildItems()
         {
-            ItemsLists.Clear();
+            this.ItemsLists.Clear();
 
-            List<Item> wellnessItems = wellnessItemsService.GetWellnessItems();
+            List<Item> wellnessItems = this.wellnessItemsService.GetWellnessItems();
 
             if (wellnessItems.Count == 0)
             {
-                ShopVisibility = Visibility.Collapsed;
-                OnPropertyChanged(nameof(ItemsLists));
+                this.ShopVisibility = Visibility.Collapsed;
+                this.OnPropertyChanged(nameof(this.ItemsLists));
                 return;
             }
 
-            ShopVisibility = Visibility.Visible;
+            this.ShopVisibility = Visibility.Visible;
 
-            float extraDiscountPercentage = Calendars.IsInMenstrualPhase
+            float extraDiscountPercentage = this.Calendars.IsInMenstrualPhase
                 ? MenstrualPhaseExtraDiscountPercentage
                 : NoExtraDiscountPercentage;
 
@@ -303,24 +313,24 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
                     itemRow.Items.Add(new ItemViewModel(
                         currentItem,
                         extraDiscountPercentage,
-                        basketService));
+                        this.basketService));
                 }
 
-                ItemsLists.Add(itemRow);
+                this.ItemsLists.Add(itemRow);
             }
 
-            OnPropertyChanged(nameof(ItemsLists));
+            this.OnPropertyChanged(nameof(this.ItemsLists));
         }
 
         private void AddNewNote()
         {
-            if (Notes.Count >= MaximumNotesCount)
+            if (this.Notes.Count >= MaximumNotesCount)
             {
                 return;
             }
 
-            periodTrackerService.AddNote(string.Empty);
-            LoadNotes();
+            this.periodTrackerService.AddNote(string.Empty);
+            this.LoadNotes();
         }
 
         private void UpdateNote(NoteViewModel note)
@@ -330,7 +340,7 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
                 return;
             }
 
-            periodTrackerService.UpdateNote(note.NoteId, note.NoteBody, note.NoteIsDone);
+            this.periodTrackerService.UpdateNote(note.NoteId, note.NoteBody, note.NoteIsDone);
         }
 
         private void DeleteNote(NoteViewModel note)
@@ -340,8 +350,8 @@ namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
                 return;
             }
 
-            periodTrackerService.DeleteNote(note.NoteId);
-            LoadNotes();
+            this.periodTrackerService.DeleteNote(note.NoteId);
+            this.LoadNotes();
         }
     }
 }

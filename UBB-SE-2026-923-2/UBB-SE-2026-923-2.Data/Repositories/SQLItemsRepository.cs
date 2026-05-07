@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IItemsRepository"/>.
     /// <para>
@@ -34,7 +34,7 @@ namespace UBB_SE_2026_923_2.Repositories
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var item = new Item(name, producer, category, price, numberOfPills,
                                 quantity: 0, label, description, imagePath, discount);
@@ -49,7 +49,7 @@ namespace UBB_SE_2026_923_2.Repositories
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var item = new Item(name, producer, category, price, numberOfPills,
                                 activeSubstances, batches, quantity,
@@ -81,7 +81,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void RemoveItemById(int idToBeRemoved)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var item = db.Items.FirstOrDefault(i => i.Id == idToBeRemoved);
             if (item is null)
@@ -98,7 +98,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public Item GetItemById(int id)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var item = db.Items
                 .AsNoTracking()
                 .Include(i => i.ItemSubstanceEntries)
@@ -110,7 +110,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Item> GetAllItems()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var items = db.Items
                 .AsNoTracking()
                 .Include(i => i.ItemSubstanceEntries)
@@ -121,7 +121,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<Item> GetItemsByName(string name)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var items = db.Items
                 .AsNoTracking()
                 .Include(i => i.ItemSubstanceEntries)
@@ -133,7 +133,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateItemById(Item newItem)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var existing = db.Items
                 .Include(i => i.ItemSubstanceEntries)
@@ -187,7 +187,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public bool ItemExists(int id)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Items.AsNoTracking().Any(i => i.Id == id);
         }
 
@@ -195,7 +195,7 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             DateOnly oneMonthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
 
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             return db.OrderItems
                 .AsNoTracking()

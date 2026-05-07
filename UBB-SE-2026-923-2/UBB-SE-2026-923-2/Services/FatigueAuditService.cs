@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public sealed class FatigueAuditService : IFatigueAuditService
     {
         private const double MaxWeeklyHours = 60.0;
@@ -37,7 +37,7 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            shiftRepository.UpdateShiftStaffId(shiftId, newStaffId);
+            this.shiftRepository.UpdateShiftStaffId(shiftId, newStaffId);
             return true;
         }
 
@@ -46,8 +46,8 @@ namespace UBB_SE_2026_923_2.Services
             var normalizedWeekStart = StartOfWeek(weekStart);
             var normalizedWeekEnd = normalizedWeekStart.AddDays(DaysInWeek);
 
-            var staffProfilesById = BuildStaffProfilesById();
-            var allShifts = BuildAllRosterShifts(staffProfilesById)
+            var staffProfilesById = this.BuildStaffProfilesById();
+            var allShifts = this.BuildAllRosterShifts(staffProfilesById)
                 .Where(IsAuditableShift)
                 .ToList();
 
@@ -134,7 +134,7 @@ namespace UBB_SE_2026_923_2.Services
                 .OrderBy(ByShiftStart)
                 .ToList();
 
-            var suggestions = BuildSuggestions(dedupedViolations, normalizedWeekStart, weeklyShifts, allShifts, eligibleStaffProfiles);
+            var suggestions = this.BuildSuggestions(dedupedViolations, normalizedWeekStart, weeklyShifts, allShifts, eligibleStaffProfiles);
 
             return new AutoAuditResult
             {
@@ -151,12 +151,12 @@ namespace UBB_SE_2026_923_2.Services
         private Dictionary<int, StaffProfile> BuildStaffProfilesById()
         {
             var profilesById = new Dictionary<int, StaffProfile>();
-            foreach (var staffMember in staffRepository.LoadAllStaff())
+            foreach (var staffMember in this.staffRepository.LoadAllStaff())
             {
                 profilesById[staffMember.StaffID] = new StaffProfile
                 {
                     StaffId = staffMember.StaffID,
-                    FullName = ($"{staffMember.FirstName} {staffMember.LastName}").Trim(),
+                    FullName = $"{staffMember.FirstName} {staffMember.LastName}".Trim(),
                     Role = staffMember switch
                     {
                         Doctor => DoctorRole,
@@ -174,13 +174,14 @@ namespace UBB_SE_2026_923_2.Services
                     Status = staffMember is Doctor doctorMember ? doctorMember.DoctorStatus.ToString() : AvailableStaffStatus,
                 };
             }
+
             return profilesById;
         }
 
         private IReadOnlyList<RosterShift> BuildAllRosterShifts(IReadOnlyDictionary<int, StaffProfile> staffProfilesById)
         {
             var rosterShifts = new List<RosterShift>();
-            foreach (var shift in shiftRepository.GetAllShifts())
+            foreach (var shift in this.shiftRepository.GetAllShifts())
             {
                 int staffId = shift.AppointedStaff.StaffID;
                 StaffProfile? matchingProfile = staffProfilesById.TryGetValue(staffId, out var profile) ? profile : null;
@@ -196,6 +197,7 @@ namespace UBB_SE_2026_923_2.Services
                     Status = shift.Status.ToString(),
                 });
             }
+
             return rosterShifts;
         }
 

@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="ISubstancesRepository"/>. All
     /// data access goes through a short-lived <see cref="AppDbContext"/>
@@ -26,26 +26,26 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void AddSubstance(string name, float lethalDose, string description)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             db.Substances.Add(new Substance(name, lethalDose, description));
             db.SaveChanges();
         }
 
         public Substance GetSubstanceByName(string name)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Substances.AsNoTracking().FirstOrDefault(s => s.Name == name)!;
         }
 
         public List<Substance> GetAllSubstances()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Substances.AsNoTracking().ToList();
         }
 
         public void RemoveSubstanceByName(string name)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var substance = db.Substances.FirstOrDefault(s => s.Name == name);
             if (substance is null)
             {
@@ -63,7 +63,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateSubstanceByName(Substance substance)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var tracked = db.Substances.FirstOrDefault(s => s.Name == substance.Name);
             if (tracked is null)
             {
@@ -77,7 +77,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public bool SubstanceExists(string name)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Substances.AsNoTracking().Any(s => s.Name == name);
         }
 
@@ -88,7 +88,7 @@ namespace UBB_SE_2026_923_2.Repositories
             // to orders picked up in the last month.
             DateOnly oneMonthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
 
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             return db.ItemSubstances
                 .AsNoTracking()

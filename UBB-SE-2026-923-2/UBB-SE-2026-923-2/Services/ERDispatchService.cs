@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public sealed class ERDispatchService : IERDispatchService
     {
         private const string PendingStatus = "PENDING";
@@ -54,7 +54,7 @@ namespace UBB_SE_2026_923_2.Services
             (string Specialization, string Location) ToSpecializationLocationPair(DoctorProfile doctor) =>
                 (doctor.Specialization.Trim(), doctor.Location.Trim());
 
-            var availableDoctors = GetAvailableDoctors(GetDoctorRosterForDispatch());
+            var availableDoctors = GetAvailableDoctors(this.GetDoctorRosterForDispatch());
             var liveTemplates = availableDoctors
                 .Where(HasSpecializationAndLocation)
                 .Select(ToSpecializationLocationPair)
@@ -69,7 +69,7 @@ namespace UBB_SE_2026_923_2.Services
             for (int templateIndex = 0; templateIndex < normalizedCount; templateIndex++)
             {
                 var template = templates[(startIndex + templateIndex) % templates.Length];
-                var newId = requestRepository.AddRequest(template.Specialization, template.Location, PendingStatus);
+                var newId = this.requestRepository.AddRequest(template.Specialization, template.Location, PendingStatus);
                 createdIds.Add(newId);
             }
 
@@ -80,7 +80,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             int ToRequestId(ERRequest request) => request.Id;
 
-            var pendingIds = GetPendingRequests()
+            var pendingIds = this.GetPendingRequests()
                 .Select(ToRequestId)
                 .ToList();
             return Task.FromResult<IReadOnlyList<int>>(pendingIds);
@@ -88,11 +88,11 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task<ERDispatchResult> DispatchERRequestAsync(int requestId)
         {
-            await dispatchLock.WaitAsync();
+            await this.dispatchLock.WaitAsync();
             try
             {
                 bool HasMatchingId(ERRequest pendingRequest) => pendingRequest.Id == requestId;
-                var request = GetPendingRequests().FirstOrDefault(HasMatchingId);
+                var request = this.GetPendingRequests().FirstOrDefault(HasMatchingId);
                 if (request == null)
                 {
                     return new ERDispatchResult
@@ -102,11 +102,11 @@ namespace UBB_SE_2026_923_2.Services
                     };
                 }
 
-                var matchedDoctor = FindBestMatchingDoctor(request);
+                var matchedDoctor = this.FindBestMatchingDoctor(request);
 
                 if (matchedDoctor == null)
                 {
-                    requestRepository.UpdateRequestStatus(requestId, UnmatchedStatus, null, null);
+                    this.requestRepository.UpdateRequestStatus(requestId, UnmatchedStatus, null, null);
                     return new ERDispatchResult
                     {
                         Request = request,
@@ -115,10 +115,10 @@ namespace UBB_SE_2026_923_2.Services
                     };
                 }
 
-                requestRepository.UpdateRequestStatus(requestId, AssignedStatus, matchedDoctor.DoctorId, matchedDoctor.FullName);
-                await staffRepository.UpdateStatusAsync(matchedDoctor.DoctorId, DoctorStatus.IN_EXAMINATION.ToString());
+                this.requestRepository.UpdateRequestStatus(requestId, AssignedStatus, matchedDoctor.DoctorId, matchedDoctor.FullName);
+                await this.staffRepository.UpdateStatusAsync(matchedDoctor.DoctorId, DoctorStatus.IN_EXAMINATION.ToString());
 
-                NotifyER(matchedDoctor, request);
+                this.NotifyER(matchedDoctor, request);
 
                 return new ERDispatchResult
                 {
@@ -132,31 +132,31 @@ namespace UBB_SE_2026_923_2.Services
             }
             finally
             {
-                dispatchLock.Release();
+                this.dispatchLock.Release();
             }
         }
 
         private void NotifyER(DoctorProfile matchedDoctor, ERRequest request)
         {
-            if (notificationRepository == null)
+            if (this.notificationRepository == null)
             {
                 return;
             }
 
             string message = $"You have been assigned to ER request #{request.Id} ({request.Specialization}) at {request.Location}.";
-            notificationRepository.AddNotification(matchedDoctor.DoctorId, ERAssignmentNotificationTitle, message);
+            this.notificationRepository.AddNotification(matchedDoctor.DoctorId, ERAssignmentNotificationTitle, message);
         }
 
         public Task<IReadOnlyList<DoctorProfile>> GetManualOverrideCandidatesAsync(int requestId, int nearEndMinutes)
         {
-            var request = requestRepository.GetRequestById(requestId);
+            var request = this.requestRepository.GetRequestById(requestId);
             if (request == null)
             {
                 return Task.FromResult<IReadOnlyList<DoctorProfile>>(Array.Empty<DoctorProfile>());
             }
 
             var now = DateTime.Now;
-            var inExaminationDoctors = GetDoctorsInExamination(GetDoctorRosterForDispatch());
+            var inExaminationDoctors = GetDoctorsInExamination(this.GetDoctorRosterForDispatch());
 
             bool HasScheduleEnd(DoctorProfile doctor) => doctor.ScheduleEnd.HasValue;
             bool IsNearEnd(DoctorProfile doctor)
@@ -164,6 +164,7 @@ namespace UBB_SE_2026_923_2.Services
                 var minutesToEnd = (doctor.ScheduleEnd!.Value - now).TotalMinutes;
                 return minutesToEnd >= 0 && minutesToEnd <= nearEndMinutes;
             }
+
             bool MatchesRequestSpecialization(DoctorProfile doctor) =>
                 IsSameValue(doctor.Specialization, request.Specialization);
 
@@ -187,12 +188,12 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task<ERDispatchResult> ManualOverrideAsync(int requestId, int doctorId, int nearEndMinutes)
         {
-            await dispatchLock.WaitAsync();
+            await this.dispatchLock.WaitAsync();
             try
             {
-                var request = requestRepository.GetRequestById(requestId);
+                var request = this.requestRepository.GetRequestById(requestId);
                 bool HasMatchingDoctorId(DoctorProfile rosterEntry) => rosterEntry.DoctorId == doctorId;
-                var doctor = GetDoctorRosterForDispatch().FirstOrDefault(HasMatchingDoctorId);
+                var doctor = this.GetDoctorRosterForDispatch().FirstOrDefault(HasMatchingDoctorId);
 
                 if (request == null || doctor == null)
                 {
@@ -203,7 +204,7 @@ namespace UBB_SE_2026_923_2.Services
                     };
                 }
 
-                var eligibleCandidates = await GetManualOverrideCandidatesAsync(requestId, nearEndMinutes);
+                var eligibleCandidates = await this.GetManualOverrideCandidatesAsync(requestId, nearEndMinutes);
                 bool HasMatchingDoctorIdInCandidates(DoctorProfile overrideCandidate) => overrideCandidate.DoctorId == doctorId;
                 if (!eligibleCandidates.Any(HasMatchingDoctorIdInCandidates))
                 {
@@ -215,10 +216,10 @@ namespace UBB_SE_2026_923_2.Services
                     };
                 }
 
-                requestRepository.UpdateRequestStatus(requestId, AssignedStatus, doctor.DoctorId, doctor.FullName);
-                await staffRepository.UpdateStatusAsync(doctor.DoctorId, DoctorStatus.IN_EXAMINATION.ToString());
+                this.requestRepository.UpdateRequestStatus(requestId, AssignedStatus, doctor.DoctorId, doctor.FullName);
+                await this.staffRepository.UpdateStatusAsync(doctor.DoctorId, DoctorStatus.IN_EXAMINATION.ToString());
 
-                NotifyER(doctor, request);
+                this.NotifyER(doctor, request);
 
                 return new ERDispatchResult
                 {
@@ -232,13 +233,13 @@ namespace UBB_SE_2026_923_2.Services
             }
             finally
             {
-                dispatchLock.Release();
+                this.dispatchLock.Release();
             }
         }
 
         private DoctorProfile? FindBestMatchingDoctor(ERRequest request)
         {
-            var availableDoctors = GetAvailableDoctors(GetDoctorRosterForDispatch());
+            var availableDoctors = GetAvailableDoctors(this.GetDoctorRosterForDispatch());
 
             bool IsMatchingAvailableDoctor(DoctorProfile doctor) =>
                 IsSameValue(doctor.Specialization, request.Specialization)
@@ -256,8 +257,8 @@ namespace UBB_SE_2026_923_2.Services
         private IReadOnlyList<DoctorProfile> GetDoctorRosterForDispatch()
         {
             var now = DateTime.Now;
-            var allShifts = shiftRepository.GetAllShifts();
-            var allStaff = staffRepository.LoadAllStaff();
+            var allShifts = this.shiftRepository.GetAllShifts();
+            var allStaff = this.staffRepository.LoadAllStaff();
 
             bool IsCurrentNonCancelledShift(Shift shift) =>
                 shift.StartTime <= now
@@ -288,7 +289,7 @@ namespace UBB_SE_2026_923_2.Services
                 roster.Add(new DoctorProfile
                 {
                     DoctorId = staffMember.StaffID,
-                    FullName = ($"{staffMember.FirstName} {staffMember.LastName}").Trim(),
+                    FullName = $"{staffMember.FirstName} {staffMember.LastName}".Trim(),
                     Specialization = string.IsNullOrWhiteSpace(staffMember.Specialization) ? DefaultSpecialization : staffMember.Specialization.Trim(),
                     Status = staffMember.DoctorStatus,
                     Location = (currentShift.Location ?? string.Empty).Trim(),
@@ -296,6 +297,7 @@ namespace UBB_SE_2026_923_2.Services
                     ScheduleEnd = currentShift.EndTime,
                 });
             }
+
             return roster;
         }
 
@@ -305,7 +307,7 @@ namespace UBB_SE_2026_923_2.Services
                 string.Equals((request.Status ?? string.Empty).Trim(), PendingStatus, StringComparison.OrdinalIgnoreCase);
             DateTime ByCreatedAt(ERRequest request) => request.CreatedAt;
 
-            return requestRepository.GetAllRequests()
+            return this.requestRepository.GetAllRequests()
                 .Where(IsPending)
                 .OrderBy(ByCreatedAt)
                 .ToList();

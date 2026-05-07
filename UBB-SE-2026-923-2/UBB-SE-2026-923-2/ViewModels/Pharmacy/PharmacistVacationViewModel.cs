@@ -1,12 +1,12 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Base;
-
 namespace UBB_SE_2026_923_2.ViewModels.Pharmacy
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Base;
+
     public sealed class PharmacistVacationViewModel : ObservableObject
     {
         private readonly IPharmacyVacationService service;
@@ -16,20 +16,20 @@ namespace UBB_SE_2026_923_2.ViewModels.Pharmacy
         public PharmacistVacationViewModel(IPharmacyVacationService service)
         {
             this.service = service ?? throw new ArgumentNullException(nameof(service));
-            LoadPharmacists();
+            this.LoadPharmacists();
         }
 
         public void LoadPharmacists()
         {
-            Pharmacists.Clear();
-            foreach (var pharmacist in service.GetPharmacists())
+            this.Pharmacists.Clear();
+            foreach (var pharmacist in this.service.GetPharmacists())
             {
                 bool IsNonEmpty(string? namePart) => !string.IsNullOrWhiteSpace(namePart);
                 var displayName = string.Join(
                     " ",
                     new[] { pharmacist.FirstName?.Trim(), pharmacist.LastName?.Trim() }
                         .Where(IsNonEmpty));
-                Pharmacists.Add(new PharmacistChoice(pharmacist, displayName));
+                this.Pharmacists.Add(new PharmacistChoice(pharmacist, displayName));
             }
         }
 
@@ -50,8 +50,8 @@ namespace UBB_SE_2026_923_2.ViewModels.Pharmacy
 
             try
             {
-                service.RegisterVacation(
-                    pharmacist.staff.StaffID,
+                this.service.RegisterVacation(
+                    pharmacist.Staff.StaffID,
                     startDate.Value.Date,
                     endDate.Value.Date);
                 return VacationRegistrationResult.Success("Vacation shift added to repository.");
@@ -66,12 +66,12 @@ namespace UBB_SE_2026_923_2.ViewModels.Pharmacy
             }
         }
 
-        public sealed record PharmacistChoice(Pharmacyst staff, string displayName);
+        public sealed record PharmacistChoice(Pharmacyst Staff, string DisplayName);
     }
 
     public sealed record VacationRegistrationResult(
-        VacationRegistrationStatus status,
-        string message)
+        VacationRegistrationStatus Status,
+        string Message)
     {
         public static VacationRegistrationResult Success(string message) =>
             new VacationRegistrationResult(VacationRegistrationStatus.Success, message);

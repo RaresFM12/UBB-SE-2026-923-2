@@ -1,11 +1,11 @@
-using UBB_SE_2026_923_2.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.Views
 {
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public sealed partial class RoleSelectionPage : Page
     {
         private readonly ICurrentUserService currentUser;
@@ -14,25 +14,25 @@ namespace UBB_SE_2026_923_2.Views
         {
             InitializeComponent();
 
-            currentUser = App.Services.GetRequiredService<ICurrentUserService>();
+            this.currentUser = App.Services.GetRequiredService<ICurrentUserService>();
         }
 
         private void Admin_Click(object sender, RoutedEventArgs e)
         {
-            currentUser.RoleType = UserRole.Admin;
-            Frame.Navigate(typeof(RoleDashboardPage));
+            this.currentUser.RoleType = UserRole.Admin;
+            this.Frame.Navigate(typeof(RoleDashboardPage));
         }
 
         private void Doctor_Click(object sender, RoutedEventArgs e)
         {
-            currentUser.RoleType = UserRole.Doctor;
-            Frame.Navigate(typeof(RoleDashboardPage));
+            this.currentUser.RoleType = UserRole.Doctor;
+            this.Frame.Navigate(typeof(RoleDashboardPage));
         }
 
         private void Pharmacist_Click(object sender, RoutedEventArgs e)
         {
-            currentUser.RoleType = UserRole.Pharmacist;
-            Frame.Navigate(typeof(RoleDashboardPage));
+            this.currentUser.RoleType = UserRole.Pharmacist;
+            this.Frame.Navigate(typeof(RoleDashboardPage));
         }
     }
 }

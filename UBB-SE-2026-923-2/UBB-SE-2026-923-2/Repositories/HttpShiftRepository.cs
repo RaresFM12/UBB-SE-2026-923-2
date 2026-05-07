@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of all three shift-repository interfaces.
     /// Network calls are async internally; the synchronous interface methods
@@ -25,7 +25,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<Shift> GetAllShifts()
         {
-            var shifts = httpClient.GetFromJsonAsync<List<Shift>>(BasePath).GetAwaiter().GetResult();
+            var shifts = this.httpClient.GetFromJsonAsync<List<Shift>>(BasePath).GetAwaiter().GetResult();
             return shifts ?? new List<Shift>();
         }
 
@@ -44,13 +44,13 @@ namespace UBB_SE_2026_923_2.Repositories
                 Status = newShift.Status,
             };
 
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
 
         public void UpdateShiftStatus(int shiftId, ShiftStatus status)
         {
-            var response = httpClient
+            var response = this.httpClient
                 .PatchAsJsonAsync($"{BasePath}/{shiftId}/status", new { Status = status })
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
@@ -58,7 +58,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateShiftStaffId(int shiftId, int newStaffId)
         {
-            var response = httpClient
+            var response = this.httpClient
                 .PatchAsJsonAsync($"{BasePath}/{shiftId}/staff", new { StaffId = newStaffId })
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
@@ -66,7 +66,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void DeleteShift(int shiftId)
         {
-            var response = httpClient.DeleteAsync($"{BasePath}/{shiftId}").GetAwaiter().GetResult();
+            var response = this.httpClient.DeleteAsync($"{BasePath}/{shiftId}").GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
     }

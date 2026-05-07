@@ -1,15 +1,15 @@
-using Moq;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.Tests.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Moq;
+    using NUnit.Framework;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+    using UBB_SE_2026_923_2.Services;
+
     [TestFixture]
     public class DoctorAppointmentServiceTests
     {
@@ -21,17 +21,17 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [SetUp]
         public void Setup()
         {
-            mockAppointmentRepository = new Mock<IAppointmentRepository>();
-            mockStaffRepository = new Mock<IStaffRepository>();
-            mockShiftRepository = new Mock<IShiftRepository>();
-            service = new DoctorAppointmentService(mockAppointmentRepository.Object, mockStaffRepository.Object, mockShiftRepository.Object);
+            this.mockAppointmentRepository = new Mock<IAppointmentRepository>();
+            this.mockStaffRepository = new Mock<IStaffRepository>();
+            this.mockShiftRepository = new Mock<IShiftRepository>();
+            this.service = new DoctorAppointmentService(this.mockAppointmentRepository.Object, this.mockStaffRepository.Object, this.mockShiftRepository.Object);
         }
 
         [Test]
         public async Task GetUpcomingAppointmentsAsync_NoAppointments_ReturnsEmpty()
         {
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment>());
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment>());
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -39,9 +39,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task GetUpcomingAppointmentsAsync_AppointmentForDifferentDoctor_ReturnsEmpty()
         {
             var appointment = new Appointment { DoctorId = 2, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -50,9 +50,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var tomorrow = DateTime.Now.AddDays(1);
             var appointment = new Appointment { Id = 1, DoctorId = 1, Date = tomorrow, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(9.5), Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
             Assert.That(result.Count, Is.EqualTo(1));
         }
 
@@ -61,9 +61,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var farFuture = DateTime.Now.AddDays(60);
             var appointment = new Appointment { Id = 1, DoctorId = 1, Date = farFuture, StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -72,24 +72,29 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var appointments = Enumerable.Range(1, 5).Select(index => new Appointment
             {
-                Id = index, DoctorId = 1, Date = DateTime.Now.AddDays(index), StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10), Status = "Scheduled"
+                Id = index,
+                DoctorId = 1,
+                Date = DateTime.Now.AddDays(index),
+                StartTime = TimeSpan.FromHours(9),
+                EndTime = TimeSpan.FromHours(10),
+                Status = "Scheduled",
             }).ToList();
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 2, 2);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 2, 2);
             Assert.That(result.Count, Is.EqualTo(2));
         }
 
         [Test]
         public async Task GetAllDoctorsAsync_ReturnsSortedDoctors()
         {
-            mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>
+            this.mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>
             {
                 (1, "Zoe", "Adams"),
                 (2, "Alice", "Brown"),
             });
 
-            var result = await service.GetAllDoctorsAsync();
+            var result = await this.service.GetAllDoctorsAsync();
             Assert.That(result[0].DoctorName, Is.EqualTo("Alice Brown"));
             Assert.That(result[1].DoctorName, Is.EqualTo("Zoe Adams"));
         }
@@ -97,8 +102,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public async Task GetAllDoctorsAsync_Empty_ReturnsEmpty()
         {
-            mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>());
-            var result = await service.GetAllDoctorsAsync();
+            this.mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>());
+            var result = await this.service.GetAllDoctorsAsync();
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -106,9 +111,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task GetAppointmentDetailsAsync_Found_ReturnsAppointment()
         {
             var appointment = new Appointment { Id = 5, DoctorId = 1, Date = DateTime.Now, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10), Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            var result = await service.GetAppointmentDetailsAsync(5);
+            var result = await this.service.GetAppointmentDetailsAsync(5);
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(5));
         }
@@ -116,8 +121,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public async Task GetAppointmentDetailsAsync_NotFound_ReturnsNull()
         {
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment>());
-            var result = await service.GetAppointmentDetailsAsync(99);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment>());
+            var result = await this.service.GetAppointmentDetailsAsync(99);
             Assert.That(result, Is.Null);
         }
 
@@ -130,9 +135,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Appointment { Id = 2, DoctorId = 1, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" },
                 new Appointment { Id = 3, DoctorId = 2, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(8), Status = "Scheduled" },
             };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var result = await service.GetAppointmentsForAdminAsync(1);
+            var result = await this.service.GetAppointmentsForAdminAsync(1);
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0].Id, Is.EqualTo(2));
         }
@@ -141,18 +146,18 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task CancelAppointmentAsync_FinishedAppointment_Throws()
         {
             var appointment = new Appointment { Id = 1, Status = "Finished" };
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await service.CancelAppointmentAsync(appointment));
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await this.service.CancelAppointmentAsync(appointment));
         }
 
         [Test]
         public async Task CancelAppointmentAsync_ScheduledAppointment_Cancels()
         {
             var appointment = new Appointment { Id = 1, Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.UpdateAppointmentStatusAsync(1, "Canceled")).Returns(Task.CompletedTask);
+            this.mockAppointmentRepository.Setup(repository => repository.UpdateAppointmentStatusAsync(1, "Canceled")).Returns(Task.CompletedTask);
 
-            await service.CancelAppointmentAsync(appointment);
+            await this.service.CancelAppointmentAsync(appointment);
             Assert.That(appointment.Status, Is.EqualTo("Canceled"));
-            mockAppointmentRepository.Verify(repository => repository.UpdateAppointmentStatusAsync(1, "Canceled"), Times.Once);
+            this.mockAppointmentRepository.Verify(repository => repository.UpdateAppointmentStatusAsync(1, "Canceled"), Times.Once);
         }
 
         [Test]
@@ -162,16 +167,16 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var now = DateTime.Now;
             var shift = new Shift(1, doctor, "Ward", now, now.AddHours(8), ShiftStatus.ACTIVE);
             var cancelledShift = new Shift(2, doctor, "Ward", now, now.AddHours(8), ShiftStatus.CANCELLED);
-            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift, cancelledShift });
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift, cancelledShift });
 
-            var result = await service.GetShiftsForStaffInRangeAsync(1, now.AddHours(-1), now.AddHours(10));
+            var result = await this.service.GetShiftsForStaffInRangeAsync(1, now.AddHours(-1), now.AddHours(10));
             Assert.That(result.Count, Is.EqualTo(1));
         }
 
         [Test]
         public async Task GetShiftsForStaffInRangeAsync_NoShiftRepo_ReturnsEmpty()
         {
-            var serviceWithoutShiftRepository = new DoctorAppointmentService(mockAppointmentRepository.Object, mockStaffRepository.Object);
+            var serviceWithoutShiftRepository = new DoctorAppointmentService(this.mockAppointmentRepository.Object, this.mockStaffRepository.Object);
             var result = await serviceWithoutShiftRepository.GetShiftsForStaffInRangeAsync(1, DateTime.Now, DateTime.Now.AddDays(7));
             Assert.That(result.Count, Is.EqualTo(0));
         }
@@ -185,9 +190,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Appointment { Id = 1, DoctorId = 1, Date = baseDate, StartTime = TimeSpan.FromHours(14), EndTime = TimeSpan.FromHours(15), Status = "S" },
                 new Appointment { Id = 2, DoctorId = 1, Date = baseDate, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10), Status = "S" },
             };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
             Assert.That(result[0].StartTime, Is.LessThan(result[1].StartTime));
         }
 
@@ -196,11 +201,16 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var appointments = Enumerable.Range(1, 10).Select(index => new Appointment
             {
-                Id = index, DoctorId = 1, Date = DateTime.Now.AddDays(index), StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10), Status = "Scheduled"
+                Id = index,
+                DoctorId = 1,
+                Date = DateTime.Now.AddDays(index),
+                StartTime = TimeSpan.FromHours(9),
+                EndTime = TimeSpan.FromHours(10),
+                Status = "Scheduled",
             }).ToList();
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 3);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 3);
             Assert.That(result.Count, Is.EqualTo(3));
         }
 
@@ -209,11 +219,16 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var appointments = Enumerable.Range(1, 3).Select(index => new Appointment
             {
-                Id = index, DoctorId = 1, Date = DateTime.Now.AddDays(index), StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10), Status = "Scheduled"
+                Id = index,
+                DoctorId = 1,
+                Date = DateTime.Now.AddDays(index),
+                StartTime = TimeSpan.FromHours(9),
+                EndTime = TimeSpan.FromHours(10),
+                Status = "Scheduled",
             }).ToList();
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 10, 10);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 10, 10);
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -221,9 +236,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task GetUpcomingAppointmentsAsync_CanceledAppointment_StillReturned()
         {
             var appointment = new Appointment { Id = 1, DoctorId = 1, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10), Status = "Canceled" };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
             Assert.That(result.Count, Is.EqualTo(1));
         }
 
@@ -231,9 +246,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task GetUpcomingAppointmentsAsync_PastAppointment_Excluded()
         {
             var appointment = new Appointment { Id = 1, DoctorId = 1, Date = DateTime.Today.AddDays(-1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -241,21 +256,21 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task CancelAppointmentAsync_CanceledAppointment_CancelsAgain()
         {
             var appointment = new Appointment { Id = 1, Status = "Canceled" };
-            mockAppointmentRepository.Setup(repository => repository.UpdateAppointmentStatusAsync(1, "Canceled")).Returns(Task.CompletedTask);
+            this.mockAppointmentRepository.Setup(repository => repository.UpdateAppointmentStatusAsync(1, "Canceled")).Returns(Task.CompletedTask);
 
-            await service.CancelAppointmentAsync(appointment);
+            await this.service.CancelAppointmentAsync(appointment);
             Assert.That(appointment.Status, Is.EqualTo("Canceled"));
         }
 
         [Test]
         public async Task GetAllDoctorsAsync_SingleDoctor_ReturnsSingle()
         {
-            mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>
+            this.mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>
             {
                 (1, "John", "Doe"),
             });
 
-            var result = await service.GetAllDoctorsAsync();
+            var result = await this.service.GetAllDoctorsAsync();
             Assert.That(result.Count, Is.EqualTo(1));
             Assert.That(result[0].DoctorName, Is.EqualTo("John Doe"));
         }
@@ -264,9 +279,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task GetAppointmentsForAdminAsync_NoDoctorAppointments_ReturnsEmpty()
         {
             var appointment = new Appointment { Id = 1, DoctorId = 2, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            var result = await service.GetAppointmentsForAdminAsync(1);
+            var result = await this.service.GetAppointmentsForAdminAsync(1);
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -276,9 +291,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var doctor = new Doctor { StaffID = 1 };
             var now = DateTime.Now;
             var shift = new Shift(1, doctor, "Ward", now.AddDays(10), now.AddDays(10).AddHours(8), ShiftStatus.ACTIVE);
-            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
-            var result = await service.GetShiftsForStaffInRangeAsync(1, now, now.AddDays(2));
+            var result = await this.service.GetShiftsForStaffInRangeAsync(1, now, now.AddDays(2));
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -288,9 +303,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var doctor = new Doctor { StaffID = 2 };
             var now = DateTime.Now;
             var shift = new Shift(1, doctor, "Ward", now, now.AddHours(8), ShiftStatus.ACTIVE);
-            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
 
-            var result = await service.GetShiftsForStaffInRangeAsync(1, now.AddHours(-1), now.AddHours(10));
+            var result = await this.service.GetShiftsForStaffInRangeAsync(1, now.AddHours(-1), now.AddHours(10));
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -303,9 +318,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Appointment { Id = 2, DoctorId = 1, Date = DateTime.Now, StartTime = TimeSpan.FromHours(10), Status = "Scheduled" },
                 new Appointment { Id = 3, DoctorId = 2, Date = DateTime.Now, StartTime = TimeSpan.FromHours(11), Status = "Scheduled" },
             };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var result = await service.GetAppointmentDetailsAsync(2);
+            var result = await this.service.GetAppointmentDetailsAsync(2);
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(2));
         }
@@ -313,14 +328,14 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public async Task GetAllDoctorsAsync_ThreeDoctors_SortedAlphabetically()
         {
-            mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>
+            this.mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>
             {
                 (1, "Charlie", "Zeta"),
                 (2, "Alice", "Alpha"),
                 (3, "Bob", "Beta"),
             });
 
-            var result = await service.GetAllDoctorsAsync();
+            var result = await this.service.GetAllDoctorsAsync();
             Assert.That(result.Count, Is.EqualTo(3));
             Assert.That(result[0].DoctorName, Is.EqualTo("Alice Alpha"));
         }
@@ -335,9 +350,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Appointment { Id = 2, DoctorId = 1, Date = baseDate, StartTime = TimeSpan.FromHours(14), Status = "Scheduled" },
                 new Appointment { Id = 3, DoctorId = 1, Date = baseDate, StartTime = TimeSpan.FromHours(9), Status = "Scheduled" },
             };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var result = await service.GetAppointmentsForAdminAsync(1);
+            var result = await this.service.GetAppointmentsForAdminAsync(1);
             Assert.That(result.Count, Is.EqualTo(3));
             Assert.That(result[0].StartTime, Is.LessThanOrEqualTo(result[1].StartTime).Or.LessThanOrEqualTo(TimeSpan.FromHours(10)));
         }
@@ -346,20 +361,20 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task CancelAppointmentAsync_UpdatesStatusToCanceled()
         {
             var appointment = new Appointment { Id = 5, Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.UpdateAppointmentStatusAsync(5, "Canceled")).Returns(Task.CompletedTask);
+            this.mockAppointmentRepository.Setup(repository => repository.UpdateAppointmentStatusAsync(5, "Canceled")).Returns(Task.CompletedTask);
 
-            await service.CancelAppointmentAsync(appointment);
+            await this.service.CancelAppointmentAsync(appointment);
             Assert.That(appointment.Status, Is.EqualTo("Canceled"));
-            mockAppointmentRepository.Verify(repository => repository.UpdateAppointmentStatusAsync(5, "Canceled"), Times.Once);
+            this.mockAppointmentRepository.Verify(repository => repository.UpdateAppointmentStatusAsync(5, "Canceled"), Times.Once);
         }
 
         [Test]
         public async Task GetUpcomingAppointmentsAsync_ExactlyAt30Days_Excluded()
         {
             var appointment = new Appointment { Id = 1, DoctorId = 1, Date = DateTime.Now.AddDays(31), StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10), Status = "Scheduled" };
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
@@ -373,9 +388,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 new Shift(1, doctor, "Ward", now, now.AddHours(4), ShiftStatus.ACTIVE),
                 new Shift(2, doctor, "Ward", now.AddHours(5), now.AddHours(8), ShiftStatus.SCHEDULED),
             };
-            mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
-            var result = await service.GetShiftsForStaffInRangeAsync(1, now.AddHours(-1), now.AddHours(10));
+            var result = await this.service.GetShiftsForStaffInRangeAsync(1, now.AddHours(-1), now.AddHours(10));
             Assert.That(result.Count, Is.EqualTo(2));
         }
 
@@ -384,16 +399,16 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var appointments = Enumerable.Range(1, 10).Select(index => new Appointment
             {
-                Id = index, DoctorId = 1, Date = DateTime.Now.AddDays(index), StartTime = TimeSpan.FromHours(9), Status = "Scheduled"
+                Id = index,
+                DoctorId = 1,
+                Date = DateTime.Now.AddDays(index),
+                StartTime = TimeSpan.FromHours(9),
+                Status = "Scheduled",
             }).ToList();
-            mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var result = await service.GetAppointmentsForAdminAsync(1);
+            var result = await this.service.GetAppointmentsForAdminAsync(1);
             Assert.That(result.Count, Is.EqualTo(10));
         }
     }
 }
-
-
-
-

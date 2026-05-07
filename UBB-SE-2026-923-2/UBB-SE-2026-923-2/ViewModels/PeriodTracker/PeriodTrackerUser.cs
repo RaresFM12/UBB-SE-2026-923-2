@@ -1,9 +1,9 @@
-﻿using System;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
-namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
+﻿namespace UBB_SE_2026_923_2.ViewModels.PeriodTracker
 {
+    using System;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public static class PeriodTrackerUser
     {
         private static IPeriodTrackerService periodTrackerService;

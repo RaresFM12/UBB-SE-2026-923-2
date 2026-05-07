@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IHangoutRepository"/>.
     /// </summary>
@@ -31,20 +31,20 @@ namespace UBB_SE_2026_923_2.Repositories
                 MaxParticipants = maxParticipants,
             };
 
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
             return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
         }
 
         public List<Hangout> GetAllHangouts()
         {
-            var hangouts = httpClient.GetFromJsonAsync<List<Hangout>>(BasePath).GetAwaiter().GetResult();
+            var hangouts = this.httpClient.GetFromJsonAsync<List<Hangout>>(BasePath).GetAwaiter().GetResult();
             return hangouts ?? new List<Hangout>();
         }
 
         public Hangout? GetHangoutById(int hangoutId)
         {
-            var response = httpClient.GetAsync($"{BasePath}/{hangoutId}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{hangoutId}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;

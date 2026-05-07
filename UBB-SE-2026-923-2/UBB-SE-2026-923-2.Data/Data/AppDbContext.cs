@@ -1,7 +1,7 @@
+namespace UBB_SE_2026_923_2.Data;
+
 using Microsoft.EntityFrameworkCore;
 using UBB_SE_2026_923_2.Models;
-
-namespace UBB_SE_2026_923_2.Data;
 
 /// <summary>
 /// Single EF Core context for the entire application. Code-first; the schema
@@ -15,33 +15,53 @@ public class AppDbContext : DbContext
     }
 
     // -------- Core domain --------
-    public DbSet<User> Users => Set<User>();
-    public DbSet<Staff> StaffMembers => Set<Staff>();
-    public DbSet<Doctor> Doctors => Set<Doctor>();
-    public DbSet<Pharmacyst> Pharmacysts => Set<Pharmacyst>();
+    public DbSet<User> Users => this.Set<User>();
+
+    public DbSet<Staff> StaffMembers => this.Set<Staff>();
+
+    public DbSet<Doctor> Doctors => this.Set<Doctor>();
+
+    public DbSet<Pharmacyst> Pharmacysts => this.Set<Pharmacyst>();
 
     // -------- Pharmacy --------
-    public DbSet<Item> Items => Set<Item>();
-    public DbSet<Substance> Substances => Set<Substance>();
-    public DbSet<ItemSubstance> ItemSubstances => Set<ItemSubstance>();
-    public DbSet<ItemBatch> ItemBatches => Set<ItemBatch>();
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
-    public DbSet<UserDiscount> UserDiscounts => Set<UserDiscount>();
-    public DbSet<UserNotification> UserNotifications => Set<UserNotification>();
-    public DbSet<PeriodNote> PeriodNotes => Set<PeriodNote>();
+    public DbSet<Item> Items => this.Set<Item>();
+
+    public DbSet<Substance> Substances => this.Set<Substance>();
+
+    public DbSet<ItemSubstance> ItemSubstances => this.Set<ItemSubstance>();
+
+    public DbSet<ItemBatch> ItemBatches => this.Set<ItemBatch>();
+
+    public DbSet<Order> Orders => this.Set<Order>();
+
+    public DbSet<OrderItem> OrderItems => this.Set<OrderItem>();
+
+    public DbSet<UserDiscount> UserDiscounts => this.Set<UserDiscount>();
+
+    public DbSet<UserNotification> UserNotifications => this.Set<UserNotification>();
+
+    public DbSet<PeriodNote> PeriodNotes => this.Set<PeriodNote>();
 
     // -------- Hospital --------
-    public DbSet<Shift> Shifts => Set<Shift>();
-    public DbSet<ShiftSwapRequest> ShiftSwapRequests => Set<ShiftSwapRequest>();
-    public DbSet<Appointment> Appointments => Set<Appointment>();
-    public DbSet<MedicalEvaluation> MedicalEvaluations => Set<MedicalEvaluation>();
-    public DbSet<ERRequest> ERRequests => Set<ERRequest>();
-    public DbSet<Notification> Notifications => Set<Notification>();
-    public DbSet<Hangout> Hangouts => Set<Hangout>();
-    public DbSet<HangoutParticipant> HangoutParticipants => Set<HangoutParticipant>();
-    public DbSet<PharmacyHandover> PharmacyHandovers => Set<PharmacyHandover>();
-    public DbSet<HighRiskMedicine> HighRiskMedicines => Set<HighRiskMedicine>();
+    public DbSet<Shift> Shifts => this.Set<Shift>();
+
+    public DbSet<ShiftSwapRequest> ShiftSwapRequests => this.Set<ShiftSwapRequest>();
+
+    public DbSet<Appointment> Appointments => this.Set<Appointment>();
+
+    public DbSet<MedicalEvaluation> MedicalEvaluations => this.Set<MedicalEvaluation>();
+
+    public DbSet<ERRequest> ERRequests => this.Set<ERRequest>();
+
+    public DbSet<Notification> Notifications => this.Set<Notification>();
+
+    public DbSet<Hangout> Hangouts => this.Set<Hangout>();
+
+    public DbSet<HangoutParticipant> HangoutParticipants => this.Set<HangoutParticipant>();
+
+    public DbSet<PharmacyHandover> PharmacyHandovers => this.Set<PharmacyHandover>();
+
+    public DbSet<HighRiskMedicine> HighRiskMedicines => this.Set<HighRiskMedicine>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -145,11 +165,11 @@ public class AppDbContext : DbContext
             // values must exist before any Item -> ItemSubstance link can be
             // created. Item rows themselves stay user-generated.
             entity.HasData(
-                new Substance { Name = "Ibuprofen",   LethalDose = 3200.00f, Description = "Anti-inflammatory pain reliever" },
+                new Substance { Name = "Ibuprofen", LethalDose = 3200.00f, Description = "Anti-inflammatory pain reliever" },
                 new Substance { Name = "Paracetamol", LethalDose = 4000.00f, Description = "Pain reliever and fever reducer" },
-                new Substance { Name = "Magnesium",   LethalDose = 2500.00f, Description = "Mineral supplement for muscle and nerve support" },
-                new Substance { Name = "Vitamin C",   LethalDose = 2000.00f, Description = "Vitamin supplement for immune support" },
-                new Substance { Name = "Cetirizine",  LethalDose =  500.00f, Description = "Antihistamine for allergy relief" });
+                new Substance { Name = "Magnesium", LethalDose = 2500.00f, Description = "Mineral supplement for muscle and nerve support" },
+                new Substance { Name = "Vitamin C", LethalDose = 2000.00f, Description = "Vitamin supplement for immune support" },
+                new Substance { Name = "Cetirizine", LethalDose = 500.00f, Description = "Antihistamine for allergy relief" });
         });
 
         modelBuilder.Entity<Item>(entity =>

@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.Data;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using UBB_SE_2026_923_2.Configuration;
-
-namespace UBB_SE_2026_923_2.Data;
 
 /// <summary>
 /// Lets the EF Core CLI tooling (<c>dotnet ef migrations add</c>,

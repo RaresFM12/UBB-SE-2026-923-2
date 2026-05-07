@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IHighRiskMedicineRepository"/>.
     /// </summary>
@@ -23,7 +23,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<(string MedicineName, string WarningMessage)> GetAllHighRiskMedicines()
         {
-            var summaries = httpClient
+            var summaries = this.httpClient
                 .GetFromJsonAsync<List<HighRiskMedicineSummary>>(BasePath)
                 .GetAwaiter().GetResult();
             if (summaries is null)

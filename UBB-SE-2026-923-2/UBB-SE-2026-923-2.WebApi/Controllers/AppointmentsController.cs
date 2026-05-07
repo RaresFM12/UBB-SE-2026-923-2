@@ -1,8 +1,8 @@
+namespace UBB_SE_2026_923_2.WebApi.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,27 +18,27 @@ public class AppointmentsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<Appointment>>> GetAll()
     {
-        var appointments = await repository.GetAllAppointmentsAsync();
-        return Ok(appointments);
+        var appointments = await this.repository.GetAllAppointmentsAsync();
+        return this.Ok(appointments);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateAppointmentRequest request)
     {
-        await repository.AddAppointmentAsync(
+        await this.repository.AddAppointmentAsync(
             request.PatientId,
             request.DoctorId,
             request.StartTime,
             request.EndTime,
             request.Status);
-        return NoContent();
+        return this.NoContent();
     }
 
     [HttpPatch("{id:int}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
     {
-        await repository.UpdateAppointmentStatusAsync(id, request.Status);
-        return NoContent();
+        await this.repository.UpdateAppointmentStatusAsync(id, request.Status);
+        return this.NoContent();
     }
 
     public record CreateAppointmentRequest(

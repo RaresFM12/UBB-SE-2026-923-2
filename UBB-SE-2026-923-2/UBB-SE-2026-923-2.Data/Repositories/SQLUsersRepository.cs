@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using UBB_SE_2026_923_2.Data;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Microsoft.EntityFrameworkCore;
+    using UBB_SE_2026_923_2.Data;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// EF Core implementation of <see cref="IUsersRepository"/>. Period notes,
     /// user discounts and per-item notification flags are loaded through
@@ -31,19 +31,19 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public bool UserExists(string email)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Users.AsNoTracking().Any(u => u.Email == email);
         }
 
         public bool UserExists(int id)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Users.AsNoTracking().Any(u => u.Id == id);
         }
 
         public User GetUserById(int id)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var user = db.Users
                 .AsNoTracking()
                 .Include(u => u.PeriodNoteEntries)
@@ -56,7 +56,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public User GetUserByEmail(string email)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var user = db.Users
                 .AsNoTracking()
                 .Include(u => u.PeriodNoteEntries)
@@ -70,7 +70,7 @@ namespace UBB_SE_2026_923_2.Repositories
         public void AddUser(string email, string phoneNumber, string passwordHash, string username,
             bool discountNotifications, bool isDisabled = false, bool isAdmin = false, int loyaltyPoints = 0, string role = "Client")
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var user = new User
             {
@@ -91,7 +91,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateUser(User newUser)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
 
             var existing = db.Users
                 .Include(u => u.PeriodNoteEntries)
@@ -168,7 +168,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<User> GetAllUsers()
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             var users = db.Users
                 .AsNoTracking()
                 .Include(u => u.PeriodNoteEntries)
@@ -186,7 +186,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public bool UserHasPeriodTracker(int id)
         {
-            using var db = dbContextFactory.CreateDbContext();
+            using var db = this.dbContextFactory.CreateDbContext();
             return db.Users
                 .AsNoTracking()
                 .Any(u => u.Id == id

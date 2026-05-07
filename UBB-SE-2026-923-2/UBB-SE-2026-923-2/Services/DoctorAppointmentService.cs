@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public sealed class DoctorAppointmentService : IDoctorAppointmentService
     {
         private const int UpcomingAppointmentsWindowDays = 31;
@@ -16,7 +16,6 @@ namespace UBB_SE_2026_923_2.Services
         private const string ScheduledStatus = "Scheduled";
         private const string FinishedStatus = "Finished";
         private const string CanceledStatus = "Canceled";
-        private const string InExaminationStatus = "IN_EXAMINATION";
         private const string AvailableStatus = "AVAILABLE";
         private const string PatientNamePrefix = "PAT-";
         private const string DefaultPatientIdString = "0";
@@ -36,7 +35,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             DateTime from = fromDate.Date;
             DateTime to = from.AddDays(UpcomingAppointmentsWindowDays);
-            var allAppointments = await dataSource.GetAllAppointmentsAsync();
+            var allAppointments = await this.dataSource.GetAllAppointmentsAsync();
 
             bool IsForDoctor(Appointment appointment) => appointment.DoctorId == doctorUserId;
             bool IsWithinWindow(Appointment appointment)
@@ -61,7 +60,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task<IReadOnlyList<(int DoctorId, string DoctorName)>> GetAllDoctorsAsync()
         {
-            var doctors = await staffRepository.GetAllDoctorsAsync();
+            var doctors = await this.staffRepository.GetAllDoctorsAsync();
 
             (int DoctorId, string DoctorName) ToDoctorOption((int DoctorId, string FirstName, string LastName) doctor) =>
                 (doctor.DoctorId, ((doctor.FirstName ?? string.Empty) + " " + (doctor.LastName ?? string.Empty)).Trim());
@@ -76,7 +75,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task<Appointment?> GetAppointmentDetailsAsync(int appointmentId)
         {
-            var allAppointments = await dataSource.GetAllAppointmentsAsync();
+            var allAppointments = await this.dataSource.GetAllAppointmentsAsync();
             bool HasMatchingId(Appointment existingAppointment) => existingAppointment.Id == appointmentId;
 
             var appointment = allAppointments.FirstOrDefault(HasMatchingId);
@@ -85,7 +84,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task<IReadOnlyList<Appointment>> GetAppointmentsForAdminAsync(int doctorId)
         {
-            var allAppointments = await dataSource.GetAllAppointmentsAsync();
+            var allAppointments = await this.dataSource.GetAllAppointmentsAsync();
 
             bool IsForDoctor(Appointment appointment) => appointment.DoctorId == doctorId;
             DateTime ByDate(Appointment appointment) => appointment.Date;
@@ -101,7 +100,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task CreateAppointmentAsync(string patientName, int doctorId, DateTime date, TimeSpan startTime)
         {
-            await EnsureDoctorIsBookableAsync(doctorId);
+            await this.EnsureDoctorIsBookableAsync(doctorId);
 
             var appointment = new Appointment
             {
@@ -113,17 +112,18 @@ namespace UBB_SE_2026_923_2.Services
                 EndTime = startTime.Add(TimeSpan.FromMinutes(DefaultAppointmentDurationMinutes)),
                 Status = ScheduledStatus,
             };
-            await PersistAppointmentAsync(appointment);
+            await this.PersistAppointmentAsync(appointment);
         }
 
         public async Task BookAppointmentAsync(Appointment appointment)
         {
-            await EnsureDoctorIsBookableAsync(appointment.DoctorId);
+            await this.EnsureDoctorIsBookableAsync(appointment.DoctorId);
             if (string.IsNullOrWhiteSpace(appointment.ExternalRefId))
             {
                 appointment.ExternalRefId = ExtractExternalRefId(appointment.PatientName);
             }
-            await PersistAppointmentAsync(appointment);
+
+            await this.PersistAppointmentAsync(appointment);
         }
 
         public async Task FinishAppointmentAsync(Appointment appointment)
@@ -133,10 +133,10 @@ namespace UBB_SE_2026_923_2.Services
                 throw new InvalidOperationException("This appointment is already finished.");
             }
 
-            await dataSource.UpdateAppointmentStatusAsync(appointment!.Id, FinishedStatus);
+            await this.dataSource.UpdateAppointmentStatusAsync(appointment!.Id, FinishedStatus);
             appointment.Status = FinishedStatus;
 
-            var allAppointments = await dataSource.GetAllAppointmentsAsync();
+            var allAppointments = await this.dataSource.GetAllAppointmentsAsync();
 
             DateTime finishedStart = appointment.Date.Date.Add(appointment.StartTime);
             DateTime finishedEnd = appointment.Date.Date.Add(appointment.EndTime);
@@ -167,13 +167,13 @@ namespace UBB_SE_2026_923_2.Services
 
             if (concurrentAppointments == NoActiveAppointmentsCount)
             {
-                await staffRepository.UpdateStatusAsync(appointment.DoctorId, AvailableStatus);
+                await this.staffRepository.UpdateStatusAsync(appointment.DoctorId, AvailableStatus);
             }
         }
 
         private async Task EnsureDoctorIsBookableAsync(int doctorId)
         {
-            var doctor = staffRepository.GetStaffById(doctorId) as Doctor;
+            var doctor = this.staffRepository.GetStaffById(doctorId) as Doctor;
             if (doctor == null)
             {
                 return;
@@ -202,7 +202,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task<IReadOnlyList<Appointment>> GetAppointmentsInRangeAsync(int doctorId, DateTime fromDate, DateTime toDate)
         {
-            var rawAppointments = await dataSource.GetAllAppointmentsAsync();
+            var rawAppointments = await this.dataSource.GetAllAppointmentsAsync();
 
             bool IsForDoctor(Appointment appointment) => appointment.DoctorId == doctorId;
             bool IsInRange(Appointment appointment)
@@ -236,13 +236,13 @@ namespace UBB_SE_2026_923_2.Services
                 throw new InvalidOperationException("Cannot cancel an appointment that is already Finished.");
             }
 
-            await dataSource.UpdateAppointmentStatusAsync(appointment!.Id, CanceledStatus);
+            await this.dataSource.UpdateAppointmentStatusAsync(appointment!.Id, CanceledStatus);
             appointment.Status = CanceledStatus;
         }
 
         public Task<IReadOnlyList<Shift>> GetShiftsForStaffInRangeAsync(int doctorId, DateTime fromDate, DateTime toDate)
         {
-            if (shiftRepository == null)
+            if (this.shiftRepository == null)
             {
                 return Task.FromResult<IReadOnlyList<Shift>>(new List<Shift>());
             }
@@ -255,7 +255,7 @@ namespace UBB_SE_2026_923_2.Services
 
             DateTime ByStartTime(Shift shift) => shift.StartTime;
 
-            IReadOnlyList<Shift> LoadAndFilter() => shiftRepository
+            IReadOnlyList<Shift> LoadAndFilter() => this.shiftRepository
                 .GetAllShifts()
                 .Where(IsForDoctorInRange)
                 .OrderBy(ByStartTime)
@@ -271,7 +271,7 @@ namespace UBB_SE_2026_923_2.Services
             DateTime end = appointment.Date.Date.Add(appointment.EndTime);
             string status = string.IsNullOrWhiteSpace(appointment.Status) ? ScheduledStatus : appointment.Status;
 
-            await dataSource.AddAppointmentAsync(patientId, appointment.DoctorId, start, end, status);
+            await this.dataSource.AddAppointmentAsync(patientId, appointment.DoctorId, start, end, status);
         }
 
         private static int ParsePatientId(string? patientName)

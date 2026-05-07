@@ -1,19 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-
 namespace UBB_SE_2026_923_2.Models
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Text.Json.Serialization;
+
     public class Hangout
     {
         private const string DateFormat = "yyyy-MM-dd";
 
         public int HangoutID { get; set; }
+
         public string Title { get; set; } = string.Empty;
+
         public string Description { get; set; } = string.Empty;
+
         public DateTime Date { get; set; }
-        public string FormattedDate => Date.ToString(DateFormat);
+
+        public string FormattedDate => this.Date.ToString(DateFormat);
+
         public int MaxParticipants { get; set; }
 
         // Legacy in-memory view — not persisted, IStaff cannot round-trip

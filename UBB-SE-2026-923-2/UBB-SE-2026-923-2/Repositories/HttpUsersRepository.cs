@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IUsersRepository"/>.
     /// </summary>
@@ -24,19 +24,19 @@ namespace UBB_SE_2026_923_2.Repositories
         public bool UserExists(string email)
         {
             var url = $"{BasePath}/exists?email={Uri.EscapeDataString(email)}";
-            return httpClient.GetFromJsonAsync<bool>(url).GetAwaiter().GetResult();
+            return this.httpClient.GetFromJsonAsync<bool>(url).GetAwaiter().GetResult();
         }
 
         public bool UserExists(int id)
         {
-            return httpClient
+            return this.httpClient
                 .GetFromJsonAsync<bool>($"{BasePath}/{id}/exists")
                 .GetAwaiter().GetResult();
         }
 
         public User GetUserById(int id)
         {
-            var response = httpClient.GetAsync($"{BasePath}/{id}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{id}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
@@ -50,7 +50,7 @@ namespace UBB_SE_2026_923_2.Repositories
         public User GetUserByEmail(string email)
         {
             var url = $"{BasePath}/by-email?email={Uri.EscapeDataString(email)}";
-            var response = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync(url).GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
@@ -77,13 +77,13 @@ namespace UBB_SE_2026_923_2.Repositories
                 Role = role,
             };
 
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
         }
 
         public void UpdateUser(User user)
         {
-            var response = httpClient
+            var response = this.httpClient
                 .PutAsJsonAsync($"{BasePath}/{user.Id}", user)
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
@@ -91,13 +91,13 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public List<User> GetAllUsers()
         {
-            var users = httpClient.GetFromJsonAsync<List<User>>(BasePath).GetAwaiter().GetResult();
+            var users = this.httpClient.GetFromJsonAsync<List<User>>(BasePath).GetAwaiter().GetResult();
             return users ?? new List<User>();
         }
 
         public bool UserHasPeriodTracker(int id)
         {
-            return httpClient
+            return this.httpClient
                 .GetFromJsonAsync<bool>($"{BasePath}/{id}/period-tracker")
                 .GetAwaiter().GetResult();
         }

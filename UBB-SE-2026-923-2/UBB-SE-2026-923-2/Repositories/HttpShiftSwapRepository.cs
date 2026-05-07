@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IShiftSwapRepository"/>.
     /// </summary>
@@ -23,14 +23,14 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public int AddShiftSwapRequest(ShiftSwapRequest request)
         {
-            var response = httpClient.PostAsJsonAsync(BasePath, request).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, request).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
             return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
         }
 
         public IReadOnlyList<ShiftSwapRequest> GetAllShiftSwapRequests()
         {
-            var swaps = httpClient
+            var swaps = this.httpClient
                 .GetFromJsonAsync<List<ShiftSwapRequest>>(BasePath)
                 .GetAwaiter().GetResult();
             return swaps ?? new List<ShiftSwapRequest>();
@@ -38,7 +38,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public ShiftSwapRequest? GetShiftSwapRequestById(int swapId)
         {
-            var response = httpClient.GetAsync($"{BasePath}/{swapId}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{swapId}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
@@ -50,7 +50,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateShiftSwapRequestStatus(int swapId, string status)
         {
-            var response = httpClient
+            var response = this.httpClient
                 .PatchAsJsonAsync($"{BasePath}/{swapId}/status", new { Status = status })
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();

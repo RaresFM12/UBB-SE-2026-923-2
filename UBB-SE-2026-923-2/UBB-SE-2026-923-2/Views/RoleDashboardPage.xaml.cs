@@ -1,27 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.Versioning;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Views.Admin;
-using UBB_SE_2026_923_2.Views.Doctor;
-using UBB_SE_2026_923_2.Views.Pharmacy;
-using UBB_SE_2026_923_2.Views.Accounts;
-using UBB_SE_2026_923_2.Views.Orders;
-using UBB_SE_2026_923_2.Views.ProductsCatalogue;
-using UBB_SE_2026_923_2.Views.PharmacyManagement;
-using UBB_SE_2026_923_2.Views.PeriodTracker;
-using UBB_SE_2026_923_2.ViewModels.PeriodTracker;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.Repositories;
-
 namespace UBB_SE_2026_923_2.Views
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Linq;
+    using System.Runtime.Versioning;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Media.Animation;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.PeriodTracker;
+    using UBB_SE_2026_923_2.Views.Accounts;
+    using UBB_SE_2026_923_2.Views.Admin;
+    using UBB_SE_2026_923_2.Views.Doctor;
+    using UBB_SE_2026_923_2.Views.Orders;
+    using UBB_SE_2026_923_2.Views.PeriodTracker;
+    using UBB_SE_2026_923_2.Views.Pharmacy;
+    using UBB_SE_2026_923_2.Views.PharmacyManagement;
+    using UBB_SE_2026_923_2.Views.ProductsCatalogue;
+
     [SupportedOSPlatform("windows10.0.17763.0")]
     public sealed partial class RoleDashboardPage : Page
     {
@@ -29,15 +29,16 @@ namespace UBB_SE_2026_923_2.Views
         private readonly ObservableCollection<MenuEntry> items = new ObservableCollection<MenuEntry>();
         private readonly Dictionary<string, Type> routes = new Dictionary<string, Type>();
         private readonly Dictionary<string, object?> routeParameters = new Dictionary<string, object?>();
-        private IOrderService? orderService;
-        private PeriodTrackerViewModel? periodTrackerViewModel;
+        private readonly IOrderService? orderService;
+        private readonly PeriodTrackerViewModel? periodTrackerViewModel;
 
         public RoleDashboardPage()
         {
             InitializeComponent();
 
-            currentUser = App.Services.GetRequiredService<ICurrentUserService>();
-            orderService = new OrderService();
+            this.currentUser = App.Services.GetRequiredService<ICurrentUserService>();
+            this.orderService = new OrderService();
+
             // Repositories now come from DI as HTTP-backed implementations; the
             // desktop no longer talks to EF Core directly.
             var usersRepository = App.Services.GetRequiredService<IUsersRepository>();
@@ -46,79 +47,79 @@ namespace UBB_SE_2026_923_2.Views
                 usersRepository,
                 itemsRepository,
                 App.Services.GetRequiredService<RaresICurrentUserService>(),
-                orderService);
-            periodTrackerViewModel = new PeriodTrackerViewModel(
+                this.orderService);
+            this.periodTrackerViewModel = new PeriodTrackerViewModel(
                 ptFactory.CreatePeriodTrackerService(),
                 ptFactory.CreateWellnessItemsService(),
                 ptFactory.CreateBasketService());
             var productCatalogueService = new ProductCatalogueService(itemsRepository);
             var user = ServiceWrapper.UserAccountService.CurrentUser;
-            var catalogParameter = ((IProductCatalogueService)productCatalogueService, user, orderService);
+            var catalogParameter = ((IProductCatalogueService)productCatalogueService, user, this.orderService);
 
-            MenuList.ItemsSource = items;
-            BuildForRole(catalogParameter);
+            MenuList.ItemsSource = this.items;
+            this.BuildForRole(catalogParameter);
         }
 
         private void BuildForRole((IProductCatalogueService, User, IOrderService) catalogParameter)
         {
-            items.Clear();
-            routes.Clear();
-            routeParameters.Clear();
+            this.items.Clear();
+            this.routes.Clear();
+            this.routeParameters.Clear();
 
-            RoleText.Text = $"Role: {currentUser.RoleType}";
+            RoleText.Text = $"Role: {this.currentUser.RoleType}";
 
-            switch (currentUser.RoleType)
+            switch (this.currentUser.RoleType)
             {
                 case UserRole.Admin:
-                    Add("See Doctor Schedule", "admin-doctor-schedule", typeof(DoctorSchedulePage));
-                    Add("See Pharmacy Schedule", "admin-pharmacy-schedule", typeof(PharmacySchedulePage));
-                    Add("Appointments", "admin-appointments", typeof(AppointmentsPage));
-                    Add("Create Shift", "admin-create-shift", typeof(AdminShiftView));
-                    Add("Auto-Audit", "admin-auto-audit", typeof(FatigueAuditPage));
-                    Add("ER Dispatch", "admin-er-dispatch", typeof(ERDispatchPage));
-                    Add("Accounts Management", "admin-accounts", typeof(AdminAccountsManagementView));
-                    Add("Pharmacy Inventory Update", "admin-pharmacy-inventory", typeof(EditPage));
+                    this.Add("See Doctor Schedule", "admin-doctor-schedule", typeof(DoctorSchedulePage));
+                    this.Add("See Pharmacy Schedule", "admin-pharmacy-schedule", typeof(PharmacySchedulePage));
+                    this.Add("Appointments", "admin-appointments", typeof(AppointmentsPage));
+                    this.Add("Create Shift", "admin-create-shift", typeof(AdminShiftView));
+                    this.Add("Auto-Audit", "admin-auto-audit", typeof(FatigueAuditPage));
+                    this.Add("ER Dispatch", "admin-er-dispatch", typeof(ERDispatchPage));
+                    this.Add("Accounts Management", "admin-accounts", typeof(AdminAccountsManagementView));
+                    this.Add("Pharmacy Inventory Update", "admin-pharmacy-inventory", typeof(EditPage));
                     break;
 
                 case UserRole.Pharmacist:
-                    Add("See Schedule", "pharmacist-schedule", typeof(PharmacySchedulePage));
-                    Add("Vacation Window", "pharmacist-vacation", typeof(PharmacistVacationPage));
-                    Add("Salary", "pharmacist-salary", typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
-                    Add("Product Catalogue", "pharmacist-catalogue", typeof(CatalogPage), catalogParameter);
-                    Add("Order Management", "pharmacist-orders", typeof(OrderManagementPage), orderService);
-                    Add("Edit Inventory", "pharmacist-edit", typeof(EditPage));
-                    Add("Statistics", "pharmacist-statistics", typeof(StatisticsPage));
-                    Add("Notifications", "pharmacist-notifications", typeof(Notifications));
+                    this.Add("See Schedule", "pharmacist-schedule", typeof(PharmacySchedulePage));
+                    this.Add("Vacation Window", "pharmacist-vacation", typeof(PharmacistVacationPage));
+                    this.Add("Salary", "pharmacist-salary", typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
+                    this.Add("Product Catalogue", "pharmacist-catalogue", typeof(CatalogPage), catalogParameter);
+                    this.Add("Order Management", "pharmacist-orders", typeof(OrderManagementPage), this.orderService);
+                    this.Add("Edit Inventory", "pharmacist-edit", typeof(EditPage));
+                    this.Add("Statistics", "pharmacist-statistics", typeof(StatisticsPage));
+                    this.Add("Notifications", "pharmacist-notifications", typeof(Notifications));
                     break;
 
                 case UserRole.Doctor:
-                    Add("Medical Evaluation", "doctor-medical", typeof(UBB_SE_2026_923_2.Views.MedicalEvaluationView));
-                    Add("Shift Swap Request", "doctor-shift-swap-request", typeof(MySchedulePage));
-                    Add("Incoming Swap Requests", "doctor-shift-swap-incoming", typeof(IncomingSwapRequestsPage));
-                    Add("See Schedule", "doctor-schedule", typeof(DoctorSchedulePage));
-                    Add("Salary", "doctor-salary", typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
-                    Add("Hang Out", "doctor-hangout", typeof(HangOutPlaceholderPage));
-                    Add("Product Catalogue", "doctor-catalogue", typeof(CatalogPage), catalogParameter);
-                    Add("Order History", "doctor-orders", typeof(OrderHistoryPage), orderService);
-                    Add("Period Tracker", "doctor-period-tracker", typeof(PeriodTrackerPage), periodTrackerViewModel);
+                    this.Add("Medical Evaluation", "doctor-medical", typeof(UBB_SE_2026_923_2.Views.MedicalEvaluationView));
+                    this.Add("Shift Swap Request", "doctor-shift-swap-request", typeof(MySchedulePage));
+                    this.Add("Incoming Swap Requests", "doctor-shift-swap-incoming", typeof(IncomingSwapRequestsPage));
+                    this.Add("See Schedule", "doctor-schedule", typeof(DoctorSchedulePage));
+                    this.Add("Salary", "doctor-salary", typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
+                    this.Add("Hang Out", "doctor-hangout", typeof(HangOutPlaceholderPage));
+                    this.Add("Product Catalogue", "doctor-catalogue", typeof(CatalogPage), catalogParameter);
+                    this.Add("Order History", "doctor-orders", typeof(OrderHistoryPage), this.orderService);
+                    this.Add("Period Tracker", "doctor-period-tracker", typeof(PeriodTrackerPage), this.periodTrackerViewModel);
                     break;
 
                 case UserRole.Client:
-                    Add("Product Catalogue", "client-catalogue", typeof(CatalogPage), catalogParameter);
-                    Add("Shopping Cart", "client-cart", typeof(BasketPage), orderService);
-                    Add("Order History", "client-orders", typeof(OrderHistoryPage), orderService);
-                    Add("Period Tracker", "client-period-tracker", typeof(PeriodTrackerPage), periodTrackerViewModel);
-                    Add("Notifications", "client-notifications", typeof(Notifications));
+                    this.Add("Product Catalogue", "client-catalogue", typeof(CatalogPage), catalogParameter);
+                    this.Add("Shopping Cart", "client-cart", typeof(BasketPage), this.orderService);
+                    this.Add("Order History", "client-orders", typeof(OrderHistoryPage), this.orderService);
+                    this.Add("Period Tracker", "client-period-tracker", typeof(PeriodTrackerPage), this.periodTrackerViewModel);
+                    this.Add("Notifications", "client-notifications", typeof(Notifications));
                     break;
             }
 
-            Add("Profile", "profile-management", typeof(ProfileManagementView));
+            this.Add("Profile", "profile-management", typeof(ProfileManagementView));
 
-            var first = items.FirstOrDefault();
+            var first = this.items.FirstOrDefault();
             if (first != null)
             {
                 MenuList.SelectedItem = first;
-                NavigateToKey(first.Key);
+                this.NavigateToKey(first.Key);
             }
         }
 
@@ -129,9 +130,9 @@ namespace UBB_SE_2026_923_2.Views
                 throw new InvalidOperationException($"{pageType.FullName} is not a Page.");
             }
 
-            items.Add(new MenuEntry { Key = key, Title = title });
-            routes[key] = pageType;
-            routeParameters[key] = parameter;
+            this.items.Add(new MenuEntry { Key = key, Title = title });
+            this.routes[key] = pageType;
+            this.routeParameters[key] = parameter;
         }
 
         private void MenuList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -141,29 +142,30 @@ namespace UBB_SE_2026_923_2.Views
                 return;
             }
 
-            NavigateToKey(entry.Key);
+            this.NavigateToKey(entry.Key);
         }
 
         private void NavigateToKey(string key)
         {
-            if (!routes.TryGetValue(key, out var pageType))
+            if (!this.routes.TryGetValue(key, out var pageType))
             {
                 pageType = typeof(NotImplementedPlaceholderPage);
             }
 
-            routeParameters.TryGetValue(key, out var parameter);
+            this.routeParameters.TryGetValue(key, out var parameter);
             ContentFrame.Navigate(pageType, parameter, new SuppressNavigationTransitionInfo());
         }
 
         private void ChangeRole_Click(object sender, RoutedEventArgs e)
         {
             ServiceWrapper.UserAccountService.Logout();
-            Frame.Navigate(typeof(LoginView));
+            this.Frame.Navigate(typeof(LoginView));
         }
 
         private sealed class MenuEntry
         {
             public string Key { get; set; } = string.Empty;
+
             public string Title { get; set; } = string.Empty;
         }
     }

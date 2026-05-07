@@ -1,9 +1,9 @@
-using System;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Services;
-
 namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Services;
+
     public sealed class CurrentUserService : ICurrentUserService
     {
         private static UserRole roleType = UserRole.Client;
@@ -21,11 +21,15 @@ namespace UBB_SE_2026_923_2.Services
             set => roleType = value;
         }
 
-        public string Role => RoleType.ToString();
+        public string Role => this.RoleType.ToString();
 
         public void SetFromUser(User user)
         {
-            if (user == null) return;
+            if (user == null)
+            {
+                return;
+            }
+
             userId = user.Id;
             if (Enum.TryParse<UserRole>(user.Role, ignoreCase: true, out var parsed))
             {

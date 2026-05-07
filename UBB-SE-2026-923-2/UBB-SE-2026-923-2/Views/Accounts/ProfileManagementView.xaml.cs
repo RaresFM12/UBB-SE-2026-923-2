@@ -1,47 +1,48 @@
-using System;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.ViewModels.Accounts;
-
 namespace UBB_SE_2026_923_2.Views.Accounts
 {
+    using System;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.ViewModels.Accounts;
+
     public sealed partial class ProfileManagementView : Page
     {
-        private UserAccountService accountService;
+        private readonly UserAccountService accountService;
+
         public ProfileManagementViewModel ViewModel { get; }
 
         public ProfileManagementView()
         {
             this.InitializeComponent();
 
-            accountService = ServiceWrapper.UserAccountService;
-            ViewModel = new ProfileManagementViewModel(accountService);
+            this.accountService = ServiceWrapper.UserAccountService;
+            this.ViewModel = new ProfileManagementViewModel(this.accountService);
 
-            this.DataContext = ViewModel;
+            this.DataContext = this.ViewModel;
         }
 
         private void OnSaveClick(object sender, RoutedEventArgs e)
         {
             try
             {
-                ViewModel.ErrorMessage = null;
-                ViewModel.SaveChanges();
+                this.ViewModel.ErrorMessage = null;
+                this.ViewModel.SaveChanges();
             }
             catch (Exception ex)
             {
-                ViewModel.ErrorMessage = ex.Message;
+                this.ViewModel.ErrorMessage = ex.Message;
             }
         }
 
         private void OnCancelClick(object sender, RoutedEventArgs e)
         {
-            ViewModel.CancelChanges();
+            this.ViewModel.CancelChanges();
         }
 
         private async void OnChangePasswordClick(object sender, RoutedEventArgs e)
         {
-            var dialog = new ChangePasswordView(accountService);
+            var dialog = new ChangePasswordView(this.accountService);
             dialog.XamlRoot = this.XamlRoot;
 
             await dialog.ShowAsync();
@@ -49,7 +50,7 @@ namespace UBB_SE_2026_923_2.Views.Accounts
 
         private async void OnOrderHistoryClick(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.OrderHistoryPage), new OrderService());
+            this.Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.OrderHistoryPage), new OrderService());
         }
     }
 }

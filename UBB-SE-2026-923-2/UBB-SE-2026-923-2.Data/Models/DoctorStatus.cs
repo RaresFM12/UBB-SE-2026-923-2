@@ -4,6 +4,6 @@
     {
         AVAILABLE,
         IN_EXAMINATION,
-        OFF_DUTY
+        OFF_DUTY,
     }
 }

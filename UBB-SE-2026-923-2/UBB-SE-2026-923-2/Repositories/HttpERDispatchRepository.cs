@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using UBB_SE_2026_923_2.Models;
-
 namespace UBB_SE_2026_923_2.Repositories
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Json;
+    using UBB_SE_2026_923_2.Models;
+
     /// <summary>
     /// HTTP-backed implementation of <see cref="IERDispatchRepository"/>.
     /// </summary>
@@ -24,20 +24,20 @@ namespace UBB_SE_2026_923_2.Repositories
         public int AddRequest(string specialization, string location, string status)
         {
             var payload = new { Specialization = specialization, Location = location, Status = status };
-            var response = httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
+            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();
             return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
         }
 
         public IReadOnlyList<ERRequest> GetAllRequests()
         {
-            var requests = httpClient.GetFromJsonAsync<List<ERRequest>>(BasePath).GetAwaiter().GetResult();
+            var requests = this.httpClient.GetFromJsonAsync<List<ERRequest>>(BasePath).GetAwaiter().GetResult();
             return requests ?? new List<ERRequest>();
         }
 
         public ERRequest? GetRequestById(int requestId)
         {
-            var response = httpClient.GetAsync($"{BasePath}/{requestId}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{requestId}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
@@ -55,7 +55,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 AssignedDoctorId = assignedDoctorId,
                 AssignedDoctorName = assignedDoctorName,
             };
-            var response = httpClient
+            var response = this.httpClient
                 .PatchAsJsonAsync($"{BasePath}/{requestId}/status", payload)
                 .GetAwaiter().GetResult();
             response.EnsureSuccessStatusCode();

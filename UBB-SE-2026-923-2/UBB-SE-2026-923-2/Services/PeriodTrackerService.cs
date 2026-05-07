@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UBB_SE_2026_923_2.Models;
-using UBB_SE_2026_923_2.Repositories;
-
-namespace UBB_SE_2026_923_2.Services
+﻿namespace UBB_SE_2026_923_2.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Repositories;
+
     public class PeriodTrackerService : IPeriodTrackerService
     {
         private const int DefaultCycleLengthInDays = 28;
@@ -28,12 +28,12 @@ namespace UBB_SE_2026_923_2.Services
 
         public User GetCurrentUser()
         {
-            return currentUserService.RaresCurrentUser;
+            return this.currentUserService.RaresCurrentUser;
         }
 
         public PeriodTrackerState GetTrackerState()
         {
-            User currentUser = GetCurrentUser();
+            User currentUser = this.GetCurrentUser();
 
             if (currentUser == null)
             {
@@ -48,19 +48,19 @@ namespace UBB_SE_2026_923_2.Services
                 CycleDays = currentUser.CycleDays,
                 PeriodLasts = currentUser.PeriodLasts,
                 PremenstrualSyndromeOption = currentUser.PremenstrualSyndromeOption,
-                HasPeriodTracker = usersRepository.UserHasPeriodTracker(currentUser.Id)
+                HasPeriodTracker = this.usersRepository.UserHasPeriodTracker(currentUser.Id),
             };
         }
 
         public Dictionary<int, Tuple<string, bool>> GetNotes()
         {
-            User currentUser = GetCurrentUser();
+            User currentUser = this.GetCurrentUser();
             return currentUser?.PeriodNotes ?? new Dictionary<int, Tuple<string, bool>>();
         }
 
         public int GetMaxNoteId()
         {
-            User currentUser = GetCurrentUser();
+            User currentUser = this.GetCurrentUser();
 
             if (currentUser == null || currentUser.PeriodNotes == null || currentUser.PeriodNotes.Count == 0)
             {
@@ -72,7 +72,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public void UpdatePeriodTracker(DateTimeOffset startPeriodDate, double cycleDays, double periodLasts, int premenstrualSyndromeOption)
         {
-            User currentUser = GetCurrentUser();
+            User currentUser = this.GetCurrentUser();
 
             if (currentUser == null)
             {
@@ -85,28 +85,28 @@ namespace UBB_SE_2026_923_2.Services
                 Convert.ToInt32(periodLasts),
                 premenstrualSyndromeOption);
 
-            SaveCurrentUser();
+            this.SaveCurrentUser();
         }
 
         public void AddNote(string noteBody)
         {
-            User currentUser = GetCurrentUser();
+            User currentUser = this.GetCurrentUser();
 
             if (currentUser == null)
             {
                 return;
             }
 
-            int nextNoteIdentifier = GetNextNoteIdentifier();
+            int nextNoteIdentifier = this.GetNextNoteIdentifier();
             string safeNoteBody = noteBody ?? string.Empty;
 
             currentUser.AddPeriodNoteToUser(nextNoteIdentifier, safeNoteBody, false);
-            SaveCurrentUser();
+            this.SaveCurrentUser();
         }
 
         public void UpdateNote(int noteId, string noteBody, bool isDone)
         {
-            User currentUser = GetCurrentUser();
+            User currentUser = this.GetCurrentUser();
 
             if (currentUser == null || currentUser.PeriodNotes == null)
             {
@@ -116,12 +116,12 @@ namespace UBB_SE_2026_923_2.Services
             string safeNoteBody = noteBody ?? string.Empty;
             currentUser.PeriodNotes[noteId] = new Tuple<string, bool>(safeNoteBody, isDone);
 
-            SaveCurrentUser();
+            this.SaveCurrentUser();
         }
 
         public void DeleteNote(int noteId)
         {
-            User currentUser = GetCurrentUser();
+            User currentUser = this.GetCurrentUser();
 
             if (currentUser == null || currentUser.PeriodNotes == null)
             {
@@ -134,16 +134,16 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             currentUser.PeriodNotes.Remove(noteId);
-            SaveCurrentUser();
+            this.SaveCurrentUser();
         }
 
         public void SaveCurrentUser()
         {
-            User currentUser = GetCurrentUser();
+            User currentUser = this.GetCurrentUser();
 
             if (currentUser != null)
             {
-                usersRepository.UpdateUser(currentUser);
+                this.usersRepository.UpdateUser(currentUser);
             }
         }
 
@@ -155,7 +155,7 @@ namespace UBB_SE_2026_923_2.Services
                 CycleDays = DefaultCycleLengthInDays,
                 PeriodLasts = DefaultPeriodLengthInDays,
                 PremenstrualSyndromeOption = DefaultPremenstrualSyndromeOption,
-                HasPeriodTracker = false
+                HasPeriodTracker = false,
             };
         }
 
@@ -173,7 +173,7 @@ namespace UBB_SE_2026_923_2.Services
 
         private int GetNextNoteIdentifier()
         {
-            int maximumExistingNoteIdentifier = GetMaxNoteId();
+            int maximumExistingNoteIdentifier = this.GetMaxNoteId();
 
             if (maximumExistingNoteIdentifier == 0)
             {

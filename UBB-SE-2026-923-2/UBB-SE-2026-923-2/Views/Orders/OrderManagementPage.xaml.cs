@@ -1,3 +1,5 @@
+namespace UBB_SE_2026_923_2.Views.Orders;
+
 using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -5,10 +7,10 @@ using Microsoft.UI.Xaml.Navigation;
 using UBB_SE_2026_923_2.Services;
 using UBB_SE_2026_923_2.ViewModels.Orders;
 
-namespace UBB_SE_2026_923_2.Views.Orders;
 public sealed partial class OrderManagementPage : Page
 {
     private IOrderService orderService;
+
     public OrderManagementViewModel ViewModel { get; set; }
 
     public OrderManagementPage()
@@ -22,11 +24,12 @@ public sealed partial class OrderManagementPage : Page
         {
             return;
         }
-        orderService = service;
-        ViewModel = new (orderService);
-        DataContext = ViewModel;
 
-        ViewModel.ClickDetailButton += RedirectToPage;
+        this.orderService = service;
+        this.ViewModel = new(this.orderService);
+        this.DataContext = this.ViewModel;
+
+        this.ViewModel.ClickDetailButton += this.RedirectToPage;
     }
 
     private void RedirectToPage(Tuple<IOrderService, OrderDetail> args)
@@ -36,12 +39,14 @@ public sealed partial class OrderManagementPage : Page
 
         if (!completeStatus && !expiredStatus)
         {
-            Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.EditableOrderDetailPage),
+            this.Frame.Navigate(
+                typeof(UBB_SE_2026_923_2.Views.Orders.EditableOrderDetailPage),
                     new Tuple<IOrderService, int>(args.Item1, args.Item2.OrderID));
         }
         else
         {
-            Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.NonEditableOrderDetailPage),
+            this.Frame.Navigate(
+                typeof(UBB_SE_2026_923_2.Views.Orders.NonEditableOrderDetailPage),
                     new Tuple<IOrderService, int>(args.Item1, args.Item2.OrderID));
         }
     }
@@ -50,7 +55,9 @@ public sealed partial class OrderManagementPage : Page
 public partial class OrderDetailTemplateSelector : DataTemplateSelector
 {
     public DataTemplate IncompleteTemplate { get; set; }
+
     public DataTemplate ExpiredTemplate { get; set; }
+
     public DataTemplate CompleteTemplate { get; set; }
 
     protected override DataTemplate SelectTemplateCore(object item)
@@ -59,13 +66,14 @@ public partial class OrderDetailTemplateSelector : DataTemplateSelector
 
         if (currentOrder.IsComplete)
         {
-            return CompleteTemplate;
-        }
-        if (currentOrder.IsExpired)
-        {
-            return ExpiredTemplate;
+            return this.CompleteTemplate;
         }
 
-        return IncompleteTemplate;
+        if (currentOrder.IsExpired)
+        {
+            return this.ExpiredTemplate;
+        }
+
+        return this.IncompleteTemplate;
     }
 }

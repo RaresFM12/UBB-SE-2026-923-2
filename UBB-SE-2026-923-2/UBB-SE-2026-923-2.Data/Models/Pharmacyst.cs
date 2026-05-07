@@ -10,7 +10,7 @@ namespace UBB_SE_2026_923_2.Models
     {
         public Pharmacyst()
         {
-            Role = "Pharmacist";
+            this.Role = "Pharmacist";
         }
 
         public Pharmacyst(int staffID, string firstName, string lastName, string contactInfo, bool available, string certification, int yearsOfExp)
