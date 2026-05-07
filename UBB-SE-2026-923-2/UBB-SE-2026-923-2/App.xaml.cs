@@ -82,9 +82,9 @@ namespace UBB_SE_2026_923_2
 
             // Pharmacy-side repositories.
             services.AddSingleton<IUsersRepository, HttpUsersRepository>();
-            services.AddScoped<IItemsRepository, SQLItemsRepository>();
-            services.AddScoped<IOrdersRepository, SQLOrdersRepository>();
-            services.AddScoped<ISubstancesRepository, SQLSubstancesRepository>();
+            services.AddSingleton<IItemsRepository, HttpItemsRepository>();
+            services.AddSingleton<IOrdersRepository, HttpOrdersRepository>();
+            services.AddSingleton<ISubstancesRepository, HttpSubstancesRepository>();
 
             // Staff goes through the Web API. One HTTP-backed instance is
             // forwarded to all three staff-repository interfaces.

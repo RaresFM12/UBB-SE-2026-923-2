@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -14,7 +15,8 @@ namespace UBB_SE_2026_923_2.Models
         public string Category { get; set; }
         public string ImagePath { get; set; }
         public int NumberOfPills { get; set; }
-        public int Quantity { get; private set; }
+        // Setter opened up so System.Text.Json can rehydrate Quantity over HTTP.
+        public int Quantity { get; set; }
         public string Label { get; set; }
         public string Description { get; set; }
         public float DiscountPercentage { get; set; }
@@ -29,7 +31,12 @@ namespace UBB_SE_2026_923_2.Models
         public Dictionary<DateOnly, int> Batches { get; set; }
 
         // ---- EF Core navigation collections (persisted) ----
+        // [JsonIgnore]: server projects these into the legacy dictionaries
+        // (ActiveSubstances/Batches) before returning, and they create cycles
+        // back to Item over the wire.
+        [JsonIgnore]
         public ICollection<ItemSubstance> ItemSubstanceEntries { get; set; } = new List<ItemSubstance>();
+        [JsonIgnore]
         public ICollection<ItemBatch> ItemBatchEntries { get; set; } = new List<ItemBatch>();
 
         public Item()

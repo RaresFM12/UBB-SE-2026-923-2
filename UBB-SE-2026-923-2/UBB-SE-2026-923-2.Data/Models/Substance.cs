@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace UBB_SE_2026_923_2.Models
 {
@@ -9,6 +10,8 @@ namespace UBB_SE_2026_923_2.Models
         public string Description { get; set; } = string.Empty;
 
         // ---- EF Core navigation collection (persisted) ----
+        // [JsonIgnore]: would create cycles back through Item over the wire.
+        [JsonIgnore]
         public ICollection<ItemSubstance> ItemSubstanceEntries { get; set; } = new List<ItemSubstance>();
 
         // Parameterless constructor required by EF Core when materializing entities.
