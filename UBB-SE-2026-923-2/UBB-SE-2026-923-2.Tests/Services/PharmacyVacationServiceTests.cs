@@ -153,8 +153,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetPharmacists_ManyPharmacists_AllReturned()
         {
             var pharmacists = new List<Pharmacyst>();
-            for (int i = 1; i <= 10; i++)
-                pharmacists.Add(new Pharmacyst(i, $"First{i}", $"Last{i}", "", true, $"cert{i}", i));
+            for (int pharmacistIndex = 1; pharmacistIndex <= 10; pharmacistIndex++)
+                pharmacists.Add(new Pharmacyst(pharmacistIndex, $"First{pharmacistIndex}", $"Last{pharmacistIndex}", "", true, $"cert{pharmacistIndex}", pharmacistIndex));
             mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(pharmacists);
             var result = service.GetPharmacists();
             Assert.That(result.Count, Is.EqualTo(10));

@@ -129,8 +129,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetWellnessItems_ManyItems_ReturnsAllWellness()
         {
             var items = new List<Item>();
-            for (int i = 1; i <= 50; i++)
-                items.Add(new Item(i, $"Item{i}", "P", i % 2 == 0 ? "wellness" : "other", 10f, 1, quantity: 0));
+            for (int itemIndex = 1; itemIndex <= 50; itemIndex++)
+                items.Add(new Item(itemIndex, $"Item{itemIndex}", "P", itemIndex % 2 == 0 ? "wellness" : "other", 10f, 1, quantity: 0));
             mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
             var result = service.GetWellnessItems();
             Assert.That(result.Count, Is.EqualTo(25));

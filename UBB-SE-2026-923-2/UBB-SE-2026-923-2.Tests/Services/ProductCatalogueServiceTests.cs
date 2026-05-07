@@ -191,9 +191,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItems_SortByPriceAscending_ReturnsSorted()
         {
             var result = service.GetItems(null, sortBy: "price", ascending: true, pageSize: 100);
-            for (int i = 1; i < result.Count; i++)
+            for (int itemIndex = 1; itemIndex < result.Count; itemIndex++)
             {
-                Assert.That(result[i].Price, Is.GreaterThanOrEqualTo(result[i - 1].Price));
+                Assert.That(result[itemIndex].Price, Is.GreaterThanOrEqualTo(result[itemIndex - 1].Price));
             }
         }
 
@@ -201,9 +201,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetItems_SortByPriceDescending_ReturnsSorted()
         {
             var result = service.GetItems(null, sortBy: "price", ascending: false, pageSize: 100);
-            for (int i = 1; i < result.Count; i++)
+            for (int itemIndex = 1; itemIndex < result.Count; itemIndex++)
             {
-                Assert.That(result[i].Price, Is.LessThanOrEqualTo(result[i - 1].Price));
+                Assert.That(result[itemIndex].Price, Is.LessThanOrEqualTo(result[itemIndex - 1].Price));
             }
         }
 

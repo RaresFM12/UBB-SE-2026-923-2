@@ -156,8 +156,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var staff = new Pharmacyst { StaffID = 1 };
             var baseDate = new DateTime(2025, 6, 1);
             var shifts = new List<Shift>();
-            for (int i = 0; i < 10; i++)
-                shifts.Add(new Shift(i + 1, staff, "Pharmacy", baseDate.AddHours(i * 2), baseDate.AddHours(i * 2 + 1), ShiftStatus.SCHEDULED));
+            for (int shiftIndex = 0; shiftIndex < 10; shiftIndex++)
+                shifts.Add(new Shift(shiftIndex + 1, staff, "Pharmacy", baseDate.AddHours(shiftIndex * 2), baseDate.AddHours(shiftIndex * 2 + 1), ShiftStatus.SCHEDULED));
             mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(shifts);
 
             var result = await service.GetShiftsAsync(1, baseDate, baseDate.AddDays(1));
@@ -220,8 +220,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public void GetPharmacists_ManyPharmacists_ReturnsAll()
         {
             var pharmacists = new List<Pharmacyst>();
-            for (int i = 1; i <= 20; i++)
-                pharmacists.Add(new Pharmacyst(i, $"First{i}", $"Last{i}", "", true, $"cert{i}", i));
+            for (int pharmacistIndex = 1; pharmacistIndex <= 20; pharmacistIndex++)
+                pharmacists.Add(new Pharmacyst(pharmacistIndex, $"First{pharmacistIndex}", $"Last{pharmacistIndex}", "", true, $"cert{pharmacistIndex}", pharmacistIndex));
             mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(pharmacists);
             var result = service.GetPharmacists();
             Assert.That(result.Count, Is.EqualTo(20));
