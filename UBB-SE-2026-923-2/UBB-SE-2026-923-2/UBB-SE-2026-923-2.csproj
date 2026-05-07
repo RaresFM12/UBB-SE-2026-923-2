@@ -37,19 +37,14 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <!--
-    EF Core, the entity model and the connection-string helper now live in
-    UBB-SE-2026-923-2.Data so the EF design-time tooling can build the
-    DbContext assembly without dragging in Microsoft.WindowsAppSDK's module
-    initializer (which throws "Class not registered" outside an MSIX host).
+    The desktop project references UBB-SE-2026-923-2.Data only for the
+    shared domain models and repository interfaces. EF Core, the DbContext
+    and the SQL Server provider live entirely on the Web API side now.
   -->
   <ItemGroup>
     <ProjectReference Include="..\UBB-SE-2026-923-2.Data\UBB-SE-2026-923-2.Data.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
     <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />

@@ -1,10 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using System;
 using System.Net.Http;
 using UBB_SE_2026_923_2.Configuration;
-using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Repositories;
 using UBB_SE_2026_923_2.Services;
 using UBB_SE_2026_923_2.ViewModels;
@@ -25,8 +23,8 @@ namespace UBB_SE_2026_923_2
         {
             InitializeComponent();
             // Build the DI container first so that ServiceWrapper.Initialize
-            // (and any other static-style entry points) can resolve EF Core
-            // repositories rather than falling back to the legacy ADO.NET ones.
+            // (and any other static-style entry points) can resolve repositories
+            // through the registered HTTP-backed implementations.
             Services = ConfigureServices().BuildServiceProvider();
             ServiceWrapper.Initialize();
         }
@@ -41,17 +39,10 @@ namespace UBB_SE_2026_923_2
         {
             var services = new ServiceCollection();
 
-            // EF Core context registration.
-            // AddDbContextFactory exposes IDbContextFactory<AppDbContext> (singleton),
-            // which is the only safe way for our singleton repositories to obtain a
-            // short-lived DbContext per call (DbContext itself is NOT thread-safe).
-            // AddDbContext is also called so any service that prefers a directly-
-            // injected (scoped) AppDbContext continues to work.
-            services.AddDbContextFactory<AppDbContext>(options =>
-                options.UseSqlServer(AppSettings.ConnectionString));
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(AppSettings.ConnectionString));
-
+            // The desktop project no longer talks to the database directly:
+            // every repository is HTTP-backed and goes through the Web API.
+            // EF Core lives in UBB-SE-2026-923-2.Data and is hosted by
+            // UBB-SE-2026-923-2.WebApi.
             RegisterInfrastructure(services);
             RegisterRepositories(services);
             RegisterServices(services);
