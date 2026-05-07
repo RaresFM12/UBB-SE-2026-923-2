@@ -60,25 +60,7 @@
     <Compile Include="..\UBB-SE-2026-923-2\Services\PeriodTrackerService.cs" Link="LinkedSources\PeriodTrackerService.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\PeriodTrackerState.cs" Link="LinkedSources\PeriodTrackerState.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\RaresICurrentUserService.cs" Link="LinkedSources\RaresICurrentUserService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IUsersRepository.cs" Link="LinkedSources\IUsersRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IItemsRepository.cs" Link="LinkedSources\IItemsRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\ISubstancesRepository.cs" Link="LinkedSources\ISubstancesRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IOrdersRepository.cs" Link="LinkedSources\IOrdersRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IEvaluationsRepository.cs" Link="LinkedSources\IEvaluationsRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IAppointmentRepository.cs" Link="LinkedSources\IAppointmentRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IStaffRepository.cs" Link="LinkedSources\IStaffRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IShiftRepository.cs" Link="LinkedSources\IShiftRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IShiftSwapRepository.cs" Link="LinkedSources\IShiftSwapRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\INotificationRepository.cs" Link="LinkedSources\INotificationRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IERDispatchRepository.cs" Link="LinkedSources\IERDispatchRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IHangoutRepository.cs" Link="LinkedSources\IHangoutRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IHangoutParticipantRepository.cs" Link="LinkedSources\IHangoutParticipantRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IHighRiskMedicineRepository.cs" Link="LinkedSources\IHighRiskMedicineRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IPharmacyStaffRepository.cs" Link="LinkedSources\IPharmacyStaffRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IPharmacyShiftRepository.cs" Link="LinkedSources\IPharmacyShiftRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IPharmacyHandoverRepository.cs" Link="LinkedSources\IPharmacyHandoverRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IShiftManagementShiftRepository.cs" Link="LinkedSources\IShiftManagementShiftRepository.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Repositories\IShiftManagementStaffRepository.cs" Link="LinkedSources\IShiftManagementStaffRepository.cs" />
+    <!-- Repository interfaces are in UBB-SE-2026-923-2.Data (already project-referenced above) -->
     <Compile Include="..\UBB-SE-2026-923-2\Services\IDoctorAppointmentService.cs" Link="LinkedSources\IDoctorAppointmentService.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\DoctorAppointmentService.cs" Link="LinkedSources\DoctorAppointmentService.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\IMedicalEvaluationService.cs" Link="LinkedSources\IMedicalEvaluationService.cs" />

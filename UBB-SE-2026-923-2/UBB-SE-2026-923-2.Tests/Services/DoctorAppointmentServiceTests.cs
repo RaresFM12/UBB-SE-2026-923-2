@@ -230,7 +230,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public async Task GetUpcomingAppointmentsAsync_PastAppointment_Excluded()
         {
-            var appointment = new Appointment { Id = 1, DoctorId = 1, Date = DateTime.Now.AddDays(-1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
+            var appointment = new Appointment { Id = 1, DoctorId = 1, Date = DateTime.Today.AddDays(-1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
             mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
             var result = await service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
