@@ -22,12 +22,22 @@ namespace UBB_SE_2026_923_2
 
         public App()
         {
-            InitializeComponent();
-            // Build the DI container first so that ServiceWrapper.Initialize
-            // (and any other static-style entry points) can resolve EF Core
-            // repositories rather than falling back to the legacy ADO.NET ones.
-            Services = ConfigureServices().BuildServiceProvider();
-            ServiceWrapper.Initialize();
+            try
+            {
+                InitializeComponent();
+                // Build the DI container first so that ServiceWrapper.Initialize
+                // (and any other static-style entry points) can resolve EF Core
+                // repositories rather than falling back to the legacy ADO.NET ones.
+                Services = ConfigureServices().BuildServiceProvider();
+                ServiceWrapper.Initialize();
+            }
+            catch (Exception ex)
+            {
+                System.IO.File.WriteAllText(
+                    System.IO.Path.Combine(AppContext.BaseDirectory, "crash.log"),
+                    ex.ToString());
+                throw;
+            }
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs eventArgs)
