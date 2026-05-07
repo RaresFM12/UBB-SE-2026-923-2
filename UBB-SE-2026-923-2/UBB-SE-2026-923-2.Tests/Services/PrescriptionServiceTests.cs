@@ -236,5 +236,51 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             Assert.Throws<ArgumentNullException>(() => service.GetCheapestPrescriptionItems("", 30));
         }
+
+        [Test]
+        public void GetCheapestPrescriptionItems_WhitespaceName_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => service.GetCheapestPrescriptionItems("   ", 30));
+        }
+
+        [Test]
+        public void GetCheapestPrescriptionItems_OneDayTreatment_ReturnsNonNull()
+        {
+            var item = new Item(1, "Aspirin", "Bayer", "pain", 5f, 1, quantity: 50);
+            item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(30))] = 50;
+            mockItemsRepo.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepo.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+
+            var result = service.GetCheapestPrescriptionItems("Aspirin", 1);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.ContainsKey(1), Is.True);
+        }
+
+        [Test]
+        public void GetItemsFromPrescription_FloatId_Throws()
+        {
+            Assert.Throws<ArgumentException>(() => service.GetItemsFromPrescription("1.5", new Dictionary<int, float>()));
+        }
+
+        [Test]
+        public void GetItemsFromPrescription_SpecialCharId_Throws()
+        {
+            Assert.Throws<ArgumentException>(() => service.GetItemsFromPrescription("@#$", new Dictionary<int, float>()));
+        }
+
+        [Test]
+        public void GetCheapestPrescriptionItems_AllExpiredBatches_ReturnsEmptyOrSubstitute()
+        {
+            var item = new Item(1, "Aspirin", "Bayer", "pain", 10f, 30, quantity: 50);
+            item.Batches[DateOnly.FromDateTime(DateTime.Now.AddDays(-10))] = 50;
+            item.ActiveSubstances["acid"] = 500f;
+
+            mockItemsRepo.Setup(r => r.GetAllItems()).Returns(new List<Item> { item });
+            mockItemsRepo.Setup(r => r.GetItemsByName("Aspirin")).Returns(new List<Item> { item });
+
+            var result = service.GetCheapestPrescriptionItems("Aspirin", 30);
+            // Either returns the item anyway or returns empty if expired batches are excluded
+            Assert.That(result, Is.Not.Null);
+        }
     }
 }

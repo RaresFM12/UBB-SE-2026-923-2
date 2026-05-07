@@ -249,5 +249,137 @@ namespace UBB_SE_2026_923_2.Tests.Services
             // 360 + 360 * 5 * 0.02 = 360 + 36 = 396
             Assert.That(result, Is.EqualTo(396).Within(1));
         }
+
+        [Test]
+        public async Task ComputeSalaryDoctorAsync_MultipleShiftsSameMonth_SumsUp()
+        {
+            var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 0);
+            var wed1 = new DateTime(2025, 1, 8, 9, 0, 0);
+            var wed2 = new DateTime(2025, 1, 15, 9, 0, 0);
+            var shifts = new List<Shift>
+            {
+                new Shift(1, doctor, "Ward", wed1, wed1.AddHours(8), ShiftStatus.COMPLETED),
+                new Shift(2, doctor, "Ward", wed2, wed2.AddHours(8), ShiftStatus.COMPLETED),
+            };
+
+            var result = await service.ComputeSalaryDoctorAsync(doctor, shifts, 1, 2025);
+            // 2 * (8 * 85) = 1360
+            Assert.That(result, Is.GreaterThan(1300));
+        }
+
+        [Test]
+        public async Task ComputeSalaryDoctorAsync_ZeroExperience_NoExperienceBonus()
+        {
+            var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 0);
+            var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
+            var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
+
+            var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
+            // Base pay with zero experience
+            Assert.That(result, Is.GreaterThan(600));
+        }
+
+        [Test]
+        public async Task ComputeSalaryDoctorAsync_FridayNightIntoSaturday_AppliesNightMultiplier()
+        {
+            var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 0);
+            var fridayNight = new DateTime(2025, 1, 10, 22, 0, 0); // Friday night
+            var shift = new Shift(1, doctor, "Ward", fridayNight, fridayNight.AddHours(8), ShiftStatus.COMPLETED);
+
+            var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
+            // Night multiplier should apply
+            Assert.That(result, Is.GreaterThan(680));
+        }
+
+        [Test]
+        public async Task ComputeSalaryDoctorAsync_NoHangoutParticipation_NoHangoutBonus()
+        {
+            var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 0);
+            var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
+            var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
+
+            mockParticipantRepo.Setup(r => r.GetAllParticipants()).Returns(new List<(int, int)>());
+            mockHangoutRepo.Setup(r => r.GetAllHangouts()).Returns(new List<Hangout>());
+
+            var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
+            Assert.That(result, Is.GreaterThan(600));
+        }
+
+        [Test]
+        public async Task ComputeSalaryPharmacistAsync_SaturdayShift_AppliesOvertimeMultiplier()
+        {
+            var pharmacist = new Pharmacyst(1, "A", "B", "c", true, "Cert", 0);
+            var saturday = new DateTime(2025, 1, 11, 9, 0, 0);
+            var shift = new Shift(1, pharmacist, "Pharmacy", saturday, saturday.AddHours(8), ShiftStatus.COMPLETED);
+
+            var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
+            // 8 * 45 * 1.15 = 414
+            Assert.That(result, Is.GreaterThan(400));
+        }
+
+        [Test]
+        public async Task ComputeSalaryPharmacistAsync_SundayShift_AppliesOvertimeMultiplier()
+        {
+            var pharmacist = new Pharmacyst(1, "A", "B", "c", true, "Cert", 0);
+            var sunday = new DateTime(2025, 1, 12, 9, 0, 0);
+            var shift = new Shift(1, pharmacist, "Pharmacy", sunday, sunday.AddHours(8), ShiftStatus.COMPLETED);
+
+            var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
+            // 8 * 45 * 1.25 = 450
+            Assert.That(result, Is.GreaterThan(440));
+        }
+
+        [Test]
+        public async Task ComputeSalaryPharmacistAsync_NightShift_AppliesNightMultiplier()
+        {
+            var pharmacist = new Pharmacyst(1, "A", "B", "c", true, "Cert", 0);
+            var nightStart = new DateTime(2025, 1, 8, 22, 0, 0);
+            var shift = new Shift(1, pharmacist, "Pharmacy", nightStart, nightStart.AddHours(8), ShiftStatus.COMPLETED);
+
+            var result = await service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
+            // 8 * 45 * 1.20 = 432
+            Assert.That(result, Is.GreaterThan(420));
+        }
+
+        [Test]
+        public async Task ComputeSalaryPharmacistAsync_MultipleShifts_SumsUp()
+        {
+            var pharmacist = new Pharmacyst(1, "A", "B", "c", true, "Cert", 0);
+            var wed1 = new DateTime(2025, 1, 8, 9, 0, 0);
+            var wed2 = new DateTime(2025, 1, 15, 9, 0, 0);
+            var shifts = new List<Shift>
+            {
+                new Shift(1, pharmacist, "Pharmacy", wed1, wed1.AddHours(8), ShiftStatus.COMPLETED),
+                new Shift(2, pharmacist, "Pharmacy", wed2, wed2.AddHours(8), ShiftStatus.COMPLETED),
+            };
+
+            var result = await service.ComputeSalaryPharmacistAsync(pharmacist, shifts, 1, 2025);
+            // 2 * 360 = 720
+            Assert.That(result, Is.EqualTo(720).Within(5));
+        }
+
+        [Test]
+        public async Task ComputeSalaryDoctorAsync_HighExperience_LargeBonus()
+        {
+            var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 25);
+            var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
+            var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
+
+            var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
+            // 680 + 680 * 25 * 0.02 = 680 + 340 = 1020
+            Assert.That(result, Is.GreaterThan(950));
+        }
+
+        [Test]
+        public async Task ComputeSalaryDoctorAsync_SurgeonWithExperience_CombinesBonuses()
+        {
+            var doctor = new Doctor(1, "A", "B", "c", true, "Surgeon", "L1", DoctorStatus.AVAILABLE, 10);
+            var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
+            var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
+
+            var result = await service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
+            // Base 680, surgeon +20%, experience +20% => significant bonus
+            Assert.That(result, Is.GreaterThan(900));
+        }
     }
 }

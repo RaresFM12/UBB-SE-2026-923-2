@@ -179,5 +179,180 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var result = service.RunAutoAudit(monday);
             Assert.That(result.Violations.All(v => v.StaffId == 1), Is.True);
         }
+
+        [Test]
+        public void RunAutoAudit_Exactly60Hours_NoViolation()
+        {
+            var monday = new DateTime(2025, 1, 6);
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+
+            // 6 days * 10 hours = 60 hours exactly
+            var shifts = new List<Shift>();
+            for (int day = 0; day < 6; day++)
+            {
+                shifts.Add(new Shift(day + 1, doctor1, "Ward",
+                    monday.AddDays(day).AddHours(6),
+                    monday.AddDays(day).AddHours(16),
+                    ShiftStatus.SCHEDULED));
+            }
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(shifts);
+
+            var result = service.RunAutoAudit(monday);
+            Assert.That(result.Violations.Any(v => v.Rule == "MAX_60H_PER_WEEK"), Is.False);
+        }
+
+        [Test]
+        public void RunAutoAudit_Exactly12HoursRest_NoViolation()
+        {
+            var monday = new DateTime(2025, 1, 6);
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+
+            var shifts = new List<Shift>
+            {
+                new Shift(1, doctor1, "Ward", monday.AddHours(6), monday.AddHours(14), ShiftStatus.SCHEDULED),
+                new Shift(2, doctor1, "Ward", monday.AddHours(26), monday.AddHours(34), ShiftStatus.SCHEDULED), // 12h gap exactly
+            };
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(shifts);
+
+            var result = service.RunAutoAudit(monday);
+            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.False);
+        }
+
+        [Test]
+        public void RunAutoAudit_NoStaff_NoViolations()
+        {
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff>());
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(new List<Shift>());
+
+            var result = service.RunAutoAudit(DateTime.Now);
+            Assert.That(result.Violations.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void RunAutoAudit_BothViolationsSameStaff_ReportsBoth()
+        {
+            var monday = new DateTime(2025, 1, 6);
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+
+            // 7 days * 10 hours = 70 hours (exceeds 60) AND insufficient rest between some shifts
+            var shifts = new List<Shift>();
+            for (int day = 0; day < 7; day++)
+            {
+                shifts.Add(new Shift(day + 1, doctor1, "Ward",
+                    monday.AddDays(day).AddHours(6),
+                    monday.AddDays(day).AddHours(16),
+                    ShiftStatus.SCHEDULED));
+            }
+            // Add extra shift with insufficient rest on Monday
+            shifts.Add(new Shift(8, doctor1, "Ward", monday.AddHours(20), monday.AddHours(28), ShiftStatus.SCHEDULED));
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(shifts);
+
+            var result = service.RunAutoAudit(monday);
+            Assert.That(result.HasConflicts, Is.True);
+            Assert.That(result.Violations.Any(v => v.Rule == "MAX_60H_PER_WEEK"), Is.True);
+            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.True);
+        }
+
+        [Test]
+        public void ReassignShift_ValidIds_ReturnsTrue_Verifiable()
+        {
+            var result = service.ReassignShift(5, 10);
+            Assert.That(result, Is.True);
+            mockShiftRepo.Verify(r => r.UpdateShiftStaffId(5, 10), Times.Once);
+        }
+
+        [Test]
+        public void RunAutoAudit_ActiveShifts_AreConsidered()
+        {
+            var monday = new DateTime(2025, 1, 6);
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+
+            var shifts = new List<Shift>();
+            for (int day = 0; day < 7; day++)
+            {
+                shifts.Add(new Shift(day + 1, doctor1, "Ward",
+                    monday.AddDays(day).AddHours(6),
+                    monday.AddDays(day).AddHours(16),
+                    ShiftStatus.ACTIVE));
+            }
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(shifts);
+
+            var result = service.RunAutoAudit(monday);
+            Assert.That(result.HasConflicts, Is.True);
+        }
+
+        [Test]
+        public void RunAutoAudit_CompletedShifts_AreConsidered()
+        {
+            var monday = new DateTime(2025, 1, 6);
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+
+            var shifts = new List<Shift>
+            {
+                new Shift(1, doctor1, "Ward", monday.AddHours(6), monday.AddHours(14), ShiftStatus.COMPLETED),
+                new Shift(2, doctor1, "Ward", monday.AddHours(18), monday.AddHours(26), ShiftStatus.COMPLETED), // 4h gap
+            };
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(shifts);
+
+            var result = service.RunAutoAudit(monday);
+            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.True);
+        }
+
+        [Test]
+        public void RunAutoAudit_ShiftsFromDifferentWeek_NotCounted()
+        {
+            var monday = new DateTime(2025, 1, 6);
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+
+            // Shifts in the NEXT week should not count for this week's audit
+            var nextMonday = monday.AddDays(7);
+            var shifts = new List<Shift>();
+            for (int day = 0; day < 7; day++)
+            {
+                shifts.Add(new Shift(day + 1, doctor1, "Ward",
+                    nextMonday.AddDays(day).AddHours(6),
+                    nextMonday.AddDays(day).AddHours(16),
+                    ShiftStatus.SCHEDULED));
+            }
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(shifts);
+
+            var result = service.RunAutoAudit(monday);
+            Assert.That(result.Violations.Any(v => v.Rule == "MAX_60H_PER_WEEK"), Is.False);
+        }
+
+        [Test]
+        public void RunAutoAudit_SingleShortShift_NoViolations()
+        {
+            var monday = new DateTime(2025, 1, 6);
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+
+            var shifts = new List<Shift>
+            {
+                new Shift(1, doctor1, "Ward", monday.AddHours(9), monday.AddHours(13), ShiftStatus.SCHEDULED),
+            };
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(shifts);
+
+            var result = service.RunAutoAudit(monday);
+            Assert.That(result.HasConflicts, Is.False);
+            Assert.That(result.Violations.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void RunAutoAudit_ThreeShiftsWithSufficientRest_NoRestViolation()
+        {
+            var monday = new DateTime(2025, 1, 6);
+            mockStaffRepo.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { doctor1 });
+
+            var shifts = new List<Shift>
+            {
+                new Shift(1, doctor1, "Ward", monday.AddHours(6), monday.AddHours(14), ShiftStatus.SCHEDULED),
+                new Shift(2, doctor1, "Ward", monday.AddDays(1).AddHours(6), monday.AddDays(1).AddHours(14), ShiftStatus.SCHEDULED),
+                new Shift(3, doctor1, "Ward", monday.AddDays(2).AddHours(6), monday.AddDays(2).AddHours(14), ShiftStatus.SCHEDULED),
+            };
+            mockShiftRepo.Setup(r => r.GetAllShifts()).Returns(shifts);
+
+            var result = service.RunAutoAudit(monday);
+            Assert.That(result.Violations.Any(v => v.Rule == "MIN_12H_REST"), Is.False);
+        }
     }
 }
