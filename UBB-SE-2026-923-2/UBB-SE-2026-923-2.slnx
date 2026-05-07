@@ -11,4 +11,5 @@
     <Deploy />
   </Project>
   <Project Path="UBB-SE-2026-923-2.Data/UBB-SE-2026-923-2.Data.csproj" />
+  <Project Path="UBB-SE-2026-923-2.WebApi/UBB-SE-2026-923-2.WebApi.csproj" />
 </Solution>

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using System;
+using System.Net.Http;
 using UBB_SE_2026_923_2.Configuration;
 using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Repositories;
@@ -64,6 +65,13 @@ namespace UBB_SE_2026_923_2
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<RaresICurrentUserService, CurrentUserServiceAdapter>();
             services.AddSingleton<DialogPresenter>();
+
+            // Single HttpClient pointing at the local Web API. Replace BaseAddress
+            // when deploying the API somewhere other than localhost.
+            services.AddSingleton<HttpClient>(_ => new HttpClient
+            {
+                BaseAddress = new Uri(AppSettings.WebApiBaseUrl),
+            });
         }
 
         private static void RegisterRepositories(IServiceCollection services)
@@ -95,7 +103,8 @@ namespace UBB_SE_2026_923_2
             services.AddSingleton<IPharmacyHandoverRepository, PharmacyHandoverRepository>();
             services.AddSingleton<IShiftSwapRepository, ShiftSwapRepository>();
             services.AddSingleton<INotificationRepository, NotificationRepository>();
-            services.AddSingleton<IAppointmentRepository, AppointmentRepository>();
+            // Appointments now go through the Web API instead of EF Core directly.
+            services.AddSingleton<IAppointmentRepository, HttpAppointmentRepository>();
             services.AddSingleton<IHangoutRepository, HangoutRepository>();
             services.AddSingleton<IHangoutParticipantRepository, HangoutParticipantRepository>();
             services.AddSingleton<IEvaluationsRepository, EvaluationsRepository>();
