@@ -26,28 +26,28 @@ public class ItemsController : ControllerBase
         return this.Ok(this.repository.GetAllItems());
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<Item> GetById(int id)
+    [HttpGet("{itemId:int}")]
+    public ActionResult<Item> GetById(int itemId)
     {
-        if (!this.repository.ItemExists(id))
+        if (!this.repository.ItemExists(itemId))
         {
             return this.NotFound();
         }
 
-        return this.Ok(this.repository.GetItemById(id));
+        return this.Ok(this.repository.GetItemById(itemId));
     }
 
-    [HttpGet("{id:int}/exists")]
-    public ActionResult<bool> Exists(int id)
+    [HttpGet("{itemId:int}/exists")]
+    public ActionResult<bool> Exists(int itemId)
     {
-        return this.Ok(this.repository.ItemExists(id));
+        return this.Ok(this.repository.ItemExists(itemId));
     }
 
     [HttpGet("top")]
     public ActionResult<List<ItemPopularitySummary>> GetTop()
     {
         var top = this.repository.GetTop30Items()
-            .Select(t => new ItemPopularitySummary(t.Item1, t.Item2, t.Item3))
+            .Select(topItem => new ItemPopularitySummary(topItem.Item1, topItem.Item2, topItem.Item3))
             .ToList();
         return this.Ok(top);
     }
@@ -87,18 +87,18 @@ public class ItemsController : ControllerBase
         return this.NoContent();
     }
 
-    [HttpPut("{id:int}")]
-    public IActionResult Update(int id, [FromBody] Item item)
+    [HttpPut("{itemId:int}")]
+    public IActionResult Update(int itemId, [FromBody] Item item)
     {
-        item.Id = id;
+        item.Id = itemId;
         this.repository.UpdateItemById(item);
         return this.NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    [HttpDelete("{itemId:int}")]
+    public IActionResult Delete(int itemId)
     {
-        this.repository.RemoveItemById(id);
+        this.repository.RemoveItemById(itemId);
         return this.NoContent();
     }
 

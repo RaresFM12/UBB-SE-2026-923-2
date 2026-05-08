@@ -19,7 +19,7 @@ public class HighRiskMedicinesController : ControllerBase
     public ActionResult<IReadOnlyList<HighRiskMedicineSummary>> GetAll()
     {
         var medicines = this.repository.GetAllHighRiskMedicines()
-            .Select(m => new HighRiskMedicineSummary(m.MedicineName, m.WarningMessage))
+            .Select(medicine => new HighRiskMedicineSummary(medicine.MedicineName, medicine.WarningMessage))
             .ToList();
         return this.Ok(medicines);
     }
