@@ -36,13 +36,8 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public User GetUserById(int userId)
         {
-<<<<<<< abbreviation-fixes
-            var response = this.httpClient.GetAsync($"{BasePath}/{userId}").GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
-=======
             var httpResponse = this.httpClient.GetAsync($"{BasePath}/{userId}").GetAwaiter().GetResult();
             if (httpResponse.StatusCode == HttpStatusCode.NotFound)
->>>>>>> main
             {
                 return null!;
             }

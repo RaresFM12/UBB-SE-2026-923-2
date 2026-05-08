@@ -43,19 +43,11 @@ namespace UBB_SE_2026_923_2.Repositories
             httpResponse.EnsureSuccessStatusCode();
         }
 
-<<<<<<< abbreviation-fixes
-        public async Task UpdateAppointmentStatusAsync(int patientId, string status)
-        {
-            var payload = new { Status = status };
-            var response = await this.httpClient.PatchAsJsonAsync($"{BasePath}/{patientId}/status", payload);
-            response.EnsureSuccessStatusCode();
-=======
         public async Task UpdateAppointmentStatusAsync(int appointmentId, string status)
         {
             var requestPayload = new { Status = status };
             var httpResponse = await this.httpClient.PatchAsJsonAsync($"{BasePath}/{appointmentId}/status", requestPayload);
             httpResponse.EnsureSuccessStatusCode();
->>>>>>> main
         }
     }
 }

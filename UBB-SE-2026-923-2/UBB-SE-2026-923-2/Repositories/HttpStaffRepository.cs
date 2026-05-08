@@ -65,13 +65,8 @@ namespace UBB_SE_2026_923_2.Repositories
                 return Array.Empty<(int, string, string)>();
             }
 
-<<<<<<< abbreviation-fixes
-            return summaries
-                .Select(doctor => (doctor.DoctorId, doctor.FirstName, doctor.LastName))
-=======
             return doctorSummaries
                 .Select(doctorSummary => (doctorSummary.DoctorId, doctorSummary.FirstName, doctorSummary.LastName))
->>>>>>> main
                 .ToList();
         }
 
