@@ -34,10 +34,10 @@ public class AppointmentsController : ControllerBase
         return this.NoContent();
     }
 
-    [HttpPatch("{id:int}/status")]
-    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
+    [HttpPatch("{appointmentId:int}/status")]
+    public async Task<IActionResult> UpdateStatus(int appointmentId, [FromBody] UpdateStatusRequest request)
     {
-        await this.repository.UpdateAppointmentStatusAsync(id, request.Status);
+        await this.repository.UpdateAppointmentStatusAsync(appointmentId, request.Status);
         return this.NoContent();
     }
 

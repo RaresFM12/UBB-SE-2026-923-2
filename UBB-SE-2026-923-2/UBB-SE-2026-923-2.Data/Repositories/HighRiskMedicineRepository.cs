@@ -13,21 +13,21 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class HighRiskMedicineRepository : IHighRiskMedicineRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public HighRiskMedicineRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public HighRiskMedicineRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public IReadOnlyList<(string MedicineName, string WarningMessage)> GetAllHighRiskMedicines()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.HighRiskMedicines
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.HighRiskMedicines
                 .AsNoTracking()
-                .Select(m => new { m.MedicineName, m.WarningMessage })
+                .Select(medicine => new { medicine.MedicineName, medicine.WarningMessage })
                 .AsEnumerable()
-                .Select(row => (row.MedicineName, row.WarningMessage))
+                .Select(medicineRow => (medicineRow.MedicineName, medicineRow.WarningMessage))
                 .ToList();
         }
     }

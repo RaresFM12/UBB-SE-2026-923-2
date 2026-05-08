@@ -13,54 +13,54 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class AppointmentRepository : IAppointmentRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public AppointmentRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public AppointmentRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public async Task<IReadOnlyList<Appointment>> GetAllAppointmentsAsync()
         {
-            await using var db = await this.dbContextFactory.CreateDbContextAsync();
-            var rows = await db.Appointments
+            await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
+            var appointmentRows = await databaseContext.Appointments
                 .AsNoTracking()
-                .Select(a => new
+                .Select(appointment => new
                 {
-                    a.Id,
-                    a.DoctorId,
-                    a.PatientName,
-                    a.Date,
-                    a.StartTime,
-                    a.EndTime,
-                    a.Status,
-                    a.Type,
-                    a.Location,
-                    a.Notes,
+                    appointment.Id,
+                    appointment.DoctorId,
+                    appointment.PatientName,
+                    appointment.Date,
+                    appointment.StartTime,
+                    appointment.EndTime,
+                    appointment.Status,
+                    appointment.Type,
+                    appointment.Location,
+                    appointment.Notes,
                 })
                 .ToListAsync();
 
-            return rows
-                .Select(row => new Appointment
+            return appointmentRows
+                .Select(appointmentRow => new Appointment
                 {
-                    Id = row.Id,
-                    DoctorId = row.DoctorId,
+                    Id = appointmentRow.Id,
+                    DoctorId = appointmentRow.DoctorId,
                     DoctorName = string.Empty,
-                    PatientName = row.PatientName,
-                    Date = row.Date,
-                    StartTime = row.StartTime,
-                    EndTime = row.EndTime,
-                    Status = row.Status,
-                    Type = row.Type,
-                    Location = row.Location,
-                    Notes = row.Notes,
+                    PatientName = appointmentRow.PatientName,
+                    Date = appointmentRow.Date,
+                    StartTime = appointmentRow.StartTime,
+                    EndTime = appointmentRow.EndTime,
+                    Status = appointmentRow.Status,
+                    Type = appointmentRow.Type,
+                    Location = appointmentRow.Location,
+                    Notes = appointmentRow.Notes,
                 })
                 .ToList();
         }
 
         public async Task AddAppointmentAsync(int patientId, int doctorId, DateTime startTime, DateTime endTime, string status)
         {
-            await using var db = await this.dbContextFactory.CreateDbContextAsync();
+            await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
 
             var appointment = new Appointment
             {
@@ -72,21 +72,21 @@ namespace UBB_SE_2026_923_2.Repositories
                 Status = status,
             };
 
-            db.Appointments.Add(appointment);
-            await db.SaveChangesAsync();
+            databaseContext.Appointments.Add(appointment);
+            await databaseContext.SaveChangesAsync();
         }
 
-        public async Task UpdateAppointmentStatusAsync(int id, string status)
+        public async Task UpdateAppointmentStatusAsync(int appointmentId, string status)
         {
-            await using var db = await this.dbContextFactory.CreateDbContextAsync();
-            var appointment = await db.Appointments.FirstOrDefaultAsync(a => a.Id == id);
-            if (appointment is null)
+            await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
+            var appointmentRecord = await databaseContext.Appointments.FirstOrDefaultAsync(appointment => appointment.Id == appointmentId);
+            if (appointmentRecord is null)
             {
                 return;
             }
 
-            appointment.Status = status;
-            await db.SaveChangesAsync();
+            appointmentRecord.Status = status;
+            await databaseContext.SaveChangesAsync();
         }
     }
 }

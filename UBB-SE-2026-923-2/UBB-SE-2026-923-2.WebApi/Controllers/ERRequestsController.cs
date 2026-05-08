@@ -21,10 +21,10 @@ public class ERRequestsController : ControllerBase
         return this.Ok(this.repository.GetAllRequests());
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<ERRequest> GetById(int id)
+    [HttpGet("{requestId:int}")]
+    public ActionResult<ERRequest> GetById(int requestId)
     {
-        var request = this.repository.GetRequestById(id);
+        var request = this.repository.GetRequestById(requestId);
         if (request is null)
         {
             return this.NotFound();
@@ -40,10 +40,10 @@ public class ERRequestsController : ControllerBase
         return this.Ok(id);
     }
 
-    [HttpPatch("{id:int}/status")]
-    public IActionResult UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
+    [HttpPatch("{requestId:int}/status")]
+    public IActionResult UpdateStatus(int requestId, [FromBody] UpdateStatusRequest request)
     {
-        this.repository.UpdateRequestStatus(id, request.Status, request.AssignedDoctorId, request.AssignedDoctorName);
+        this.repository.UpdateRequestStatus(requestId, request.Status, request.AssignedDoctorId, request.AssignedDoctorName);
         return this.NoContent();
     }
 

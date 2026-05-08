@@ -11,6 +11,6 @@ namespace UBB_SE_2026_923_2.Repositories
 
         Task AddAppointmentAsync(int patientId, int doctorId, DateTime startTime, DateTime endTime, string status);
 
-        Task UpdateAppointmentStatusAsync(int id, string status);
+        Task UpdateAppointmentStatusAsync(int appointmentId, string status);
     }
 }

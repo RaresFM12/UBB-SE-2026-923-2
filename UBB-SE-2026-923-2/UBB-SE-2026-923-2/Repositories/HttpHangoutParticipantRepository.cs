@@ -23,24 +23,28 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<(int HangoutId, int StaffId)> GetAllParticipants()
         {
-            var summaries = this.httpClient
+            var participantSummaries = this.httpClient
                 .GetFromJsonAsync<List<HangoutParticipantSummary>>(BasePath)
                 .GetAwaiter().GetResult();
-            if (summaries is null)
+            if (participantSummaries is null)
             {
                 return Array.Empty<(int, int)>();
             }
 
+<<<<<<< abbreviation-fixes
             return summaries
+=======
+            return participantSummaries
+>>>>>>> main
                 .Select(participant => (participant.HangoutId, participant.StaffId))
                 .ToList();
         }
 
         public void AddParticipant(int hangoutId, int staffId)
         {
-            var payload = new { HangoutId = hangoutId, StaffId = staffId };
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var requestPayload = new { HangoutId = hangoutId, StaffId = staffId };
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
     }
 }

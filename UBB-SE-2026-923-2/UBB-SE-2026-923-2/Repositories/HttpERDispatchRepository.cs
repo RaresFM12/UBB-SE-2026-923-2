@@ -23,42 +23,42 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public int AddRequest(string specialization, string location, string status)
         {
-            var payload = new { Specialization = specialization, Location = location, Status = status };
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
+            var requestPayload = new { Specialization = specialization, Location = location, Status = status };
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
         }
 
         public IReadOnlyList<ERRequest> GetAllRequests()
         {
-            var requests = this.httpClient.GetFromJsonAsync<List<ERRequest>>(BasePath).GetAwaiter().GetResult();
-            return requests ?? new List<ERRequest>();
+            var erRequestsList = this.httpClient.GetFromJsonAsync<List<ERRequest>>(BasePath).GetAwaiter().GetResult();
+            return erRequestsList ?? new List<ERRequest>();
         }
 
         public ERRequest? GetRequestById(int requestId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{requestId}").GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            var httpResponse = this.httpClient.GetAsync($"{BasePath}/{requestId}").GetAwaiter().GetResult();
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
 
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<ERRequest>().GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<ERRequest>().GetAwaiter().GetResult();
         }
 
         public void UpdateRequestStatus(int requestId, string status, int? assignedDoctorId, string? assignedDoctorName)
         {
-            var payload = new
+            var requestPayload = new
             {
                 Status = status,
                 AssignedDoctorId = assignedDoctorId,
                 AssignedDoctorName = assignedDoctorName,
             };
-            var response = this.httpClient
-                .PatchAsJsonAsync($"{BasePath}/{requestId}/status", payload)
+            var httpResponse = this.httpClient
+                .PatchAsJsonAsync($"{BasePath}/{requestId}/status", requestPayload)
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
     }
 }

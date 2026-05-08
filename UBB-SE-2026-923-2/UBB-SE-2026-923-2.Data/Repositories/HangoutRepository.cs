@@ -14,40 +14,40 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class HangoutRepository : IHangoutRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public HangoutRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public HangoutRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
-        public int AddHangout(string title, string description, DateTime date, int maxParticipants)
+        public int AddHangout(string title, string description, DateTime date, int maximumParticipants)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
             var hangout = new Hangout
             {
                 Title = title,
                 Description = description ?? string.Empty,
                 Date = date,
-                MaxParticipants = maxParticipants,
+                MaxParticipants = maximumParticipants,
             };
 
-            db.Hangouts.Add(hangout);
-            db.SaveChanges();
+            databaseContext.Hangouts.Add(hangout);
+            databaseContext.SaveChanges();
             return hangout.HangoutID;
         }
 
         public List<Hangout> GetAllHangouts()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Hangouts.AsNoTracking().ToList();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Hangouts.AsNoTracking().ToList();
         }
 
         public Hangout? GetHangoutById(int hangoutId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Hangouts.AsNoTracking().FirstOrDefault(h => h.HangoutID == hangoutId);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Hangouts.AsNoTracking().FirstOrDefault(hangout => hangout.HangoutID == hangoutId);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task AddAppointmentAsync(int patientId, int doctorId, DateTime startTime, DateTime endTime, string status)
         {
-            var payload = new
+            var requestPayload = new
             {
                 PatientId = patientId,
                 DoctorId = doctorId,
@@ -39,15 +39,23 @@ namespace UBB_SE_2026_923_2.Repositories
                 Status = status,
             };
 
-            var response = await this.httpClient.PostAsJsonAsync(BasePath, payload);
-            response.EnsureSuccessStatusCode();
+            var httpResponse = await this.httpClient.PostAsJsonAsync(BasePath, requestPayload);
+            httpResponse.EnsureSuccessStatusCode();
         }
 
+<<<<<<< abbreviation-fixes
         public async Task UpdateAppointmentStatusAsync(int patientId, string status)
         {
             var payload = new { Status = status };
             var response = await this.httpClient.PatchAsJsonAsync($"{BasePath}/{patientId}/status", payload);
             response.EnsureSuccessStatusCode();
+=======
+        public async Task UpdateAppointmentStatusAsync(int appointmentId, string status)
+        {
+            var requestPayload = new { Status = status };
+            var httpResponse = await this.httpClient.PatchAsJsonAsync($"{BasePath}/{appointmentId}/status", requestPayload);
+            httpResponse.EnsureSuccessStatusCode();
+>>>>>>> main
         }
     }
 }

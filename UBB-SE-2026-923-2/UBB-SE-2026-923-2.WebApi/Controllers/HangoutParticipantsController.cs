@@ -19,7 +19,7 @@ public class HangoutParticipantsController : ControllerBase
     public ActionResult<IReadOnlyList<HangoutParticipantSummary>> GetAll()
     {
         var participants = this.repository.GetAllParticipants()
-            .Select(p => new HangoutParticipantSummary(p.HangoutId, p.StaffId))
+            .Select(participant => new HangoutParticipantSummary(participant.HangoutId, participant.StaffId))
             .ToList();
         return this.Ok(participants);
     }

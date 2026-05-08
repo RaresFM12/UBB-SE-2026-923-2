@@ -23,31 +23,31 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void AddSubstance(string name, float lethalDose, string description)
         {
-            var payload = new { Name = name, LethalDose = lethalDose, Description = description };
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var requestPayload = new { Name = name, LethalDose = lethalDose, Description = description };
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void RemoveSubstanceByName(string name)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .DeleteAsync($"{BasePath}/{Uri.EscapeDataString(name)}")
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public Substance GetSubstanceByName(string name)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .GetAsync($"{BasePath}/{Uri.EscapeDataString(name)}")
                 .GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
             }
 
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<Substance>().GetAwaiter().GetResult()!;
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<Substance>().GetAwaiter().GetResult()!;
         }
 
         public List<Substance> GetAllSubstances()
@@ -60,10 +60,10 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateSubstanceByName(Substance substance)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .PutAsJsonAsync($"{BasePath}/{Uri.EscapeDataString(substance.Name)}", substance)
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public bool SubstanceExists(string name)
@@ -75,10 +75,10 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public Dictionary<string, int> GetTop30Substances()
         {
-            var top = this.httpClient
+            var topSubstances = this.httpClient
                 .GetFromJsonAsync<Dictionary<string, int>>($"{BasePath}/top")
                 .GetAwaiter().GetResult();
-            return top ?? new Dictionary<string, int>();
+            return topSubstances ?? new Dictionary<string, int>();
         }
     }
 }

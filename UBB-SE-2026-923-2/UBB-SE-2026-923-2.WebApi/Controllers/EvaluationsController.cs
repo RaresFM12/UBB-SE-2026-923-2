@@ -34,17 +34,17 @@ public class EvaluationsController : ControllerBase
         return this.NoContent();
     }
 
-    [HttpPut("{id:int}")]
-    public IActionResult Update(int id, [FromBody] UpdateEvaluationRequest request)
+    [HttpPut("{evaluationId:int}")]
+    public IActionResult Update(int evaluationId, [FromBody] UpdateEvaluationRequest request)
     {
-        this.repository.UpdateEvaluation(id, request.Diagnosis, request.Notes, request.Medications);
+        this.repository.UpdateEvaluation(evaluationId, request.Diagnosis, request.Notes, request.Medications);
         return this.NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    [HttpDelete("{evaluationId:int}")]
+    public IActionResult Delete(int evaluationId)
     {
-        this.repository.DeleteEvaluation(id);
+        this.repository.DeleteEvaluation(evaluationId);
         return this.NoContent();
     }
 

@@ -36,14 +36,14 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IStaff? GetStaffById(int staffId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{staffId}").GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            var httpResponse = this.httpClient.GetAsync($"{BasePath}/{staffId}").GetAwaiter().GetResult();
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
 
-            response.EnsureSuccessStatusCode();
-            var staff = response.Content
+            httpResponse.EnsureSuccessStatusCode();
+            var staff = httpResponse.Content
                 .ReadFromJsonAsync<Staff>()
                 .GetAwaiter().GetResult();
             return staff;
@@ -59,32 +59,37 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public async Task<IReadOnlyList<(int DoctorId, string FirstName, string LastName)>> GetAllDoctorsAsync()
         {
-            var summaries = await this.httpClient.GetFromJsonAsync<List<DoctorSummary>>($"{BasePath}/doctors");
-            if (summaries is null)
+            var doctorSummaries = await this.httpClient.GetFromJsonAsync<List<DoctorSummary>>($"{BasePath}/doctors");
+            if (doctorSummaries is null)
             {
                 return Array.Empty<(int, string, string)>();
             }
 
+<<<<<<< abbreviation-fixes
             return summaries
                 .Select(doctor => (doctor.DoctorId, doctor.FirstName, doctor.LastName))
+=======
+            return doctorSummaries
+                .Select(doctorSummary => (doctorSummary.DoctorId, doctorSummary.FirstName, doctorSummary.LastName))
+>>>>>>> main
                 .ToList();
         }
 
         public async Task UpdateStatusAsync(int staffId, string status)
         {
-            var response = await this.httpClient.PatchAsJsonAsync(
+            var httpResponse = await this.httpClient.PatchAsJsonAsync(
                 $"{BasePath}/{staffId}/status",
                 new { Status = status });
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void UpdateStaffAvailability(int staffId, bool isAvailable, DoctorStatus status = DoctorStatus.OFF_DUTY)
         {
-            var payload = new { IsAvailable = isAvailable, Status = status };
-            var response = this.httpClient
-                .PatchAsJsonAsync($"{BasePath}/{staffId}/availability", payload)
+            var requestPayload = new { IsAvailable = isAvailable, Status = status };
+            var httpResponse = this.httpClient
+                .PatchAsJsonAsync($"{BasePath}/{staffId}/availability", requestPayload)
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
     }
 }

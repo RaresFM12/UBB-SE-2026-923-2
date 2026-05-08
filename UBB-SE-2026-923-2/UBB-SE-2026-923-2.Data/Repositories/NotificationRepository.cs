@@ -10,18 +10,18 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class NotificationRepository : INotificationRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public NotificationRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public NotificationRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public void AddNotification(int recipientStaffId, string title, string message)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            db.Notifications.Add(new Notification
+            databaseContext.Notifications.Add(new Notification
             {
                 RecipientStaffId = recipientStaffId,
                 Title = title,
@@ -30,7 +30,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 IsRead = false,
             });
 
-            db.SaveChanges();
+            databaseContext.SaveChanges();
         }
     }
 }

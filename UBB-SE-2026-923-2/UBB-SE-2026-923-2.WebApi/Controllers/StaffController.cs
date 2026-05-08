@@ -33,10 +33,10 @@ public class StaffController : ControllerBase
         return this.Ok(staff);
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<Staff> GetById(int id)
+    [HttpGet("{staffId:int}")]
+    public ActionResult<Staff> GetById(int staffId)
     {
-        var staff = this.staffRepository.GetStaffById(id) as Staff;
+        var staff = this.staffRepository.GetStaffById(staffId) as Staff;
         if (staff is null)
         {
             return this.NotFound();
@@ -50,7 +50,7 @@ public class StaffController : ControllerBase
     {
         var doctors = await this.staffRepository.GetAllDoctorsAsync();
         var summaries = doctors
-            .Select(d => new DoctorSummary(d.DoctorId, d.FirstName, d.LastName))
+            .Select(doctor => new DoctorSummary(doctor.DoctorId, doctor.FirstName, doctor.LastName))
             .ToList();
         return this.Ok(summaries);
     }
@@ -61,17 +61,17 @@ public class StaffController : ControllerBase
         return this.Ok(this.pharmacyStaffRepository.GetPharmacists());
     }
 
-    [HttpPatch("{id:int}/status")]
-    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
+    [HttpPatch("{staffId:int}/status")]
+    public async Task<IActionResult> UpdateStatus(int staffId, [FromBody] UpdateStatusRequest request)
     {
-        await this.staffRepository.UpdateStatusAsync(id, request.Status);
+        await this.staffRepository.UpdateStatusAsync(staffId, request.Status);
         return this.NoContent();
     }
 
-    [HttpPatch("{id:int}/availability")]
-    public IActionResult UpdateAvailability(int id, [FromBody] UpdateAvailabilityRequest request)
+    [HttpPatch("{staffId:int}/availability")]
+    public IActionResult UpdateAvailability(int staffId, [FromBody] UpdateAvailabilityRequest request)
     {
-        this.shiftManagementStaffRepository.UpdateStaffAvailability(id, request.IsAvailable, request.Status);
+        this.shiftManagementStaffRepository.UpdateStaffAvailability(staffId, request.IsAvailable, request.Status);
         return this.NoContent();
     }
 

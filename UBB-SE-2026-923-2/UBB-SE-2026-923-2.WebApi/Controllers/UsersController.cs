@@ -21,15 +21,15 @@ public class UsersController : ControllerBase
         return this.Ok(this.repository.GetAllUsers());
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<User> GetById(int id)
+    [HttpGet("{userId:int}")]
+    public ActionResult<User> GetById(int userId)
     {
-        if (!this.repository.UserExists(id))
+        if (!this.repository.UserExists(userId))
         {
             return this.NotFound();
         }
 
-        var user = this.repository.GetUserById(id);
+        var user = this.repository.GetUserById(userId);
         return this.Ok(user);
     }
 
@@ -50,10 +50,10 @@ public class UsersController : ControllerBase
         return this.Ok(user);
     }
 
-    [HttpGet("{id:int}/exists")]
-    public ActionResult<bool> ExistsById(int id)
+    [HttpGet("{userId:int}/exists")]
+    public ActionResult<bool> ExistsById(int userId)
     {
-        return this.Ok(this.repository.UserExists(id));
+        return this.Ok(this.repository.UserExists(userId));
     }
 
     [HttpGet("exists")]
@@ -67,10 +67,10 @@ public class UsersController : ControllerBase
         return this.Ok(this.repository.UserExists(email));
     }
 
-    [HttpGet("{id:int}/period-tracker")]
-    public ActionResult<bool> HasPeriodTracker(int id)
+    [HttpGet("{userId:int}/period-tracker")]
+    public ActionResult<bool> HasPeriodTracker(int userId)
     {
-        return this.Ok(this.repository.UserHasPeriodTracker(id));
+        return this.Ok(this.repository.UserHasPeriodTracker(userId));
     }
 
     [HttpPost]
@@ -89,11 +89,11 @@ public class UsersController : ControllerBase
         return this.NoContent();
     }
 
-    [HttpPut("{id:int}")]
-    public IActionResult Update(int id, [FromBody] User user)
+    [HttpPut("{userId:int}")]
+    public IActionResult Update(int userId, [FromBody] User user)
     {
         // Defend against id mismatch between URL and payload — URL wins.
-        user.Id = id;
+        user.Id = userId;
         this.repository.UpdateUser(user);
         return this.NoContent();
     }

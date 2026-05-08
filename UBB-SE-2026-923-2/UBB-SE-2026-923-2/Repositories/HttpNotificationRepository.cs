@@ -20,14 +20,14 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void AddNotification(int recipientStaffId, string title, string message)
         {
-            var payload = new
+            var requestPayload = new
             {
                 RecipientStaffId = recipientStaffId,
                 Title = title,
                 Message = message,
             };
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
     }
 }

@@ -12,18 +12,18 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class ERDispatchRepository : IERDispatchRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public ERDispatchRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public ERDispatchRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public int AddRequest(string specialization, string location, string status)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var request = new ERRequest
+            var newERRequest = new ERRequest
             {
                 Specialization = specialization,
                 Location = location,
@@ -33,36 +33,36 @@ namespace UBB_SE_2026_923_2.Repositories
                 AssignedDoctorName = null,
             };
 
-            db.ERRequests.Add(request);
-            db.SaveChanges();
-            return request.Id;
+            databaseContext.ERRequests.Add(newERRequest);
+            databaseContext.SaveChanges();
+            return newERRequest.Id;
         }
 
         public IReadOnlyList<ERRequest> GetAllRequests()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.ERRequests.AsNoTracking().ToList();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.ERRequests.AsNoTracking().ToList();
         }
 
         public ERRequest? GetRequestById(int requestId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.ERRequests.AsNoTracking().FirstOrDefault(r => r.Id == requestId);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.ERRequests.AsNoTracking().FirstOrDefault(erRequest => erRequest.Id == requestId);
         }
 
         public void UpdateRequestStatus(int requestId, string status, int? assignedDoctorId, string? assignedDoctorName)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var request = db.ERRequests.FirstOrDefault(r => r.Id == requestId);
-            if (request is null)
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var retrievedERRequest = databaseContext.ERRequests.FirstOrDefault(erRequest => erRequest.Id == requestId);
+            if (retrievedERRequest is null)
             {
                 return;
             }
 
-            request.Status = status;
-            request.AssignedDoctorId = assignedDoctorId;
-            request.AssignedDoctorName = assignedDoctorName;
-            db.SaveChanges();
+            retrievedERRequest.Status = status;
+            retrievedERRequest.AssignedDoctorId = assignedDoctorId;
+            retrievedERRequest.AssignedDoctorName = assignedDoctorName;
+            databaseContext.SaveChanges();
         }
     }
 }

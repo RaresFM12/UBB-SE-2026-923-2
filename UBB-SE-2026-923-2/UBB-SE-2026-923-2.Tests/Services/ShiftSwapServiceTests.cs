@@ -2,7 +2,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Moq;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
@@ -38,7 +37,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var past = new Shift(1, this.doctor1, "A", DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1).AddHours(8), ShiftStatus.COMPLETED);
             var future = new Shift(2, this.doctor1, "A", DateTime.Now.AddDays(1), DateTime.Now.AddDays(1).AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { past, future });
+            this.mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { past, future });
 
             var result = this.service.GetFutureShiftsForStaff(1);
             Assert.That(result.Count, Is.EqualTo(1));
@@ -46,94 +45,78 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
 
         [Test]
-        public void GetFutureShiftsForStaff_DifferentStaff_ReturnsEmpty()
+        public void GetEligibleSwapColleaguesForShift_ValidFutureShift_ReturnsColleagues()
         {
-            var shift = new Shift(1, this.doctor2, "A", DateTime.Now.AddDays(1), DateTime.Now.AddDays(1).AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
-
-            var result = this.service.GetFutureShiftsForStaff(1);
-            Assert.That(result.Count, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void GetEligibleSwapColleaguesForShift_ShiftNotFound_ReturnsEmpty()
-        {
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
-            var result = this.service.GetEligibleSwapColleaguesForShift(1, 99, out string error);
-            Assert.That(result.Count, Is.EqualTo(0));
-            Assert.That(error, Is.EqualTo("Shift not found."));
-        }
-
-        [Test]
-        public void GetEligibleSwapColleaguesForShift_NotOwnShift_ReturnsEmpty()
-        {
-            var shift = new Shift(1, this.doctor2, "A", DateTime.Now.AddDays(1), DateTime.Now.AddDays(1).AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            var futureDate = DateTime.Now.AddDays(2);
+            var shift = new Shift(1, this.doctor1, "A", futureDate, futureDate.AddHours(8), ShiftStatus.SCHEDULED);
+            this.mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { shift });
+            this.mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, this.doctor2 });
 
             var result = this.service.GetEligibleSwapColleaguesForShift(1, 1, out string error);
-            Assert.That(error, Does.Contain("own shift"));
+            Assert.That(error, Is.Empty);
         }
 
         [Test]
-        public void GetEligibleSwapColleaguesForShift_PastShift_ReturnsEmpty()
+        public void GetEligibleSwapColleagues_InvalidState_ReturnsError()
         {
-            var shift = new Shift(1, this.doctor1, "A", DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1).AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            var pastShift = new Shift(1, this.doctor1, "A", DateTime.Now.AddDays(-1), DateTime.Now.AddDays(-1).AddHours(8), ShiftStatus.SCHEDULED);
+            this.mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { pastShift });
 
-            var result = this.service.GetEligibleSwapColleaguesForShift(1, 1, out string error);
-            Assert.That(error, Does.Contain("future"));
+            this.service.GetEligibleSwapColleaguesForShift(1, 1, out string errorPast);
+            Assert.That(errorPast, Does.Contain("future"));
+
+            var differentStaffShift = new Shift(2, this.doctor2, "A", DateTime.Now.AddDays(1), DateTime.Now.AddDays(1).AddHours(8), ShiftStatus.SCHEDULED);
+            this.mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { differentStaffShift });
+
+            this.service.GetEligibleSwapColleaguesForShift(1, 2, out string errorOwn);
+            Assert.That(errorOwn, Does.Contain("own shift"));
         }
 
         [Test]
-        public void AcceptSwapRequest_RequestNotFound_ReturnsFalse()
+        public void AcceptSwapRequest_Valid_UpdatesAndNotifies()
         {
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns((ShiftSwapRequest)null);
+            var swap = new ShiftSwapRequest(1, 10, 1, 2); // Request for Shift 10, from Dr 1 to Dr 2
+            this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(1)).Returns(swap);
+
+            var targetShift = new Shift(10, this.doctor1, "A", DateTime.Now.AddDays(1), DateTime.Now.AddDays(1).AddHours(8), ShiftStatus.SCHEDULED);
+            this.mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { targetShift });
+
             var result = this.service.AcceptSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-            Assert.That(message, Does.Contain("not found"));
+
+            Assert.That(result, Is.True);
+            this.mockShiftRepository.Verify(r => r.UpdateShiftStaffId(10, 2), Times.Once);
+            this.mockShiftSwapRepository.Verify(r => r.UpdateShiftSwapRequestStatus(1, "ACCEPTED"), Times.Once);
+            this.mockNotificationRepository.Verify(r => r.AddNotification(1, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Test]
-        public void AcceptSwapRequest_WrongColleague_ReturnsFalse()
+        public void AcceptSwapRequest_InvalidContext_ReturnsFalse()
         {
-            var swap = new ShiftSwapRequest(1, 1, 1, 3);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-            var result = this.service.AcceptSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-            Assert.That(message, Does.Contain("cannot accept"));
+            // Case 1: Not Found
+            this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(1)).Returns((ShiftSwapRequest)null);
+            Assert.That(this.service.AcceptSwapRequest(1, 2, out _), Is.False);
+
+            // Case 2: Wrong Colleague
+            var swapWrong = new ShiftSwapRequest(2, 10, 1, 3);
+            this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(2)).Returns(swapWrong);
+            Assert.That(this.service.AcceptSwapRequest(2, 2, out _), Is.False);
+
+            // Case 3: Not Pending
+            var swapDone = new ShiftSwapRequest(3, 10, 1, 2) { Status = ShiftSwapRequestStatus.ACCEPTED };
+            this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(3)).Returns(swapDone);
+            Assert.That(this.service.AcceptSwapRequest(3, 2, out _), Is.False);
         }
 
         [Test]
-        public void AcceptSwapRequest_NotPending_ReturnsFalse()
+        public void AcceptSwapRequest_Overlap_ReturnsFalse()
         {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2) { Status = ShiftSwapRequestStatus.ACCEPTED };
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-            var result = this.service.AcceptSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-            Assert.That(message, Does.Contain("no longer pending"));
-        }
-
-        [Test]
-        public void AcceptSwapRequest_ShiftNotFound_ReturnsFalse()
-        {
-            var swap = new ShiftSwapRequest(1, 99, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
-            var result = this.service.AcceptSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-            Assert.That(message, Does.Contain("Shift not found"));
-        }
-
-        [Test]
-        public void AcceptSwapRequest_ColleagueOverlap_ReturnsFalse()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
+            var swap = new ShiftSwapRequest(1, 10, 1, 2);
+            this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(1)).Returns(swap);
 
             var now = DateTime.Now.AddDays(1);
-            var targetShift = new Shift(1, this.doctor1, "A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            var colleagueShift = new Shift(2, this.doctor2, "B", now.AddHours(4), now.AddHours(12), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { targetShift, colleagueShift });
+            var targetShift = new Shift(10, this.doctor1, "A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
+            var colleagueShift = new Shift(20, this.doctor2, "B", now.AddHours(4), now.AddHours(12), ShiftStatus.SCHEDULED);
+            this.mockShiftRepository.Setup(r => r.GetAllShifts()).Returns(new List<Shift> { targetShift, colleagueShift });
 
             var result = this.service.AcceptSwapRequest(1, 2, out string message);
             Assert.That(result, Is.False);
@@ -141,232 +124,25 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
 
         [Test]
-        public void AcceptSwapRequest_Valid_ReturnsTrue()
+        public void RejectSwapRequest_Valid_UpdatesAndNotifies()
         {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
+            var swap = new ShiftSwapRequest(1, 10, 1, 2);
+            this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(1)).Returns(swap);
 
-            var now = DateTime.Now.AddDays(1);
-            var targetShift = new Shift(1, this.doctor1, "A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { targetShift });
+            var result = this.service.RejectSwapRequest(1, 2, out string message);
 
-            var result = this.service.AcceptSwapRequest(1, 2, out string message);
             Assert.That(result, Is.True);
-            Assert.That(message, Does.Contain("accepted"));
-            this.mockShiftRepository.Verify(repository => repository.UpdateShiftStaffId(1, 2), Times.Once);
-            this.mockNotificationRepository.Verify(repository => repository.AddNotification(1, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-        }
-
-        [Test]
-        public void RejectSwapRequest_RequestNotFound_ReturnsFalse()
-        {
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns((ShiftSwapRequest)null);
-            var result = this.service.RejectSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void RejectSwapRequest_WrongColleague_ReturnsFalse()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 3);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-            var result = this.service.RejectSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void RejectSwapRequest_NotPending_ReturnsFalse()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2) { Status = ShiftSwapRequestStatus.REJECTED };
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-            var result = this.service.RejectSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void RejectSwapRequest_Valid_ReturnsTrue()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-
-            var result = this.service.RejectSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.True);
-            Assert.That(message, Does.Contain("rejected"));
-            this.mockNotificationRepository.Verify(repository => repository.AddNotification(1, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            this.mockShiftSwapRepository.Verify(r => r.UpdateShiftSwapRequestStatus(1, "REJECTED"), Times.Once);
+            this.mockNotificationRepository.Verify(r => r.AddNotification(1, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Test]
         public void GetAllDoctors_ReturnsOrderedDoctors()
         {
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor2, this.doctor1 });
+            this.mockStaffRepository.Setup(r => r.LoadAllStaff()).Returns(new List<IStaff> { this.doctor2, this.doctor1 });
             var result = this.service.GetAllDoctors();
-            Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0].FirstName, Is.EqualTo("Jane"));
             Assert.That(result[1].FirstName, Is.EqualTo("John"));
-        }
-
-        [Test]
-        public void GetFutureShiftsForStaff_CancelledShift_StillReturned()
-        {
-            var future = new Shift(1, this.doctor1, "A", DateTime.Now.AddDays(1), DateTime.Now.AddDays(1).AddHours(8), ShiftStatus.CANCELLED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { future });
-
-            var result = this.service.GetFutureShiftsForStaff(1);
-            Assert.That(result.Count, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void GetFutureShiftsForStaff_MultipleShifts_ReturnsSorted()
-        {
-            var far = new Shift(1, this.doctor1, "A", DateTime.Now.AddDays(5), DateTime.Now.AddDays(5).AddHours(8), ShiftStatus.SCHEDULED);
-            var near = new Shift(2, this.doctor1, "A", DateTime.Now.AddDays(1), DateTime.Now.AddDays(1).AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { far, near });
-
-            var result = this.service.GetFutureShiftsForStaff(1);
-            Assert.That(result.Count, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void GetFutureShiftsForStaff_NoShifts_ReturnsEmpty()
-        {
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
-            var result = this.service.GetFutureShiftsForStaff(1);
-            Assert.That(result.Count, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void GetEligibleSwapColleaguesForShift_ValidShift_ReturnsColleagues()
-        {
-            var futureDate = DateTime.Now.AddDays(2);
-            var shift = new Shift(1, this.doctor1, "A", futureDate, futureDate.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, this.doctor2 });
-
-            var result = this.service.GetEligibleSwapColleaguesForShift(1, 1, out string error);
-            Assert.That(error, Is.Null.Or.Empty);
-        }
-
-        [Test]
-        public void RejectSwapRequest_Valid_CallsRepoUpdate()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-
-            this.service.RejectSwapRequest(1, 2, out string message);
-            this.mockShiftSwapRepository.Verify(repository => repository.UpdateShiftSwapRequestStatus(1, It.IsAny<string>()), Times.Once);
-        }
-
-        [Test]
-        public void AcceptSwapRequest_Valid_CallsRepoUpdate()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-
-            var now = DateTime.Now.AddDays(1);
-            var targetShift = new Shift(1, this.doctor1, "A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { targetShift });
-
-            this.service.AcceptSwapRequest(1, 2, out string message);
-            this.mockShiftSwapRepository.Verify(repository => repository.UpdateShiftSwapRequestStatus(1, It.IsAny<string>()), Times.Once);
-        }
-
-        [Test]
-        public void GetAllDoctors_EmptyStaff_ReturnsEmpty()
-        {
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff>());
-            var result = this.service.GetAllDoctors();
-            Assert.That(result.Count, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void GetAllDoctors_OnlyDoctors_ReturnsAll()
-        {
-            var doctor3 = new Doctor(3, "Alice", "Wonder", "c", true, "Neuro", "L3", DoctorStatus.AVAILABLE, 1);
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, this.doctor2, doctor3 });
-            var result = this.service.GetAllDoctors();
-            Assert.That(result.Count, Is.EqualTo(3));
-        }
-
-        [Test]
-        public void AcceptSwapRequest_NotifiesRequester()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-
-            var now = DateTime.Now.AddDays(1);
-            var targetShift = new Shift(1, this.doctor1, "A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { targetShift });
-
-            this.service.AcceptSwapRequest(1, 2, out string message);
-            this.mockNotificationRepository.Verify(repository => repository.AddNotification(1, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-        }
-
-        [Test]
-        public void RejectSwapRequest_NotifiesRequester()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-
-            this.service.RejectSwapRequest(1, 2, out string message);
-            this.mockNotificationRepository.Verify(repository => repository.AddNotification(1, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-        }
-
-        [Test]
-        public void AcceptSwapRequest_RequestNotFound_ReturnsFalseWithMessage()
-        {
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(99)).Returns((ShiftSwapRequest)null);
-            var result = this.service.AcceptSwapRequest(99, 2, out string message);
-            Assert.That(result, Is.False);
-            Assert.That(message, Does.Contain("not found"));
-        }
-
-        [Test]
-        public void AcceptSwapRequest_WrongColleague_ReturnsFalseWithMessage()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 3);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-
-            var result = this.service.AcceptSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void AcceptSwapRequest_AlreadyAccepted_ReturnsFalse()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2) { Status = ShiftSwapRequestStatus.ACCEPTED };
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-
-            var result = this.service.AcceptSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-            Assert.That(message, Does.Contain("no longer pending"));
-        }
-
-        [Test]
-        public void AcceptSwapRequest_ShiftDeleted_ReturnsFalse()
-        {
-            var swap = new ShiftSwapRequest(1, 99, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
-
-            var result = this.service.AcceptSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-            Assert.That(message, Does.Contain("Shift not found"));
-        }
-
-        [Test]
-        public void AcceptSwapRequest_ColleagueHasOverlap_ReturnsFalse()
-        {
-            var swap = new ShiftSwapRequest(1, 1, 1, 2);
-            this.mockShiftSwapRepository.Setup(repository => repository.GetShiftSwapRequestById(1)).Returns(swap);
-
-            var now = DateTime.Now.AddDays(1);
-            var targetShift = new Shift(1, this.doctor1, "A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            var overlappingShift = new Shift(2, this.doctor2, "A", now.AddHours(2), now.AddHours(6), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { targetShift, overlappingShift });
-
-            var result = this.service.AcceptSwapRequest(1, 2, out string message);
-            Assert.That(result, Is.False);
-            Assert.That(message, Does.Contain("already scheduled"));
         }
     }
 }

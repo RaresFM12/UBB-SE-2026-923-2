@@ -28,7 +28,7 @@ namespace UBB_SE_2026_923_2.Repositories
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
         {
-            var payload = new
+            var requestPayload = new
             {
                 Name = name,
                 Producer = producer,
@@ -40,8 +40,8 @@ namespace UBB_SE_2026_923_2.Repositories
                 ImagePath = imagePath,
                 Discount = discount,
             };
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void AddItemWithQuantity(string name, string producer, string category,
@@ -50,7 +50,7 @@ namespace UBB_SE_2026_923_2.Repositories
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
         {
-            var payload = new
+            var requestPayload = new
             {
                 Name = name,
                 Producer = producer,
@@ -65,26 +65,26 @@ namespace UBB_SE_2026_923_2.Repositories
                 ImagePath = imagePath,
                 Discount = discount,
             };
-            var response = this.httpClient.PostAsJsonAsync($"{BasePath}/with-quantity", payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.PostAsJsonAsync($"{BasePath}/with-quantity", requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
-        public void RemoveItemById(int idToBeRemoved)
+        public void RemoveItemById(int itemIdToRemove)
         {
-            var response = this.httpClient.DeleteAsync($"{BasePath}/{idToBeRemoved}").GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.DeleteAsync($"{BasePath}/{itemIdToRemove}").GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public Item GetItemById(int itemId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{itemId}").GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            var httpResponse = this.httpClient.GetAsync($"{BasePath}/{itemId}").GetAwaiter().GetResult();
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
             }
 
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<Item>().GetAwaiter().GetResult()!;
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<Item>().GetAwaiter().GetResult()!;
         }
 
         public List<Item> GetAllItems()
@@ -102,10 +102,10 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateItemById(Item newItem)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .PutAsJsonAsync($"{BasePath}/{newItem.Id}", newItem)
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public bool ItemExists(int itemId)
