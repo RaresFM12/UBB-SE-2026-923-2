@@ -31,7 +31,11 @@ namespace UBB_SE_2026_923_2.Repositories
                 return Array.Empty<(int, int)>();
             }
 
+<<<<<<< abbreviation-fixes
+            return summaries
+=======
             return participantSummaries
+>>>>>>> main
                 .Select(participant => (participant.HangoutId, participant.StaffId))
                 .ToList();
         }

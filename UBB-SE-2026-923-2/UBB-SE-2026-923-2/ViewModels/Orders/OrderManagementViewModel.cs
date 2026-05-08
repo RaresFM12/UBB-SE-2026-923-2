@@ -165,7 +165,7 @@
                     intermediateFilteredOrderList.Add(resultOrder);
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
             }
 

@@ -8,9 +8,9 @@ namespace UBB_SE_2026_923_2.Services
 
     public class HangoutService : IHangoutService
     {
-        private const int MinHangoutTitleLength = 5;
-        private const int MaxHangoutTitleLength = 25;
-        private const int MaxHangoutDescriptionLength = 100;
+        private const int MinimumHangoutTitleLength = 5;
+        private const int MaximumHangoutTitleLength = 25;
+        private const int MaximumHangoutDescriptionLength = 100;
         private const int MinDaysAheadForHangout = 7;
         private const string FinishedAppointmentStatus = "Finished";
         private const string CanceledAppointmentStatusUs = "Canceled";
@@ -38,14 +38,14 @@ namespace UBB_SE_2026_923_2.Services
 
         public int CreateHangout(string title, string description, DateTime date, int maxParticipants, IStaff creator)
         {
-            if (string.IsNullOrWhiteSpace(title) || title.Length < MinHangoutTitleLength || title.Length > MaxHangoutTitleLength)
+            if (string.IsNullOrWhiteSpace(title) || title.Length < MinimumHangoutTitleLength || title.Length > MaximumHangoutTitleLength)
             {
-                throw new ArgumentException($"Title must be between {MinHangoutTitleLength} and {MaxHangoutTitleLength} characters.");
+                throw new ArgumentException($"Title must be between {MinimumHangoutTitleLength} and {MaximumHangoutTitleLength} characters.");
             }
 
-            if (description != null && description.Length > MaxHangoutDescriptionLength)
+            if (description != null && description.Length > MaximumHangoutDescriptionLength)
             {
-                throw new ArgumentException($"Description must be at most {MaxHangoutDescriptionLength} characters.");
+                throw new ArgumentException($"Description must be at most {MaximumHangoutDescriptionLength} characters.");
             }
 
             if (date.Date < DateTime.Now.Date.AddDays(MinDaysAheadForHangout))

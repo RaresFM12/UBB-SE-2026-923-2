@@ -9,7 +9,7 @@
 
     public interface ICatalogPageViewModel : INotifyPropertyChanged
     {
-        void Initialize(IProductCatalogueService service, User user, IOrderService orderService);
+        void Initialize(IProductCatalogueService catalogueService, User user, IOrderService orderService);
 
         event EventHandler<Type> NavigateRequested;
 

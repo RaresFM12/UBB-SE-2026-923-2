@@ -10,7 +10,7 @@
     public class AdminService : IAdminService
     {
         private const int EmptyQuantity = 0;
-        private const int MinPositiveValue = 1;
+        private const int MinimumPositiveValue = 1;
 
         private const string StockAlertTitle = "Stock Alert";
         private const string ProductExpiredTitle = "Product Expired";
@@ -50,9 +50,9 @@
                 .ToList();
         }
 
-        public Item GetItemById(int id)
+        public Item GetItemById(int itemId)
         {
-            return this.itemRepository.GetItemById(id);
+            return this.itemRepository.GetItemById(itemId);
         }
 
         public Substance GetSubstanceByName(string name)
@@ -85,9 +85,9 @@
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Console.WriteLine($"Error adding item: {ex.Message}");
+                Console.WriteLine($"Error adding item: {exception.Message}");
             }
         }
 
@@ -106,31 +106,31 @@
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Console.WriteLine($"Error adding item: {ex.Message}");
+                Console.WriteLine($"Error adding item: {exception.Message}");
             }
         }
 
-        public void RemoveItemById(int id)
+        public void RemoveItemById(int itemId)
         {
-            this.itemRepository.RemoveItemById(id);
+            this.itemRepository.RemoveItemById(itemId);
         }
 
-        public void UpdateItemById(int id, Item updatedItem)
+        public void UpdateItemById(int itemId, Item updatedItem)
         {
-            if (!this.itemRepository.ItemExists(id))
+            if (!this.itemRepository.ItemExists(itemId))
             {
                 throw new ArgumentException("Item with the specified ID does not exist.");
             }
 
-            Item previousItem = this.itemRepository.GetItemById(id);
-            if (previousItem.Quantity == EmptyQuantity && updatedItem.Quantity >= MinPositiveValue)
+            Item previousItem = this.itemRepository.GetItemById(itemId);
+            if (previousItem.Quantity == EmptyQuantity && updatedItem.Quantity >= MinimumPositiveValue)
             {
                 this.SendNewStockNotification(updatedItem);
             }
 
-            updatedItem.Id = id;
+            updatedItem.Id = itemId;
             this.itemRepository.UpdateItemById(updatedItem);
         }
 
@@ -204,8 +204,8 @@
         {
             if (item.Name == string.Empty ||
                 item.Producer == string.Empty ||
-                item.Price < MinPositiveValue ||
-                item.NumberOfPills < MinPositiveValue ||
+                item.Price < MinimumPositiveValue ||
+                item.NumberOfPills < MinimumPositiveValue ||
                 item.Quantity < EmptyQuantity ||
                 item.DiscountPercentage < EmptyQuantity ||
                 item.ActiveSubstances.Count == EmptyQuantity)
@@ -248,7 +248,7 @@
             foreach (int itemId in user.StockAlerts)
             {
                 Item item = this.itemRepository.GetItemById(itemId);
-                if (item.Quantity >= MinPositiveValue)
+                if (item.Quantity >= MinimumPositiveValue)
                 {
                     string concentrations = item.ActiveSubstances != null && item.ActiveSubstances.Any()
                         ? string.Join(", ", item.ActiveSubstances.Select(substance => $"{substance.Key} ({substance.Value})"))

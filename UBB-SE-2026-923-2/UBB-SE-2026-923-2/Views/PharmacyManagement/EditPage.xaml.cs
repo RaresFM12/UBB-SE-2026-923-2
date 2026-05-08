@@ -2,14 +2,15 @@
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 namespace UBB_SE_2026_923_2.Views.PharmacyManagement
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using ABI.System.Collections.Generic;
     using Microsoft.UI;
     using Microsoft.UI.Xaml;
     using Microsoft.UI.Xaml.Controls;
     using Microsoft.UI.Xaml.Media;
     using Microsoft.UI.Xaml.Navigation;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using UBB_SE_2026_923_2.Models;
     using UBB_SE_2026_923_2.Services;
     using UBB_SE_2026_923_2.ViewModels.PharmacyManagement;
@@ -258,9 +259,9 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             {
                 this.ViewModel.AddItemWithQuantity(newItem);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException exception)
             {
-                AddItemFormatError.Text = ex.Message;
+                AddItemFormatError.Text = exception.Message;
                 AddItemFormatError.Visibility = Visibility.Visible;
                 return;
             }
@@ -376,10 +377,10 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
         private void RefreshActiveSubstancesList()
         {
             var list = this.ActiveSubstancesDict
-                .Select(kvp => new ActiveSubstance
+                .Select(keyValuePair => new ActiveSubstance
                 {
-                    Name = kvp.Key,
-                    Concentration = kvp.Value,
+                    Name = keyValuePair.Key,
+                    Concentration = keyValuePair.Value,
                 })
                 .ToList();
 
@@ -509,12 +510,12 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
         private void RefreshBatchesList()
         {
             var list = this.BatchesDict
-                .Select(kvp => new BatchItem
+                .Select(keyValuePair => new BatchItem
                 {
-                    Date = kvp.Key,
-                    Packs = kvp.Value,
+                    Date = keyValuePair.Key,
+                    Packs = keyValuePair.Value,
                 })
-                .OrderBy(x => x.Date)
+                .OrderBy(item => item.Date)
                 .ToList();
 
             BatchesList.ItemsSource = list;
@@ -631,9 +632,9 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            int id = selectedItem.Id;
+            int itemId = selectedItem.Id;
 
-            this.ViewModel.RemoveItemById(id);
+            this.ViewModel.RemoveItemById(itemId);
             this.ViewModel.RefreshItems();
             ItemList.ItemsSource = this.ViewModel.Items;
             RemoveItemError.Visibility = Visibility.Collapsed;
@@ -733,7 +734,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 return;
             }
 
-            int id = int.Parse(IdBox.Text);
+            int itemId = int.Parse(IdBox.Text);
 
             string name = NameBoxUpdate.Text;
             string producer = ProducerBoxUpdate.Text;
@@ -756,7 +757,7 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
                 quantity += this.BatchesDict.ElementAt(i).Value;
             }
 
-            this.ViewModel.UpdateItemById(id, new Item(name, producer, category, price, numberOfPills, this.ActiveSubstancesDict, this.BatchesDict, quantity, label, description, imagePath, discount));
+            this.ViewModel.UpdateItemById(itemId, new Item(name, producer, category, price, numberOfPills, this.ActiveSubstancesDict, this.BatchesDict, quantity, label, description, imagePath, discount));
 
             this.ViewModel.RefreshItems();
             ItemList.ItemsSource = this.ViewModel.Items;
@@ -921,10 +922,10 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
         private void RefreshActiveSubstancesListUpdate()
         {
             var list = this.ActiveSubstancesDict
-                .Select(kvp => new ActiveSubstance
+                .Select(keyValuePair => new ActiveSubstance
                 {
-                    Name = kvp.Key,
-                    Concentration = kvp.Value,
+                    Name = keyValuePair.Key,
+                    Concentration = keyValuePair.Value,
                 })
                 .ToList();
 
@@ -1044,12 +1045,12 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
         private void RefreshBatchesListUpdate()
         {
             var list = this.BatchesDict
-                .Select(kvp => new BatchItem
+                .Select(keyValuePair => new BatchItem
                 {
-                    Date = kvp.Key,
-                    Packs = kvp.Value,
+                    Date = keyValuePair.Key,
+                    Packs = keyValuePair.Value,
                 })
-                .OrderBy(x => x.Date)
+                .OrderBy(item => item.Date)
                 .ToList();
 
             BatchesListUpdate.ItemsSource = list;
@@ -1185,9 +1186,9 @@ namespace UBB_SE_2026_923_2.Views.PharmacyManagement
             {
                 this.ViewModel.AddSubstance(newSubstance);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException exception)
             {
-                AddSubstanceFormatError.Text = ex.Message;
+                AddSubstanceFormatError.Text = exception.Message;
                 AddSubstanceFormatError.Visibility = Visibility.Visible;
                 return;
             }

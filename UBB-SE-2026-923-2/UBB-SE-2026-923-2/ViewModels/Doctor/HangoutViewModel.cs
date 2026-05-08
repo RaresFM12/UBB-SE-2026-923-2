@@ -11,10 +11,10 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
 
     public class HangoutViewModel : ObservableObject
     {
-        private const int MinHangoutTitleLength = 5;
-        private const int MaxHangoutTitleLength = 25;
-        private const int MaxHangoutDescriptionLength = 100;
-        private const int MinDaysAheadForHangoutCreation = 7;
+        private const int MinimumHangoutTitleLength = 5;
+        private const int MaximumHangoutTitleLength = 25;
+        private const int MaximumHangoutDescriptionLength = 100;
+        private const int MinimumDaysAheadForHangoutCreation = 7;
 
         private readonly IHangoutService hangoutService;
         private readonly IDoctorAppointmentService? doctorService;
@@ -61,7 +61,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
             }
         }
 
-        private DateTimeOffset selectedDate = DateTimeOffset.Now.AddDays(MinDaysAheadForHangoutCreation);
+        private DateTimeOffset selectedDate = DateTimeOffset.Now.AddDays(MinimumDaysAheadForHangoutCreation);
 
         public DateTimeOffset SelectedDate
         {
@@ -165,9 +165,9 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
         }
 
         private bool CanCreateHangout() =>
-            this.Title.Length >= MinHangoutTitleLength &&
-            this.Title.Length <= MaxHangoutTitleLength &&
-            this.Description.Length <= MaxHangoutDescriptionLength &&
+            this.Title.Length >= MinimumHangoutTitleLength &&
+            this.Title.Length <= MaximumHangoutTitleLength &&
+            this.Description.Length <= MaximumHangoutDescriptionLength &&
             this.SelectedDoctor != null;
 
         private void CreateHangout()

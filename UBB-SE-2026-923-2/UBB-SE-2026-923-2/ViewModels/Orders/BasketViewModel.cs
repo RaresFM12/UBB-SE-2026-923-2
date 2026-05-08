@@ -11,7 +11,7 @@
 
     public class BasketItemViewModel : INotifyPropertyChanged, IEquatable<BasketItemViewModel>
     {
-        private const int MinQuantity = 0;
+        private const int MinimumQuantity = 0;
         private const float PriceChangeTolerance = 0.0001f;
         private const int PercentageFactor = 100;
 
@@ -42,7 +42,7 @@
             get => this.quantity;
             set
             {
-                int safeValue = Math.Max(MinQuantity, value);
+                int safeValue = Math.Max(MinimumQuantity, value);
 
                 if (this.quantity == safeValue)
                 {
@@ -120,7 +120,7 @@
             this.ExtraItemDiscount = extraItemDiscount;
             this.ItemActiveUserDiscount = userDiscount;
 
-            this.quantity = Math.Max(MinQuantity, quantity);
+            this.quantity = Math.Max(MinimumQuantity, quantity);
         }
 
         public void SetFinalPrices(float finalPriceBefore, float finalPriceAfter)

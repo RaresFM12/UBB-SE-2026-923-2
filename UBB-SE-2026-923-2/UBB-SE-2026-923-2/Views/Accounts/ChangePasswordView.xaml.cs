@@ -9,29 +9,29 @@
     {
         private readonly IUserAccountService accountService;
 
-        public ChangePasswordViewModel ViewModel { get; }
+        public ChangePasswordViewModel ChangePasswordViewModel { get; }
 
         public ChangePasswordView(IUserAccountService service)
         {
             this.InitializeComponent();
 
             this.accountService = service;
-            this.ViewModel = new ChangePasswordViewModel(service);
+            this.ChangePasswordViewModel = new ChangePasswordViewModel(service);
 
-            this.DataContext = this.ViewModel;
+            this.DataContext = this.ChangePasswordViewModel;
         }
 
         private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            this.ViewModel.OldPassword = OldPasswordBox.Password;
-            this.ViewModel.NewPassword = NewPasswordBox.Password;
-            this.ViewModel.ConfirmPassword = ConfirmPasswordBox.Password;
+            this.ChangePasswordViewModel.OldPassword = OldPasswordBox.Password;
+            this.ChangePasswordViewModel.NewPassword = NewPasswordBox.Password;
+            this.ChangePasswordViewModel.ConfirmPassword = ConfirmPasswordBox.Password;
 
-            this.ViewModel.ErrorMessage = null;
+            this.ChangePasswordViewModel.ErrorMessage = null;
 
-            this.ViewModel.ChangePasswordCommand.Execute(null);
+            this.ChangePasswordViewModel.ChangePasswordCommand.Execute(null);
 
-            if (!string.IsNullOrEmpty(this.ViewModel.ErrorMessage))
+            if (!string.IsNullOrEmpty(this.ChangePasswordViewModel.ErrorMessage))
             {
                 args.Cancel = true;
             }

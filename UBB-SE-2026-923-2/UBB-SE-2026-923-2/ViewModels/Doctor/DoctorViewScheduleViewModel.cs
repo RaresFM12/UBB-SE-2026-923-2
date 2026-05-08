@@ -302,7 +302,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
 
             try
             {
-                var appointmentDetails = await this.appointmentService.GetAppointmentDetailsAsync(item.Id);
+                var appointmentDetails = await this.appointmentService.GetAppointmentDetailsAsync(item.AppointmentItemId);
                 if (appointmentDetails is null)
                 {
                     await this.dialogPresenter.ShowMessageAsync("Details", "Appointment not found.");

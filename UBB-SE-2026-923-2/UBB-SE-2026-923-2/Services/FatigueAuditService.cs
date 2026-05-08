@@ -8,18 +8,18 @@ namespace UBB_SE_2026_923_2.Services
 
     public sealed class FatigueAuditService : IFatigueAuditService
     {
-        private const double MaxWeeklyHours = 60.0;
+        private const double MaximumWeeklyHours = 60.0;
         private const string DoctorRole = "Doctor";
         private const string PharmacistRole = "Pharmacist";
         private const string DefaultSpecialization = "General";
         private const string CancelledShiftStatus = "CANCELLED";
         private const string InactiveStaffStatus = "INACTIVE";
         private const string AvailableStaffStatus = "AVAILABLE";
-        private const string MaxWeeklyHoursViolationRule = "MAX_60H_PER_WEEK";
-        private const string MinRestViolationRule = "MIN_12H_REST";
+        private const string MaximumWeeklyHoursViolationRule = "MAX_60H_PER_WEEK";
+        private const string MinimumRestViolationRule = "MIN_12H_REST";
         private const int DaysInWeek = 7;
-        private const int MinValidId = 1;
-        private static readonly TimeSpan MinRestGap = TimeSpan.FromHours(12);
+        private const int MinimumValidId = 1;
+        private static readonly TimeSpan MinimumRestGap = TimeSpan.FromHours(12);
 
         private readonly IShiftRepository shiftRepository;
         private readonly IStaffRepository staffRepository;
@@ -32,7 +32,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public bool ReassignShift(int shiftId, int newStaffId)
         {
-            if (shiftId < MinValidId || newStaffId < MinValidId)
+            if (shiftId < MinimumValidId || newStaffId < MinimumValidId)
             {
                 return false;
             }
@@ -85,7 +85,7 @@ namespace UBB_SE_2026_923_2.Services
 
                 var totalHours = staffWeeklyShifts.Sum(WeekOverlapHours);
 
-                if (totalHours > MaxWeeklyHours)
+                if (totalHours > MaximumWeeklyHours)
                 {
                     foreach (var shift in staffWeeklyShifts)
                     {
@@ -96,8 +96,8 @@ namespace UBB_SE_2026_923_2.Services
                             StaffName = shift.StaffName,
                             ShiftStart = shift.Start,
                             ShiftEnd = shift.End,
-                            Rule = MaxWeeklyHoursViolationRule,
-                            Message = $"Weekly total is {totalHours:F1}h (limit {MaxWeeklyHours:F0}h).",
+                            Rule = MaximumWeeklyHoursViolationRule,
+                            Message = $"Weekly total is {totalHours:F1}h (limit {MaximumWeeklyHours:F0}h).",
                         });
                     }
                 }
@@ -108,7 +108,7 @@ namespace UBB_SE_2026_923_2.Services
                     var currentShift = staffAllShifts[shiftIndex];
                     var restGap = currentShift.Start - previousShift.End;
 
-                    if (restGap < MinRestGap && weeklyShiftIds.Contains(currentShift.Id))
+                    if (restGap < MinimumRestGap && weeklyShiftIds.Contains(currentShift.Id))
                     {
                         violations.Add(new AuditViolation
                         {
@@ -117,8 +117,8 @@ namespace UBB_SE_2026_923_2.Services
                             StaffName = currentShift.StaffName,
                             ShiftStart = currentShift.Start,
                             ShiftEnd = currentShift.End,
-                            Rule = MinRestViolationRule,
-                            Message = $"Rest gap is {restGap.TotalHours:F1}h (minimum {MinRestGap.TotalHours:F0}h).",
+                            Rule = MinimumRestViolationRule,
+                            Message = $"Rest gap is {restGap.TotalHours:F1}h (minimum {MinimumRestGap.TotalHours:F0}h).",
                         });
                     }
                 }
@@ -308,14 +308,14 @@ namespace UBB_SE_2026_923_2.Services
 
             bool EndsBeforeProposedStart(RosterShift shift) => shift.End <= proposed.Start;
             var previousShift = candidateShifts.LastOrDefault(EndsBeforeProposedStart);
-            if (previousShift != null && (proposed.Start - previousShift.End) < MinRestGap)
+            if (previousShift != null && (proposed.Start - previousShift.End) < MinimumRestGap)
             {
                 return false;
             }
 
             bool StartsAfterProposedEnd(RosterShift shift) => shift.Start >= proposed.End;
             var nextShift = candidateShifts.FirstOrDefault(StartsAfterProposedEnd);
-            if (nextShift != null && (nextShift.Start - proposed.End) < MinRestGap)
+            if (nextShift != null && (nextShift.Start - proposed.End) < MinimumRestGap)
             {
                 return false;
             }
@@ -324,7 +324,7 @@ namespace UBB_SE_2026_923_2.Services
             double WeekOverlapHours(RosterShift shift) => GetOverlapHours(shift.Start, shift.End, weekStart, weekEnd);
             var existingHours = candidateShifts.Sum(WeekOverlapHours);
             var proposedHours = GetOverlapHours(proposed.Start, proposed.End, weekStart, weekEnd);
-            return existingHours + proposedHours <= MaxWeeklyHours;
+            return existingHours + proposedHours <= MaximumWeeklyHours;
         }
 
         private static void ApplyTentativeReassignment(IList<RosterShift> allShifts, int shiftId, int newStaffId, string newStaffName)

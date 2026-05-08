@@ -138,7 +138,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
 
             var colleagues = this.staffAndShiftService.GetEligibleSwapColleaguesForShift(
                 this.SelectedDoctor.StaffId,
-                this.SelectedShift.Id,
+                this.SelectedShift.ShiftId,
                 out var error);
 
             if (!string.IsNullOrWhiteSpace(error))
@@ -169,7 +169,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
 
             var success = this.staffAndShiftService.RequestShiftSwap(
                 this.SelectedDoctor.StaffId,
-                this.SelectedShift.Id,
+                this.SelectedShift.ShiftId,
                 this.SelectedColleague.StaffId,
                 out var message);
 
