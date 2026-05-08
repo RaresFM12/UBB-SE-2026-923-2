@@ -13,15 +13,15 @@ namespace UBB_SE_2026_923_2.Models
             this.Role = "Pharmacist";
         }
 
-        public Pharmacyst(int staffID, string firstName, string lastName, string contactInfo, bool available, string certification, int yearsOfExp)
+        public Pharmacyst(int staffId, string firstName, string lastName, string contactInformation, bool isAvailable, string certification, int yearsOfExperience)
         {
-            this.StaffID = staffID;
+            this.StaffID = staffId;
             this.FirstName = firstName;
             this.LastName = lastName;
-            this.ContactInfo = contactInfo;
-            this.Available = available;
+            this.ContactInfo = contactInformation;
+            this.Available = isAvailable;
             this.Certification = certification;
-            this.YearsOfExperience = yearsOfExp;
+            this.YearsOfExperience = yearsOfExperience;
             this.Role = "Pharmacist";
         }
     }

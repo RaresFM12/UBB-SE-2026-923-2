@@ -23,14 +23,14 @@ namespace UBB_SE_2026_923_2.Models
             this.Role = "Doctor";
         }
 
-        public Doctor(int staffID, string firstName, string lastName, string contactInfo, bool available,
+        public Doctor(int staffId, string firstName, string lastName, string contactInformation, bool isAvailable,
             string specialization, string licenseNumber, DoctorStatus doctorStatus, int yearsOfExperience)
         {
-            this.StaffID = staffID;
+            this.StaffID = staffId;
             this.FirstName = firstName;
             this.LastName = lastName;
-            this.ContactInfo = contactInfo;
-            this.Available = available;
+            this.ContactInfo = contactInformation;
+            this.Available = isAvailable;
             this.Specialization = specialization;
             this.LicenseNumber = licenseNumber;
             this.DoctorStatus = doctorStatus;
