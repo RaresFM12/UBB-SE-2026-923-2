@@ -32,7 +32,7 @@ namespace UBB_SE_2026_923_2.Repositories
             }
 
             return summaries
-                .Select(m => (m.MedicineName, m.WarningMessage))
+                .Select(medicine => (medicine.MedicineName, medicine.WarningMessage))
                 .ToList();
         }
     }

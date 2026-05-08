@@ -12,16 +12,16 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class ShiftSwapRepository : IShiftSwapRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public ShiftSwapRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public ShiftSwapRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public int AddShiftSwapRequest(ShiftSwapRequest request)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
             var entity = new ShiftSwapRequest
             {
@@ -32,27 +32,27 @@ namespace UBB_SE_2026_923_2.Repositories
                 Status = request.Status,
             };
 
-            db.ShiftSwapRequests.Add(entity);
-            db.SaveChanges();
+            databaseContext.ShiftSwapRequests.Add(entity);
+            databaseContext.SaveChanges();
             return entity.SwapId;
         }
 
         public IReadOnlyList<ShiftSwapRequest> GetAllShiftSwapRequests()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.ShiftSwapRequests.AsNoTracking().ToList();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.ShiftSwapRequests.AsNoTracking().ToList();
         }
 
         public ShiftSwapRequest? GetShiftSwapRequestById(int swapId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.ShiftSwapRequests.AsNoTracking().FirstOrDefault(s => s.SwapId == swapId);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.ShiftSwapRequests.AsNoTracking().FirstOrDefault(swapRequest => swapRequest.SwapId == swapId);
         }
 
         public void UpdateShiftSwapRequestStatus(int swapId, string status)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var swapRequest = db.ShiftSwapRequests.FirstOrDefault(s => s.SwapId == swapId);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var swapRequest = databaseContext.ShiftSwapRequests.FirstOrDefault(swapRequest => swapRequest.SwapId == swapId);
             if (swapRequest is null)
             {
                 return;
@@ -66,7 +66,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 swapRequest.Status = parsedStatus;
             }
 
-            db.SaveChanges();
+            databaseContext.SaveChanges();
         }
     }
 }

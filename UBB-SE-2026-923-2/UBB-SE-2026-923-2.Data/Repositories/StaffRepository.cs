@@ -17,23 +17,23 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class StaffRepository : IShiftManagementStaffRepository, IStaffRepository, IPharmacyStaffRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public StaffRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public StaffRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public List<IStaff> LoadAllStaff()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
             // TPH: query the base set, return only the concrete subtypes the
             // legacy code surfaced (Doctor / Pharmacyst). EF picks the right
             // .NET type based on the Role discriminator.
-            return db.StaffMembers
+            return databaseContext.StaffMembers
                 .AsNoTracking()
-                .Where(s => s is Doctor || s is Pharmacyst)
+                .Where(staffMember => staffMember is Doctor || staffMember is Pharmacyst)
                 .ToList()
                 .Cast<IStaff>()
                 .ToList();
@@ -41,91 +41,91 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IStaff? GetStaffById(int staffId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.StaffMembers
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.StaffMembers
                 .AsNoTracking()
-                .Where(s => s.StaffID == staffId && (s is Doctor || s is Pharmacyst))
+                .Where(staffMember => staffMember.StaffID == staffId && (staffMember is Doctor || staffMember is Pharmacyst))
                 .FirstOrDefault() as IStaff;
         }
 
         public List<Pharmacyst> GetPharmacists()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Pharmacysts.AsNoTracking().ToList();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Pharmacysts.AsNoTracking().ToList();
         }
 
         public async Task<IReadOnlyList<(int DoctorId, string FirstName, string LastName)>> GetAllDoctorsAsync()
         {
-            await using var db = await this.dbContextFactory.CreateDbContextAsync();
-            var rows = await db.Doctors
+            await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
+            var doctorRows = await databaseContext.Doctors
                 .AsNoTracking()
-                .Select(d => new { d.StaffID, d.FirstName, d.LastName })
+                .Select(doctor => new { doctor.StaffID, doctor.FirstName, doctor.LastName })
                 .ToListAsync();
 
-            return rows
-                .Select(row => (row.StaffID, row.FirstName, row.LastName))
+            return doctorRows
+                .Select(doctorRow => (doctorRow.StaffID, doctorRow.FirstName, doctorRow.LastName))
                 .ToList();
         }
 
         public async Task UpdateStatusAsync(int staffId, string status)
         {
-            await using var db = await this.dbContextFactory.CreateDbContextAsync();
-            var staff = await db.StaffMembers.FirstOrDefaultAsync(s => s.StaffID == staffId);
-            if (staff is null)
+            await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
+            var staffMember = await databaseContext.StaffMembers.FirstOrDefaultAsync(staff => staff.StaffID == staffId);
+            if (staffMember is null)
             {
                 return;
             }
 
-            staff.Status = status;
-            await db.SaveChangesAsync();
+            staffMember.Status = status;
+            await databaseContext.SaveChangesAsync();
         }
 
         public void UpdateStaffAvailability(int staffId, bool isAvailable, DoctorStatus status = DoctorStatus.OFF_DUTY)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var staff = db.StaffMembers.FirstOrDefault(s => s.StaffID == staffId);
-            if (staff is null)
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var staffMember = databaseContext.StaffMembers.FirstOrDefault(staff => staff.StaffID == staffId);
+            if (staffMember is null)
             {
                 return;
             }
 
-            staff.Available = isAvailable;
-            staff.Status = status.ToString();
-            if (staff is Doctor doctor)
+            staffMember.Available = isAvailable;
+            staffMember.Status = status.ToString();
+            if (staffMember is Doctor doctor)
             {
                 doctor.DoctorStatus = status;
             }
 
-            db.SaveChanges();
+            databaseContext.SaveChanges();
         }
 
         public void UpdateStaff(IStaff staff)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var existing = db.StaffMembers.FirstOrDefault(s => s.StaffID == staff.StaffID);
-            if (existing is null)
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var existingStaffMember = databaseContext.StaffMembers.FirstOrDefault(trackedStaff => trackedStaff.StaffID == staff.StaffID);
+            if (existingStaffMember is null)
             {
                 return;
             }
 
-            existing.FirstName = staff.FirstName;
-            existing.LastName = staff.LastName;
-            existing.ContactInfo = staff.ContactInfo;
-            existing.Available = staff.Available;
+            existingStaffMember.FirstName = staff.FirstName;
+            existingStaffMember.LastName = staff.LastName;
+            existingStaffMember.ContactInfo = staff.ContactInfo;
+            existingStaffMember.Available = staff.Available;
 
-            if (existing is Doctor existingDoctor && staff is Doctor incomingDoctor)
+            if (existingStaffMember is Doctor existingDoctor && staff is Doctor incomingDoctor)
             {
                 existingDoctor.LicenseNumber = incomingDoctor.LicenseNumber;
                 existingDoctor.Specialization = incomingDoctor.Specialization;
                 existingDoctor.DoctorStatus = incomingDoctor.DoctorStatus;
                 existingDoctor.Status = incomingDoctor.DoctorStatus.ToString();
             }
-            else if (existing is Pharmacyst existingPharmacist && staff is Pharmacyst incomingPharmacist)
+            else if (existingStaffMember is Pharmacyst existingPharmacist && staff is Pharmacyst incomingPharmacist)
             {
                 existingPharmacist.Certification = incomingPharmacist.Certification;
             }
 
-            db.SaveChanges();
+            databaseContext.SaveChanges();
         }
     }
 }

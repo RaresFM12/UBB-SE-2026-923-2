@@ -22,47 +22,47 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class SQLUsersRepository : IUsersRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public SQLUsersRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public SQLUsersRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public bool UserExists(string email)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Users.AsNoTracking().Any(u => u.Email == email);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Users.AsNoTracking().Any(user => user.Email == email);
         }
 
-        public bool UserExists(int id)
+        public bool UserExists(int userId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Users.AsNoTracking().Any(u => u.Id == id);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Users.AsNoTracking().Any(user => user.Id == userId);
         }
 
-        public User GetUserById(int id)
+        public User GetUserById(int userId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var user = db.Users
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var user = databaseContext.Users
                 .AsNoTracking()
-                .Include(u => u.PeriodNoteEntries)
-                .Include(u => u.UserDiscountEntries)
-                .Include(u => u.UserNotificationEntries)
-                .FirstOrDefault(u => u.Id == id);
+                .Include(user => user.PeriodNoteEntries)
+                .Include(user => user.UserDiscountEntries)
+                .Include(user => user.UserNotificationEntries)
+                .FirstOrDefault(user => user.Id == userId);
 
             return user is null ? null! : ProjectIntoLegacyCollections(user);
         }
 
         public User GetUserByEmail(string email)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var user = db.Users
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var user = databaseContext.Users
                 .AsNoTracking()
-                .Include(u => u.PeriodNoteEntries)
-                .Include(u => u.UserDiscountEntries)
-                .Include(u => u.UserNotificationEntries)
-                .FirstOrDefault(u => u.Email == email);
+                .Include(user => user.PeriodNoteEntries)
+                .Include(user => user.UserDiscountEntries)
+                .Include(user => user.UserNotificationEntries)
+                .FirstOrDefault(user => user.Email == email);
 
             return user is null ? null! : ProjectIntoLegacyCollections(user);
         }
@@ -70,7 +70,7 @@ namespace UBB_SE_2026_923_2.Repositories
         public void AddUser(string email, string phoneNumber, string passwordHash, string username,
             bool discountNotifications, bool isDisabled = false, bool isAdmin = false, int loyaltyPoints = 0, string role = "Client")
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
             var user = new User
             {
@@ -85,95 +85,95 @@ namespace UBB_SE_2026_923_2.Repositories
                 LoyaltyPoints = loyaltyPoints,
             };
 
-            db.Users.Add(user);
-            db.SaveChanges();
+            databaseContext.Users.Add(user);
+            databaseContext.SaveChanges();
         }
 
         public void UpdateUser(User newUser)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var existing = db.Users
-                .Include(u => u.PeriodNoteEntries)
-                .Include(u => u.UserDiscountEntries)
-                .Include(u => u.UserNotificationEntries)
-                .FirstOrDefault(u => u.Id == newUser.Id);
+            var existingUser = databaseContext.Users
+                .Include(user => user.PeriodNoteEntries)
+                .Include(user => user.UserDiscountEntries)
+                .Include(user => user.UserNotificationEntries)
+                .FirstOrDefault(user => user.Id == newUser.Id);
 
-            if (existing is null)
+            if (existingUser is null)
             {
                 return;
             }
 
             // Scalar fields, including period-tracker columns that used to
             // live in a separate table.
-            existing.Email = newUser.Email;
-            existing.PhoneNumber = newUser.PhoneNumber;
-            existing.PasswordHash = newUser.PasswordHash;
-            existing.Username = newUser.Username;
-            existing.IsAdmin = newUser.IsAdmin;
-            existing.IsDisabled = newUser.IsDisabled;
-            existing.Role = newUser.Role;
-            existing.DiscountNotifications = newUser.DiscountNotifications;
-            existing.LoyaltyPoints = newUser.LoyaltyPoints;
-            existing.StartPeriodDate = newUser.StartPeriodDate;
-            existing.CycleDays = newUser.CycleDays;
-            existing.PeriodLasts = newUser.PeriodLasts;
-            existing.PremenstrualSyndromeOption = newUser.PremenstrualSyndromeOption;
+            existingUser.Email = newUser.Email;
+            existingUser.PhoneNumber = newUser.PhoneNumber;
+            existingUser.PasswordHash = newUser.PasswordHash;
+            existingUser.Username = newUser.Username;
+            existingUser.IsAdmin = newUser.IsAdmin;
+            existingUser.IsDisabled = newUser.IsDisabled;
+            existingUser.Role = newUser.Role;
+            existingUser.DiscountNotifications = newUser.DiscountNotifications;
+            existingUser.LoyaltyPoints = newUser.LoyaltyPoints;
+            existingUser.StartPeriodDate = newUser.StartPeriodDate;
+            existingUser.CycleDays = newUser.CycleDays;
+            existingUser.PeriodLasts = newUser.PeriodLasts;
+            existingUser.PremenstrualSyndromeOption = newUser.PremenstrualSyndromeOption;
 
             // Replace the related collections from the legacy in-memory views.
             // Phase 3 will switch callers to mutate the EF nav collections
             // directly, at which point this projection goes away.
-            db.PeriodNotes.RemoveRange(existing.PeriodNoteEntries);
-            existing.PeriodNoteEntries.Clear();
-            foreach (var pair in newUser.PeriodNotes)
+            databaseContext.PeriodNotes.RemoveRange(existingUser.PeriodNoteEntries);
+            existingUser.PeriodNoteEntries.Clear();
+            foreach (var keyValuePair in newUser.PeriodNotes)
             {
-                existing.PeriodNoteEntries.Add(new PeriodNote
+                existingUser.PeriodNoteEntries.Add(new PeriodNote
                 {
-                    UserId = existing.Id,
-                    NoteId = pair.Key,
-                    NoteBody = pair.Value.Item1,
-                    IsDone = pair.Value.Item2,
+                    UserId = existingUser.Id,
+                    NoteId = keyValuePair.Key,
+                    NoteBody = keyValuePair.Value.Item1,
+                    IsDone = keyValuePair.Value.Item2,
                 });
             }
 
-            db.UserDiscounts.RemoveRange(existing.UserDiscountEntries);
-            existing.UserDiscountEntries.Clear();
-            foreach (var pair in newUser.UserDiscounts)
+            databaseContext.UserDiscounts.RemoveRange(existingUser.UserDiscountEntries);
+            existingUser.UserDiscountEntries.Clear();
+            foreach (var keyValuePair in newUser.UserDiscounts)
             {
-                existing.UserDiscountEntries.Add(new UserDiscount
+                existingUser.UserDiscountEntries.Add(new UserDiscount
                 {
-                    UserId = existing.Id,
-                    ItemId = pair.Key,
-                    DiscountPercentage = pair.Value,
+                    UserId = existingUser.Id,
+                    ItemId = keyValuePair.Key,
+                    DiscountPercentage = keyValuePair.Value,
                 });
             }
 
-            db.UserNotifications.RemoveRange(existing.UserNotificationEntries);
-            existing.UserNotificationEntries.Clear();
+            databaseContext.UserNotifications.RemoveRange(existingUser.UserNotificationEntries);
+            existingUser.UserNotificationEntries.Clear();
             var notificationItemIds = new HashSet<int>(newUser.FavoriteItems);
             notificationItemIds.UnionWith(newUser.StockAlerts);
             foreach (var itemId in notificationItemIds)
             {
-                existing.UserNotificationEntries.Add(new UserNotification
+                existingUser.UserNotificationEntries.Add(new UserNotification
                 {
-                    UserId = existing.Id,
+                    UserId = existingUser.Id,
                     ItemId = itemId,
                     IsFavorite = newUser.FavoriteItems.Contains(itemId),
                     IsStockAlert = newUser.StockAlerts.Contains(itemId),
                 });
             }
 
-            db.SaveChanges();
+            databaseContext.SaveChanges();
         }
 
         public List<User> GetAllUsers()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var users = db.Users
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var users = databaseContext.Users
                 .AsNoTracking()
-                .Include(u => u.PeriodNoteEntries)
-                .Include(u => u.UserDiscountEntries)
-                .Include(u => u.UserNotificationEntries)
+                .Include(user => user.PeriodNoteEntries)
+                .Include(user => user.UserDiscountEntries)
+                .Include(user => user.UserNotificationEntries)
                 .ToList();
 
             foreach (var user in users)
@@ -184,45 +184,45 @@ namespace UBB_SE_2026_923_2.Repositories
             return users;
         }
 
-        public bool UserHasPeriodTracker(int id)
+        public bool UserHasPeriodTracker(int userId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Users
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Users
                 .AsNoTracking()
-                .Any(u => u.Id == id
-                       && u.StartPeriodDate != default
-                       && u.StartPeriodDate != DateOnly.MinValue
-                       && u.StartPeriodDate != DateOnly.MaxValue);
+                .Any(user => user.Id == userId
+                           && user.StartPeriodDate != default
+                           && user.StartPeriodDate != DateOnly.MinValue
+                           && user.StartPeriodDate != DateOnly.MaxValue);
         }
 
         private static User ProjectIntoLegacyCollections(User user)
         {
-            foreach (var note in user.PeriodNoteEntries)
+            foreach (var periodNote in user.PeriodNoteEntries)
             {
-                if (!user.PeriodNotes.ContainsKey(note.NoteId))
+                if (!user.PeriodNotes.ContainsKey(periodNote.NoteId))
                 {
-                    user.AddPeriodNoteToUser(note.NoteId, note.NoteBody, note.IsDone);
+                    user.AddPeriodNoteToUser(periodNote.NoteId, periodNote.NoteBody, periodNote.IsDone);
                 }
             }
 
-            foreach (var discount in user.UserDiscountEntries)
+            foreach (var userDiscount in user.UserDiscountEntries)
             {
-                if (!user.UserDiscounts.ContainsKey(discount.ItemId))
+                if (!user.UserDiscounts.ContainsKey(userDiscount.ItemId))
                 {
-                    user.AddUserDiscount(discount.ItemId, discount.DiscountPercentage);
+                    user.AddUserDiscount(userDiscount.ItemId, userDiscount.DiscountPercentage);
                 }
             }
 
-            foreach (var notification in user.UserNotificationEntries)
+            foreach (var userNotification in user.UserNotificationEntries)
             {
-                if (notification.IsFavorite && !user.FavoriteItems.Contains(notification.ItemId))
+                if (userNotification.IsFavorite && !user.FavoriteItems.Contains(userNotification.ItemId))
                 {
-                    user.AddItemToFavoriteItems(notification.ItemId);
+                    user.AddItemToFavoriteItems(userNotification.ItemId);
                 }
 
-                if (notification.IsStockAlert && !user.StockAlerts.Contains(notification.ItemId))
+                if (userNotification.IsStockAlert && !user.StockAlerts.Contains(userNotification.ItemId))
                 {
-                    user.AddStockAlertToUser(notification.ItemId);
+                    user.AddStockAlertToUser(userNotification.ItemId);
                 }
             }
 

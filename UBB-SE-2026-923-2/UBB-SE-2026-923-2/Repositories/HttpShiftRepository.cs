@@ -35,7 +35,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 ? newShift.StaffId
                 : (newShift.AppointedStaff?.StaffID ?? 0);
 
-            var payload = new
+            var requestPayload = new
             {
                 StaffId = staffId,
                 Location = newShift.Location,
@@ -44,30 +44,30 @@ namespace UBB_SE_2026_923_2.Repositories
                 Status = newShift.Status,
             };
 
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void UpdateShiftStatus(int shiftId, ShiftStatus status)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .PatchAsJsonAsync($"{BasePath}/{shiftId}/status", new { Status = status })
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void UpdateShiftStaffId(int shiftId, int newStaffId)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .PatchAsJsonAsync($"{BasePath}/{shiftId}/staff", new { StaffId = newStaffId })
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void DeleteShift(int shiftId)
         {
-            var response = this.httpClient.DeleteAsync($"{BasePath}/{shiftId}").GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.DeleteAsync($"{BasePath}/{shiftId}").GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
     }
 }

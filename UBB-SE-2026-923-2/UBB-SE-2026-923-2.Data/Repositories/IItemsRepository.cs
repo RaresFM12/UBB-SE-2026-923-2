@@ -9,19 +9,19 @@ namespace UBB_SE_2026_923_2.Repositories
         public const string ImagePathDefault = "..\\..\\Assets\\placeholder.png";
 
         void AddItem(string name, string producer, string category,
-                    float price, int nrOfPills,
+                    float price, int numberOfPills,
                     string label = "", string description = "", string imagePath = ImagePathDefault,
                     float discount = 0f);
 
         void AddItemWithQuantity(string name, string producer, string category,
-                    float price, int nrOfPills,
+                    float price, int numberOfPills,
                     int quantity, Dictionary<string, float> activeSubstances, Dictionary<DateOnly, int> batches,
                     string label = "", string description = "", string imagePath = ImagePathDefault,
                     float discount = 0f);
 
-        void RemoveItemById(int idToBeRemoved);
+        void RemoveItemById(int itemIdToRemove);
 
-        Item GetItemById(int id);
+        Item GetItemById(int itemId);
 
         List<Item> GetAllItems();
 
@@ -29,7 +29,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
         void UpdateItemById(Item newItem);
 
-        bool ItemExists(int id);
+        bool ItemExists(int itemId);
 
         List<Tuple<int, string, int>> GetTop30Items();
     }

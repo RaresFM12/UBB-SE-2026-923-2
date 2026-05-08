@@ -22,11 +22,11 @@ namespace UBB_SE_2026_923_2.Repositories
         private const int TopItemsLimit = 30;
         private const string ImagePathDefault = "..\\..\\Assets\\placeholder.png";
 
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public SQLItemsRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public SQLItemsRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public void AddItem(string name, string producer, string category,
@@ -34,13 +34,13 @@ namespace UBB_SE_2026_923_2.Repositories
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
             var item = new Item(name, producer, category, price, numberOfPills,
                                 quantity: 0, label, description, imagePath, discount);
 
-            db.Items.Add(item);
-            db.SaveChanges();
+            databaseContext.Items.Add(item);
+            databaseContext.SaveChanges();
         }
 
         public void AddItemWithQuantity(string name, string producer, string category,
@@ -49,7 +49,7 @@ namespace UBB_SE_2026_923_2.Repositories
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
             var item = new Item(name, producer, category, price, numberOfPills,
                                 activeSubstances, batches, quantity,
@@ -57,33 +57,33 @@ namespace UBB_SE_2026_923_2.Repositories
 
             // Project the legacy dictionaries into the EF-mapped navigation
             // collections — the dictionaries themselves are [NotMapped].
-            foreach (var pair in activeSubstances)
+            foreach (var keyValuePair in activeSubstances)
             {
                 item.ItemSubstanceEntries.Add(new ItemSubstance
                 {
-                    SubstanceName = pair.Key,
-                    Concentration = pair.Value,
+                    SubstanceName = keyValuePair.Key,
+                    Concentration = keyValuePair.Value,
                 });
             }
 
-            foreach (var pair in batches)
+            foreach (var keyValuePair in batches)
             {
                 item.ItemBatchEntries.Add(new ItemBatch
                 {
-                    ExpirationDate = pair.Key,
-                    NumberOfPacks = pair.Value,
+                    ExpirationDate = keyValuePair.Key,
+                    NumberOfPacks = keyValuePair.Value,
                 });
             }
 
-            db.Items.Add(item);
-            db.SaveChanges();
+            databaseContext.Items.Add(item);
+            databaseContext.SaveChanges();
         }
 
-        public void RemoveItemById(int idToBeRemoved)
+        public void RemoveItemById(int itemIdToRemove)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var item = db.Items.FirstOrDefault(i => i.Id == idToBeRemoved);
+            var item = databaseContext.Items.FirstOrDefault(item => item.Id == itemIdToRemove);
             if (item is null)
             {
                 return;
@@ -92,53 +92,53 @@ namespace UBB_SE_2026_923_2.Repositories
             // Cascade is configured for substances/batches/order items already.
             // User-side links (UserNotifications, UserDiscounts) reference Item
             // with cascade as well; just remove the parent.
-            db.Items.Remove(item);
-            db.SaveChanges();
+            databaseContext.Items.Remove(item);
+            databaseContext.SaveChanges();
         }
 
-        public Item GetItemById(int id)
+        public Item GetItemById(int itemId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var item = db.Items
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var item = databaseContext.Items
                 .AsNoTracking()
-                .Include(i => i.ItemSubstanceEntries)
-                .Include(i => i.ItemBatchEntries)
-                .FirstOrDefault(i => i.Id == id);
+                .Include(item => item.ItemSubstanceEntries)
+                .Include(item => item.ItemBatchEntries)
+                .FirstOrDefault(item => item.Id == itemId);
 
             return item is null ? null! : ProjectIntoLegacyDictionaries(item);
         }
 
         public List<Item> GetAllItems()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var items = db.Items
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var items = databaseContext.Items
                 .AsNoTracking()
-                .Include(i => i.ItemSubstanceEntries)
-                .Include(i => i.ItemBatchEntries)
+                .Include(item => item.ItemSubstanceEntries)
+                .Include(item => item.ItemBatchEntries)
                 .ToList();
-            return items.Select(i => ProjectIntoLegacyDictionaries(i)).ToList();
+            return items.Select(item => ProjectIntoLegacyDictionaries(item)).ToList();
         }
 
         public List<Item> GetItemsByName(string name)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var items = db.Items
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var items = databaseContext.Items
                 .AsNoTracking()
-                .Include(i => i.ItemSubstanceEntries)
-                .Include(i => i.ItemBatchEntries)
-                .Where(i => i.Name == name)
+                .Include(item => item.ItemSubstanceEntries)
+                .Include(item => item.ItemBatchEntries)
+                .Where(item => item.Name == name)
                 .ToList();
-            return items.Select(i => ProjectIntoLegacyDictionaries(i)).ToList();
+            return items.Select(item => ProjectIntoLegacyDictionaries(item)).ToList();
         }
 
         public void UpdateItemById(Item newItem)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var existing = db.Items
-                .Include(i => i.ItemSubstanceEntries)
-                .Include(i => i.ItemBatchEntries)
-                .FirstOrDefault(i => i.Id == newItem.Id);
+            var existing = databaseContext.Items
+                .Include(item => item.ItemSubstanceEntries)
+                .Include(item => item.ItemBatchEntries)
+                .FirstOrDefault(item => item.Id == newItem.Id);
 
             if (existing is null)
             {
@@ -158,68 +158,68 @@ namespace UBB_SE_2026_923_2.Repositories
             // Replace the related collections from the legacy dictionaries.
             // Phase 3 will switch callers to mutate ItemSubstanceEntries /
             // ItemBatchEntries directly, at which point this projection goes.
-            db.ItemSubstances.RemoveRange(existing.ItemSubstanceEntries);
+            databaseContext.ItemSubstances.RemoveRange(existing.ItemSubstanceEntries);
             existing.ItemSubstanceEntries.Clear();
-            foreach (var pair in newItem.ActiveSubstances)
+            foreach (var keyValuePair in newItem.ActiveSubstances)
             {
                 existing.ItemSubstanceEntries.Add(new ItemSubstance
                 {
                     ItemId = existing.Id,
-                    SubstanceName = pair.Key,
-                    Concentration = pair.Value,
+                    SubstanceName = keyValuePair.Key,
+                    Concentration = keyValuePair.Value,
                 });
             }
 
-            db.ItemBatches.RemoveRange(existing.ItemBatchEntries);
+            databaseContext.ItemBatches.RemoveRange(existing.ItemBatchEntries);
             existing.ItemBatchEntries.Clear();
-            foreach (var pair in newItem.Batches)
+            foreach (var keyValuePair in newItem.Batches)
             {
                 existing.ItemBatchEntries.Add(new ItemBatch
                 {
                     ItemId = existing.Id,
-                    ExpirationDate = pair.Key,
-                    NumberOfPacks = pair.Value,
+                    ExpirationDate = keyValuePair.Key,
+                    NumberOfPacks = keyValuePair.Value,
                 });
             }
 
-            db.SaveChanges();
+            databaseContext.SaveChanges();
         }
 
-        public bool ItemExists(int id)
+        public bool ItemExists(int itemId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Items.AsNoTracking().Any(i => i.Id == id);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Items.AsNoTracking().Any(item => item.Id == itemId);
         }
 
         public List<Tuple<int, string, int>> GetTop30Items()
         {
             DateOnly oneMonthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
 
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            return db.OrderItems
+            return databaseContext.OrderItems
                 .AsNoTracking()
                 .Join(
-                    db.Orders.Where(o => o.PickUpDate >= oneMonthAgo),
-                    oi => oi.OrderId,
-                    o => o.Id,
-                    (oi, _) => oi.ItemId)
+                    databaseContext.Orders.Where(order => order.PickUpDate >= oneMonthAgo),
+                    orderItem => orderItem.OrderId,
+                    order => order.Id,
+                    (orderItem, _) => orderItem.ItemId)
                 .Join(
-                    db.Items.AsNoTracking(),
+                    databaseContext.Items.AsNoTracking(),
                     itemId => itemId,
                     item => item.Id,
                     (itemId, item) => new { item.Id, item.Name })
-                .GroupBy(row => new { row.Id, row.Name })
-                .Select(group => new
+                .GroupBy(itemRow => new { itemRow.Id, itemRow.Name })
+                .Select(itemGroup => new
                 {
-                    group.Key.Id,
-                    group.Key.Name,
-                    NumberOfOrders = group.Count(),
+                    itemGroup.Key.Id,
+                    itemGroup.Key.Name,
+                    NumberOfOrders = itemGroup.Count(),
                 })
-                .OrderByDescending(row => row.NumberOfOrders)
+                .OrderByDescending(itemRow => itemRow.NumberOfOrders)
                 .Take(TopItemsLimit)
                 .AsEnumerable()
-                .Select(row => new Tuple<int, string, int>(row.Id, row.Name, row.NumberOfOrders))
+                .Select(itemRow => new Tuple<int, string, int>(itemRow.Id, itemRow.Name, itemRow.NumberOfOrders))
                 .ToList();
         }
 
@@ -228,19 +228,19 @@ namespace UBB_SE_2026_923_2.Repositories
             // Move data from the EF nav collections into the legacy dict
             // properties so existing call sites keep working unchanged.
             // Use the domain methods so Item.Quantity is recomputed correctly.
-            foreach (var link in item.ItemSubstanceEntries)
+            foreach (var itemSubstanceLink in item.ItemSubstanceEntries)
             {
-                if (!item.ActiveSubstances.ContainsKey(link.SubstanceName))
+                if (!item.ActiveSubstances.ContainsKey(itemSubstanceLink.SubstanceName))
                 {
-                    item.AddActiveSubstanceToItem(link.SubstanceName, link.Concentration);
+                    item.AddActiveSubstanceToItem(itemSubstanceLink.SubstanceName, itemSubstanceLink.Concentration);
                 }
             }
 
-            foreach (var batch in item.ItemBatchEntries)
+            foreach (var itemBatch in item.ItemBatchEntries)
             {
-                if (!item.Batches.ContainsKey(batch.ExpirationDate))
+                if (!item.Batches.ContainsKey(itemBatch.ExpirationDate))
                 {
-                    item.AddNewBatchToItem(batch.ExpirationDate, batch.NumberOfPacks);
+                    item.AddNewBatchToItem(itemBatch.ExpirationDate, itemBatch.NumberOfPacks);
                 }
             }
 

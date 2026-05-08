@@ -5,7 +5,7 @@ namespace UBB_SE_2026_923_2.Repositories
 
     public interface IHangoutRepository
     {
-        int AddHangout(string title, string description, System.DateTime date, int maxParticipants);
+        int AddHangout(string title, string description, System.DateTime date, int maximumParticipants);
 
         List<Hangout> GetAllHangouts();
 

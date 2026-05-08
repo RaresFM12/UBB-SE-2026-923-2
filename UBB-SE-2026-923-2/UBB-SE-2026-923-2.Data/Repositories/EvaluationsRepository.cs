@@ -18,27 +18,27 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class EvaluationsRepository : IEvaluationsRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public EvaluationsRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public EvaluationsRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public IReadOnlyList<MedicalEvaluation> GetAllEvaluations()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.MedicalEvaluations
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.MedicalEvaluations
                 .AsNoTracking()
-                .Include(e => e.Evaluator)
+                .Include(evaluation => evaluation.Evaluator)
                 .ToList();
         }
 
         public void AddEvaluation(int doctorId, int patientId, string diagnosis, string notes, string medications, bool assumedRisk)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var evaluation = new MedicalEvaluation
+            var newEvaluation = new MedicalEvaluation
             {
                 DoctorId = doctorId == 0 ? null : doctorId,
                 PatientId = patientId.ToString(),
@@ -48,36 +48,36 @@ namespace UBB_SE_2026_923_2.Repositories
                 EvaluationDate = DateTime.UtcNow,
             };
 
-            db.MedicalEvaluations.Add(evaluation);
-            db.SaveChanges();
+            databaseContext.MedicalEvaluations.Add(newEvaluation);
+            databaseContext.SaveChanges();
         }
 
         public void UpdateEvaluation(int evaluationId, string diagnosis, string notes, string medications)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var evaluation = db.MedicalEvaluations.FirstOrDefault(e => e.EvaluationID == evaluationId);
-            if (evaluation is null)
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var existingEvaluation = databaseContext.MedicalEvaluations.FirstOrDefault(evaluation => evaluation.EvaluationID == evaluationId);
+            if (existingEvaluation is null)
             {
                 return;
             }
 
-            evaluation.Symptoms = diagnosis ?? string.Empty;
-            evaluation.Notes = notes ?? string.Empty;
-            evaluation.MedicationsList = medications ?? string.Empty;
-            db.SaveChanges();
+            existingEvaluation.Symptoms = diagnosis ?? string.Empty;
+            existingEvaluation.Notes = notes ?? string.Empty;
+            existingEvaluation.MedicationsList = medications ?? string.Empty;
+            databaseContext.SaveChanges();
         }
 
         public void DeleteEvaluation(int evaluationId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var evaluation = db.MedicalEvaluations.FirstOrDefault(e => e.EvaluationID == evaluationId);
-            if (evaluation is null)
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var evaluationToRemove = databaseContext.MedicalEvaluations.FirstOrDefault(evaluation => evaluation.EvaluationID == evaluationId);
+            if (evaluationToRemove is null)
             {
                 return;
             }
 
-            db.MedicalEvaluations.Remove(evaluation);
-            db.SaveChanges();
+            databaseContext.MedicalEvaluations.Remove(evaluationToRemove);
+            databaseContext.SaveChanges();
         }
     }
 }

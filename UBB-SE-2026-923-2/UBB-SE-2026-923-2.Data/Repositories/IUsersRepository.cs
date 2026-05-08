@@ -11,9 +11,9 @@
     {
         bool UserExists(string email);
 
-        bool UserExists(int id);
+        bool UserExists(int userId);
 
-        User GetUserById(int id);
+        User GetUserById(int userId);
 
         User GetUserByEmail(string email);
 
@@ -24,6 +24,6 @@
 
         List<User> GetAllUsers();
 
-        bool UserHasPeriodTracker(int id);
+        bool UserHasPeriodTracker(int userId);
     }
 }

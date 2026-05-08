@@ -12,17 +12,17 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class PharmacyHandoverRepository : IPharmacyHandoverRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public PharmacyHandoverRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public PharmacyHandoverRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public IReadOnlyList<PharmacyHandover> GetAllPharmacyHandovers()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.PharmacyHandovers.AsNoTracking().ToList();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.PharmacyHandovers.AsNoTracking().ToList();
         }
     }
 }

@@ -12,33 +12,33 @@ namespace UBB_SE_2026_923_2.Repositories
     /// </summary>
     public class HangoutParticipantRepository : IHangoutParticipantRepository
     {
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public HangoutParticipantRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public HangoutParticipantRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public IReadOnlyList<(int HangoutId, int StaffId)> GetAllParticipants()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.HangoutParticipants
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.HangoutParticipants
                 .AsNoTracking()
-                .Select(p => new { p.HangoutId, p.StaffId })
+                .Select(participant => new { participant.HangoutId, participant.StaffId })
                 .AsEnumerable()
-                .Select(row => (row.HangoutId, row.StaffId))
+                .Select(participantRow => (participantRow.HangoutId, participantRow.StaffId))
                 .ToList();
         }
 
         public void AddParticipant(int hangoutId, int staffId)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            db.HangoutParticipants.Add(new HangoutParticipant
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            databaseContext.HangoutParticipants.Add(new HangoutParticipant
             {
                 HangoutId = hangoutId,
                 StaffId = staffId,
             });
-            db.SaveChanges();
+            databaseContext.SaveChanges();
         }
     }
 }
