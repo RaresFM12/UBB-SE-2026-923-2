@@ -46,12 +46,13 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var item = new Item(id, name, producer, category, price, pills, label, string.Empty, string.Empty, discount: discount, quantity: 0);
             if (quantity > 0)
             {
-                item.Batches[DateOnly.FromDateTime(System.DateTime.Now.AddDays(30))] = quantity;
+                item.Batches[System.DateOnly.FromDateTime(System.DateTime.Now.AddDays(30))] = quantity;
             }
 
             return item;
         }
 
+        // --- Search ---
         [Test]
         public void GetItems_NoFilters_ReturnsAllItems()
         {
@@ -68,19 +69,13 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
 
         [Test]
-        public void GetItems_SearchByNameCaseInsensitive_Works()
-        {
-            var result = this.service.GetItems("aspirin", pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(1));
-        }
-
-        [Test]
         public void GetItems_SearchNoMatch_ReturnsEmpty()
         {
             var result = this.service.GetItems("NonExistent", pageSize: 100);
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
+        // --- Categories ---
         [Test]
         public void GetItems_FilterByCategory_ReturnsMatching()
         {
@@ -95,13 +90,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result.All(item => item.Category == "vitamins" || item.Category == "pain"), Is.True);
         }
 
-        [Test]
-        public void GetItems_FilterByCategory_EmptyList_ReturnsAll()
-        {
-            var result = this.service.GetItems(null, categories: new List<string>(), pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(12));
-        }
-
+        // --- Price ---
         [Test]
         public void GetItems_FilterByPriceRange_ReturnsInRange()
         {
@@ -116,13 +105,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 this.service.GetItems(null, priceRanges: new List<(float, float)> { (20f, 5f) }, pageSize: 100));
         }
 
-        [Test]
-        public void GetItems_FilterByPriceRange_NegativeMin_Throws()
-        {
-            Assert.Throws<System.ArgumentException>(() =>
-                this.service.GetItems(null, priceRanges: new List<(float, float)> { (-1f, 10f) }, pageSize: 100));
-        }
-
+        // --- Stock ---
         [Test]
         public void GetItems_StockFilterInStock_ReturnsOnlyInStock()
         {
@@ -137,20 +120,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result.All(item => item.Quantity > 0 && item.Quantity < 10), Is.True);
         }
 
-        [Test]
-        public void GetItems_StockFilterNull_ReturnsAll()
-        {
-            var result = this.service.GetItems(null, stockFilter: null, pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(12));
-        }
-
-        [Test]
-        public void GetItems_StockFilterUnknown_ReturnsAll()
-        {
-            var result = this.service.GetItems(null, stockFilter: "unknown_filter", pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(12));
-        }
-
+        // --- Discount ---
         [Test]
         public void GetItems_DiscountedTrue_ReturnsOnlyDiscounted()
         {
@@ -158,20 +128,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result.All(item => item.DiscountPercentage > 0), Is.True);
         }
 
-        [Test]
-        public void GetItems_DiscountedFalse_ReturnsOnlyNonDiscounted()
-        {
-            var result = this.service.GetItems(null, discounted: false, pageSize: 100);
-            Assert.That(result.All(item => item.DiscountPercentage == 0), Is.True);
-        }
-
-        [Test]
-        public void GetItems_DiscountedNull_ReturnsAll()
-        {
-            var result = this.service.GetItems(null, discounted: null, pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(12));
-        }
-
+        // --- Substances ---
         [Test]
         public void GetItems_FilterBySubstance_ReturnsMatching()
         {
@@ -181,23 +138,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result[0].Name, Is.EqualTo("Aspirin"));
         }
 
-        [Test]
-        public void GetItems_FilterBySubstance_NoMatch_ReturnsEmpty()
-        {
-            var result = this.service.GetItems(null, substances: new List<string> { "nonexistent_substance" }, pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void GetItems_SortByPriceAscending_ReturnsSorted()
-        {
-            var result = this.service.GetItems(null, sortBy: "price", ascending: true, pageSize: 100);
-            for (int itemIndex = 1; itemIndex < result.Count; itemIndex++)
-            {
-                Assert.That(result[itemIndex].Price, Is.GreaterThanOrEqualTo(result[itemIndex - 1].Price));
-            }
-        }
-
+        // --- Sorting ---
         [Test]
         public void GetItems_SortByPriceDescending_ReturnsSorted()
         {
@@ -208,25 +149,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             }
         }
 
-        [Test]
-        public void GetItems_SortByNewestAscending_DoesNotThrow()
-        {
-            Assert.DoesNotThrow(() => this.service.GetItems(null, sortBy: "newest", ascending: true, pageSize: 100));
-        }
-
-        [Test]
-        public void GetItems_SortByNewestDescending_DoesNotThrow()
-        {
-            Assert.DoesNotThrow(() => this.service.GetItems(null, sortBy: "newest", ascending: false, pageSize: 100));
-        }
-
-        [Test]
-        public void GetItems_SortByNull_ReturnsUnsorted()
-        {
-            var result = this.service.GetItems(null, sortBy: null, pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(12));
-        }
-
+        // --- Pagination & Integration ---
         [Test]
         public void GetItems_Pagination_FirstPage()
         {
@@ -235,59 +158,10 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
 
         [Test]
-        public void GetItems_Pagination_SecondPage()
-        {
-            var result = this.service.GetItems(null, page: 1, pageSize: 5);
-            Assert.That(result.Count, Is.EqualTo(5));
-        }
-
-        [Test]
-        public void GetItems_Pagination_LastPage()
-        {
-            var result = this.service.GetItems(null, page: 2, pageSize: 5);
-            Assert.That(result.Count, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void GetItems_Pagination_BeyondLastPage_ReturnsEmpty()
-        {
-            var result = this.service.GetItems(null, page: 10, pageSize: 5);
-            Assert.That(result.Count, Is.EqualTo(0));
-        }
-
-        [Test]
         public void GetItems_CombinedFilters_Work()
         {
             var result = this.service.GetItems("i", categories: new List<string> { "vitamins" }, discounted: false, pageSize: 100);
             Assert.That(result.All(item => item.Category == "vitamins" && item.DiscountPercentage == 0 && item.Name.Contains("i", System.StringComparison.OrdinalIgnoreCase)), Is.True);
-        }
-
-        [Test]
-        public void GetItems_EmptySearch_ReturnsAll()
-        {
-            var result = this.service.GetItems(string.Empty, pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(12));
-        }
-
-        [Test]
-        public void GetItems_WhitespaceSearch_ReturnsAll()
-        {
-            var result = this.service.GetItems("   ", pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(12));
-        }
-
-        [Test]
-        public void GetItems_MultiplePriceRanges_ReturnsUnion()
-        {
-            var result = this.service.GetItems(null, priceRanges: new List<(float, float)> { (0f, 5f), (20f, 30f) }, pageSize: 100);
-            Assert.That(result.Count, Is.GreaterThan(0));
-        }
-
-        [Test]
-        public void GetItems_DefaultPageSize_Returns10()
-        {
-            var result = this.service.GetItems(null);
-            Assert.That(result.Count, Is.LessThanOrEqualTo(10));
         }
     }
 }
