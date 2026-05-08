@@ -13,11 +13,11 @@ using UBB_SE_2026_923_2.Configuration;
 /// </summary>
 public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
-    public AppDbContext CreateDbContext(string[] args)
+    public AppDbContext CreateDbContext(string[] arguments)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
+        var databaseContextOptionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlServer(AppSettings.ConnectionString);
 
-        return new AppDbContext(optionsBuilder.Options);
+        return new AppDbContext(databaseContextOptionsBuilder.Options);
     }
 }

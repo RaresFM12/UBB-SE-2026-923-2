@@ -23,34 +23,34 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public int AddOrder(int clientId, DateOnly pickUpDate, bool isCompleted = false, bool isExpired = false)
         {
-            var payload = new
+            var requestPayload = new
             {
                 ClientId = clientId,
                 PickUpDate = pickUpDate,
                 IsCompleted = isCompleted,
                 IsExpired = isExpired,
             };
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
         }
 
         public void RemoveOrder(int orderIdToBeRemoved)
         {
-            var response = this.httpClient.DeleteAsync($"{BasePath}/{orderIdToBeRemoved}").GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.DeleteAsync($"{BasePath}/{orderIdToBeRemoved}").GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public Order GetOrder(int orderId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{orderId}").GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            var httpResponse = this.httpClient.GetAsync($"{BasePath}/{orderId}").GetAwaiter().GetResult();
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
             }
 
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<Order>().GetAwaiter().GetResult()!;
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<Order>().GetAwaiter().GetResult()!;
         }
 
         public List<Order> GetAllOrders()
@@ -69,10 +69,10 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void UpdateOrder(Order newOrder)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .PutAsJsonAsync($"{BasePath}/{newOrder.Id}", newOrder)
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public bool OrderExists(int orderId)

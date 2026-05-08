@@ -21,37 +21,37 @@ namespace UBB_SE_2026_923_2.Repositories
             this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
-        public int AddHangout(string title, string description, DateTime date, int maxParticipants)
+        public int AddHangout(string title, string description, DateTime date, int maximumParticipants)
         {
-            var payload = new
+            var requestPayload = new
             {
                 Title = title,
                 Description = description,
                 Date = date,
-                MaxParticipants = maxParticipants,
+                MaxParticipants = maximumParticipants,
             };
 
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
         }
 
         public List<Hangout> GetAllHangouts()
         {
-            var hangouts = this.httpClient.GetFromJsonAsync<List<Hangout>>(BasePath).GetAwaiter().GetResult();
-            return hangouts ?? new List<Hangout>();
+            var hangoutsList = this.httpClient.GetFromJsonAsync<List<Hangout>>(BasePath).GetAwaiter().GetResult();
+            return hangoutsList ?? new List<Hangout>();
         }
 
         public Hangout? GetHangoutById(int hangoutId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{hangoutId}").GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            var httpResponse = this.httpClient.GetAsync($"{BasePath}/{hangoutId}").GetAwaiter().GetResult();
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
 
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<Hangout>().GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<Hangout>().GetAwaiter().GetResult();
         }
     }
 }

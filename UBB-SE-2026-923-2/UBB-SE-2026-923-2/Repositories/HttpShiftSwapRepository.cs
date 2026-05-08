@@ -23,37 +23,37 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public int AddShiftSwapRequest(ShiftSwapRequest request)
         {
-            var response = this.httpClient.PostAsJsonAsync(BasePath, request).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, request).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
         }
 
         public IReadOnlyList<ShiftSwapRequest> GetAllShiftSwapRequests()
         {
-            var swaps = this.httpClient
+            var swapRequests = this.httpClient
                 .GetFromJsonAsync<List<ShiftSwapRequest>>(BasePath)
                 .GetAwaiter().GetResult();
-            return swaps ?? new List<ShiftSwapRequest>();
+            return swapRequests ?? new List<ShiftSwapRequest>();
         }
 
         public ShiftSwapRequest? GetShiftSwapRequestById(int swapId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{swapId}").GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            var httpResponse = this.httpClient.GetAsync($"{BasePath}/{swapId}").GetAwaiter().GetResult();
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
 
-            response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<ShiftSwapRequest>().GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            return httpResponse.Content.ReadFromJsonAsync<ShiftSwapRequest>().GetAwaiter().GetResult();
         }
 
         public void UpdateShiftSwapRequestStatus(int swapId, string status)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .PatchAsJsonAsync($"{BasePath}/{swapId}/status", new { Status = status })
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
     }
 }

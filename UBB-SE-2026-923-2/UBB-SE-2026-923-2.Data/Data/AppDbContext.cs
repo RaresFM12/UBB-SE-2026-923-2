@@ -9,8 +9,8 @@ using UBB_SE_2026_923_2.Models;
 /// </summary>
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options)
-        : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> databaseContextOptions)
+        : base(databaseContextOptions)
     {
     }
 
@@ -63,108 +63,108 @@ public class AppDbContext : DbContext
 
     public DbSet<HighRiskMedicine> HighRiskMedicines => this.Set<HighRiskMedicine>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder databaseModelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(databaseModelBuilder);
 
-        ConfigureStaffHierarchy(modelBuilder);
-        ConfigureUserAndPharmacy(modelBuilder);
-        ConfigureHospital(modelBuilder);
-        ConfigureReferenceData(modelBuilder);
+        ConfigureStaffHierarchy(databaseModelBuilder);
+        ConfigureUserAndPharmacy(databaseModelBuilder);
+        ConfigureHospital(databaseModelBuilder);
+        ConfigureReferenceData(databaseModelBuilder);
     }
 
-    private static void ConfigureStaffHierarchy(ModelBuilder modelBuilder)
+    private static void ConfigureStaffHierarchy(ModelBuilder databaseModelBuilder)
     {
         // TPH: Staff is the base table; Doctor and Pharmacyst share it.
         // The existing Role string property doubles as the discriminator.
-        modelBuilder.Entity<Staff>(entity =>
+        databaseModelBuilder.Entity<Staff>(staffEntityBuilder =>
         {
-            entity.ToTable("Staff");
-            entity.HasKey(s => s.StaffID);
-            entity.Property(s => s.StaffID).ValueGeneratedOnAdd();
+            staffEntityBuilder.ToTable("Staff");
+            staffEntityBuilder.HasKey(staff => staff.StaffID);
+            staffEntityBuilder.Property(staff => staff.StaffID).ValueGeneratedOnAdd();
 
-            entity.Property(s => s.Email).HasMaxLength(256);
-            entity.Property(s => s.PasswordHash).HasMaxLength(512);
-            entity.Property(s => s.Role).HasMaxLength(50).IsRequired();
-            entity.Property(s => s.Department).HasMaxLength(100);
-            entity.Property(s => s.FirstName).HasMaxLength(100);
-            entity.Property(s => s.LastName).HasMaxLength(100);
-            entity.Property(s => s.ContactInfo).HasMaxLength(200);
-            entity.Property(s => s.LicenseNumber).HasMaxLength(100);
-            entity.Property(s => s.Specialization).HasMaxLength(100);
-            entity.Property(s => s.Status).HasMaxLength(50);
-            entity.Property(s => s.Certification).HasMaxLength(200);
+            staffEntityBuilder.Property(staff => staff.Email).HasMaxLength(256);
+            staffEntityBuilder.Property(staff => staff.PasswordHash).HasMaxLength(512);
+            staffEntityBuilder.Property(staff => staff.Role).HasMaxLength(50).IsRequired();
+            staffEntityBuilder.Property(staff => staff.Department).HasMaxLength(100);
+            staffEntityBuilder.Property(staff => staff.FirstName).HasMaxLength(100);
+            staffEntityBuilder.Property(staff => staff.LastName).HasMaxLength(100);
+            staffEntityBuilder.Property(staff => staff.ContactInfo).HasMaxLength(200);
+            staffEntityBuilder.Property(staff => staff.LicenseNumber).HasMaxLength(100);
+            staffEntityBuilder.Property(staff => staff.Specialization).HasMaxLength(100);
+            staffEntityBuilder.Property(staff => staff.Status).HasMaxLength(50);
+            staffEntityBuilder.Property(staff => staff.Certification).HasMaxLength(200);
 
-            entity.HasIndex(s => s.Email)
+            staffEntityBuilder.HasIndex(staff => staff.Email)
                   .IsUnique()
                   .HasFilter("[Email] IS NOT NULL AND [Email] <> ''");
 
-            entity.HasDiscriminator(s => s.Role)
+            staffEntityBuilder.HasDiscriminator(staff => staff.Role)
                   .HasValue<Staff>("Staff")
                   .HasValue<Doctor>("Doctor")
                   .HasValue<Pharmacyst>("Pharmacist");
         });
 
-        modelBuilder.Entity<Doctor>(entity =>
+        databaseModelBuilder.Entity<Doctor>(doctorEntityBuilder =>
         {
-            entity.Property(d => d.DoctorStatus)
+            doctorEntityBuilder.Property(doctor => doctor.DoctorStatus)
                   .HasConversion<string>()
                   .HasMaxLength(30);
         });
     }
 
-    private static void ConfigureUserAndPharmacy(ModelBuilder modelBuilder)
+    private static void ConfigureUserAndPharmacy(ModelBuilder databaseModelBuilder)
     {
-        modelBuilder.Entity<User>(entity =>
+        databaseModelBuilder.Entity<User>(userEntityBuilder =>
         {
-            entity.ToTable("Users");
-            entity.HasKey(u => u.Id);
-            entity.Property(u => u.Id).ValueGeneratedOnAdd();
-            entity.Property(u => u.Email).HasMaxLength(256).IsRequired();
-            entity.Property(u => u.PhoneNumber).HasMaxLength(50).IsRequired();
-            entity.Property(u => u.PasswordHash).HasMaxLength(512).IsRequired();
-            entity.Property(u => u.Username).HasMaxLength(100).IsRequired();
-            entity.Property(u => u.Role).HasMaxLength(20).HasDefaultValue("Client");
-            entity.HasIndex(u => u.Email).IsUnique();
+            userEntityBuilder.ToTable("Users");
+            userEntityBuilder.HasKey(user => user.Id);
+            userEntityBuilder.Property(user => user.Id).ValueGeneratedOnAdd();
+            userEntityBuilder.Property(user => user.Email).HasMaxLength(256).IsRequired();
+            userEntityBuilder.Property(user => user.PhoneNumber).HasMaxLength(50).IsRequired();
+            userEntityBuilder.Property(user => user.PasswordHash).HasMaxLength(512).IsRequired();
+            userEntityBuilder.Property(user => user.Username).HasMaxLength(100).IsRequired();
+            userEntityBuilder.Property(user => user.Role).HasMaxLength(20).HasDefaultValue("Client");
+            userEntityBuilder.HasIndex(user => user.Email).IsUnique();
 
-            entity.HasMany(u => u.Orders)
-                  .WithOne(o => o.Client)
-                  .HasForeignKey(o => o.ClientId)
+            userEntityBuilder.HasMany(user => user.Orders)
+                  .WithOne(order => order.Client)
+                  .HasForeignKey(order => order.ClientId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasMany(u => u.PeriodNoteEntries)
-                  .WithOne(p => p.User)
-                  .HasForeignKey(p => p.UserId)
+            userEntityBuilder.HasMany(user => user.PeriodNoteEntries)
+                  .WithOne(periodNote => periodNote.User)
+                  .HasForeignKey(periodNote => periodNote.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(u => u.UserDiscountEntries)
-                  .WithOne(d => d.User)
-                  .HasForeignKey(d => d.UserId)
+            userEntityBuilder.HasMany(user => user.UserDiscountEntries)
+                  .WithOne(userDiscount => userDiscount.User)
+                  .HasForeignKey(userDiscount => userDiscount.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(u => u.UserNotificationEntries)
-                  .WithOne(n => n.User)
-                  .HasForeignKey(n => n.UserId)
+            userEntityBuilder.HasMany(user => user.UserNotificationEntries)
+                  .WithOne(userNotification => userNotification.User)
+                  .HasForeignKey(userNotification => userNotification.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<Substance>(entity =>
+        databaseModelBuilder.Entity<Substance>(substanceEntityBuilder =>
         {
-            entity.ToTable("Substances");
-            entity.HasKey(s => s.Name);
-            entity.Property(s => s.Name).HasMaxLength(255);
-            entity.Property(s => s.Description).HasMaxLength(2000);
+            substanceEntityBuilder.ToTable("Substances");
+            substanceEntityBuilder.HasKey(substance => substance.Name);
+            substanceEntityBuilder.Property(substance => substance.Name).HasMaxLength(255);
+            substanceEntityBuilder.Property(substance => substance.Description).HasMaxLength(2000);
 
-            entity.HasMany(s => s.ItemSubstanceEntries)
-                  .WithOne(link => link.Substance)
-                  .HasForeignKey(link => link.SubstanceName)
+            substanceEntityBuilder.HasMany(substance => substance.ItemSubstanceEntries)
+                  .WithOne(itemSubstanceLink => itemSubstanceLink.Substance)
+                  .HasForeignKey(itemSubstanceLink => itemSubstanceLink.SubstanceName)
                   .OnDelete(DeleteBehavior.Cascade);
 
             // Reference data: curated list of pharmacological substances with
             // their lethal dose. Items reference these by Name, so the seed
             // values must exist before any Item -> ItemSubstance link can be
             // created. Item rows themselves stay user-generated.
-            entity.HasData(
+            substanceEntityBuilder.HasData(
                 new Substance { Name = "Ibuprofen", LethalDose = 3200.00f, Description = "Anti-inflammatory pain reliever" },
                 new Substance { Name = "Paracetamol", LethalDose = 4000.00f, Description = "Pain reliever and fever reducer" },
                 new Substance { Name = "Magnesium", LethalDose = 2500.00f, Description = "Mineral supplement for muscle and nerve support" },
@@ -172,247 +172,247 @@ public class AppDbContext : DbContext
                 new Substance { Name = "Cetirizine", LethalDose = 500.00f, Description = "Antihistamine for allergy relief" });
         });
 
-        modelBuilder.Entity<Item>(entity =>
+        databaseModelBuilder.Entity<Item>(itemEntityBuilder =>
         {
-            entity.ToTable("Items");
-            entity.HasKey(i => i.Id);
-            entity.Property(i => i.Id).ValueGeneratedOnAdd();
-            entity.Property(i => i.Name).HasMaxLength(200).IsRequired();
-            entity.Property(i => i.Producer).HasMaxLength(200);
-            entity.Property(i => i.Category).HasMaxLength(100);
-            entity.Property(i => i.ImagePath).HasMaxLength(500);
-            entity.Property(i => i.Label).HasMaxLength(100);
-            entity.Property(i => i.Description).HasMaxLength(2000);
+            itemEntityBuilder.ToTable("Items");
+            itemEntityBuilder.HasKey(item => item.Id);
+            itemEntityBuilder.Property(item => item.Id).ValueGeneratedOnAdd();
+            itemEntityBuilder.Property(item => item.Name).HasMaxLength(200).IsRequired();
+            itemEntityBuilder.Property(item => item.Producer).HasMaxLength(200);
+            itemEntityBuilder.Property(item => item.Category).HasMaxLength(100);
+            itemEntityBuilder.Property(item => item.ImagePath).HasMaxLength(500);
+            itemEntityBuilder.Property(item => item.Label).HasMaxLength(100);
+            itemEntityBuilder.Property(item => item.Description).HasMaxLength(2000);
 
-            entity.HasMany(i => i.ItemSubstanceEntries)
-                  .WithOne(link => link.Item)
-                  .HasForeignKey(link => link.ItemId)
+            itemEntityBuilder.HasMany(item => item.ItemSubstanceEntries)
+                  .WithOne(itemSubstanceLink => itemSubstanceLink.Item)
+                  .HasForeignKey(itemSubstanceLink => itemSubstanceLink.ItemId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(i => i.ItemBatchEntries)
-                  .WithOne(b => b.Item)
-                  .HasForeignKey(b => b.ItemId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<ItemSubstance>(entity =>
-        {
-            entity.ToTable("ItemSubstances");
-            entity.HasKey(link => new { link.ItemId, link.SubstanceName });
-            entity.Property(link => link.SubstanceName).HasMaxLength(255);
-        });
-
-        modelBuilder.Entity<ItemBatch>(entity =>
-        {
-            entity.ToTable("ItemBatches");
-            entity.HasKey(b => new { b.ItemId, b.ExpirationDate });
-        });
-
-        modelBuilder.Entity<Order>(entity =>
-        {
-            entity.ToTable("Orders");
-            entity.HasKey(o => o.Id);
-            entity.Property(o => o.Id).ValueGeneratedOnAdd();
-
-            entity.HasMany(o => o.OrderItemEntries)
-                  .WithOne(oi => oi.Order)
-                  .HasForeignKey(oi => oi.OrderId)
+            itemEntityBuilder.HasMany(item => item.ItemBatchEntries)
+                  .WithOne(itemBatch => itemBatch.Item)
+                  .HasForeignKey(itemBatch => itemBatch.ItemId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<OrderItem>(entity =>
+        databaseModelBuilder.Entity<ItemSubstance>(itemSubstanceEntityBuilder =>
         {
-            entity.ToTable("OrderItems");
-            entity.HasKey(oi => new { oi.OrderId, oi.ItemId });
+            itemSubstanceEntityBuilder.ToTable("ItemSubstances");
+            itemSubstanceEntityBuilder.HasKey(itemSubstanceLink => new { itemSubstanceLink.ItemId, itemSubstanceLink.SubstanceName });
+            itemSubstanceEntityBuilder.Property(itemSubstanceLink => itemSubstanceLink.SubstanceName).HasMaxLength(255);
+        });
 
-            entity.HasOne(oi => oi.Item)
+        databaseModelBuilder.Entity<ItemBatch>(itemBatchEntityBuilder =>
+        {
+            itemBatchEntityBuilder.ToTable("ItemBatches");
+            itemBatchEntityBuilder.HasKey(itemBatch => new { itemBatch.ItemId, itemBatch.ExpirationDate });
+        });
+
+        databaseModelBuilder.Entity<Order>(orderEntityBuilder =>
+        {
+            orderEntityBuilder.ToTable("Orders");
+            orderEntityBuilder.HasKey(order => order.Id);
+            orderEntityBuilder.Property(order => order.Id).ValueGeneratedOnAdd();
+
+            orderEntityBuilder.HasMany(order => order.OrderItemEntries)
+                  .WithOne(orderItem => orderItem.Order)
+                  .HasForeignKey(orderItem => orderItem.OrderId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        databaseModelBuilder.Entity<OrderItem>(orderItemEntityBuilder =>
+        {
+            orderItemEntityBuilder.ToTable("OrderItems");
+            orderItemEntityBuilder.HasKey(orderItem => new { orderItem.OrderId, orderItem.ItemId });
+
+            orderItemEntityBuilder.HasOne(orderItem => orderItem.Item)
                   .WithMany()
-                  .HasForeignKey(oi => oi.ItemId)
+                  .HasForeignKey(orderItem => orderItem.ItemId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<UserDiscount>(entity =>
+        databaseModelBuilder.Entity<UserDiscount>(userDiscountEntityBuilder =>
         {
-            entity.ToTable("UserDiscounts");
-            entity.HasKey(d => new { d.UserId, d.ItemId });
+            userDiscountEntityBuilder.ToTable("UserDiscounts");
+            userDiscountEntityBuilder.HasKey(userDiscount => new { userDiscount.UserId, userDiscount.ItemId });
 
-            entity.HasOne(d => d.Item)
+            userDiscountEntityBuilder.HasOne(userDiscount => userDiscount.Item)
                   .WithMany()
-                  .HasForeignKey(d => d.ItemId)
+                  .HasForeignKey(userDiscount => userDiscount.ItemId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<UserNotification>(entity =>
+        databaseModelBuilder.Entity<UserNotification>(userNotificationEntityBuilder =>
         {
-            entity.ToTable("UserNotifications");
-            entity.HasKey(n => new { n.UserId, n.ItemId });
+            userNotificationEntityBuilder.ToTable("UserNotifications");
+            userNotificationEntityBuilder.HasKey(userNotification => new { userNotification.UserId, userNotification.ItemId });
 
-            entity.HasOne(n => n.Item)
+            userNotificationEntityBuilder.HasOne(userNotification => userNotification.Item)
                   .WithMany()
-                  .HasForeignKey(n => n.ItemId)
+                  .HasForeignKey(userNotification => userNotification.ItemId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<PeriodNote>(entity =>
+        databaseModelBuilder.Entity<PeriodNote>(periodNoteEntityBuilder =>
         {
-            entity.ToTable("PeriodNotes");
-            entity.HasKey(p => new { p.UserId, p.NoteId });
-            entity.Property(p => p.NoteBody).HasMaxLength(2000);
+            periodNoteEntityBuilder.ToTable("PeriodNotes");
+            periodNoteEntityBuilder.HasKey(periodNote => new { periodNote.UserId, periodNote.NoteId });
+            periodNoteEntityBuilder.Property(periodNote => periodNote.NoteBody).HasMaxLength(2000);
         });
     }
 
-    private static void ConfigureHospital(ModelBuilder modelBuilder)
+    private static void ConfigureHospital(ModelBuilder databaseModelBuilder)
     {
-        modelBuilder.Entity<Shift>(entity =>
+        databaseModelBuilder.Entity<Shift>(shiftEntityBuilder =>
         {
-            entity.ToTable("Shifts");
-            entity.HasKey(s => s.Id);
-            entity.Property(s => s.Id).ValueGeneratedOnAdd();
-            entity.Property(s => s.Location).HasMaxLength(200);
-            entity.Property(s => s.Status).HasConversion<string>().HasMaxLength(30);
+            shiftEntityBuilder.ToTable("Shifts");
+            shiftEntityBuilder.HasKey(shift => shift.Id);
+            shiftEntityBuilder.Property(shift => shift.Id).ValueGeneratedOnAdd();
+            shiftEntityBuilder.Property(shift => shift.Location).HasMaxLength(200);
+            shiftEntityBuilder.Property(shift => shift.Status).HasConversion<string>().HasMaxLength(30);
 
-            entity.HasOne(s => s.Staff)
-                  .WithMany(staff => staff.Shifts)
-                  .HasForeignKey(s => s.StaffId)
+            shiftEntityBuilder.HasOne(shift => shift.Staff)
+                  .WithMany(staffMember => staffMember.Shifts)
+                  .HasForeignKey(shift => shift.StaffId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<ShiftSwapRequest>(entity =>
+        databaseModelBuilder.Entity<ShiftSwapRequest>(shiftSwapRequestEntityBuilder =>
         {
-            entity.ToTable("ShiftSwapRequests");
-            entity.HasKey(s => s.SwapId);
-            entity.Property(s => s.SwapId).ValueGeneratedOnAdd();
-            entity.Property(s => s.Status).HasConversion<string>().HasMaxLength(30);
+            shiftSwapRequestEntityBuilder.ToTable("ShiftSwapRequests");
+            shiftSwapRequestEntityBuilder.HasKey(shiftSwapRequest => shiftSwapRequest.SwapId);
+            shiftSwapRequestEntityBuilder.Property(shiftSwapRequest => shiftSwapRequest.SwapId).ValueGeneratedOnAdd();
+            shiftSwapRequestEntityBuilder.Property(shiftSwapRequest => shiftSwapRequest.Status).HasConversion<string>().HasMaxLength(30);
 
-            entity.HasOne(s => s.Shift)
+            shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Shift)
                   .WithMany()
-                  .HasForeignKey(s => s.ShiftId)
+                  .HasForeignKey(shiftSwapRequest => shiftSwapRequest.ShiftId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(s => s.Requester)
-                  .WithMany(staff => staff.ShiftSwapRequestsAsRequester)
-                  .HasForeignKey(s => s.RequesterId)
+            shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Requester)
+                  .WithMany(staffMember => staffMember.ShiftSwapRequestsAsRequester)
+                  .HasForeignKey(shiftSwapRequest => shiftSwapRequest.RequesterId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(s => s.Colleague)
-                  .WithMany(staff => staff.ShiftSwapRequestsAsColleague)
-                  .HasForeignKey(s => s.ColleagueId)
-                  .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<Appointment>(entity =>
-        {
-            entity.ToTable("Appointments");
-            entity.HasKey(a => a.Id);
-            entity.Property(a => a.Id).ValueGeneratedOnAdd();
-            entity.Property(a => a.PatientName).HasMaxLength(200);
-            entity.Property(a => a.DoctorName).HasMaxLength(200);
-            entity.Property(a => a.Status).HasMaxLength(50);
-            entity.Property(a => a.Type).HasMaxLength(100);
-            entity.Property(a => a.Location).HasMaxLength(200);
-            entity.Property(a => a.Notes).HasMaxLength(2000);
-
-            entity.HasOne(a => a.Doctor)
-                  .WithMany(d => d.Appointments)
-                  .HasForeignKey(a => a.DoctorId)
+            shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Colleague)
+                  .WithMany(staffMember => staffMember.ShiftSwapRequestsAsColleague)
+                  .HasForeignKey(shiftSwapRequest => shiftSwapRequest.ColleagueId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<MedicalEvaluation>(entity =>
+        databaseModelBuilder.Entity<Appointment>(appointmentEntityBuilder =>
         {
-            entity.ToTable("MedicalEvaluations");
-            entity.HasKey(e => e.EvaluationID);
-            entity.Property(e => e.EvaluationID).ValueGeneratedOnAdd();
-            entity.Property(e => e.PatientId).HasMaxLength(100);
-            entity.Property(e => e.Symptoms).HasMaxLength(2000);
-            entity.Property(e => e.MedicationsList).HasMaxLength(2000);
-            entity.Property(e => e.Notes).HasMaxLength(2000);
+            appointmentEntityBuilder.ToTable("Appointments");
+            appointmentEntityBuilder.HasKey(appointment => appointment.Id);
+            appointmentEntityBuilder.Property(appointment => appointment.Id).ValueGeneratedOnAdd();
+            appointmentEntityBuilder.Property(appointment => appointment.PatientName).HasMaxLength(200);
+            appointmentEntityBuilder.Property(appointment => appointment.DoctorName).HasMaxLength(200);
+            appointmentEntityBuilder.Property(appointment => appointment.Status).HasMaxLength(50);
+            appointmentEntityBuilder.Property(appointment => appointment.Type).HasMaxLength(100);
+            appointmentEntityBuilder.Property(appointment => appointment.Location).HasMaxLength(200);
+            appointmentEntityBuilder.Property(appointment => appointment.Notes).HasMaxLength(2000);
 
-            entity.HasOne(e => e.Evaluator)
-                  .WithMany(d => d.MedicalEvaluations)
-                  .HasForeignKey(e => e.DoctorId)
+            appointmentEntityBuilder.HasOne(appointment => appointment.Doctor)
+                  .WithMany(doctor => doctor.Appointments)
+                  .HasForeignKey(appointment => appointment.DoctorId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<ERRequest>(entity =>
+        databaseModelBuilder.Entity<MedicalEvaluation>(medicalEvaluationEntityBuilder =>
         {
-            entity.ToTable("ERRequests");
-            entity.HasKey(r => r.Id);
-            entity.Property(r => r.Id).ValueGeneratedOnAdd();
-            entity.Property(r => r.Specialization).HasMaxLength(100);
-            entity.Property(r => r.Location).HasMaxLength(200);
-            entity.Property(r => r.Status).HasMaxLength(50);
-            entity.Property(r => r.AssignedDoctorName).HasMaxLength(200);
+            medicalEvaluationEntityBuilder.ToTable("MedicalEvaluations");
+            medicalEvaluationEntityBuilder.HasKey(medicalEvaluation => medicalEvaluation.EvaluationID);
+            medicalEvaluationEntityBuilder.Property(medicalEvaluation => medicalEvaluation.EvaluationID).ValueGeneratedOnAdd();
+            medicalEvaluationEntityBuilder.Property(medicalEvaluation => medicalEvaluation.PatientId).HasMaxLength(100);
+            medicalEvaluationEntityBuilder.Property(medicalEvaluation => medicalEvaluation.Symptoms).HasMaxLength(2000);
+            medicalEvaluationEntityBuilder.Property(medicalEvaluation => medicalEvaluation.MedicationsList).HasMaxLength(2000);
+            medicalEvaluationEntityBuilder.Property(medicalEvaluation => medicalEvaluation.Notes).HasMaxLength(2000);
 
-            entity.HasOne(r => r.AssignedDoctor)
+            medicalEvaluationEntityBuilder.HasOne(medicalEvaluation => medicalEvaluation.Evaluator)
+                  .WithMany(doctor => doctor.MedicalEvaluations)
+                  .HasForeignKey(medicalEvaluation => medicalEvaluation.DoctorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        databaseModelBuilder.Entity<ERRequest>(emergencyRoomRequestEntityBuilder =>
+        {
+            emergencyRoomRequestEntityBuilder.ToTable("ERRequests");
+            emergencyRoomRequestEntityBuilder.HasKey(emergencyRoomRequest => emergencyRoomRequest.Id);
+            emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.Id).ValueGeneratedOnAdd();
+            emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.Specialization).HasMaxLength(100);
+            emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.Location).HasMaxLength(200);
+            emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.Status).HasMaxLength(50);
+            emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.AssignedDoctorName).HasMaxLength(200);
+
+            emergencyRoomRequestEntityBuilder.HasOne(emergencyRoomRequest => emergencyRoomRequest.AssignedDoctor)
                   .WithMany()
-                  .HasForeignKey(r => r.AssignedDoctorId)
+                  .HasForeignKey(emergencyRoomRequest => emergencyRoomRequest.AssignedDoctorId)
                   .OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.Entity<Notification>(entity =>
+        databaseModelBuilder.Entity<Notification>(notificationEntityBuilder =>
         {
-            entity.ToTable("Notifications");
-            entity.HasKey(n => n.Id);
-            entity.Property(n => n.Id).ValueGeneratedOnAdd();
-            entity.Property(n => n.Title).HasMaxLength(200);
-            entity.Property(n => n.Message).HasMaxLength(2000);
-            entity.Property(n => n.ActionButtonText).HasMaxLength(100);
+            notificationEntityBuilder.ToTable("Notifications");
+            notificationEntityBuilder.HasKey(notification => notification.Id);
+            notificationEntityBuilder.Property(notification => notification.Id).ValueGeneratedOnAdd();
+            notificationEntityBuilder.Property(notification => notification.Title).HasMaxLength(200);
+            notificationEntityBuilder.Property(notification => notification.Message).HasMaxLength(2000);
+            notificationEntityBuilder.Property(notification => notification.ActionButtonText).HasMaxLength(100);
 
-            entity.HasOne(n => n.Recipient)
-                  .WithMany(s => s.Notifications)
-                  .HasForeignKey(n => n.RecipientStaffId)
+            notificationEntityBuilder.HasOne(notification => notification.Recipient)
+                  .WithMany(staffMember => staffMember.Notifications)
+                  .HasForeignKey(notification => notification.RecipientStaffId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<Hangout>(entity =>
+        databaseModelBuilder.Entity<Hangout>(hangoutEntityBuilder =>
         {
-            entity.ToTable("Hangouts");
-            entity.HasKey(h => h.HangoutID);
-            entity.Property(h => h.HangoutID).ValueGeneratedOnAdd();
-            entity.Property(h => h.Title).HasMaxLength(200);
-            entity.Property(h => h.Description).HasMaxLength(2000);
+            hangoutEntityBuilder.ToTable("Hangouts");
+            hangoutEntityBuilder.HasKey(hangout => hangout.HangoutID);
+            hangoutEntityBuilder.Property(hangout => hangout.HangoutID).ValueGeneratedOnAdd();
+            hangoutEntityBuilder.Property(hangout => hangout.Title).HasMaxLength(200);
+            hangoutEntityBuilder.Property(hangout => hangout.Description).HasMaxLength(2000);
 
-            entity.HasMany(h => h.HangoutParticipantEntries)
-                  .WithOne(p => p.Hangout)
-                  .HasForeignKey(p => p.HangoutId)
+            hangoutEntityBuilder.HasMany(hangout => hangout.HangoutParticipantEntries)
+                  .WithOne(hangoutParticipant => hangoutParticipant.Hangout)
+                  .HasForeignKey(hangoutParticipant => hangoutParticipant.HangoutId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<HangoutParticipant>(entity =>
+        databaseModelBuilder.Entity<HangoutParticipant>(hangoutParticipantEntityBuilder =>
         {
-            entity.ToTable("HangoutParticipants");
-            entity.HasKey(p => new { p.HangoutId, p.StaffId });
+            hangoutParticipantEntityBuilder.ToTable("HangoutParticipants");
+            hangoutParticipantEntityBuilder.HasKey(hangoutParticipant => new { hangoutParticipant.HangoutId, hangoutParticipant.StaffId });
 
-            entity.HasOne(p => p.Staff)
-                  .WithMany(s => s.HangoutParticipantEntries)
-                  .HasForeignKey(p => p.StaffId)
+            hangoutParticipantEntityBuilder.HasOne(hangoutParticipant => hangoutParticipant.Staff)
+                  .WithMany(staffMember => staffMember.HangoutParticipantEntries)
+                  .HasForeignKey(hangoutParticipant => hangoutParticipant.StaffId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<PharmacyHandover>(entity =>
+        databaseModelBuilder.Entity<PharmacyHandover>(pharmacyHandoverEntityBuilder =>
         {
-            entity.ToTable("PharmacyHandovers");
-            entity.HasKey(h => new { h.PharmacistId, h.HandoverDate });
+            pharmacyHandoverEntityBuilder.ToTable("PharmacyHandovers");
+            pharmacyHandoverEntityBuilder.HasKey(pharmacyHandover => new { pharmacyHandover.PharmacistId, pharmacyHandover.HandoverDate });
 
-            entity.HasOne(h => h.Pharmacist)
+            pharmacyHandoverEntityBuilder.HasOne(pharmacyHandover => pharmacyHandover.Pharmacist)
                   .WithMany()
-                  .HasForeignKey(h => h.PharmacistId)
+                  .HasForeignKey(pharmacyHandover => pharmacyHandover.PharmacistId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
-    private static void ConfigureReferenceData(ModelBuilder modelBuilder)
+    private static void ConfigureReferenceData(ModelBuilder databaseModelBuilder)
     {
-        modelBuilder.Entity<HighRiskMedicine>(entity =>
+        databaseModelBuilder.Entity<HighRiskMedicine>(highRiskMedicineEntityBuilder =>
         {
-            entity.ToTable("HighRiskMedicines");
-            entity.HasKey(m => m.MedicineName);
-            entity.Property(m => m.MedicineName).HasMaxLength(200);
-            entity.Property(m => m.WarningMessage).HasMaxLength(1000);
+            highRiskMedicineEntityBuilder.ToTable("HighRiskMedicines");
+            highRiskMedicineEntityBuilder.HasKey(highRiskMedicine => highRiskMedicine.MedicineName);
+            highRiskMedicineEntityBuilder.Property(highRiskMedicine => highRiskMedicine.MedicineName).HasMaxLength(200);
+            highRiskMedicineEntityBuilder.Property(highRiskMedicine => highRiskMedicine.WarningMessage).HasMaxLength(1000);
 
             // Reference data consumed by MedicalEvaluationService.CheckMedicineConflict.
-            entity.HasData(
+            highRiskMedicineEntityBuilder.HasData(
                 new HighRiskMedicine
                 {
                     MedicineName = "Warfarin",

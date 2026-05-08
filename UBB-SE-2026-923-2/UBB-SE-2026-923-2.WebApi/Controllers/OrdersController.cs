@@ -26,21 +26,21 @@ public class OrdersController : ControllerBase
         return this.Ok(this.repository.GetAllOrders());
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<Order> GetById(int id)
+    [HttpGet("{orderId:int}")]
+    public ActionResult<Order> GetById(int orderId)
     {
-        if (!this.repository.OrderExists(id))
+        if (!this.repository.OrderExists(orderId))
         {
             return this.NotFound();
         }
 
-        return this.Ok(this.repository.GetOrder(id));
+        return this.Ok(this.repository.GetOrder(orderId));
     }
 
-    [HttpGet("{id:int}/exists")]
-    public ActionResult<bool> Exists(int id)
+    [HttpGet("{orderId:int}/exists")]
+    public ActionResult<bool> Exists(int orderId)
     {
-        return this.Ok(this.repository.OrderExists(id));
+        return this.Ok(this.repository.OrderExists(orderId));
     }
 
     [HttpPost]
@@ -50,18 +50,18 @@ public class OrdersController : ControllerBase
         return this.Ok(id);
     }
 
-    [HttpPut("{id:int}")]
-    public IActionResult Update(int id, [FromBody] Order order)
+    [HttpPut("{orderId:int}")]
+    public IActionResult Update(int orderId, [FromBody] Order order)
     {
-        order.Id = id;
+        order.Id = orderId;
         this.repository.UpdateOrder(order);
         return this.NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    [HttpDelete("{orderId:int}")]
+    public IActionResult Delete(int orderId)
     {
-        this.repository.RemoveOrder(id);
+        this.repository.RemoveOrder(orderId);
         return this.NoContent();
     }
 

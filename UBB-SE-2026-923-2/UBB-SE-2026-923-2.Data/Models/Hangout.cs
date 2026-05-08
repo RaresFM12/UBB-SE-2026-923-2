@@ -36,14 +36,14 @@ namespace UBB_SE_2026_923_2.Models
         {
         }
 
-        public Hangout(int hangoutID, string title, string description, DateTime date, int maxParticipants)
+        public Hangout(int hangoutId, string title, string description, DateTime date, int maximumParticipants)
             : this()
         {
-            this.HangoutID = hangoutID;
+            this.HangoutID = hangoutId;
             this.Title = title;
             this.Description = description;
             this.Date = date;
-            this.MaxParticipants = maxParticipants;
+            this.MaxParticipants = maximumParticipants;
             this.ParticipantList = new List<IStaff>(this.MaxParticipants);
         }
     }

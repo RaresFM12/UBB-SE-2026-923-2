@@ -23,48 +23,48 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public bool UserExists(string email)
         {
-            var url = $"{BasePath}/exists?email={Uri.EscapeDataString(email)}";
-            return this.httpClient.GetFromJsonAsync<bool>(url).GetAwaiter().GetResult();
+            var requestUrl = $"{BasePath}/exists?email={Uri.EscapeDataString(email)}";
+            return this.httpClient.GetFromJsonAsync<bool>(requestUrl).GetAwaiter().GetResult();
         }
 
-        public bool UserExists(int id)
+        public bool UserExists(int userId)
         {
             return this.httpClient
-                .GetFromJsonAsync<bool>($"{BasePath}/{id}/exists")
+                .GetFromJsonAsync<bool>($"{BasePath}/{userId}/exists")
                 .GetAwaiter().GetResult();
         }
 
-        public User GetUserById(int id)
+        public User GetUserById(int userId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{id}").GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            var httpResponse = this.httpClient.GetAsync($"{BasePath}/{userId}").GetAwaiter().GetResult();
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
             }
 
-            response.EnsureSuccessStatusCode();
-            var user = response.Content.ReadFromJsonAsync<User>().GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            var user = httpResponse.Content.ReadFromJsonAsync<User>().GetAwaiter().GetResult();
             return user!;
         }
 
         public User GetUserByEmail(string email)
         {
-            var url = $"{BasePath}/by-email?email={Uri.EscapeDataString(email)}";
-            var response = this.httpClient.GetAsync(url).GetAwaiter().GetResult();
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            var requestUrl = $"{BasePath}/by-email?email={Uri.EscapeDataString(email)}";
+            var httpResponse = this.httpClient.GetAsync(requestUrl).GetAwaiter().GetResult();
+            if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
             }
 
-            response.EnsureSuccessStatusCode();
-            var user = response.Content.ReadFromJsonAsync<User>().GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
+            var user = httpResponse.Content.ReadFromJsonAsync<User>().GetAwaiter().GetResult();
             return user!;
         }
 
         public void AddUser(string email, string phoneNumber, string passwordHash, string username,
             bool discountNotifications, bool isDisabled = false, bool isAdmin = false, int loyaltyPoints = 0, string role = "Client")
         {
-            var payload = new
+            var requestPayload = new
             {
                 Email = email,
                 PhoneNumber = phoneNumber,
@@ -77,16 +77,16 @@ namespace UBB_SE_2026_923_2.Repositories
                 Role = role,
             };
 
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void UpdateUser(User user)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .PutAsJsonAsync($"{BasePath}/{user.Id}", user)
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public List<User> GetAllUsers()
@@ -95,10 +95,10 @@ namespace UBB_SE_2026_923_2.Repositories
             return users ?? new List<User>();
         }
 
-        public bool UserHasPeriodTracker(int id)
+        public bool UserHasPeriodTracker(int userId)
         {
             return this.httpClient
-                .GetFromJsonAsync<bool>($"{BasePath}/{id}/period-tracker")
+                .GetFromJsonAsync<bool>($"{BasePath}/{userId}/period-tracker")
                 .GetAwaiter().GetResult();
         }
     }

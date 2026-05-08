@@ -22,15 +22,15 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public IReadOnlyList<MedicalEvaluation> GetAllEvaluations()
         {
-            var evaluations = this.httpClient
+            var evaluationsList = this.httpClient
                 .GetFromJsonAsync<List<MedicalEvaluation>>(BasePath)
                 .GetAwaiter().GetResult();
-            return evaluations ?? new List<MedicalEvaluation>();
+            return evaluationsList ?? new List<MedicalEvaluation>();
         }
 
         public void AddEvaluation(int doctorId, int patientId, string diagnosis, string notes, string medications, bool assumedRisk)
         {
-            var payload = new
+            var requestPayload = new
             {
                 DoctorId = doctorId,
                 PatientId = patientId,
@@ -39,25 +39,25 @@ namespace UBB_SE_2026_923_2.Repositories
                 Medications = medications,
                 AssumedRisk = assumedRisk,
             };
-            var response = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void UpdateEvaluation(int evaluationId, string diagnosis, string notes, string medications)
         {
-            var payload = new { Diagnosis = diagnosis, Notes = notes, Medications = medications };
-            var response = this.httpClient
-                .PutAsJsonAsync($"{BasePath}/{evaluationId}", payload)
+            var requestPayload = new { Diagnosis = diagnosis, Notes = notes, Medications = medications };
+            var httpResponse = this.httpClient
+                .PutAsJsonAsync($"{BasePath}/{evaluationId}", requestPayload)
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
 
         public void DeleteEvaluation(int evaluationId)
         {
-            var response = this.httpClient
+            var httpResponse = this.httpClient
                 .DeleteAsync($"{BasePath}/{evaluationId}")
                 .GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            httpResponse.EnsureSuccessStatusCode();
         }
     }
 }

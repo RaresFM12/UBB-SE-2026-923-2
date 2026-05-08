@@ -38,21 +38,21 @@ public static class AppSettings
 
     private static IConfigurationRoot BuildConfiguration()
     {
-        var builder = new ConfigurationBuilder()
+        var configurationBuilder = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
 
-        return builder.Build();
+        return configurationBuilder.Build();
     }
 
     private static string LoadConnectionString()
     {
         try
         {
-            var fromConfig = Configuration.GetConnectionString(ConnectionStringKey);
-            if (!string.IsNullOrWhiteSpace(fromConfig))
+            var retrievedConfigurationValue = Configuration.GetConnectionString(ConnectionStringKey);
+            if (!string.IsNullOrWhiteSpace(retrievedConfigurationValue))
             {
-                return fromConfig;
+                return retrievedConfigurationValue;
             }
         }
         catch
@@ -67,10 +67,10 @@ public static class AppSettings
     {
         try
         {
-            var fromConfig = Configuration[WebApiBaseUrlKey];
-            if (!string.IsNullOrWhiteSpace(fromConfig))
+            var retrievedConfigurationValue = Configuration[WebApiBaseUrlKey];
+            if (!string.IsNullOrWhiteSpace(retrievedConfigurationValue))
             {
-                return fromConfig;
+                return retrievedConfigurationValue;
             }
         }
         catch

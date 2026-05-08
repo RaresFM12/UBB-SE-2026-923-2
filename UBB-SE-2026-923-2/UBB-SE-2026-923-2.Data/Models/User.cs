@@ -106,7 +106,7 @@
             this.Basket = new Dictionary<int, BasketEntry>();
         }
 
-        public User(int id, string email, string phoneNumber,
+        public User(int userId, string email, string phoneNumber,
                     string passwordHash, bool isAdmin, bool isDisabled,
                     string userName, bool discountNotifications,
                     int loyaltyPoints, DateOnly startPeriodDate = default(DateOnly),
@@ -114,7 +114,7 @@
                     int premenstrualSyndromeOption = PremenstrualSyndromeOptionDefault)
             : this()
         {
-            this.Id = id;
+            this.Id = userId;
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.PasswordHash = passwordHash;

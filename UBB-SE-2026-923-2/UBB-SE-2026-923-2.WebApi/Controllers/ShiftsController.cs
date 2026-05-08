@@ -36,24 +36,24 @@ public class ShiftsController : ControllerBase
         return this.NoContent();
     }
 
-    [HttpPatch("{id:int}/status")]
-    public IActionResult UpdateStatus(int id, [FromBody] UpdateShiftStatusRequest request)
+    [HttpPatch("{shiftId:int}/status")]
+    public IActionResult UpdateStatus(int shiftId, [FromBody] UpdateShiftStatusRequest request)
     {
-        this.repository.UpdateShiftStatus(id, request.Status);
+        this.repository.UpdateShiftStatus(shiftId, request.Status);
         return this.NoContent();
     }
 
-    [HttpPatch("{id:int}/staff")]
-    public IActionResult UpdateStaff(int id, [FromBody] UpdateShiftStaffRequest request)
+    [HttpPatch("{shiftId:int}/staff")]
+    public IActionResult UpdateStaff(int shiftId, [FromBody] UpdateShiftStaffRequest request)
     {
-        this.repository.UpdateShiftStaffId(id, request.StaffId);
+        this.repository.UpdateShiftStaffId(shiftId, request.StaffId);
         return this.NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    [HttpDelete("{shiftId:int}")]
+    public IActionResult Delete(int shiftId)
     {
-        this.repository.DeleteShift(id);
+        this.repository.DeleteShift(shiftId);
         return this.NoContent();
     }
 

@@ -21,10 +21,10 @@ public class ShiftSwapsController : ControllerBase
         return this.Ok(this.repository.GetAllShiftSwapRequests());
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<ShiftSwapRequest> GetById(int id)
+    [HttpGet("{swapId:int}")]
+    public ActionResult<ShiftSwapRequest> GetById(int swapId)
     {
-        var swap = this.repository.GetShiftSwapRequestById(id);
+        var swap = this.repository.GetShiftSwapRequestById(swapId);
         if (swap is null)
         {
             return this.NotFound();
@@ -40,10 +40,10 @@ public class ShiftSwapsController : ControllerBase
         return this.Ok(id);
     }
 
-    [HttpPatch("{id:int}/status")]
-    public IActionResult UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
+    [HttpPatch("{swapId:int}/status")]
+    public IActionResult UpdateStatus(int swapId, [FromBody] UpdateStatusRequest request)
     {
-        this.repository.UpdateShiftSwapRequestStatus(id, request.Status);
+        this.repository.UpdateShiftSwapRequestStatus(swapId, request.Status);
         return this.NoContent();
     }
 

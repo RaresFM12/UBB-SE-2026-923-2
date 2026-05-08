@@ -17,36 +17,36 @@ namespace UBB_SE_2026_923_2.Repositories
     {
         private const int TopSubstancesLimit = 30;
 
-        private readonly IDbContextFactory<AppDbContext> dbContextFactory;
+        private readonly IDbContextFactory<AppDbContext> databaseContextFactory;
 
-        public SQLSubstancesRepository(IDbContextFactory<AppDbContext> dbContextFactory)
+        public SQLSubstancesRepository(IDbContextFactory<AppDbContext> databaseContextFactory)
         {
-            this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+            this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
         public void AddSubstance(string name, float lethalDose, string description)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            db.Substances.Add(new Substance(name, lethalDose, description));
-            db.SaveChanges();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            databaseContext.Substances.Add(new Substance(name, lethalDose, description));
+            databaseContext.SaveChanges();
         }
 
         public Substance GetSubstanceByName(string name)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Substances.AsNoTracking().FirstOrDefault(s => s.Name == name)!;
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Substances.AsNoTracking().FirstOrDefault(substance => substance.Name == name)!;
         }
 
         public List<Substance> GetAllSubstances()
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Substances.AsNoTracking().ToList();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Substances.AsNoTracking().ToList();
         }
 
         public void RemoveSubstanceByName(string name)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var substance = db.Substances.FirstOrDefault(s => s.Name == name);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var substance = databaseContext.Substances.FirstOrDefault(substance => substance.Name == name);
             if (substance is null)
             {
                 return;
@@ -55,30 +55,30 @@ namespace UBB_SE_2026_923_2.Repositories
             // Cascade is configured on Substance → ItemSubstance, but rows may
             // already be loaded by other operations; remove them defensively
             // so SaveChanges does not collide with FK constraints.
-            var links = db.ItemSubstances.Where(link => link.SubstanceName == name);
-            db.ItemSubstances.RemoveRange(links);
-            db.Substances.Remove(substance);
-            db.SaveChanges();
+            var itemSubstanceLinks = databaseContext.ItemSubstances.Where(link => link.SubstanceName == name);
+            databaseContext.ItemSubstances.RemoveRange(itemSubstanceLinks);
+            databaseContext.Substances.Remove(substance);
+            databaseContext.SaveChanges();
         }
 
         public void UpdateSubstanceByName(Substance substance)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            var tracked = db.Substances.FirstOrDefault(s => s.Name == substance.Name);
-            if (tracked is null)
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            var trackedSubstance = databaseContext.Substances.FirstOrDefault(tracked => tracked.Name == substance.Name);
+            if (trackedSubstance is null)
             {
                 return;
             }
 
-            tracked.LethalDose = substance.LethalDose;
-            tracked.Description = substance.Description;
-            db.SaveChanges();
+            trackedSubstance.LethalDose = substance.LethalDose;
+            trackedSubstance.Description = substance.Description;
+            databaseContext.SaveChanges();
         }
 
         public bool SubstanceExists(string name)
         {
-            using var db = this.dbContextFactory.CreateDbContext();
-            return db.Substances.AsNoTracking().Any(s => s.Name == name);
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
+            return databaseContext.Substances.AsNoTracking().Any(substance => substance.Name == name);
         }
 
         public Dictionary<string, int> GetTop30Substances()
@@ -88,23 +88,23 @@ namespace UBB_SE_2026_923_2.Repositories
             // to orders picked up in the last month.
             DateOnly oneMonthAgo = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
 
-            using var db = this.dbContextFactory.CreateDbContext();
+            using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            return db.ItemSubstances
+            return databaseContext.ItemSubstances
                 .AsNoTracking()
-                .SelectMany(link => db.OrderItems
-                    .Where(oi => oi.ItemId == link.ItemId)
-                    .Select(oi => new { link.SubstanceName, oi.OrderId }))
+                .SelectMany(link => databaseContext.OrderItems
+                    .Where(orderItem => orderItem.ItemId == link.ItemId)
+                    .Select(orderItem => new { link.SubstanceName, orderItem.OrderId }))
                 .Join(
-                    db.Orders.Where(o => o.PickUpDate >= oneMonthAgo),
-                    pair => pair.OrderId,
+                    databaseContext.Orders.Where(order => order.PickUpDate >= oneMonthAgo),
+                    orderPair => orderPair.OrderId,
                     order => order.Id,
-                    (pair, _) => pair.SubstanceName)
-                .GroupBy(name => name)
-                .Select(group => new { Name = group.Key, NumberOfOrders = group.Count() })
-                .OrderByDescending(row => row.NumberOfOrders)
+                    (orderPair, _) => orderPair.SubstanceName)
+                .GroupBy(substanceName => substanceName)
+                .Select(substanceGroup => new { Name = substanceGroup.Key, NumberOfOrders = substanceGroup.Count() })
+                .OrderByDescending(substanceRow => substanceRow.NumberOfOrders)
                 .Take(TopSubstancesLimit)
-                .ToDictionary(row => row.Name, row => row.NumberOfOrders);
+                .ToDictionary(substanceRow => substanceRow.Name, substanceRow => substanceRow.NumberOfOrders);
         }
     }
 }

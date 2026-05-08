@@ -21,10 +21,10 @@ public class HangoutsController : ControllerBase
         return this.Ok(this.repository.GetAllHangouts());
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<Hangout> GetById(int id)
+    [HttpGet("{hangoutId:int}")]
+    public ActionResult<Hangout> GetById(int hangoutId)
     {
-        var hangout = this.repository.GetHangoutById(id);
+        var hangout = this.repository.GetHangoutById(hangoutId);
         if (hangout is null)
         {
             return this.NotFound();
