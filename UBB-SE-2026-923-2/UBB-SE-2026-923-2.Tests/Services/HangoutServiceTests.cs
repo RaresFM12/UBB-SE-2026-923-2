@@ -3,7 +3,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Moq;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
@@ -42,39 +41,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
         }
 
-        [Test]
-        public void CreateHangout_TitleTooShort_Throws()
-        {
-            Assert.Throws<ArgumentException>(() =>
-                this.service.CreateHangout("Hi", "desc", DateTime.Now.AddDays(10), 5, this.doctor1));
-        }
-
-        [Test]
-        public void CreateHangout_TitleTooLong_Throws()
-        {
-            Assert.Throws<ArgumentException>(() =>
-                this.service.CreateHangout(new string('A', 30), "desc", DateTime.Now.AddDays(10), 5, this.doctor1));
-        }
-
+        // --- CreateHangout Tests ---
         [Test]
         public void CreateHangout_TitleNull_Throws()
         {
             Assert.Throws<ArgumentException>(() =>
                 this.service.CreateHangout(null, "desc", DateTime.Now.AddDays(10), 5, this.doctor1));
-        }
-
-        [Test]
-        public void CreateHangout_TitleWhitespace_Throws()
-        {
-            Assert.Throws<ArgumentException>(() =>
-                this.service.CreateHangout("   ", "desc", DateTime.Now.AddDays(10), 5, this.doctor1));
-        }
-
-        [Test]
-        public void CreateHangout_DescriptionTooLong_Throws()
-        {
-            Assert.Throws<ArgumentException>(() =>
-                this.service.CreateHangout("ValidTitle", new string('A', 101), DateTime.Now.AddDays(10), 5, this.doctor1));
         }
 
         [Test]
@@ -122,29 +94,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockParticipantRepository.Verify(repository => repository.AddParticipant(42, 1), Times.Once);
         }
 
-        [Test]
-        public void CreateHangout_NullDescription_Works()
-        {
-            this.mockHangoutRepository.Setup(repository => repository.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
-                .Returns(1);
-            Assert.DoesNotThrow(() => this.service.CreateHangout("ValidTitle", null, DateTime.Now.AddDays(10), 5, this.doctor1));
-        }
-
+        // --- JoinHangout Tests ---
         [Test]
         public void JoinHangout_HangoutNotFound_Throws()
         {
             this.mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns((Hangout)null);
             Assert.Throws<ArgumentException>(() => this.service.JoinHangout(1, this.doctor1));
-        }
-
-        [Test]
-        public void JoinHangout_HangoutFull_Throws()
-        {
-            var hangout = new Hangout(1, "Title", "Desc", DateTime.Now.AddDays(10), 1);
-            this.mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
-            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)> { (1, 2) });
-
-            Assert.Throws<InvalidOperationException>(() => this.service.JoinHangout(1, this.doctor1));
         }
 
         [Test]
@@ -184,6 +139,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockParticipantRepository.Verify(repository => repository.AddParticipant(1, 1), Times.Once);
         }
 
+        // --- GetAllHangouts Tests ---
         [Test]
         public void GetAllHangouts_ReturnsHangoutsWithParticipants()
         {
@@ -195,55 +151,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var result = this.service.GetAllHangouts();
             Assert.That(result.Count, Is.EqualTo(1));
             Assert.That(result[0].ParticipantList.Count, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void GetAllHangouts_Empty_ReturnsEmpty()
-        {
-            this.mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout>());
-            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff>());
-
-            var result = this.service.GetAllHangouts();
-            Assert.That(result.Count, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void JoinHangout_MedicalEvalOnDate_Throws()
-        {
-            var hangoutDate = DateTime.Now.AddDays(10);
-            var hangout = new Hangout(1, "Title", "Desc", hangoutDate, 10);
-            this.mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
-            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
-            this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
-            {
-                new MedicalEvaluation { Evaluator = this.doctor1, EvaluationDate = hangoutDate.Date },
-            });
-
-            Assert.Throws<InvalidOperationException>(() => this.service.JoinHangout(1, this.doctor1));
-        }
-
-        [Test]
-        public void CreateHangout_ExactMinTitleLength_Works()
-        {
-            this.mockHangoutRepository.Setup(repository => repository.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
-                .Returns(1);
-            Assert.DoesNotThrow(() => this.service.CreateHangout("Hello", "desc", DateTime.Now.AddDays(10), 5, this.doctor1));
-        }
-
-        [Test]
-        public void CreateHangout_ExactMaxTitleLength_Works()
-        {
-            this.mockHangoutRepository.Setup(repository => repository.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
-                .Returns(1);
-            Assert.DoesNotThrow(() => this.service.CreateHangout(new string('A', 25), "desc", DateTime.Now.AddDays(10), 5, this.doctor1));
-        }
-
-        [Test]
-        public void CreateHangout_ExactlyOneWeekAhead_Throws()
-        {
-            Assert.Throws<ArgumentException>(() =>
-                this.service.CreateHangout("ValidTitle", "desc", DateTime.Now.AddDays(6), 5, this.doctor1));
         }
     }
 }

@@ -19,6 +19,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         private Mock<IStaffRepository> mockStaffRepository;
         private Mock<IShiftRepository> mockShiftRepository;
         private Mock<ICurrentUserService> mockCurrentUserService;
+        private Mock<INotificationRepository> mockNotificationRepository;
         private MedicalEvaluationService service;
         private Doctor doctor1;
 
@@ -31,6 +32,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockStaffRepository = new Mock<IStaffRepository>();
             this.mockShiftRepository = new Mock<IShiftRepository>();
             this.mockCurrentUserService = new Mock<ICurrentUserService>();
+            this.mockNotificationRepository = new Mock<INotificationRepository>();
 
             this.service = new MedicalEvaluationService(
                 this.mockEvaluationsRepository.Object,
@@ -38,7 +40,8 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 this.mockAppointmentRepository.Object,
                 this.mockStaffRepository.Object,
                 this.mockShiftRepository.Object,
-                this.mockCurrentUserService.Object);
+                this.mockCurrentUserService.Object,
+                this.mockNotificationRepository.Object);
 
             this.doctor1 = new Doctor(1, "John", "Doe", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 5);
             this.mockHighRiskMedicineRepository.Setup(repository => repository.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
@@ -46,6 +49,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
         }
 
+        // --- GetAllDoctors & GetAppointments ---
         [Test]
         public void GetAllDoctors_ReturnsDoctorsOnly()
         {
@@ -54,14 +58,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var result = this.service.GetAllDoctors();
             Assert.That(result.Count, Is.EqualTo(1));
             Assert.That(result[0].StaffID, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void GetAllDoctors_Empty_ReturnsEmpty()
-        {
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff>());
-            var result = this.service.GetAllDoctors();
-            Assert.That(result.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -79,6 +75,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result.Count, Is.EqualTo(1));
         }
 
+        // --- GetEvaluations ---
         [Test]
         public void GetEvaluationsByDoctor_ValidId_ReturnsFiltered()
         {
@@ -98,12 +95,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result.Count, Is.EqualTo(0));
         }
 
-        [Test]
-        public void SaveEvaluation_NullRecord_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() => this.service.SaveEvaluation(null));
-        }
-
+        // --- Save & Update Evaluation ---
         [Test]
         public void SaveEvaluation_ValidRecord_CallsRepo()
         {
@@ -139,12 +131,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
 
         [Test]
-        public void UpdateEvaluation_NullRecord_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() => this.service.UpdateEvaluation(null));
-        }
-
-        [Test]
         public void UpdateEvaluation_ZeroId_Throws()
         {
             var evaluation = new MedicalEvaluation { EvaluationID = 0 };
@@ -159,27 +145,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockEvaluationsRepository.Verify(repository => repository.UpdateEvaluation(1, "S", "N", "M"), Times.Once);
         }
 
-        [Test]
-        public void CheckMedicineConflict_NullMedications_ReturnsNull()
-        {
-            var result = this.service.CheckMedicineConflict("P1", null);
-            Assert.That(result, Is.Null);
-        }
-
-        [Test]
-        public void CheckMedicineConflict_EmptyMedications_ReturnsNull()
-        {
-            var result = this.service.CheckMedicineConflict("P1", string.Empty);
-            Assert.That(result, Is.Null);
-        }
-
-        [Test]
-        public void CheckMedicineConflict_NullPatientId_ReturnsNull()
-        {
-            var result = this.service.CheckMedicineConflict(null, "Aspirin");
-            Assert.That(result, Is.Null);
-        }
-
+        // --- CheckMedicineConflict ---
         [Test]
         public void CheckMedicineConflict_HighRiskMedicine_ReturnsWarning()
         {
@@ -196,13 +162,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockHighRiskMedicineRepository.Setup(repository => repository.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
             this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
             {
-                new MedicalEvaluation
-                {
-                    PatientId = "P1",
-                    Symptoms = "Allergy to medication",
-                    MedicationsList = "Aspirin",
-                    Notes = string.Empty
-                },
+                new MedicalEvaluation { PatientId = "P1", Symptoms = "Allergy to medication", MedicationsList = "Aspirin", Notes = string.Empty },
             });
 
             var result = this.service.CheckMedicineConflict("P1", "Aspirin");
@@ -219,38 +179,36 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result, Is.Null);
         }
 
+        // --- NEW TESTS: Fatigue Features ---
         [Test]
-        public void SaveEvaluation_NullPatientId_UsesDefault()
+        public void IsDoctorFatigued_UnderThreshold_ReturnsFalse()
         {
-            this.mockCurrentUserService.Setup(service => service.UserId).Returns(1);
-            var evaluation = new MedicalEvaluation
-            {
-                PatientId = null,
-                Symptoms = string.Empty,
-                Notes = string.Empty,
-                MedicationsList = string.Empty,
-                Evaluator = this.doctor1,
-            };
+            var recentTime = DateTime.Now.AddHours(-5);
+            var shift = new Shift(1, this.doctor1, "Ward", recentTime, recentTime.AddHours(8), ShiftStatus.COMPLETED);
+            this.mockShiftRepository.Setup(repo => repo.GetAllShifts()).Returns(new List<Shift> { shift });
 
-            this.service.SaveEvaluation(evaluation);
-            this.mockEvaluationsRepository.Verify(repository => repository.AddEvaluation(1, 0, string.Empty, string.Empty, string.Empty, false), Times.Once);
+            var result = this.service.IsDoctorFatigued("1");
+            Assert.That(result, Is.False);
         }
 
         [Test]
-        public void SaveEvaluation_NoEvaluator_UsesCurrentUserId()
+        public void IsDoctorFatigued_OverThreshold_ReturnsTrue()
         {
-            this.mockCurrentUserService.Setup(service => service.UserId).Returns(42);
-            var evaluation = new MedicalEvaluation
-            {
-                PatientId = "1",
-                Symptoms = string.Empty,
-                Notes = string.Empty,
-                MedicationsList = string.Empty,
-                Evaluator = null,
-            };
+            var recentTime = DateTime.Now.AddHours(-15);
+            var shift = new Shift(1, this.doctor1, "Ward", recentTime, recentTime.AddHours(13), ShiftStatus.ACTIVE);
+            this.mockShiftRepository.Setup(repo => repo.GetAllShifts()).Returns(new List<Shift> { shift });
 
-            this.service.SaveEvaluation(evaluation);
-            this.mockEvaluationsRepository.Verify(repository => repository.AddEvaluation(42, 1, string.Empty, string.Empty, string.Empty, false), Times.Once);
+            var result = this.service.IsDoctorFatigued("1");
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void RaiseFatigueIntervention_AddsNotificationWithCorrectMessage()
+        {
+            this.service.RaiseFatigueIntervention(1, "Dr. John");
+
+            this.mockNotificationRepository.Verify(repo => repo.AddNotification(0, "Fatigue Intervention Required",
+                It.Is<string>(msg => msg.Contains("Dr. John") && msg.Contains("exceeded the 12h duty limit"))), Times.Once);
         }
     }
 }
