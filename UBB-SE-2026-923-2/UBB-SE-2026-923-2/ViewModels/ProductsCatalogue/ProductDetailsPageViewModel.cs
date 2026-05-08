@@ -128,7 +128,7 @@
 
         public string SubstancesText =>
             this.currentItem?.ActiveSubstances != null && this.currentItem.ActiveSubstances.Any()
-                ? string.Join(", ", this.currentItem.ActiveSubstances.Select(s => $"{s.Key} ({s.Value})"))
+                ? string.Join(", ", this.currentItem.ActiveSubstances.Select(substance => $"{substance.Key} ({substance.Value})"))
                 : "None";
 
         public string ImagePath => this.currentItem?.ImagePath ?? string.Empty;
