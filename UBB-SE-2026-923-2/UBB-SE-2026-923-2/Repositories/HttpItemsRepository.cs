@@ -24,7 +24,7 @@ namespace UBB_SE_2026_923_2.Repositories
         }
 
         public void AddItem(string name, string producer, string category,
-            float price, int nrOfPills,
+            float price, int numberOfPills,
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
         {
@@ -34,7 +34,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 Producer = producer,
                 Category = category,
                 Price = price,
-                NumberOfPills = nrOfPills,
+                NumberOfPills = numberOfPills,
                 Label = label,
                 Description = description,
                 ImagePath = imagePath,
@@ -45,7 +45,7 @@ namespace UBB_SE_2026_923_2.Repositories
         }
 
         public void AddItemWithQuantity(string name, string producer, string category,
-            float price, int nrOfPills,
+            float price, int numberOfPills,
             int quantity, Dictionary<string, float> activeSubstances, Dictionary<DateOnly, int> batches,
             string label = "", string description = "", string imagePath = ImagePathDefault,
             float discount = 0f)
@@ -56,7 +56,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 Producer = producer,
                 Category = category,
                 Price = price,
-                NumberOfPills = nrOfPills,
+                NumberOfPills = numberOfPills,
                 Quantity = quantity,
                 ActiveSubstances = activeSubstances,
                 Batches = batches,
@@ -75,9 +75,9 @@ namespace UBB_SE_2026_923_2.Repositories
             response.EnsureSuccessStatusCode();
         }
 
-        public Item GetItemById(int id)
+        public Item GetItemById(int itemId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{id}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{itemId}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
@@ -108,10 +108,10 @@ namespace UBB_SE_2026_923_2.Repositories
             response.EnsureSuccessStatusCode();
         }
 
-        public bool ItemExists(int id)
+        public bool ItemExists(int itemId)
         {
             return this.httpClient
-                .GetFromJsonAsync<bool>($"{BasePath}/{id}/exists")
+                .GetFromJsonAsync<bool>($"{BasePath}/{itemId}/exists")
                 .GetAwaiter().GetResult();
         }
 
@@ -126,7 +126,7 @@ namespace UBB_SE_2026_923_2.Repositories
             }
 
             return summaries
-                .Select(s => new Tuple<int, string, int>(s.Id, s.Name, s.OrdersCount))
+                .Select(summary => new Tuple<int, string, int>(summary.Id, summary.Name, summary.OrdersCount))
                 .ToList();
         }
     }

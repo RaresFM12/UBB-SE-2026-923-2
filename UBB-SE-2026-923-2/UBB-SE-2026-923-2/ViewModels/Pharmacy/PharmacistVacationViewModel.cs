@@ -9,20 +9,20 @@ namespace UBB_SE_2026_923_2.ViewModels.Pharmacy
 
     public sealed class PharmacistVacationViewModel : ObservableObject
     {
-        private readonly IPharmacyVacationService service;
+        private readonly IPharmacyVacationService pharmacyVacationService;
 
         public ObservableCollection<PharmacistChoice> Pharmacists { get; } = new ObservableCollection<PharmacistChoice>();
 
-        public PharmacistVacationViewModel(IPharmacyVacationService service)
+        public PharmacistVacationViewModel(IPharmacyVacationService pharmacyVacationService)
         {
-            this.service = service ?? throw new ArgumentNullException(nameof(service));
+            this.pharmacyVacationService = pharmacyVacationService ?? throw new ArgumentNullException(nameof(pharmacyVacationService));
             this.LoadPharmacists();
         }
 
         public void LoadPharmacists()
         {
             this.Pharmacists.Clear();
-            foreach (var pharmacist in this.service.GetPharmacists())
+            foreach (var pharmacist in this.pharmacyVacationService.GetPharmacists())
             {
                 bool IsNonEmpty(string? namePart) => !string.IsNullOrWhiteSpace(namePart);
                 var displayName = string.Join(
@@ -50,7 +50,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Pharmacy
 
             try
             {
-                this.service.RegisterVacation(
+                this.pharmacyVacationService.RegisterVacation(
                     pharmacist.Staff.StaffID,
                     startDate.Value.Date,
                     endDate.Value.Date);

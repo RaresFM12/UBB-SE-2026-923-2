@@ -163,13 +163,13 @@
                 return (false, true);
             }
 
-            if (!int.TryParse(quantityText, out int qty) || qty <= 0)
+            if (!int.TryParse(quantityText, out int quantity) || quantity <= 0)
             {
                 this.ErrorText = "Invalid quantity selected";
                 return (false, false);
             }
 
-            if (qty > 50 || qty > this.currentItem.Quantity)
+            if (quantity > 50 || quantity > this.currentItem.Quantity)
             {
                 this.ErrorText = "Invalid quantity selected";
                 return (false, false);
@@ -177,12 +177,12 @@
 
             try
             {
-                this.OrderService.AddToBasket(this.currentItem.Id, qty);
+                this.OrderService.AddToBasket(this.currentItem.Id, quantity);
                 return (true, false);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Console.WriteLine("THE REAL ERROR IS: " + ex.Message);
+                Console.WriteLine("THE REAL ERROR IS: " + exception.Message);
                 this.ErrorText = "Item already in basket";
                 return (false, false);
             }

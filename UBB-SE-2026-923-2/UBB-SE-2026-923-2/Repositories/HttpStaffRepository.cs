@@ -66,7 +66,7 @@ namespace UBB_SE_2026_923_2.Repositories
             }
 
             return summaries
-                .Select(d => (d.DoctorId, d.FirstName, d.LastName))
+                .Select(doctor => (doctor.DoctorId, doctor.FirstName, doctor.LastName))
                 .ToList();
         }
 

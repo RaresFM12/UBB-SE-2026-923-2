@@ -243,7 +243,7 @@ namespace UBB_SE_2026_923_2.Services
 
             if (exactMatches.Count != 0)
             {
-                var entry = exactMatches.FirstOrDefault(i => i.Quantity != EmptyQuantity);
+                var entry = exactMatches.FirstOrDefault(item => item.Quantity != EmptyQuantity);
                 if (entry != null)
                 {
                     items.Add(entry.Id, SingleBoxQuantity);
@@ -260,7 +260,7 @@ namespace UBB_SE_2026_923_2.Services
             Item preferredItem = preferredItems[0];
 
             var exactSubstitutes = allItems
-                .Where(i => i.NumberOfPills == requiredPills && this.SubstancesMatch(preferredItem, i))
+                .Where(item => item.NumberOfPills == requiredPills && this.SubstancesMatch(preferredItem, item))
                 .OrderBy(item => item.Price)
                 .ToList();
 
@@ -271,7 +271,7 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             var multipliedSubstitutes = allItems
-                .Where(i => i.NumberOfPills < requiredPills && this.SubstancesMatch(preferredItem, i))
+                .Where(item => item.NumberOfPills < requiredPills && this.SubstancesMatch(preferredItem, item))
                 .OrderBy(item => item.Price)
                 .ToList();
 

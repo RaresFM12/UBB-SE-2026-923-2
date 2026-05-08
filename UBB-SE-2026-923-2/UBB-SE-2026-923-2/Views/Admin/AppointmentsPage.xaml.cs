@@ -78,19 +78,19 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
         private void ViewDetails_Click(object sender, RoutedEventArgs eventArgs)
         {
-            if (sender is Button btn && btn.Tag is Appointment appt)
+            if (sender is Button button && button.Tag is Appointment appointment)
             {
-                this.Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Doctor.AppointmentDetailsPage), appt);
+                this.Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Doctor.AppointmentDetailsPage), appointment);
             }
         }
 
         private async void CancelAppointment_Click(object sender, RoutedEventArgs eventArgs)
         {
-            if (sender is Button btn && btn.Tag is Appointment appt)
+            if (sender is Button button && button.Tag is Appointment appointment)
             {
                 try
                 {
-                    await this.ViewModel.CancelAppointmentAsync(appt);
+                    await this.ViewModel.CancelAppointmentAsync(appointment);
                     this.ShowMessage("Appointment successfully canceled.", InfoBarSeverity.Informational);
 
                     if (FilterDoctorComboBox.SelectedValue is int doctorId)

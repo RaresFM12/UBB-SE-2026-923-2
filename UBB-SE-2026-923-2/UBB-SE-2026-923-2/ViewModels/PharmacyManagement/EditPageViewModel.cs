@@ -149,7 +149,7 @@ namespace UBB_SE_2026_923_2.ViewModels.PharmacyManagement
             }
         }
 
-        public Item GetItemById(int id) => this.adminService.GetItemById(id);
+        public Item GetItemById(int itemId) => this.adminService.GetItemById(itemId);
 
         public Substance GetSubstanceByName(string name) => this.adminService.GetSubstanceByName(name);
 
@@ -157,9 +157,9 @@ namespace UBB_SE_2026_923_2.ViewModels.PharmacyManagement
 
         public void AddItemWithQuantity(Item item) => this.adminService.AddItemWithQuantity(item);
 
-        public void UpdateItemById(int id, Item item) => this.adminService.UpdateItemById(id, item);
+        public void UpdateItemById(int itemId, Item item) => this.adminService.UpdateItemById(itemId, item);
 
-        public void RemoveItemById(int id) => this.adminService.RemoveItemById(id);
+        public void RemoveItemById(int itemId) => this.adminService.RemoveItemById(itemId);
 
         public void AddSubstance(Substance substance) => this.adminService.AddSubstance(substance);
 

@@ -11,7 +11,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
     public sealed partial class AdminSchedulePage : Page
     {
-        public AdminShiftViewModel ViewModel { get; }
+        public AdminShiftViewModel AdminShiftViewModel { get; }
 
         private bool initialized;
 
@@ -19,8 +19,8 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             this.InitializeComponent();
 
-            this.ViewModel = App.Services.GetRequiredService<AdminShiftViewModel>();
-            this.DataContext = this.ViewModel;
+            this.AdminShiftViewModel = App.Services.GetRequiredService<AdminShiftViewModel>();
+            this.DataContext = this.AdminShiftViewModel;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -34,7 +34,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
             this.initialized = true;
 
-            this.ViewModel.LoadAndFilterShifts();
+            this.AdminShiftViewModel.LoadAndFilterShifts();
             DateCalendar.SelectedDates.Add(System.DateTime.Today);
         }
 
@@ -49,7 +49,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
             if (picked >= AppSettings.SqlMinimumDate)
             {
-                this.ViewModel.SelectedDate = picked;
+                this.AdminShiftViewModel.SelectedDate = picked;
             }
         }
 
@@ -57,7 +57,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
         {
             if (DepartmentFilterComboBox.SelectedItem is string selectedDept && this.initialized)
             {
-                this.ViewModel.SelectedDepartment = selectedDept;
+                this.AdminShiftViewModel.SelectedDepartment = selectedDept;
             }
         }
 
@@ -67,39 +67,39 @@ namespace UBB_SE_2026_923_2.Views.Admin
             {
                 DailyBtn.IsChecked = true;
                 WeeklyBtn.IsChecked = false;
-                this.ViewModel.IsWeeklyView = false;
+                this.AdminShiftViewModel.IsWeeklyView = false;
             }
             else if (ReferenceEquals(sender, WeeklyBtn))
             {
                 WeeklyBtn.IsChecked = true;
                 DailyBtn.IsChecked = false;
-                this.ViewModel.IsWeeklyView = true;
+                this.AdminShiftViewModel.IsWeeklyView = true;
             }
         }
 
         private void SetActive_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is int shiftId)
+            if (sender is Button button && button.Tag is int shiftId)
             {
-                this.ViewModel.SetShiftActive(shiftId);
+                this.AdminShiftViewModel.SetShiftActive(shiftId);
                 this.ShowMessage($"The shift #{shiftId} was marked as active.", InfoBarSeverity.Success);
             }
         }
 
         private void CancelShift_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is int shiftId)
+            if (sender is Button button && button.Tag is int shiftId)
             {
-                this.ViewModel.CancelShift(shiftId);
+                this.AdminShiftViewModel.CancelShift(shiftId);
                 this.ShowMessage($"The shift #{shiftId} was cancelled.", InfoBarSeverity.Informational);
             }
         }
 
         private void AutoReassign_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is Shift shiftToReassign)
+            if (sender is Button button && button.Tag is Shift shiftToReassign)
             {
-                this.ViewModel.AutoFindReplacement(shiftToReassign);
+                this.AdminShiftViewModel.AutoFindReplacement(shiftToReassign);
                 this.ShowMessage("The automatic searching of a replacement has been triggered.", InfoBarSeverity.Success);
             }
         }

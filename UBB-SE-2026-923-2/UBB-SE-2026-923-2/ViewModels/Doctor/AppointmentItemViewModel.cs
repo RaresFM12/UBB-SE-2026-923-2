@@ -5,7 +5,7 @@
 
     public class AppointmentItemViewModel
     {
-        public int Id { get; set; }
+        public int AppointmentItemId { get; set; }
 
         public string PatientName { get; set; } = string.Empty;
 
@@ -35,7 +35,7 @@
 
         public AppointmentItemViewModel(Appointment item)
         {
-            this.Id = item.Id;
+            this.AppointmentItemId = item.Id;
             this.PatientName = item.PatientName ?? string.Empty;
             this.Date = item.Date;
             this.Notes = item.Notes ?? string.Empty;
@@ -50,7 +50,7 @@
 
         public Appointment ToAppointment() => new Appointment
         {
-            Id = this.Id,
+            Id = this.AppointmentItemId,
             PatientName = this.PatientName,
             DoctorId = this.DoctorId,
             DoctorName = this.DoctorName,

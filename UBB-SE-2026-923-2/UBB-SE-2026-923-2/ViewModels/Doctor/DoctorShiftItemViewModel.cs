@@ -5,7 +5,7 @@
 
     public sealed class DoctorShiftItemViewModel
     {
-        public int Id { get; }
+        public int ShiftId { get; }
 
         public DateTime StartTime { get; }
 
@@ -23,7 +23,7 @@
 
         public DoctorShiftItemViewModel(Shift shift)
         {
-            this.Id = shift.Id;
+            this.ShiftId = shift.Id;
             this.StartTime = shift.StartTime;
             this.EndTime = shift.EndTime;
             this.Location = shift.Location ?? string.Empty;

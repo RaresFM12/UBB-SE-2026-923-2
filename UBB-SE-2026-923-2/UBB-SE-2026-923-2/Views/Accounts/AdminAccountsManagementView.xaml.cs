@@ -11,7 +11,7 @@ namespace UBB_SE_2026_923_2.Views.Accounts
     {
         private IUserAccountService accountService;
 
-        public AdminAccountsManagementViewModel ViewModel { get; private set; }
+        public AdminAccountsManagementViewModel AdminAccountsManagementViewModel { get; private set; }
 
         public AdminAccountsManagementView()
         {
@@ -23,19 +23,19 @@ namespace UBB_SE_2026_923_2.Views.Accounts
             base.OnNavigatedTo(e);
 
             this.accountService = ServiceWrapper.UserAccountService;
-            this.ViewModel = new AdminAccountsManagementViewModel(this.accountService);
+            this.AdminAccountsManagementViewModel = new AdminAccountsManagementViewModel(this.accountService);
 
-            this.DataContext = this.ViewModel;
+            this.DataContext = this.AdminAccountsManagementViewModel;
         }
 
         private void OnSearchClick(object sender, RoutedEventArgs e)
         {
-            this.ViewModel.Search();
+            this.AdminAccountsManagementViewModel.Search();
         }
 
         private async void OnPromoteClick(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            if (sender is CheckBox cb && cb.DataContext is UserItemViewModel userItem)
+            if (sender is CheckBox checkBox && checkBox.DataContext is UserItemViewModel userItem)
             {
                 var dialog = new ContentDialog
                 {
@@ -50,18 +50,18 @@ namespace UBB_SE_2026_923_2.Views.Accounts
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    this.ViewModel.Promote(userItem);
+                    this.AdminAccountsManagementViewModel.Promote(userItem);
                 }
                 else
                 {
-                    cb.IsChecked = false;
+                    checkBox.IsChecked = false;
                 }
             }
         }
 
         private async void OnDisableClick(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.DataContext is UserItemViewModel userItem)
+            if (sender is Button button && button.DataContext is UserItemViewModel userItem)
             {
                 var dialog = new ContentDialog
                 {
@@ -76,7 +76,7 @@ namespace UBB_SE_2026_923_2.Views.Accounts
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    this.ViewModel.Disable(userItem);
+                    this.AdminAccountsManagementViewModel.Disable(userItem);
                 }
             }
         }

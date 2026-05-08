@@ -35,15 +35,15 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
 // ShiftRepository implements three interfaces; resolve them to the same instance per scope.
 builder.Services.AddScoped<ShiftRepository>();
-builder.Services.AddScoped<IShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
-builder.Services.AddScoped<IShiftManagementShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
-builder.Services.AddScoped<IPharmacyShiftRepository>(sp => sp.GetRequiredService<ShiftRepository>());
+builder.Services.AddScoped<IShiftRepository>(serviceProvider => serviceProvider.GetRequiredService<ShiftRepository>());
+builder.Services.AddScoped<IShiftManagementShiftRepository>(serviceProvider => serviceProvider.GetRequiredService<ShiftRepository>());
+builder.Services.AddScoped<IPharmacyShiftRepository>(serviceProvider => serviceProvider.GetRequiredService<ShiftRepository>());
 
 // StaffRepository implements three interfaces; same forwarding pattern.
 builder.Services.AddScoped<StaffRepository>();
-builder.Services.AddScoped<IStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
-builder.Services.AddScoped<IShiftManagementStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
-builder.Services.AddScoped<IPharmacyStaffRepository>(sp => sp.GetRequiredService<StaffRepository>());
+builder.Services.AddScoped<IStaffRepository>(serviceProvider => serviceProvider.GetRequiredService<StaffRepository>());
+builder.Services.AddScoped<IShiftManagementStaffRepository>(serviceProvider => serviceProvider.GetRequiredService<StaffRepository>());
+builder.Services.AddScoped<IPharmacyStaffRepository>(serviceProvider => serviceProvider.GetRequiredService<StaffRepository>());
 
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IHangoutRepository, HangoutRepository>();

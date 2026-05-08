@@ -118,9 +118,9 @@
 
                 this.RegisterSucceded?.Invoke();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                this.ErrorMessage = ex.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
 

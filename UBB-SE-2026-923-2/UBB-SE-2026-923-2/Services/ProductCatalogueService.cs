@@ -25,7 +25,7 @@
         public List<Item> GetItems(
             string search,
             List<string> categories = null,
-            List<(float min, float max)> priceRanges = null,
+            List<(float minimum, float maximum)> priceRanges = null,
             string stockFilter = null,
             bool? discounted = null,
             List<string> substances = null,
@@ -70,7 +70,7 @@
             return items.Where(item => categories.Contains(item.Category)).ToList();
         }
 
-        private List<Item> FilterByPrice(List<Item> items, List<(float min, float max)> priceRanges)
+        private List<Item> FilterByPrice(List<Item> items, List<(float minimum, float maximum)> priceRanges)
         {
             if (priceRanges == null || !priceRanges.Any())
             {
@@ -88,7 +88,7 @@
             return items.Where(item =>
             {
                 float finalPrice = item.Price * (1 - item.DiscountPercentage);
-                return priceRanges.Any(range => finalPrice >= range.min && finalPrice <= range.max);
+                return priceRanges.Any(range => finalPrice >= range.minimum && finalPrice <= range.maximum);
             }).ToList();
         }
 

@@ -27,16 +27,16 @@ namespace UBB_SE_2026_923_2.Repositories
             return this.httpClient.GetFromJsonAsync<bool>(url).GetAwaiter().GetResult();
         }
 
-        public bool UserExists(int id)
+        public bool UserExists(int userId)
         {
             return this.httpClient
-                .GetFromJsonAsync<bool>($"{BasePath}/{id}/exists")
+                .GetFromJsonAsync<bool>($"{BasePath}/{userId}/exists")
                 .GetAwaiter().GetResult();
         }
 
-        public User GetUserById(int id)
+        public User GetUserById(int userId)
         {
-            var response = this.httpClient.GetAsync($"{BasePath}/{id}").GetAwaiter().GetResult();
+            var response = this.httpClient.GetAsync($"{BasePath}/{userId}").GetAwaiter().GetResult();
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null!;
@@ -95,10 +95,10 @@ namespace UBB_SE_2026_923_2.Repositories
             return users ?? new List<User>();
         }
 
-        public bool UserHasPeriodTracker(int id)
+        public bool UserHasPeriodTracker(int userId)
         {
             return this.httpClient
-                .GetFromJsonAsync<bool>($"{BasePath}/{id}/period-tracker")
+                .GetFromJsonAsync<bool>($"{BasePath}/{userId}/period-tracker")
                 .GetAwaiter().GetResult();
         }
     }

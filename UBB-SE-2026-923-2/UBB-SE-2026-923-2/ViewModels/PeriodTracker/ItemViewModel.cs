@@ -29,7 +29,7 @@
 
         public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
-        public int Id { get; }
+        public int ItemId { get; }
 
         public ICommand AddToBasketCommand { get; }
 
@@ -141,7 +141,7 @@
         {
             this.basketService = basketService;
 
-            this.Id = item.Id;
+            this.ItemId = item.Id;
             this.Name = item.Name;
             this.ExtraDiscountPercentage = extraDiscountPercentage;
 
@@ -165,7 +165,7 @@
             this.ImagePath = BuildImagePath(item.ImagePath);
 
             this.AddToBasketCommand = new DelegateCommand(
-                ignoredParameter => this.basketService.AddToBasket(this.Id, DefaultBasketQuantity, this.ExtraDiscountPercentage));
+                ignoredParameter => this.basketService.AddToBasket(this.ItemId, DefaultBasketQuantity, this.ExtraDiscountPercentage));
         }
 
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)

@@ -321,10 +321,10 @@
             this.AddToCartCommand = new RelayCommand<UIItem>(this.AddToCart);
         }
 
-        public void Initialize(IProductCatalogueService service, User user, IOrderService orderService)
+        public void Initialize(IProductCatalogueService productService, User currentUser, IOrderService orderService)
         {
-            this.productService = service;
-            this.CurrentUser = user;
+            this.productService = productService;
+            this.CurrentUser = currentUser;
             this.OrderService = orderService;
             this.LoadProducts();
         }

@@ -14,7 +14,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
 
     public sealed class IncomingSwapRequestsViewModel : INotifyPropertyChanged
     {
-        private readonly IShiftSwapService service;
+        private readonly IShiftSwapService shiftSwapService;
 
         public ObservableCollection<IncomingSwapRequestItemViewModel> Requests { get; } = new ObservableCollection<IncomingSwapRequestItemViewModel>();
 
@@ -53,9 +53,9 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
         {
         }
 
-        public IncomingSwapRequestsViewModel(IShiftSwapService service, IEnumerable<DoctorOptionViewModel> doctors)
+        public IncomingSwapRequestsViewModel(IShiftSwapService shiftSwapService, IEnumerable<DoctorOptionViewModel> doctors)
         {
-            this.service = service;
+            this.shiftSwapService = shiftSwapService;
 
             this.Doctors.ReplaceWith(doctors);
             this.SelectedDoctor = this.Doctors.FirstOrDefault();
@@ -90,7 +90,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
                 return;
             }
 
-            var succeeded = this.service.AcceptSwapRequest(this.SelectedRequest.SwapId, this.SelectedDoctor.StaffId, out var resultMessage);
+            var succeeded = this.shiftSwapService.AcceptSwapRequest(this.SelectedRequest.SwapId, this.SelectedDoctor.StaffId, out var resultMessage);
             this.StatusMessage = resultMessage;
             if (succeeded)
             {
@@ -105,7 +105,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
                 return;
             }
 
-            var succeeded = this.service.RejectSwapRequest(this.SelectedRequest.SwapId, this.SelectedDoctor.StaffId, out var resultMessage);
+            var succeeded = this.shiftSwapService.RejectSwapRequest(this.SelectedRequest.SwapId, this.SelectedDoctor.StaffId, out var resultMessage);
             this.StatusMessage = resultMessage;
             if (succeeded)
             {
@@ -122,7 +122,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
                 return;
             }
 
-            this.Requests.ReplaceWith(this.service.GetIncomingSwapRequests(this.SelectedDoctor.StaffId)
+            this.Requests.ReplaceWith(this.shiftSwapService.GetIncomingSwapRequests(this.SelectedDoctor.StaffId)
                 .Select(IncomingSwapRequestItemViewModel.From));
 
             this.StatusMessage = this.Requests.Count == 0 ? "No pending requests." : $"{this.Requests.Count} pending request(s).";

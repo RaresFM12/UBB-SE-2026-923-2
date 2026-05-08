@@ -43,10 +43,10 @@ namespace UBB_SE_2026_923_2.Repositories
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task UpdateAppointmentStatusAsync(int id, string status)
+        public async Task UpdateAppointmentStatusAsync(int patientId, string status)
         {
             var payload = new { Status = status };
-            var response = await this.httpClient.PatchAsJsonAsync($"{BasePath}/{id}/status", payload);
+            var response = await this.httpClient.PatchAsJsonAsync($"{BasePath}/{patientId}/status", payload);
             response.EnsureSuccessStatusCode();
         }
     }

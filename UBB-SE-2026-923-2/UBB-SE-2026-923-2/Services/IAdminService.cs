@@ -12,7 +12,7 @@ namespace UBB_SE_2026_923_2.Services
 
         List<Item> SearchItemsByName(string query);
 
-        Item GetItemById(int id);
+        Item GetItemById(int itemId);
 
         Substance GetSubstanceByName(string name);
 
@@ -22,9 +22,9 @@ namespace UBB_SE_2026_923_2.Services
 
         void AddItemWithQuantity(Item newItem);
 
-        void RemoveItemById(int id);
+        void RemoveItemById(int itemId);
 
-        void UpdateItemById(int id, Item updatedItem);
+        void UpdateItemById(int itemId, Item updatedItem);
 
         void AddSubstance(Substance newSubstance);
 

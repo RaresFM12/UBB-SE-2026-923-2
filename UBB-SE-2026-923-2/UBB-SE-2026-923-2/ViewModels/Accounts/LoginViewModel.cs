@@ -64,9 +64,9 @@
                 this.userAccountService.Login(this.Email, this.Password);
                 this.LoginSucceded?.Invoke();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                this.ErrorMessage = ex.Message;
+                this.ErrorMessage = exception.Message;
             }
         }
 

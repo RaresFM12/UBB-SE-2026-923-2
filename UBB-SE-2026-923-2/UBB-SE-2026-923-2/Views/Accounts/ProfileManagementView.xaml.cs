@@ -10,34 +10,34 @@ namespace UBB_SE_2026_923_2.Views.Accounts
     {
         private readonly UserAccountService accountService;
 
-        public ProfileManagementViewModel ViewModel { get; }
+        public ProfileManagementViewModel ProfileManagementViewModel { get; }
 
         public ProfileManagementView()
         {
             this.InitializeComponent();
 
             this.accountService = ServiceWrapper.UserAccountService;
-            this.ViewModel = new ProfileManagementViewModel(this.accountService);
+            this.ProfileManagementViewModel = new ProfileManagementViewModel(this.accountService);
 
-            this.DataContext = this.ViewModel;
+            this.DataContext = this.ProfileManagementViewModel;
         }
 
         private void OnSaveClick(object sender, RoutedEventArgs e)
         {
             try
             {
-                this.ViewModel.ErrorMessage = null;
-                this.ViewModel.SaveChanges();
+                this.ProfileManagementViewModel.ErrorMessage = null;
+                this.ProfileManagementViewModel.SaveChanges();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                this.ViewModel.ErrorMessage = ex.Message;
+                this.ProfileManagementViewModel.ErrorMessage = exception.Message;
             }
         }
 
         private void OnCancelClick(object sender, RoutedEventArgs e)
         {
-            this.ViewModel.CancelChanges();
+            this.ProfileManagementViewModel.CancelChanges();
         }
 
         private async void OnChangePasswordClick(object sender, RoutedEventArgs e)

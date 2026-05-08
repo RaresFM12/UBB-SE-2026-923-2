@@ -79,7 +79,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
         private void SetActive_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is int shiftId)
+            if (sender is Button button && button.Tag is int shiftId)
             {
                 this.ViewModel.SetShiftActive(shiftId);
                 this.ShowMessage($"The shift #{shiftId} was marked as active.", InfoBarSeverity.Success);
@@ -88,7 +88,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
         private void CancelShift_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is int shiftId)
+            if (sender is Button button && button.Tag is int shiftId)
             {
                 this.ViewModel.CancelShift(shiftId);
                 this.ShowMessage($"The shift #{shiftId} was cancelled.", InfoBarSeverity.Informational);
@@ -97,7 +97,7 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
         private void AutoReassign_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is Shift shiftToReassign)
+            if (sender is Button button && button.Tag is Shift shiftToReassign)
             {
                 this.ViewModel.AutoFindReplacement(shiftToReassign);
                 this.ShowMessage("The automatic searching of a replacement has been triggered.", InfoBarSeverity.Success);

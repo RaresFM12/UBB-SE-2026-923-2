@@ -10,8 +10,8 @@ namespace UBB_SE_2026_923_2.Services
 
     public class OrderService : IOrderService
     {
-        private const float MinDiscount = 0f;
-        private const float MaxDiscount = 1f;
+        private const float MinimumDiscount = 0f;
+        private const float MaximumDiscount = 1f;
         private const float PercentageDivisor = 100f;
         private const decimal PriceRoundingFactor = 100m;
         private const int NotFoundIndex = -1;
@@ -70,19 +70,19 @@ namespace UBB_SE_2026_923_2.Services
 
         private float NormalizeDiscount(float discount)
         {
-            if (discount > MaxDiscount)
+            if (discount > MaximumDiscount)
             {
                 discount /= PercentageDivisor;
             }
 
-            if (discount < MinDiscount)
+            if (discount < MinimumDiscount)
             {
-                return MinDiscount;
+                return MinimumDiscount;
             }
 
-            if (discount > MaxDiscount)
+            if (discount > MaximumDiscount)
             {
-                return MaxDiscount;
+                return MaximumDiscount;
             }
 
             return discount;
@@ -218,13 +218,13 @@ namespace UBB_SE_2026_923_2.Services
                 basketItem.InitialPricePerBox * basketItem.ItemQuantityInBasket);
 
             float discountedPrice = finalPriceBeforeDiscount;
-            discountedPrice *= MaxDiscount - basketItem.BaseItemDiscount;
-            discountedPrice *= MaxDiscount - basketItem.ExtraItemDiscount;
-            discountedPrice *= MaxDiscount - basketItem.ItemActiveUserDiscount;
+            discountedPrice *= MaximumDiscount - basketItem.BaseItemDiscount;
+            discountedPrice *= MaximumDiscount - basketItem.ExtraItemDiscount;
+            discountedPrice *= MaximumDiscount - basketItem.ItemActiveUserDiscount;
 
             basketItem.SetFinalPrices(
                 finalPriceBeforeDiscount,
-                RoundDownTo2Decimals(Math.Max(MinDiscount, discountedPrice)));
+                RoundDownTo2Decimals(Math.Max(MinimumDiscount, discountedPrice)));
         }
 
         public Tuple<float, float> CalculateBasketTotalSum(IEnumerable<BasketItemViewModel> basketItems)
@@ -388,7 +388,7 @@ namespace UBB_SE_2026_923_2.Services
                 }
 
                 float itemDiscountAmount = this.NormalizeDiscount(currentItem.DiscountPercentage);
-                float userDiscountAmount = MinDiscount;
+                float userDiscountAmount = MinimumDiscount;
 
                 if (this.ActiveUser.UserDiscounts.ContainsKey(currentItem.Id))
                 {
@@ -396,9 +396,9 @@ namespace UBB_SE_2026_923_2.Services
                 }
 
                 float finalPriceCalculation = currentItemQuantity * currentItem.Price;
-                finalPriceCalculation *= MaxDiscount - itemDiscountAmount;
-                finalPriceCalculation *= MaxDiscount - extraDiscountAmount;
-                finalPriceCalculation *= MaxDiscount - userDiscountAmount;
+                finalPriceCalculation *= MaximumDiscount - itemDiscountAmount;
+                finalPriceCalculation *= MaximumDiscount - extraDiscountAmount;
+                finalPriceCalculation *= MaximumDiscount - userDiscountAmount;
 
                 itemInformationForOrder.Add(
                     currentItem.Id,

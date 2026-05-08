@@ -15,15 +15,15 @@ namespace UBB_SE_2026_923_2.Views.Accounts
         public RegisterView()
         {
             this.InitializeComponent();
-            var viewModel = new RegisterViewModel(ServiceWrapper.UserAccountService);
-            viewModel.RegisterSucceded += this.OnRegisterSucceded;
-            this.DataContext = viewModel;
+            var registerViewModel = new RegisterViewModel(ServiceWrapper.UserAccountService);
+            registerViewModel.RegisterSucceded += this.OnRegisterSucceded;
+            this.DataContext = registerViewModel;
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            var vm = (RegisterViewModel)this.DataContext;
-            vm.Password = PasswordBox.Password;
+            var registerViewModel = (RegisterViewModel)this.DataContext;
+            registerViewModel.Password = PasswordBox.Password;
         }
 
         private void ConfirmPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)

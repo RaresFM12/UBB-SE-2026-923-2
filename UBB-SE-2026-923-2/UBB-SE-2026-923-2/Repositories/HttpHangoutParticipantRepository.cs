@@ -32,7 +32,7 @@ namespace UBB_SE_2026_923_2.Repositories
             }
 
             return summaries
-                .Select(p => (p.HangoutId, p.StaffId))
+                .Select(participant => (participant.HangoutId, participant.StaffId))
                 .ToList();
         }
 

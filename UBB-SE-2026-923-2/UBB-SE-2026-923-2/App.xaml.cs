@@ -31,11 +31,11 @@
                 Services = ConfigureServices().BuildServiceProvider();
                 ServiceWrapper.Initialize();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 System.IO.File.WriteAllText(
                     System.IO.Path.Combine(AppContext.BaseDirectory, "crash.log"),
-                    ex.ToString());
+                    exception.ToString());
                 throw;
             }
         }

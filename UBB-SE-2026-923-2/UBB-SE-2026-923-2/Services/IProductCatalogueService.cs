@@ -8,7 +8,7 @@ namespace UBB_SE_2026_923_2.Services
         List<Item> GetItems(
             string search,
             List<string> categories = null,
-            List<(float min, float max)> priceRanges = null,
+            List<(float minimum, float maximum)> priceRanges = null,
             string stockFilter = null,
             bool? discounted = null,
             List<string> substances = null,
