@@ -144,5 +144,65 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result[0].FirstName, Is.EqualTo("Jane"));
             Assert.That(result[1].FirstName, Is.EqualTo("John"));
         }
+
+        // --- RequestShiftSwap ---
+        [Test]
+        public void RequestShiftSwap_EligibleColleague_ReturnsTrue()
+        {
+            var futureDate = DateTime.Now.AddDays(2);
+            var targetShift = new Shift(1, this.doctor1, "A", futureDate, futureDate.AddHours(8), ShiftStatus.SCHEDULED);
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { targetShift });
+            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, this.doctor2 });
+            this.mockStaffRepository.Setup(repository => repository.GetStaffById(1)).Returns(this.doctor1);
+            this.mockStaffRepository.Setup(repository => repository.GetStaffById(2)).Returns(this.doctor2);
+            this.mockShiftSwapRepository.Setup(repository => repository.AddShiftSwapRequest(It.IsAny<ShiftSwapRequest>())).Returns(10);
+
+            var result = this.service.RequestShiftSwap(1, 1, 2, out string swapMessage);
+
+            Assert.That(result, Is.True);
+            Assert.That(swapMessage, Does.Contain("successfully"));
+        }
+
+        [Test]
+        public void RequestShiftSwap_IneligibleColleague_ReturnsFalse()
+        {
+            var futureDate = DateTime.Now.AddDays(2);
+            var targetShift = new Shift(1, this.doctor1, "A", futureDate, futureDate.AddHours(8), ShiftStatus.SCHEDULED);
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { targetShift });
+            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1 });
+
+            var result = this.service.RequestShiftSwap(1, 1, 999, out string swapMessage);
+
+            Assert.That(result, Is.False);
+        }
+
+        // --- GetIncomingSwapRequests ---
+        [Test]
+        public void GetIncomingSwapRequests_PendingRequestsExist_ReturnsFiltered()
+        {
+            var pendingSwap = new ShiftSwapRequest(1, new Shift { Id = 10 }, new Staff { StaffID = 1 }, new Staff { StaffID = 2 });
+            var acceptedSwap = new ShiftSwapRequest(2, new Shift { Id = 11 }, new Staff { StaffID = 3 }, new Staff { StaffID = 2 })
+            {
+                Status = ShiftSwapRequestStatus.ACCEPTED,
+            };
+            this.mockShiftSwapRepository.Setup(repository => repository.GetAllShiftSwapRequests())
+                .Returns(new List<ShiftSwapRequest> { pendingSwap, acceptedSwap });
+
+            var result = this.service.GetIncomingSwapRequests(2);
+
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0].SwapId, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GetIncomingSwapRequests_NoPendingRequests_ReturnsEmptyList()
+        {
+            this.mockShiftSwapRepository.Setup(repository => repository.GetAllShiftSwapRequests())
+                .Returns(new List<ShiftSwapRequest>());
+
+            var result = this.service.GetIncomingSwapRequests(2);
+
+            Assert.That(result.Count, Is.EqualTo(0));
+        }
     }
 }

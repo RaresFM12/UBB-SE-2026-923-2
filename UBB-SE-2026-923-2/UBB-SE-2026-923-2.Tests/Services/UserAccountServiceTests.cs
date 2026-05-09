@@ -154,5 +154,48 @@
             Assert.That(client.IsAdmin, Is.True);
             this.mockUsersRepository.Verify(r => r.UpdateUser(client), Times.Once);
         }
+
+        // --- DisableAccount ---
+        [Test]
+        public void DisableAccount_ValidAdminDisablesClient_SetsIsDisabledTrue()
+        {
+            var admin = CreateUser(isAdmin: true);
+            var clientToDisable = CreateUser(id: 3, isAdmin: false);
+            this.LoginAs(admin);
+
+            this.userAccountService.DisableAccount(clientToDisable);
+
+            Assert.That(clientToDisable.IsDisabled, Is.True);
+            this.mockUsersRepository.Verify(repository => repository.UpdateUser(clientToDisable), Times.Once);
+        }
+
+        [Test]
+        public void DisableAccount_NotLoggedIn_ThrowsException()
+        {
+            var clientToDisable = CreateUser(id: 3, isAdmin: false);
+
+            var exception = Assert.Throws<Exception>(() => this.userAccountService.DisableAccount(clientToDisable));
+
+            Assert.That(exception.Message, Is.EqualTo("Not logged in"));
+        }
+
+        // --- Logout ---
+        [Test]
+        public void Logout_WhenLoggedIn_SetsCurrentUserToNull()
+        {
+            var userToLogin = CreateUser();
+            this.LoginAs(userToLogin);
+
+            this.userAccountService.Logout();
+
+            Assert.That(this.userAccountService.CurrentUser, Is.Null);
+        }
+
+        [Test]
+        public void Logout_WhenNotLoggedIn_DoesNotThrow()
+        {
+            Assert.DoesNotThrow(() => this.userAccountService.Logout());
+            Assert.That(this.userAccountService.CurrentUser, Is.Null);
+        }
     }
 }

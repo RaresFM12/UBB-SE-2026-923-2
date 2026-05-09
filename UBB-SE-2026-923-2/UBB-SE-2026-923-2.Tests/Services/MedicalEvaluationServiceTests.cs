@@ -210,5 +210,22 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockNotificationRepository.Verify(repo => repo.AddNotification(0, "Fatigue Intervention Required",
                 It.Is<string>(msg => msg.Contains("Dr. John") && msg.Contains("exceeded the 12h duty limit"))), Times.Once);
         }
+
+        // --- DeleteEvaluation ---
+        [Test]
+        public void DeleteEvaluation_ValidId_CallsRepository()
+        {
+            this.service.DeleteEvaluation(5);
+
+            this.mockEvaluationsRepository.Verify(repository => repository.DeleteEvaluation(5), Times.Once);
+        }
+
+        [Test]
+        public void DeleteEvaluation_AnyId_DelegatesToRepository()
+        {
+            this.service.DeleteEvaluation(99);
+
+            this.mockEvaluationsRepository.Verify(repository => repository.DeleteEvaluation(99), Times.Once);
+        }
     }
 }
