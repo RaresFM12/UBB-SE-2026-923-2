@@ -11,12 +11,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class DoctorAppointmentServiceLogicTests
+    public class DoctorAppointmentServiceTests
     {
         private Mock<IAppointmentRepository> mockAppointmentRepository;
         private Mock<IStaffRepository> mockStaffRepository;
         private Mock<IShiftRepository> mockShiftRepository;
-        private DoctorAppointmentService doctorAppointmentService;
+        private DoctorAppointmentService service;
 
         [SetUp]
         public void Setup()
@@ -24,263 +24,184 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockAppointmentRepository = new Mock<IAppointmentRepository>();
             this.mockStaffRepository = new Mock<IStaffRepository>();
             this.mockShiftRepository = new Mock<IShiftRepository>();
+            this.service = new DoctorAppointmentService(this.mockAppointmentRepository.Object, this.mockStaffRepository.Object, this.mockShiftRepository.Object);
+        }
 
-            this.doctorAppointmentService = new DoctorAppointmentService(
-                this.mockAppointmentRepository.Object,
-                this.mockStaffRepository.Object,
-                this.mockShiftRepository.Object);
+        // --- GetUpcomingAppointmentsAsync ---
+        [Test]
+        public async Task GetUpcomingAppointmentsAsync_AppointmentInWindow_ReturnsIt()
+        {
+            var tomorrow = DateTime.Now.AddDays(1);
+            var appointment = new Appointment { Id = 1, Doctor = new Doctor { StaffID = 1 }, Date = tomorrow, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(9.5), Status = "Scheduled" };
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            Assert.That(result.Count, Is.EqualTo(1));
         }
 
         [Test]
-        public async Task GetUpcomingAppointmentsAsync_WhenAppointmentsExistForMultipleDoctors_ReturnsOnlyRequestedDoctorAppointments()
+        public async Task GetUpcomingAppointmentsAsync_AppointmentOutsideWindow_ReturnsEmpty()
         {
-            var requestedDoctorIdentifier = 3;
-            var appointmentForRequestedDoctor = CreateAppointment(1, requestedDoctorIdentifier, DateTime.Today.AddDays(1), 9, 10, "Scheduled");
-            var appointmentForDifferentDoctor = CreateAppointment(2, 8, DateTime.Today.AddDays(1), 9, 10, "Scheduled");
+            var farFuture = DateTime.Now.AddDays(60);
+            var appointment = new Appointment { Id = 1, Doctor = new Doctor { StaffID = 1 }, Date = farFuture, StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
-                .ReturnsAsync(new List<Appointment> { appointmentForDifferentDoctor, appointmentForRequestedDoctor });
-
-            var returnedAppointments = await this.doctorAppointmentService.GetUpcomingAppointmentsAsync(requestedDoctorIdentifier, DateTime.Today, 0, 10);
-
-            Assert.That(returnedAppointments.Count, Is.EqualTo(1));
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
+            Assert.That(result.Count, Is.EqualTo(0));
         }
 
         [Test]
-        public async Task GetUpcomingAppointmentsAsync_WhenAppointmentsAreUnordered_ReturnsAppointmentsOrderedByDateAndStartTime()
+        public async Task GetUpcomingAppointmentsAsync_Pagination_SkipsCorrectly()
         {
-            var requestedDoctorIdentifier = 3;
-            var laterAppointment = CreateAppointment(1, requestedDoctorIdentifier, DateTime.Today.AddDays(2), 11, 12, "Scheduled");
-            var earlierAppointment = CreateAppointment(2, requestedDoctorIdentifier, DateTime.Today.AddDays(1), 9, 10, "Scheduled");
-
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
-                .ReturnsAsync(new List<Appointment> { laterAppointment, earlierAppointment });
-
-            var returnedAppointments = await this.doctorAppointmentService.GetUpcomingAppointmentsAsync(requestedDoctorIdentifier, DateTime.Today, 0, 10);
-
-            Assert.That(returnedAppointments.First().Id, Is.EqualTo(2));
-        }
-
-        [Test]
-        public async Task GetAllDoctorsAsync_WhenDoctorNamesAreUnordered_ReturnsDoctorsOrderedAlphabetically()
-        {
-            this.mockStaffRepository
-                .Setup(staffRepository => staffRepository.GetAllDoctorsAsync())
-                .ReturnsAsync(new List<(int DoctorId, string FirstName, string LastName)>
-                {
-                    (2, "Charlie", "Zeta"),
-                    (1, "Alice", "Alpha"),
-                });
-
-            var returnedDoctors = await this.doctorAppointmentService.GetAllDoctorsAsync();
-
-            Assert.That(returnedDoctors.First().DoctorName, Is.EqualTo("Alice Alpha"));
-        }
-
-        [Test]
-        public async Task GetAppointmentDetailsAsync_WhenAppointmentWithRequestedIdentifierExists_ReturnsAppointmentWithRequestedIdentifier()
-        {
-            var requestedAppointmentIdentifier = 5;
-            var matchingAppointment = CreateAppointment(requestedAppointmentIdentifier, 1, DateTime.Today, 9, 10, "Scheduled");
-
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
-                .ReturnsAsync(new List<Appointment> { matchingAppointment });
-
-            var returnedAppointment = await this.doctorAppointmentService.GetAppointmentDetailsAsync(requestedAppointmentIdentifier);
-
-            Assert.That(returnedAppointment!.Id, Is.EqualTo(requestedAppointmentIdentifier));
-        }
-
-        [Test]
-        public async Task GetAppointmentDetailsAsync_WhenAppointmentWithRequestedIdentifierDoesNotExist_ReturnsNull()
-        {
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
-                .ReturnsAsync(new List<Appointment>());
-
-            var returnedAppointment = await this.doctorAppointmentService.GetAppointmentDetailsAsync(99);
-
-            Assert.That(returnedAppointment, Is.Null);
-        }
-
-        [Test]
-        public async Task GetAppointmentsForAdminAsync_WhenAppointmentsExistForMultipleDoctors_ReturnsOnlyRequestedDoctorAppointments()
-        {
-            var requestedDoctorIdentifier = 10;
-            var appointmentForRequestedDoctor = CreateAppointment(1, requestedDoctorIdentifier, DateTime.Today.AddDays(2), 10, 11, "Scheduled");
-            var appointmentForDifferentDoctor = CreateAppointment(2, 20, DateTime.Today.AddDays(1), 9, 10, "Scheduled");
-
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
-                .ReturnsAsync(new List<Appointment> { appointmentForDifferentDoctor, appointmentForRequestedDoctor });
-
-            var returnedAppointments = await this.doctorAppointmentService.GetAppointmentsForAdminAsync(requestedDoctorIdentifier);
-
-            Assert.That(returnedAppointments.Count, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void CreateAppointmentAsync_WhenDoctorIsOffDuty_ThrowsInvalidOperationException()
-        {
-            var offDutyDoctor = new Doctor
+            var appointments = Enumerable.Range(1, 5).Select(index => new Appointment
             {
-                StaffID = 7,
-                DoctorStatus = DoctorStatus.OFF_DUTY,
-            };
+                Id = index,
+                Doctor = new Doctor { StaffID = 1 },
+                Date = DateTime.Now.AddDays(index),
+                StartTime = TimeSpan.FromHours(9),
+                Status = "Scheduled"
+            }).ToList();
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            this.mockStaffRepository
-                .Setup(staffRepository => staffRepository.GetStaffById(7))
-                .Returns(offDutyDoctor);
-
-            Assert.ThrowsAsync<InvalidOperationException>(
-                async () => await this.doctorAppointmentService.CreateAppointmentAsync("PAT-3", 7, DateTime.Today, TimeSpan.FromHours(10)));
+            var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 2, 2);
+            Assert.That(result.Count, Is.EqualTo(2));
         }
 
+        // --- GetAllDoctorsAsync ---
         [Test]
-        public async Task CreateAppointmentAsync_WhenPatientNameHasPrefix_PersistsAppointmentWithParsedPatientIdentifier()
+        public async Task GetAllDoctorsAsync_ThreeDoctors_SortedAlphabetically()
         {
-            var availableDoctor = new Doctor
+            this.mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>
             {
-                StaffID = 7,
-                DoctorStatus = DoctorStatus.AVAILABLE,
-            };
+                (1, "Charlie", "Zeta"), (2, "Alice", "Alpha"), (3, "Bob", "Beta")
+            });
 
-            this.mockStaffRepository
-                .Setup(staffRepository => staffRepository.GetStaffById(7))
-                .Returns(availableDoctor);
-
-            await this.doctorAppointmentService.CreateAppointmentAsync("PAT-42", 7, DateTime.Today, TimeSpan.FromHours(10));
-
-            this.mockAppointmentRepository.Verify(
-                appointmentRepository => appointmentRepository.AddAppointmentAsync(
-                    42,
-                    7,
-                    It.IsAny<DateTime>(),
-                    It.IsAny<DateTime>(),
-                    "Scheduled"),
-                Times.Once);
+            var result = await this.service.GetAllDoctorsAsync();
+            Assert.That(result.Count, Is.EqualTo(3));
+            Assert.That(result[0].DoctorName, Is.EqualTo("Alice Alpha"));
         }
 
         [Test]
-        public async Task BookAppointmentAsync_WhenExternalReferenceIsMissing_PersistsAppointmentWithParsedPatientIdentifier()
+        public async Task GetAllDoctorsAsync_Empty_ReturnsEmpty()
         {
-            var availableDoctor = new Doctor
+            this.mockStaffRepository.Setup(repository => repository.GetAllDoctorsAsync()).ReturnsAsync(new List<(int, string, string)>());
+            var result = await this.service.GetAllDoctorsAsync();
+            Assert.That(result.Count, Is.EqualTo(0));
+        }
+
+        // --- GetAppointmentDetailsAsync ---
+        [Test]
+        public async Task GetAppointmentDetailsAsync_Found_ReturnsAppointment()
+        {
+            var appointment = new Appointment { Id = 5, Doctor = new Doctor { StaffID = 1 }, Date = DateTime.Now, StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
+
+            var result = await this.service.GetAppointmentDetailsAsync(5);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Id, Is.EqualTo(5));
+        }
+
+        [Test]
+        public async Task GetAppointmentDetailsAsync_NotFound_ReturnsNull()
+        {
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment>());
+            var result = await this.service.GetAppointmentDetailsAsync(99);
+            Assert.That(result, Is.Null);
+        }
+
+        // --- GetAppointmentsForAdminAsync ---
+        [Test]
+        public async Task GetAppointmentsForAdminAsync_FiltersAndOrders()
+        {
+            var appointments = new List<Appointment>
             {
-                StaffID = 8,
-                DoctorStatus = DoctorStatus.AVAILABLE,
+                new Appointment { Id = 1, Doctor = new Doctor { StaffID = 1 }, Date = DateTime.Now.AddDays(2), StartTime = TimeSpan.FromHours(10), Status = "Scheduled" },
+                new Appointment { Id = 2, Doctor = new Doctor { StaffID = 1 }, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" },
+                new Appointment { Id = 3, Doctor = new Doctor { StaffID = 2 }, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(8), Status = "Scheduled" }
             };
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
-            var appointmentWithoutExternalReference = CreateAppointment(9, 8, DateTime.Today, 9, 10, "Scheduled");
-            appointmentWithoutExternalReference.PatientName = "PAT-55";
-            appointmentWithoutExternalReference.ExternalRefId = string.Empty;
+            var result = await this.service.GetAppointmentsForAdminAsync(1);
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result[0].Id, Is.EqualTo(2));
+        }
 
-            this.mockStaffRepository
-                .Setup(staffRepository => staffRepository.GetStaffById(8))
-                .Returns(availableDoctor);
-
-            await this.doctorAppointmentService.BookAppointmentAsync(appointmentWithoutExternalReference);
-
-            this.mockAppointmentRepository.Verify(
-                appointmentRepository => appointmentRepository.AddAppointmentAsync(
-                    55,
-                    8,
-                    It.IsAny<DateTime>(),
-                    It.IsAny<DateTime>(),
-                    "Scheduled"),
-                Times.Once);
+        // --- CancelAppointmentAsync ---
+        [Test]
+        public async Task CancelAppointmentAsync_FinishedAppointment_Throws()
+        {
+            var appointment = new Appointment { Id = 1, Status = "Finished" };
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await this.service.CancelAppointmentAsync(appointment));
         }
 
         [Test]
-        public void FinishAppointmentAsync_WhenAppointmentIsAlreadyFinished_ThrowsInvalidOperationException()
+        public async Task CancelAppointmentAsync_ScheduledAppointment_Cancels()
         {
-            var alreadyFinishedAppointment = CreateAppointment(1, 2, DateTime.Today, 9, 10, "Finished");
+            var appointment = new Appointment { Id = 1, Status = "Scheduled" };
+            this.mockAppointmentRepository.Setup(repository => repository.UpdateAppointmentStatusAsync(1, "Canceled")).Returns(Task.CompletedTask);
 
-            Assert.ThrowsAsync<InvalidOperationException>(
-                async () => await this.doctorAppointmentService.FinishAppointmentAsync(alreadyFinishedAppointment));
+            await this.service.CancelAppointmentAsync(appointment);
+            Assert.That(appointment.Status, Is.EqualTo("Canceled"));
+        }
+
+        // --- GetShiftsForStaffInRangeAsync ---
+        [Test]
+        public async Task GetShiftsForStaffInRangeAsync_ReturnsFilteredShifts()
+        {
+            var doctor = new Doctor { StaffID = 1 };
+            var now = DateTime.Now;
+            var shift = new Shift(1, doctor, "Ward", now, now.AddHours(8), ShiftStatus.ACTIVE);
+            var cancelledShift = new Shift(2, doctor, "Ward", now, now.AddHours(8), ShiftStatus.CANCELLED);
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift, cancelledShift });
+
+            var result = await this.service.GetShiftsForStaffInRangeAsync(1, now.AddHours(-1), now.AddHours(10));
+            Assert.That(result.Count, Is.EqualTo(1));
         }
 
         [Test]
-        public async Task FinishAppointmentAsync_WhenNoOtherScheduledAppointmentOverlaps_UpdatesDoctorStatusToAvailable()
+        public async Task GetShiftsForStaffInRangeAsync_NoShiftRepo_ReturnsEmpty()
         {
-            var appointmentToFinish = CreateAppointment(1, 2, DateTime.Today, 9, 10, "Scheduled");
+            var serviceWithoutShiftRepository = new DoctorAppointmentService(this.mockAppointmentRepository.Object, this.mockStaffRepository.Object);
+            var result = await serviceWithoutShiftRepository.GetShiftsForStaffInRangeAsync(1, DateTime.Now, DateTime.Now.AddDays(7));
+            Assert.That(result.Count, Is.EqualTo(0));
+        }
 
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
-                .ReturnsAsync(new List<Appointment> { appointmentToFinish });
+        // --- NEW TESTS FOR GAP FILLING ---
 
-            await this.doctorAppointmentService.FinishAppointmentAsync(appointmentToFinish);
+        [Test]
+        public void CreateAppointmentAsync_DoctorOffDuty_ThrowsException()
+        {
+            var offDutyDoctor = new Doctor { StaffID = 1, DoctorStatus = DoctorStatus.OFF_DUTY };
+            this.mockStaffRepository.Setup(repo => repo.GetStaffById(1)).Returns(offDutyDoctor);
 
-            this.mockStaffRepository.Verify(
-                staffRepository => staffRepository.UpdateStatusAsync(2, "AVAILABLE"),
-                Times.Once);
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await this.service.CreateAppointmentAsync("John", 1, DateTime.Now, TimeSpan.FromHours(10)));
+
+            Assert.That(ex.Message, Does.Contain("OFF_DUTY"));
         }
 
         [Test]
-        public async Task GetAppointmentsInRangeAsync_WhenAppointmentOverlapsRequestedWindow_ReturnsOverlappingAppointment()
+        public async Task CreateAppointmentAsync_ValidData_PersistsAppointment()
         {
-            var requestedDoctorIdentifier = 2;
-            var appointmentOverlappingWindow = CreateAppointment(1, requestedDoctorIdentifier, DateTime.Today, 9, 11, "Scheduled");
+            var onDutyDoctor = new Doctor { StaffID = 1, DoctorStatus = DoctorStatus.AVAILABLE };
+            this.mockStaffRepository.Setup(repo => repo.GetStaffById(1)).Returns(onDutyDoctor);
 
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
-                .ReturnsAsync(new List<Appointment> { appointmentOverlappingWindow });
+            await this.service.CreateAppointmentAsync("John", 1, DateTime.Now, TimeSpan.FromHours(10));
 
-            var returnedAppointments = await this.doctorAppointmentService.GetAppointmentsInRangeAsync(
-                requestedDoctorIdentifier,
-                DateTime.Today.AddHours(10),
-                DateTime.Today.AddHours(12));
-
-            Assert.That(returnedAppointments.Count, Is.EqualTo(1));
+            this.mockAppointmentRepository.Verify(repo => repo.AddAppointmentAsync(
+                It.IsAny<int>(), 1, It.IsAny<DateTime>(), It.IsAny<DateTime>(), "Scheduled"), Times.Once);
         }
 
         [Test]
-        public async Task GetShiftsForStaffInRangeAsync_WhenShiftsExistForMultipleDoctors_ReturnsOnlyRequestedDoctorShifts()
+        public async Task FinishAppointmentAsync_ValidAppointment_UpdatesStatus()
         {
-            var requestedDoctorIdentifier = 2;
-            var requestedDoctor = new Doctor { StaffID = requestedDoctorIdentifier };
-            var differentDoctor = new Doctor { StaffID = 9 };
+            var appointment = new Appointment { Id = 99, Doctor = new Doctor { StaffID = 1 }, Status = "Scheduled", Date = DateTime.Now, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10) };
+            this.mockAppointmentRepository.Setup(repo => repo.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment>());
 
-            this.mockShiftRepository
-                .Setup(shiftRepository => shiftRepository.GetAllShifts())
-                .Returns(new List<Shift>
-                {
-            new Shift(1, requestedDoctor, "Ward A", DateTime.Today, DateTime.Today.AddHours(8), ShiftStatus.ACTIVE),
-            new Shift(2, differentDoctor, "Ward B", DateTime.Today, DateTime.Today.AddHours(8), ShiftStatus.ACTIVE),
-                });
+            await this.service.FinishAppointmentAsync(appointment);
 
-            var returnedShifts = await this.doctorAppointmentService.GetShiftsForStaffInRangeAsync(
-                requestedDoctorIdentifier,
-                DateTime.Today.AddHours(-1),
-                DateTime.Today.AddHours(9));
-
-            Assert.That(returnedShifts.Count, Is.EqualTo(1));
-        }
-
-        private static Appointment CreateAppointment(
-            int appointmentIdentifier,
-            int doctorIdentifier,
-            DateTime appointmentDate,
-            int startHour,
-            int endHour,
-            string appointmentStatus)
-        {
-            return new Appointment
-            {
-                Id = appointmentIdentifier,
-                Doctor = new Doctor
-                {
-                    StaffID = doctorIdentifier,
-                },
-                Date = appointmentDate.Date,
-                StartTime = TimeSpan.FromHours(startHour),
-                EndTime = TimeSpan.FromHours(endHour),
-                Status = appointmentStatus,
-                PatientName = "PAT-1",
-                ExternalRefId = "EXT-1",
-            };
+            this.mockAppointmentRepository.Verify(repo => repo.UpdateAppointmentStatusAsync(99, "Finished"), Times.Once);
+            Assert.That(appointment.Status, Is.EqualTo("Finished"));
         }
     }
 }

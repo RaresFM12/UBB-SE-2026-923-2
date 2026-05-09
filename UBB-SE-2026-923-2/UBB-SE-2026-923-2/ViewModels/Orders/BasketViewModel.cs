@@ -6,8 +6,8 @@
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Windows.Input;
-    using UBB_SE_2026_923_2.Services;
     using UBB_SE_2026_923_2.Command;
+    using UBB_SE_2026_923_2.Services;
 
     public class BasketItemViewModel : INotifyPropertyChanged, IEquatable<BasketItemViewModel>
     {

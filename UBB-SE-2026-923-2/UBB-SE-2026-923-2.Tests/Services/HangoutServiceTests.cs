@@ -2,6 +2,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Moq;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
@@ -9,223 +10,147 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class HangoutServiceLogicTests
+    public class HangoutServiceTests
     {
         private Mock<IHangoutRepository> mockHangoutRepository;
-        private Mock<IHangoutParticipantRepository> mockHangoutParticipantRepository;
+        private Mock<IHangoutParticipantRepository> mockParticipantRepository;
         private Mock<IAppointmentRepository> mockAppointmentRepository;
         private Mock<IStaffRepository> mockStaffRepository;
         private Mock<IEvaluationsRepository> mockEvaluationsRepository;
-        private HangoutService hangoutService;
+        private HangoutService service;
+        private Doctor doctor1;
 
         [SetUp]
         public void Setup()
         {
             this.mockHangoutRepository = new Mock<IHangoutRepository>();
-            this.mockHangoutParticipantRepository = new Mock<IHangoutParticipantRepository>();
+            this.mockParticipantRepository = new Mock<IHangoutParticipantRepository>();
             this.mockAppointmentRepository = new Mock<IAppointmentRepository>();
             this.mockStaffRepository = new Mock<IStaffRepository>();
             this.mockEvaluationsRepository = new Mock<IEvaluationsRepository>();
-
-            this.hangoutService = new HangoutService(
+            this.service = new HangoutService(
                 this.mockHangoutRepository.Object,
-                this.mockHangoutParticipantRepository.Object,
+                this.mockParticipantRepository.Object,
                 this.mockAppointmentRepository.Object,
                 this.mockStaffRepository.Object,
                 this.mockEvaluationsRepository.Object);
 
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
+            this.doctor1 = new Doctor(1, "John", "Doe", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 5);
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
                 .ReturnsAsync(new List<Appointment>());
+            this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
+        }
 
-            this.mockEvaluationsRepository
-                .Setup(evaluationsRepository => evaluationsRepository.GetAllEvaluations())
-                .Returns(new List<MedicalEvaluation>());
+        // --- CreateHangout Tests ---
+        [Test]
+        public void CreateHangout_TitleNull_Throws()
+        {
+            Assert.Throws<ArgumentException>(() =>
+                this.service.CreateHangout(null, "desc", DateTime.Now.AddDays(10), 5, this.doctor1));
         }
 
         [Test]
-        public void CreateHangout_WhenTitleIsTooShort_ThrowsArgumentException()
+        public void CreateHangout_DateTooSoon_Throws()
         {
-            var creator = CreateDoctor(1);
-
-            Assert.Throws<ArgumentException>(
-                () => this.hangoutService.CreateHangout("Tiny", "Valid description", DateTime.Now.AddDays(10), 5, creator));
+            Assert.Throws<ArgumentException>(() =>
+                this.service.CreateHangout("ValidTitle", "desc", DateTime.Now.AddDays(3), 5, this.doctor1));
         }
 
         [Test]
-        public void CreateHangout_WhenDateIsLessThanOneWeekAway_ThrowsArgumentException()
+        public void CreateHangout_ConflictingAppointment_Throws()
         {
-            var creator = CreateDoctor(1);
-
-            Assert.Throws<ArgumentException>(
-                () => this.hangoutService.CreateHangout("Valid title", "Valid description", DateTime.Now.AddDays(3), 5, creator));
-        }
-
-        [Test]
-        public void CreateHangout_WhenCreatorHasActiveAppointmentOnHangoutDate_ThrowsInvalidOperationException()
-        {
-            var creator = CreateDoctor(1);
             var hangoutDate = DateTime.Now.AddDays(10);
-
-            this.mockAppointmentRepository
-                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
                 .ReturnsAsync(new List<Appointment>
                 {
-                    CreateAppointment(1, creator.StaffID, hangoutDate, "Scheduled"),
+                    new Appointment { Doctor = new Doctor { StaffID = 1 }, Date = hangoutDate.Date, Status = "Scheduled", StartTime = TimeSpan.FromHours(9) },
                 });
 
-            Assert.Throws<InvalidOperationException>(
-                () => this.hangoutService.CreateHangout("Valid title", "Valid description", hangoutDate, 5, creator));
+            Assert.Throws<InvalidOperationException>(() =>
+                this.service.CreateHangout("ValidTitle", "desc", hangoutDate, 5, this.doctor1));
         }
 
         [Test]
-        public void CreateHangout_WhenDataIsValid_AddsCreatorAsParticipant()
+        public void CreateHangout_MedicalEvalOnDate_Throws()
         {
-            var creator = CreateDoctor(1);
             var hangoutDate = DateTime.Now.AddDays(10);
-
-            this.mockHangoutRepository
-                .Setup(hangoutRepository => hangoutRepository.AddHangout("Valid title", "Valid description", hangoutDate, 5))
-                .Returns(77);
-
-            this.hangoutService.CreateHangout("Valid title", "Valid description", hangoutDate, 5, creator);
-
-            this.mockHangoutParticipantRepository.Verify(
-                hangoutParticipantRepository => hangoutParticipantRepository.AddParticipant(77, creator.StaffID),
-                Times.Once);
-        }
-
-        [Test]
-        public void JoinHangout_WhenHangoutDoesNotExist_ThrowsArgumentException()
-        {
-            var staffMember = CreateDoctor(1);
-
-            this.mockHangoutRepository
-                .Setup(hangoutRepository => hangoutRepository.GetHangoutById(99))
-                .Returns((Hangout)null);
-
-            Assert.Throws<ArgumentException>(() => this.hangoutService.JoinHangout(99, staffMember));
-        }
-
-        [Test]
-        public void JoinHangout_WhenHangoutIsFull_ThrowsInvalidOperationException()
-        {
-            var staffMember = CreateDoctor(3);
-            var fullHangout = CreateHangout(10, DateTime.Now.AddDays(10), 2);
-
-            this.mockHangoutRepository
-                .Setup(hangoutRepository => hangoutRepository.GetHangoutById(10))
-                .Returns(fullHangout);
-
-            this.mockHangoutParticipantRepository
-                .Setup(hangoutParticipantRepository => hangoutParticipantRepository.GetAllParticipants())
-                .Returns(new List<(int HangoutId, int StaffId)>
-                {
-                    (10, 1),
-                    (10, 2),
-                });
-
-            Assert.Throws<InvalidOperationException>(() => this.hangoutService.JoinHangout(10, staffMember));
-        }
-
-        [Test]
-        public void JoinHangout_WhenStaffMemberAlreadyJoined_ThrowsInvalidOperationException()
-        {
-            var staffMember = CreateDoctor(1);
-            var hangout = CreateHangout(10, DateTime.Now.AddDays(10), 5);
-
-            this.mockHangoutRepository
-                .Setup(hangoutRepository => hangoutRepository.GetHangoutById(10))
-                .Returns(hangout);
-
-            this.mockHangoutParticipantRepository
-                .Setup(hangoutParticipantRepository => hangoutParticipantRepository.GetAllParticipants())
-                .Returns(new List<(int HangoutId, int StaffId)>
-                {
-                    (10, 1),
-                });
-
-            Assert.Throws<InvalidOperationException>(() => this.hangoutService.JoinHangout(10, staffMember));
-        }
-
-        [Test]
-        public void JoinHangout_WhenStaffMemberCanJoin_AddsParticipant()
-        {
-            var staffMember = CreateDoctor(1);
-            var hangout = CreateHangout(10, DateTime.Now.AddDays(10), 5);
-
-            this.mockHangoutRepository
-                .Setup(hangoutRepository => hangoutRepository.GetHangoutById(10))
-                .Returns(hangout);
-
-            this.mockHangoutParticipantRepository
-                .Setup(hangoutParticipantRepository => hangoutParticipantRepository.GetAllParticipants())
-                .Returns(new List<(int HangoutId, int StaffId)>());
-
-            this.hangoutService.JoinHangout(10, staffMember);
-
-            this.mockHangoutParticipantRepository.Verify(
-                hangoutParticipantRepository => hangoutParticipantRepository.AddParticipant(10, 1),
-                Times.Once);
-        }
-
-        [Test]
-        public void GetAllHangouts_WhenParticipantsExist_PopulatesParticipantList()
-        {
-            var participatingDoctor = CreateDoctor(1);
-            var hangout = CreateHangout(10, DateTime.Now.AddDays(10), 5);
-
-            this.mockHangoutRepository
-                .Setup(hangoutRepository => hangoutRepository.GetAllHangouts())
-                .Returns(new List<Hangout> { hangout });
-
-            this.mockHangoutParticipantRepository
-                .Setup(hangoutParticipantRepository => hangoutParticipantRepository.GetAllParticipants())
-                .Returns(new List<(int HangoutId, int StaffId)>
-                {
-                    (10, 1),
-                });
-
-            this.mockStaffRepository
-                .Setup(staffRepository => staffRepository.LoadAllStaff())
-                .Returns(new List<IStaff> { participatingDoctor });
-
-            var hangouts = this.hangoutService.GetAllHangouts();
-
-            Assert.That(hangouts[0].ParticipantList.Count, Is.EqualTo(1));
-        }
-
-        private static Doctor CreateDoctor(int doctorIdentifier)
-        {
-            return new Doctor(doctorIdentifier, "John", "Doe", "contract", true, "General", "License", DoctorStatus.AVAILABLE, 5);
-        }
-
-        private static Appointment CreateAppointment(int appointmentIdentifier, int doctorIdentifier, DateTime appointmentDate, string appointmentStatus)
-        {
-            return new Appointment
+            this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
             {
-                Id = appointmentIdentifier,
-                Doctor = new Doctor
-                {
-                    StaffID = doctorIdentifier,
-                },
-                Date = appointmentDate.Date,
-                StartTime = TimeSpan.FromHours(9),
-                EndTime = TimeSpan.FromHours(10),
-                Status = appointmentStatus,
-            };
+                new MedicalEvaluation { Evaluator = this.doctor1, EvaluationDate = hangoutDate.Date },
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+                this.service.CreateHangout("ValidTitle", "desc", hangoutDate, 5, this.doctor1));
         }
 
-        private static Hangout CreateHangout(int hangoutIdentifier, DateTime hangoutDate, int maximumParticipants)
+        [Test]
+        public void CreateHangout_Valid_ReturnsId()
         {
-            return new Hangout
-            {
-                HangoutID = hangoutIdentifier,
-                Title = "Valid title",
-                Description = "Valid description",
-                Date = hangoutDate,
-                MaxParticipants = maximumParticipants,
-            };
+            this.mockHangoutRepository.Setup(repository => repository.AddHangout(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>()))
+                .Returns(42);
+
+            var result = this.service.CreateHangout("ValidTitle", "desc", DateTime.Now.AddDays(10), 5, this.doctor1);
+            Assert.That(result, Is.EqualTo(42));
+            this.mockParticipantRepository.Verify(repository => repository.AddParticipant(42, 1), Times.Once);
+        }
+
+        // --- JoinHangout Tests ---
+        [Test]
+        public void JoinHangout_HangoutNotFound_Throws()
+        {
+            this.mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns((Hangout)null);
+            Assert.Throws<ArgumentException>(() => this.service.JoinHangout(1, this.doctor1));
+        }
+
+        [Test]
+        public void JoinHangout_AlreadyJoined_Throws()
+        {
+            var hangout = new Hangout(1, "Title", "Desc", DateTime.Now.AddDays(10), 10);
+            this.mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
+            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
+
+            Assert.Throws<InvalidOperationException>(() => this.service.JoinHangout(1, this.doctor1));
+        }
+
+        [Test]
+        public void JoinHangout_ConflictingAppointment_Throws()
+        {
+            var hangoutDate = DateTime.Now.AddDays(10);
+            var hangout = new Hangout(1, "Title", "Desc", hangoutDate, 10);
+            this.mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
+            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
+                .ReturnsAsync(new List<Appointment>
+                {
+                    new Appointment { Doctor = new Doctor { StaffID = 1 }, Date = hangoutDate.Date, Status = "Scheduled", StartTime = TimeSpan.FromHours(9) },
+                });
+
+            Assert.Throws<InvalidOperationException>(() => this.service.JoinHangout(1, this.doctor1));
+        }
+
+        [Test]
+        public void JoinHangout_Valid_AddsParticipant()
+        {
+            var hangout = new Hangout(1, "Title", "Desc", DateTime.Now.AddDays(10), 10);
+            this.mockHangoutRepository.Setup(repository => repository.GetHangoutById(1)).Returns(hangout);
+            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
+
+            this.service.JoinHangout(1, this.doctor1);
+            this.mockParticipantRepository.Verify(repository => repository.AddParticipant(1, 1), Times.Once);
+        }
+
+        // --- GetAllHangouts Tests ---
+        [Test]
+        public void GetAllHangouts_ReturnsHangoutsWithParticipants()
+        {
+            var hangout = new Hangout(1, "Title", "Desc", DateTime.Now.AddDays(10), 10);
+            this.mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout> { hangout });
+            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
+            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1 });
+
+            var result = this.service.GetAllHangouts();
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0].ParticipantList.Count, Is.EqualTo(1));
         }
     }
 }

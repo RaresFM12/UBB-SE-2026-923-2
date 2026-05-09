@@ -4,7 +4,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class SecurityServiceLogicTests
+    public class SecurityServiceTests
     {
         private SecurityService securityService;
 
@@ -15,29 +15,24 @@ namespace UBB_SE_2026_923_2.Tests.Services
         }
 
         [Test]
-        public void HashPassword_WhenPasswordIsProvided_ReturnsSamePassword()
+        public void HashPassword_ReturnsInputUnchanged()
         {
-            var plainTextPassword = "Password123!";
-
-            var hashedPassword = this.securityService.HashPassword(plainTextPassword);
-
-            Assert.That(hashedPassword, Is.EqualTo(plainTextPassword));
+            // Note: This is currently testing a placeholder method.
+            // When actual hashing is implemented, update this test.
+            var result = this.securityService.HashPassword("mypassword");
+            Assert.That(result, Is.EqualTo("mypassword"));
         }
 
         [Test]
-        public void VerifyPassword_WhenPasswordMatchesStoredPassword_ReturnsTrue()
+        public void VerifyPassword_MatchingStrings_ReturnsTrue()
         {
-            var verificationResult = this.securityService.VerifyPassword("Password123!", "Password123!");
-
-            Assert.That(verificationResult, Is.True);
+            Assert.That(this.securityService.VerifyPassword("abc123", "abc123"), Is.True);
         }
 
         [Test]
-        public void VerifyPassword_WhenPasswordDoesNotMatchStoredPassword_ReturnsFalse()
+        public void VerifyPassword_DifferentStrings_ReturnsFalse()
         {
-            var verificationResult = this.securityService.VerifyPassword("WrongPassword123!", "Password123!");
-
-            Assert.That(verificationResult, Is.False);
+            Assert.That(this.securityService.VerifyPassword("abc123", "wrong"), Is.False);
         }
     }
 }

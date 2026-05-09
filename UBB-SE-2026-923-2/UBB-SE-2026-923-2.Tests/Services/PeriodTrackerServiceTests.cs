@@ -2,6 +2,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Moq;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
@@ -9,158 +10,187 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class PeriodTrackerServiceLogicTests
+    public class PeriodTrackerServiceTests
     {
         private Mock<IUsersRepository> mockUsersRepository;
         private Mock<RaresICurrentUserService> mockCurrentUserService;
-        private PeriodTrackerService periodTrackerService;
+        private PeriodTrackerService service;
+        private User testUser;
 
         [SetUp]
         public void Setup()
         {
             this.mockUsersRepository = new Mock<IUsersRepository>();
             this.mockCurrentUserService = new Mock<RaresICurrentUserService>();
+            this.service = new PeriodTrackerService(this.mockUsersRepository.Object, this.mockCurrentUserService.Object);
 
-            this.periodTrackerService = new PeriodTrackerService(
-                this.mockUsersRepository.Object,
-                this.mockCurrentUserService.Object);
+            this.testUser = new User(1, "a@b.com", "123", "hash", false, false, "user1", false, 0);
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns(this.testUser);
+        }
+
+        // --- GetCurrentUser ---
+        [Test]
+        public void GetCurrentUser_ReturnsUser()
+        {
+            var result = this.service.GetCurrentUser();
+            Assert.That(result, Is.EqualTo(this.testUser));
         }
 
         [Test]
-        public void GetTrackerState_WhenCurrentUserIsNull_ReturnsDefaultCycleDays()
+        public void GetCurrentUser_NullUser_ReturnsNull()
         {
-            this.mockCurrentUserService
-                .Setup(currentUserService => currentUserService.RaresCurrentUser)
-                .Returns((User)null);
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
+            var result = this.service.GetCurrentUser();
+            Assert.That(result, Is.Null);
+        }
 
-            var trackerState = this.periodTrackerService.GetTrackerState();
-
-            Assert.That(trackerState.CycleDays, Is.EqualTo(28));
+        // --- GetTrackerState ---
+        [Test]
+        public void GetTrackerState_NullUser_ReturnsDefault()
+        {
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
+            var result = this.service.GetTrackerState();
+            Assert.That(result.CycleDays, Is.EqualTo(28));
+            Assert.That(result.PeriodLasts, Is.EqualTo(5));
+            Assert.That(result.HasPeriodTracker, Is.False);
         }
 
         [Test]
-        public void GetTrackerState_WhenCurrentUserExists_ReturnsUserPeriodLength()
+        public void GetTrackerState_ValidUser_ReturnsCycleDays()
         {
-            var currentUser = CreateUser(7);
-            currentUser.SetPeriodTracker(new DateOnly(2025, 1, 10), 30, 6, 2);
+            this.testUser.CycleDays = 30;
+            this.testUser.PeriodLasts = 6;
+            this.mockUsersRepository.Setup(repository => repository.UserHasPeriodTracker(1)).Returns(true);
+            var result = this.service.GetTrackerState();
+            Assert.That(result.CycleDays, Is.EqualTo(30));
+            Assert.That(result.PeriodLasts, Is.EqualTo(6));
+            Assert.That(result.HasPeriodTracker, Is.True);
+        }
 
-            this.mockCurrentUserService
-                .Setup(currentUserService => currentUserService.RaresCurrentUser)
-                .Returns(currentUser);
-
-            var trackerState = this.periodTrackerService.GetTrackerState();
-
-            Assert.That(trackerState.PeriodLasts, Is.EqualTo(6));
+        // --- GetNotes ---
+        [Test]
+        public void GetNotes_NullUser_ReturnsEmpty()
+        {
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
+            var result = this.service.GetNotes();
+            Assert.That(result.Count, Is.EqualTo(0));
         }
 
         [Test]
-        public void GetMaxNoteId_WhenUserHasMultipleNotes_ReturnsLargestNoteIdentifier()
+        public void GetNotes_UserWithNotes_ReturnsNotes()
         {
-            var currentUser = CreateUser(7);
-            currentUser.PeriodNotes = new Dictionary<int, Tuple<string, bool>>
-            {
-                { 1, new Tuple<string, bool>("First note", false) },
-                { 5, new Tuple<string, bool>("Second note", true) },
-            };
+            this.testUser.AddPeriodNoteToUser(1, "Note1", false);
+            this.testUser.AddPeriodNoteToUser(2, "Note2", true);
+            var result = this.service.GetNotes();
+            Assert.That(result.Count, Is.EqualTo(2));
+        }
 
-            this.mockCurrentUserService
-                .Setup(currentUserService => currentUserService.RaresCurrentUser)
-                .Returns(currentUser);
-
-            var maximumNoteIdentifier = this.periodTrackerService.GetMaxNoteId();
-
-            Assert.That(maximumNoteIdentifier, Is.EqualTo(5));
+        // --- GetMaxNoteId ---
+        [Test]
+        public void GetMaxNoteId_NoNotes_ReturnsZero()
+        {
+            var result = this.service.GetMaxNoteId();
+            Assert.That(result, Is.EqualTo(0));
         }
 
         [Test]
-        public void AddNote_WhenCurrentUserExists_AddsNoteWithNextIdentifier()
+        public void GetMaxNoteId_WithNotes_ReturnsMax()
         {
-            var currentUser = CreateUser(7);
-            currentUser.PeriodNotes = new Dictionary<int, Tuple<string, bool>>
-            {
-                { 3, new Tuple<string, bool>("Existing note", false) },
-            };
+            this.testUser.AddPeriodNoteToUser(1, "N1", false);
+            this.testUser.AddPeriodNoteToUser(5, "N5", false);
+            this.testUser.AddPeriodNoteToUser(3, "N3", false);
+            var result = this.service.GetMaxNoteId();
+            Assert.That(result, Is.EqualTo(5));
+        }
 
-            this.mockCurrentUserService
-                .Setup(currentUserService => currentUserService.RaresCurrentUser)
-                .Returns(currentUser);
-
-            this.periodTrackerService.AddNote("New note");
-
-            Assert.That(currentUser.PeriodNotes.ContainsKey(4), Is.True);
+        // --- UpdatePeriodTracker ---
+        [Test]
+        public void UpdatePeriodTracker_NullUser_DoesNotThrow()
+        {
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
+            Assert.DoesNotThrow(() => this.service.UpdatePeriodTracker(DateTimeOffset.Now, 28, 5, 0));
         }
 
         [Test]
-        public void AddNote_WhenCurrentUserExists_SavesCurrentUser()
+        public void UpdatePeriodTracker_ValidUser_UpdatesAndSaves()
         {
-            var currentUser = CreateUser(7);
+            this.service.UpdatePeriodTracker(new DateTimeOffset(new DateTime(2025, 3, 1)), 30, 6, 1);
+            this.mockUsersRepository.Verify(repository => repository.UpdateUser(this.testUser), Times.Once);
+            Assert.That(this.testUser.CycleDays, Is.EqualTo(30));
+            Assert.That(this.testUser.PeriodLasts, Is.EqualTo(6));
+        }
 
-            this.mockCurrentUserService
-                .Setup(currentUserService => currentUserService.RaresCurrentUser)
-                .Returns(currentUser);
-
-            this.periodTrackerService.AddNote("New note");
-
-            this.mockUsersRepository.Verify(
-                usersRepository => usersRepository.UpdateUser(currentUser),
-                Times.Once);
+        // --- AddNote ---
+        [Test]
+        public void AddNote_NullUser_DoesNotThrow()
+        {
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
+            Assert.DoesNotThrow(() => this.service.AddNote("test"));
         }
 
         [Test]
-        public void UpdateNote_WhenCurrentUserExists_UpdatesSelectedNote()
+        public void AddNote_ValidUser_AddsNote()
         {
-            var currentUser = CreateUser(7);
-            currentUser.PeriodNotes = new Dictionary<int, Tuple<string, bool>>
-            {
-                { 2, new Tuple<string, bool>("Old note", false) },
-            };
+            this.service.AddNote("My note");
+            this.mockUsersRepository.Verify(repository => repository.UpdateUser(this.testUser), Times.Once);
+            Assert.That(this.testUser.PeriodNotes.Count, Is.EqualTo(1));
+            Assert.That(this.testUser.PeriodNotes.Values.First().Item1, Is.EqualTo("My note"));
+        }
 
-            this.mockCurrentUserService
-                .Setup(currentUserService => currentUserService.RaresCurrentUser)
-                .Returns(currentUser);
-
-            this.periodTrackerService.UpdateNote(2, "Updated note", true);
-
-            Assert.That(currentUser.PeriodNotes[2].Item1, Is.EqualTo("Updated note"));
+        // --- UpdateNote ---
+        [Test]
+        public void UpdateNote_NullUser_DoesNotThrow()
+        {
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
+            Assert.DoesNotThrow(() => this.service.UpdateNote(1, "body", false));
         }
 
         [Test]
-        public void DeleteNote_WhenNoteExists_RemovesSelectedNote()
+        public void UpdateNote_ValidUser_Updates()
         {
-            var currentUser = CreateUser(7);
-            currentUser.PeriodNotes = new Dictionary<int, Tuple<string, bool>>
-            {
-                { 2, new Tuple<string, bool>("Note to delete", false) },
-            };
+            this.testUser.AddPeriodNoteToUser(1, "Old", false);
+            this.service.UpdateNote(1, "New", true);
+            Assert.That(this.testUser.PeriodNotes[1].Item1, Is.EqualTo("New"));
+            Assert.That(this.testUser.PeriodNotes[1].Item2, Is.True);
+            this.mockUsersRepository.Verify(repository => repository.UpdateUser(this.testUser), Times.Once);
+        }
 
-            this.mockCurrentUserService
-                .Setup(currentUserService => currentUserService.RaresCurrentUser)
-                .Returns(currentUser);
-
-            this.periodTrackerService.DeleteNote(2);
-
-            Assert.That(currentUser.PeriodNotes.ContainsKey(2), Is.False);
+        // --- DeleteNote ---
+        [Test]
+        public void DeleteNote_NullUser_DoesNotThrow()
+        {
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
+            Assert.DoesNotThrow(() => this.service.DeleteNote(1));
         }
 
         [Test]
-        public void UpdatePeriodTracker_WhenCurrentUserExists_SavesCurrentUser()
+        public void DeleteNote_NoteExists_RemovesNote()
         {
-            var currentUser = CreateUser(7);
-
-            this.mockCurrentUserService
-                .Setup(currentUserService => currentUserService.RaresCurrentUser)
-                .Returns(currentUser);
-
-            this.periodTrackerService.UpdatePeriodTracker(new DateTimeOffset(new DateTime(2025, 1, 10)), 30, 6, 2);
-
-            this.mockUsersRepository.Verify(
-                usersRepository => usersRepository.UpdateUser(currentUser),
-                Times.Once);
+            this.testUser.AddPeriodNoteToUser(1, "Note", false);
+            this.service.DeleteNote(1);
+            Assert.That(this.testUser.PeriodNotes.ContainsKey(1), Is.False);
+            this.mockUsersRepository.Verify(repository => repository.UpdateUser(this.testUser), Times.Once);
         }
 
-        private static User CreateUser(int userIdentifier)
+        [Test]
+        public void DeleteNote_NoteDoesNotExist_DoesNotThrow()
         {
-            return new User(userIdentifier, "user@test.com", "1234567890", "hashedPassword", false, false, "testUser", false, 0);
+            Assert.DoesNotThrow(() => this.service.DeleteNote(99));
+        }
+
+        // --- SaveCurrentUser ---
+        [Test]
+        public void SaveCurrentUser_NullUser_DoesNotThrow()
+        {
+            this.mockCurrentUserService.Setup(service => service.RaresCurrentUser).Returns((User)null);
+            Assert.DoesNotThrow(() => this.service.SaveCurrentUser());
+        }
+
+        [Test]
+        public void SaveCurrentUser_ValidUser_CallsUpdate()
+        {
+            this.service.SaveCurrentUser();
+            this.mockUsersRepository.Verify(repository => repository.UpdateUser(this.testUser), Times.Once);
         }
     }
 }

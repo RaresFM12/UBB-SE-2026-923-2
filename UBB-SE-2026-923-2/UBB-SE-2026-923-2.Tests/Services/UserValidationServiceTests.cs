@@ -4,78 +4,88 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class UserValidationServiceLogicTests
+    public class UserValidationServiceTests
     {
-        private UserValidationService userValidationService;
+        private UserValidationService validationService;
 
         [SetUp]
         public void Setup()
         {
-            this.userValidationService = new UserValidationService();
+            this.validationService = new UserValidationService();
+        }
+
+        // --- Email Validation ---
+        [Test]
+        public void IsCorrectEmailFormat_ValidEmail_ReturnsTrue()
+        {
+            Assert.That(this.validationService.IsCorrectEmailFormat("user@example.com"), Is.True);
         }
 
         [Test]
-        public void IsCorrectEmailFormat_WhenEmailContainsAtSignAndDot_ReturnsTrue()
+        [TestCase("invalid-email")]
+        [TestCase("user@example")]
+        [TestCase(null)]
+        [TestCase("   ")]
+        public void IsCorrectEmailFormat_InvalidScenarios_ReturnsFalse(string? email)
         {
-            var validationResult = this.userValidationService.IsCorrectEmailFormat("user@test.com");
+            // The ! tells the compiler we know what we are doing with the null value
+            Assert.That(this.validationService.IsCorrectEmailFormat(email!), Is.False);
+        }
 
-            Assert.That(validationResult, Is.True);
+        // --- Password Validation ---
+        [Test]
+        public void IsCorrectPasswordFormat_ValidPassword_ReturnsTrue()
+        {
+            Assert.That(this.validationService.IsCorrectPasswordFormat("Abcdef1!"), Is.True);
         }
 
         [Test]
-        public void IsCorrectEmailFormat_WhenEmailIsEmpty_ReturnsFalse()
+        [TestCase("Ab1!")]         // Too short
+        [TestCase("abcdef1!")]     // No uppercase
+        [TestCase("ABCDEF1!")]     // No lowercase
+        [TestCase("Abcdefg!")]     // No digit
+        [TestCase("Abcdefg1")]     // No special char
+        [TestCase(null)]           // Null input
+        [TestCase("   ")]          // Whitespace
+        public void IsCorrectPasswordFormat_InvalidScenarios_ReturnsFalse(string? password)
         {
-            var validationResult = this.userValidationService.IsCorrectEmailFormat(string.Empty);
+            Assert.That(this.validationService.IsCorrectPasswordFormat(password!), Is.False);
+        }
 
-            Assert.That(validationResult, Is.False);
+        // --- Phone Number Validation ---
+        [Test]
+        public void IsCorrectPhoneNumberFormat_ValidNumber_ReturnsTrue()
+        {
+            Assert.That(this.validationService.IsCorrectPhoneNumberFormat("0711111111"), Is.True);
         }
 
         [Test]
-        public void IsCorrectPasswordFormat_WhenPasswordContainsRequiredCharacters_ReturnsTrue()
+        [TestCase("0711abc")]      // Letters
+        [TestCase("+40711")]       // Symbols
+        [TestCase("071-111")]      // Dashes
+        [TestCase("")]             // Empty
+        [TestCase(null)]           // Null
+        public void IsCorrectPhoneNumberFormat_InvalidScenarios_ReturnsFalse(string? phone)
         {
-            var validationResult = this.userValidationService.IsCorrectPasswordFormat("Password1!");
+            Assert.That(this.validationService.IsCorrectPhoneNumberFormat(phone!), Is.False);
+        }
 
-            Assert.That(validationResult, Is.True);
+        // --- Username Validation ---
+        [Test]
+        public void IsCorrectUsernameFormat_ValidUsername_ReturnsTrue()
+        {
+            Assert.That(this.validationService.IsCorrectUsernameFormat("john_doe"), Is.True);
         }
 
         [Test]
-        public void IsCorrectPasswordFormat_WhenPasswordHasNoSpecialCharacter_ReturnsFalse()
+        [TestCase("john123")]      // Digits
+        [TestCase("john@doe")]     // Special chars
+        [TestCase("john.doe")]     // Dot
+        [TestCase("   ")]          // Whitespace
+        [TestCase(null)]           // Null
+        public void IsCorrectUsernameFormat_InvalidScenarios_ReturnsFalse(string? username)
         {
-            var validationResult = this.userValidationService.IsCorrectPasswordFormat("Password123");
-
-            Assert.That(validationResult, Is.False);
-        }
-
-        [Test]
-        public void IsCorrectPhoneNumberFormat_WhenPhoneNumberContainsOnlyDigits_ReturnsTrue()
-        {
-            var validationResult = this.userValidationService.IsCorrectPhoneNumberFormat("0744123456");
-
-            Assert.That(validationResult, Is.True);
-        }
-
-        [Test]
-        public void IsCorrectPhoneNumberFormat_WhenPhoneNumberContainsLetters_ReturnsFalse()
-        {
-            var validationResult = this.userValidationService.IsCorrectPhoneNumberFormat("0744ABC456");
-
-            Assert.That(validationResult, Is.False);
-        }
-
-        [Test]
-        public void IsCorrectUsernameFormat_WhenUsernameContainsLettersAndUnderscore_ReturnsTrue()
-        {
-            var validationResult = this.userValidationService.IsCorrectUsernameFormat("john_doe");
-
-            Assert.That(validationResult, Is.True);
-        }
-
-        [Test]
-        public void IsCorrectUsernameFormat_WhenUsernameContainsDigits_ReturnsFalse()
-        {
-            var validationResult = this.userValidationService.IsCorrectUsernameFormat("john123");
-
-            Assert.That(validationResult, Is.False);
+            Assert.That(this.validationService.IsCorrectUsernameFormat(username!), Is.False);
         }
     }
 }
