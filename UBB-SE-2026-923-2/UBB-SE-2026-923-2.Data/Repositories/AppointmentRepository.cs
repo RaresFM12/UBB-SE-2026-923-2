@@ -33,8 +33,7 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
 
-            var assignedDoctor = await databaseContext.Doctors.FindAsync(doctorId)
-                ?? throw new ArgumentException($"Doctor with identifier {doctorId} not found.", nameof(doctorId));
+            var assignedDoctor = doctorId == 0 ? null : await databaseContext.Doctors.FindAsync(doctorId);
 
             var newAppointment = new Appointment
             {
