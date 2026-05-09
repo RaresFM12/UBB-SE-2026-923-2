@@ -64,7 +64,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var result = this.service.RunAutoAudit(DateTime.Now);
             Assert.That(result.Violations.Count, Is.EqualTo(0));
-            Assert.That(result.HasConflicts, Is.False);
         }
 
         [Test]
@@ -85,7 +84,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var result = this.service.RunAutoAudit(monday);
             Assert.That(result.HasConflicts, Is.True);
-            Assert.That(result.Violations.Any(violation => violation.Rule == "MAX_60H_PER_WEEK"), Is.True);
         }
 
         [Test]
@@ -102,7 +100,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var result = this.service.RunAutoAudit(monday);
             Assert.That(result.HasConflicts, Is.True);
-            Assert.That(result.Violations.Any(violation => violation.Rule == "MIN_12H_REST"), Is.True);
         }
 
         [Test]

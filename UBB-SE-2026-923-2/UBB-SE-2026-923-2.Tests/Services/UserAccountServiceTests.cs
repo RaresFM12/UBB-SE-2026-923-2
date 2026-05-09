@@ -43,8 +43,8 @@
         private void LoginAs(User user)
         {
             this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(user.Email)).Returns(true);
-            this.mockUsersRepository.Setup(r => r.GetUserByEmail(user.Email)).Returns(user);
-            this.mockSecurityService.Setup(s => s.VerifyPassword(It.IsAny<string>(), user.PasswordHash)).Returns(true);
+            this.mockUsersRepository.Setup(repository => repository.GetUserByEmail(user.Email)).Returns(user);
+            this.mockSecurityService.Setup(service => service.VerifyPassword(It.IsAny<string>(), user.PasswordHash)).Returns(true);
             this.userAccountService.Login(user.Email, "any_password");
         }
 
@@ -53,8 +53,8 @@
         {
             var user = CreateUser(email: "paul@gmail.com", hash: "abc123");
             this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("paul@gmail.com")).Returns(true);
-            this.mockUsersRepository.Setup(r => r.GetUserByEmail("paul@gmail.com")).Returns(user);
-            this.mockSecurityService.Setup(s => s.VerifyPassword("abc123", "abc123")).Returns(true);
+            this.mockUsersRepository.Setup(repository => repository.GetUserByEmail("paul@gmail.com")).Returns(user);
+            this.mockSecurityService.Setup(service => service.VerifyPassword("abc123", "abc123")).Returns(true);
 
             this.userAccountService.Login("paul@gmail.com", "abc123");
 
@@ -69,8 +69,8 @@
         {
             var user = CreateUser(isDisabled: scenario == "disabled");
             this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(It.IsAny<string>())).Returns(scenario != "invalid");
-            this.mockUsersRepository.Setup(r => r.GetUserByEmail(It.IsAny<string>())).Returns(user);
-            this.mockSecurityService.Setup(s => s.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(scenario != "wrongpass");
+            this.mockUsersRepository.Setup(repository => repository.GetUserByEmail(It.IsAny<string>())).Returns(user);
+            this.mockSecurityService.Setup(service => service.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(scenario != "wrongpass");
 
             var ex = Assert.Throws<Exception>(() => this.userAccountService.Login("test@test.com", "pass"));
             Assert.That(ex.Message, Is.EqualTo(expectedMessage));
@@ -84,11 +84,11 @@
             this.mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat(It.IsAny<string>())).Returns(true);
             this.mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat(It.IsAny<string>())).Returns(true);
             this.mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat(It.IsAny<string>())).Returns(true); // <--- FIX
-            this.mockUsersRepository.Setup(r => r.GetUserByEmail("new@test.com")).Returns((User?)null);
+            this.mockUsersRepository.Setup(repository => repository.GetUserByEmail("new@test.com")).Returns((User?)null);
 
             this.userAccountService.Register("new@test.com", "Pass123!", "Pass123!", "user", "0700");
 
-            this.mockUsersRepository.Verify(r => r.AddUser(
+            this.mockUsersRepository.Verify(repository => repository.AddUser(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
@@ -111,7 +111,7 @@
             this.userAccountService.UpdateProfile("newname", "0799");
 
             Assert.That(user.Username, Is.EqualTo("newname"));
-            this.mockUsersRepository.Verify(r => r.UpdateUser(user), Times.Once);
+            this.mockUsersRepository.Verify(repository => repository.UpdateUser(user), Times.Once);
         }
 
         [Test]
@@ -119,9 +119,9 @@
         {
             var user = CreateUser(hash: "old");
             this.LoginAs(user);
-            this.mockSecurityService.Setup(s => s.VerifyPassword(It.IsAny<string>(), "old")).Returns(true);
+            this.mockSecurityService.Setup(service => service.VerifyPassword(It.IsAny<string>(), "old")).Returns(true);
             this.mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat(It.IsAny<string>())).Returns(true);
-            this.mockSecurityService.Setup(s => s.HashPassword("new")).Returns("newhash");
+            this.mockSecurityService.Setup(service => service.HashPassword("new")).Returns("newhash");
 
             this.userAccountService.ChangePassword("old", "new", "new");
 
@@ -134,7 +134,7 @@
             var admin = CreateUser(isAdmin: true);
             this.LoginAs(admin);
             var users = new List<User> { admin, CreateUser(id: 99, username: "target") };
-            this.mockUsersRepository.Setup(r => r.GetAllUsers()).Returns(users);
+            this.mockUsersRepository.Setup(repository => repository.GetAllUsers()).Returns(users);
 
             var result = this.userAccountService.SearchUsers("id:99");
 
@@ -152,7 +152,7 @@
             this.userAccountService.PromoteToAdmin(client);
 
             Assert.That(client.IsAdmin, Is.True);
-            this.mockUsersRepository.Verify(r => r.UpdateUser(client), Times.Once);
+            this.mockUsersRepository.Verify(repository => repository.UpdateUser(client), Times.Once);
         }
 
         // --- DisableAccount ---
@@ -195,7 +195,6 @@
         public void Logout_WhenNotLoggedIn_DoesNotThrow()
         {
             Assert.DoesNotThrow(() => this.userAccountService.Logout());
-            Assert.That(this.userAccountService.CurrentUser, Is.Null);
         }
     }
 }

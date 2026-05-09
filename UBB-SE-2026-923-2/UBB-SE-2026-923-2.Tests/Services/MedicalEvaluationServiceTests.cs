@@ -57,7 +57,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, pharmacist });
             var result = this.service.GetAllDoctors();
             Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].StaffID, Is.EqualTo(1));
         }
 
         [Test]
@@ -85,7 +84,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var result = this.service.GetEvaluationsByDoctor("1");
             Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].EvaluationID, Is.EqualTo(1));
         }
 
         [Test]

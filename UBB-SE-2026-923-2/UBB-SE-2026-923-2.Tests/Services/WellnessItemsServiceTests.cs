@@ -32,7 +32,7 @@
                 new Item(2, "B", "P", "pain", 15f, 1, "label", quantity: 0),
                 new Item(10, "Z", "P", "wellness", 10f, 1, "label", quantity: 0)
             };
-            this.mockItemsRepository.Setup(r => r.GetAllItems()).Returns(items);
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(items);
 
             var result = this.service.GetWellnessItems();
 
@@ -45,7 +45,7 @@
         [Test]
         public void GetWellnessItems_NoMatchingItems_ReturnsEmpty()
         {
-            this.mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item>
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item>
             {
                 new Item(1, "A", "P", "supplements", 10f, 1, "label", quantity: 0)
             });
@@ -60,7 +60,7 @@
             var itemWithNull = new Item(1, "X", "P", "wellness", 10f, 1, "label", quantity: 0);
             itemWithNull.Category = null;
 
-            this.mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { itemWithNull });
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { itemWithNull });
 
             var result = this.service.GetWellnessItems();
             Assert.That(result, Is.Empty);
@@ -70,7 +70,7 @@
         public void GetWellnessItems_PreservesOriginalProperties()
         {
             var sourceItem = new Item(7, "Candle", "Zen", "wellness", 15.5f, 3, "label", quantity: 10);
-            this.mockItemsRepository.Setup(r => r.GetAllItems()).Returns(new List<Item> { sourceItem });
+            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(new List<Item> { sourceItem });
 
             var result = this.service.GetWellnessItems();
 

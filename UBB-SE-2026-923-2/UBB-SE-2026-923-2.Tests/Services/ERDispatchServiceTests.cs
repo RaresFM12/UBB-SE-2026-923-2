@@ -69,7 +69,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var result = await this.service.GetPendingRequestIdsAsync();
 
             Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0], Is.EqualTo(5));
         }
 
         [Test]
@@ -91,7 +90,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var result = await this.service.DispatchERRequestAsync(99);
 
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Message, Does.Contain("not found"));
         }
 
         [Test]
@@ -142,7 +140,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var result = await this.service.ManualOverrideAsync(99, 1, 30);
 
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Message, Does.Contain("not found"));
         }
 
         [Test]

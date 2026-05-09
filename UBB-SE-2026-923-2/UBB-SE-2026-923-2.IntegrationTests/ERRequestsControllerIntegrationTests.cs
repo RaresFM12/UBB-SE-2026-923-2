@@ -60,7 +60,7 @@ public class ERRequestsControllerIntegrationTests
 
         await client.PostAsJsonAsync("/api/ERRequests", request);
         var requests = await client.GetFromJsonAsync<List<ERRequest>>("/api/ERRequests");
-        Assert.That(requests!.Any(r => r.Specialization == "Neurology"), Is.True);
+        Assert.That(requests!.Any(repository => repository.Specialization == "Neurology"), Is.True);
     }
 
     [Test]

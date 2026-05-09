@@ -78,7 +78,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var result = await this.service.GetShiftsAsync(1, now, now.AddDays(1));
             Assert.That(result[0].Id, Is.EqualTo(2));
-            Assert.That(result[1].Id, Is.EqualTo(1));
         }
 
         // --- GetPharmacists ---

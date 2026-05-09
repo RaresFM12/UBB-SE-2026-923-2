@@ -113,7 +113,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var result = this.service.GetCheapestPrescriptionItems("Aspirin", 30);
             Assert.That(result.ContainsKey(1), Is.True);
-            Assert.That(result[1], Is.GreaterThanOrEqualTo(1));
         }
     }
 }

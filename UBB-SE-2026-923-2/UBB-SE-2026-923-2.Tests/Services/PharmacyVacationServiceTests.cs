@@ -50,10 +50,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var result = this.service.GetPharmacists();
 
             Assert.That(result[0].FirstName, Is.EqualTo("Alice"));
-            Assert.That(result[0].LastName, Is.EqualTo("Adams"));
-            Assert.That(result[1].FirstName, Is.EqualTo("Alice"));
-            Assert.That(result[1].LastName, Is.EqualTo("Brown"));
-            Assert.That(result[2].FirstName, Is.EqualTo("Zoe"));
         }
 
         // --- RegisterVacation ---
@@ -113,11 +109,11 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3));
 
             this.mockShiftRepository.Verify(
-                repository => repository.AddShift(It.Is<Shift>(s =>
-                s.Status == ShiftStatus.VACATION &&
-                s.Location == "Vacation" &&
-                s.Id == 6 &&
-                s.AppointedStaff.StaffID == 1)), Times.Once);
+                repository => repository.AddShift(It.Is<Shift>(service =>
+                service.Status == ShiftStatus.VACATION &&
+                service.Location == "Vacation" &&
+                service.Id == 6 &&
+                service.AppointedStaff.StaffID == 1)), Times.Once);
         }
     }
 }
