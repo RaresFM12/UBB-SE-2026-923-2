@@ -352,7 +352,7 @@ namespace UBB_SE_2026_923_2.Services
         private void AddOrderWithItems(int clientId, DateOnly pickUpDate, Dictionary<int, Tuple<int, float>> items, bool isCompleted = false, bool isExpired = false)
         {
             int newOrderId = this.OrdersRepository.AddOrder(clientId, pickUpDate, isCompleted, isExpired);
-            Order newOrder = new Order(newOrderId, clientId, pickUpDate, isCompleted, isExpired);
+            Order newOrder = new Order(newOrderId, new User { Id = clientId }, pickUpDate, isCompleted, isExpired);
 
             foreach (KeyValuePair<int, Tuple<int, float>> item in items)
             {

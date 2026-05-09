@@ -65,9 +65,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var appointments = new List<Appointment>
             {
-                new Appointment { DoctorId = 1, Status = "Confirmed", Date = DateTime.Now, StartTime = TimeSpan.FromHours(9) },
-                new Appointment { DoctorId = 1, Status = "Cancelled", Date = DateTime.Now, StartTime = TimeSpan.FromHours(10) },
-                new Appointment { DoctorId = 2, Status = "Confirmed", Date = DateTime.Now, StartTime = TimeSpan.FromHours(11) },
+                new Appointment { Doctor = new Doctor { StaffID = 1 }, Status = "Confirmed", Date = DateTime.Now, StartTime = TimeSpan.FromHours(9) },
+                new Appointment { Doctor = new Doctor { StaffID = 1 }, Status = "Cancelled", Date = DateTime.Now, StartTime = TimeSpan.FromHours(10) },
+                new Appointment { Doctor = new Doctor { StaffID = 2 }, Status = "Confirmed", Date = DateTime.Now, StartTime = TimeSpan.FromHours(11) },
             };
             this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 

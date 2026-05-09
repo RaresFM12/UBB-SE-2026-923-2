@@ -145,7 +145,7 @@ namespace UBB_SE_2026_923_2.Services
                 && !string.Equals(status, CancelledAppointmentStatusUk, StringComparison.OrdinalIgnoreCase);
 
             bool IsConflictingForStaff(Appointment appointment) =>
-                appointment.DoctorId == staffId
+                appointment.Doctor?.StaffID == staffId
                 && appointment.Date.Date == date.Date
                 && IsActiveStatus(appointment.Status);
 

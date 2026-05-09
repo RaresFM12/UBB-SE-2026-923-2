@@ -48,7 +48,9 @@ namespace UBB_SE_2026_923_2.Repositories
                 .AsNoTracking()
                 .Include(user => user.PeriodNoteEntries)
                 .Include(user => user.UserDiscountEntries)
+                    .ThenInclude(userDiscount => userDiscount.Item)
                 .Include(user => user.UserNotificationEntries)
+                    .ThenInclude(userNotification => userNotification.Item)
                 .FirstOrDefault(user => user.Id == userId);
 
             return user is null ? null! : ProjectIntoLegacyCollections(user);
@@ -61,7 +63,9 @@ namespace UBB_SE_2026_923_2.Repositories
                 .AsNoTracking()
                 .Include(user => user.PeriodNoteEntries)
                 .Include(user => user.UserDiscountEntries)
+                    .ThenInclude(userDiscount => userDiscount.Item)
                 .Include(user => user.UserNotificationEntries)
+                    .ThenInclude(userNotification => userNotification.Item)
                 .FirstOrDefault(user => user.Email == email);
 
             return user is null ? null! : ProjectIntoLegacyCollections(user);
@@ -72,7 +76,7 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var user = new User
+            var newUser = new User
             {
                 Email = email,
                 PhoneNumber = phoneNumber,
@@ -85,11 +89,11 @@ namespace UBB_SE_2026_923_2.Repositories
                 LoyaltyPoints = loyaltyPoints,
             };
 
-            databaseContext.Users.Add(user);
+            databaseContext.Users.Add(newUser);
             databaseContext.SaveChanges();
         }
 
-        public void UpdateUser(User newUser)
+        public void UpdateUser(User updatedUser)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
@@ -97,7 +101,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 .Include(user => user.PeriodNoteEntries)
                 .Include(user => user.UserDiscountEntries)
                 .Include(user => user.UserNotificationEntries)
-                .FirstOrDefault(user => user.Id == newUser.Id);
+                .FirstOrDefault(user => user.Id == updatedUser.Id);
 
             if (existingUser is null)
             {
@@ -106,60 +110,73 @@ namespace UBB_SE_2026_923_2.Repositories
 
             // Scalar fields, including period-tracker columns that used to
             // live in a separate table.
-            existingUser.Email = newUser.Email;
-            existingUser.PhoneNumber = newUser.PhoneNumber;
-            existingUser.PasswordHash = newUser.PasswordHash;
-            existingUser.Username = newUser.Username;
-            existingUser.IsAdmin = newUser.IsAdmin;
-            existingUser.IsDisabled = newUser.IsDisabled;
-            existingUser.Role = newUser.Role;
-            existingUser.DiscountNotifications = newUser.DiscountNotifications;
-            existingUser.LoyaltyPoints = newUser.LoyaltyPoints;
-            existingUser.StartPeriodDate = newUser.StartPeriodDate;
-            existingUser.CycleDays = newUser.CycleDays;
-            existingUser.PeriodLasts = newUser.PeriodLasts;
-            existingUser.PremenstrualSyndromeOption = newUser.PremenstrualSyndromeOption;
+            existingUser.Email = updatedUser.Email;
+            existingUser.PhoneNumber = updatedUser.PhoneNumber;
+            existingUser.PasswordHash = updatedUser.PasswordHash;
+            existingUser.Username = updatedUser.Username;
+            existingUser.IsAdmin = updatedUser.IsAdmin;
+            existingUser.IsDisabled = updatedUser.IsDisabled;
+            existingUser.Role = updatedUser.Role;
+            existingUser.DiscountNotifications = updatedUser.DiscountNotifications;
+            existingUser.LoyaltyPoints = updatedUser.LoyaltyPoints;
+            existingUser.StartPeriodDate = updatedUser.StartPeriodDate;
+            existingUser.CycleDays = updatedUser.CycleDays;
+            existingUser.PeriodLasts = updatedUser.PeriodLasts;
+            existingUser.PremenstrualSyndromeOption = updatedUser.PremenstrualSyndromeOption;
 
             // Replace the related collections from the legacy in-memory views.
             // Phase 3 will switch callers to mutate the EF nav collections
             // directly, at which point this projection goes away.
             databaseContext.PeriodNotes.RemoveRange(existingUser.PeriodNoteEntries);
             existingUser.PeriodNoteEntries.Clear();
-            foreach (var keyValuePair in newUser.PeriodNotes)
+            foreach (var periodNoteEntry in updatedUser.PeriodNotes)
             {
                 existingUser.PeriodNoteEntries.Add(new PeriodNote
                 {
-                    UserId = existingUser.Id,
-                    NoteId = keyValuePair.Key,
-                    NoteBody = keyValuePair.Value.Item1,
-                    IsDone = keyValuePair.Value.Item2,
+                    User = existingUser,
+                    NoteId = periodNoteEntry.Key,
+                    NoteBody = periodNoteEntry.Value.Item1,
+                    IsDone = periodNoteEntry.Value.Item2,
                 });
             }
 
             databaseContext.UserDiscounts.RemoveRange(existingUser.UserDiscountEntries);
             existingUser.UserDiscountEntries.Clear();
-            foreach (var keyValuePair in newUser.UserDiscounts)
+            foreach (var userDiscountEntry in updatedUser.UserDiscounts)
             {
+                int itemIdentifier = userDiscountEntry.Key;
+                var itemEntity = databaseContext.Items.Find(itemIdentifier);
+                if (itemEntity is null)
+                {
+                    continue;
+                }
+
                 existingUser.UserDiscountEntries.Add(new UserDiscount
                 {
-                    UserId = existingUser.Id,
-                    ItemId = keyValuePair.Key,
-                    DiscountPercentage = keyValuePair.Value,
+                    User = existingUser,
+                    Item = itemEntity,
+                    DiscountPercentage = userDiscountEntry.Value,
                 });
             }
 
             databaseContext.UserNotifications.RemoveRange(existingUser.UserNotificationEntries);
             existingUser.UserNotificationEntries.Clear();
-            var notificationItemIds = new HashSet<int>(newUser.FavoriteItems);
-            notificationItemIds.UnionWith(newUser.StockAlerts);
-            foreach (var itemId in notificationItemIds)
+            var notificationItemIds = new HashSet<int>(updatedUser.FavoriteItems);
+            notificationItemIds.UnionWith(updatedUser.StockAlerts);
+            foreach (var itemIdentifier in notificationItemIds)
             {
+                var itemEntity = databaseContext.Items.Find(itemIdentifier);
+                if (itemEntity is null)
+                {
+                    continue;
+                }
+
                 existingUser.UserNotificationEntries.Add(new UserNotification
                 {
-                    UserId = existingUser.Id,
-                    ItemId = itemId,
-                    IsFavorite = newUser.FavoriteItems.Contains(itemId),
-                    IsStockAlert = newUser.StockAlerts.Contains(itemId),
+                    User = existingUser,
+                    Item = itemEntity,
+                    IsFavorite = updatedUser.FavoriteItems.Contains(itemIdentifier),
+                    IsStockAlert = updatedUser.StockAlerts.Contains(itemIdentifier),
                 });
             }
 
@@ -173,7 +190,9 @@ namespace UBB_SE_2026_923_2.Repositories
                 .AsNoTracking()
                 .Include(user => user.PeriodNoteEntries)
                 .Include(user => user.UserDiscountEntries)
+                    .ThenInclude(userDiscount => userDiscount.Item)
                 .Include(user => user.UserNotificationEntries)
+                    .ThenInclude(userNotification => userNotification.Item)
                 .ToList();
 
             foreach (var user in users)
@@ -207,22 +226,24 @@ namespace UBB_SE_2026_923_2.Repositories
 
             foreach (var userDiscount in user.UserDiscountEntries)
             {
-                if (!user.UserDiscounts.ContainsKey(userDiscount.ItemId))
+                int itemIdentifier = userDiscount.Item.Id;
+                if (!user.UserDiscounts.ContainsKey(itemIdentifier))
                 {
-                    user.AddUserDiscount(userDiscount.ItemId, userDiscount.DiscountPercentage);
+                    user.AddUserDiscount(itemIdentifier, userDiscount.DiscountPercentage);
                 }
             }
 
             foreach (var userNotification in user.UserNotificationEntries)
             {
-                if (userNotification.IsFavorite && !user.FavoriteItems.Contains(userNotification.ItemId))
+                int itemIdentifier = userNotification.Item.Id;
+                if (userNotification.IsFavorite && !user.FavoriteItems.Contains(itemIdentifier))
                 {
-                    user.AddItemToFavoriteItems(userNotification.ItemId);
+                    user.AddItemToFavoriteItems(itemIdentifier);
                 }
 
-                if (userNotification.IsStockAlert && !user.StockAlerts.Contains(userNotification.ItemId))
+                if (userNotification.IsStockAlert && !user.StockAlerts.Contains(itemIdentifier))
                 {
-                    user.AddStockAlertToUser(userNotification.ItemId);
+                    user.AddStockAlertToUser(itemIdentifier);
                 }
             }
 

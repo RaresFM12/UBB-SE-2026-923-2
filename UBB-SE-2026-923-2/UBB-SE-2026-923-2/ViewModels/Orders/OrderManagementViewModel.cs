@@ -126,7 +126,7 @@
             this.orderService.ExpireOverdueOrders();
             foreach (Order currOrder in this.orderService.OrdersRepository.GetAllOrders())
             {
-                int userID = this.orderService.OrdersRepository.GetOrder(currOrder.Id).ClientId;
+                int userID = this.orderService.OrdersRepository.GetOrder(currOrder.Id).Client.Id;
                 string currUserEmail = this.orderService.UsersRepository.GetUserById(userID).Email;
 
                 OrderDetail currOrderDetail = new(currOrder, currUserEmail);

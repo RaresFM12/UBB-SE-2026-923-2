@@ -150,14 +150,18 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            var swapRequest = new ShiftSwapRequest
+            var colleague = this.staffRepository.GetStaffById(colleagueId);
+            if (colleague == null)
             {
-                ShiftId = shiftId,
-                RequesterId = requesterId,
-                ColleagueId = colleagueId,
-                RequestedAt = DateTime.UtcNow,
-                Status = ShiftSwapRequestStatus.PENDING,
-            };
+                message = "Colleague not found.";
+                return false;
+            }
+
+            var swapRequest = new ShiftSwapRequest(
+                0,
+                shift!,
+                requester as Staff ?? new Staff { StaffID = requesterId },
+                colleague as Staff ?? new Staff { StaffID = colleagueId });
 
             var swapId = this.shiftSwapRepository.AddShiftSwapRequest(swapRequest);
             if (swapId <= 0)
@@ -178,7 +182,7 @@ namespace UBB_SE_2026_923_2.Services
         public List<ShiftSwapRequest> GetIncomingSwapRequests(int colleagueId)
         {
             bool IsPendingForColleague(ShiftSwapRequest swapRequest) =>
-                swapRequest.ColleagueId == colleagueId && swapRequest.Status == ShiftSwapRequestStatus.PENDING;
+                swapRequest.Colleague.StaffID == colleagueId && swapRequest.Status == ShiftSwapRequestStatus.PENDING;
             DateTime ByRequestedAt(ShiftSwapRequest swapRequest) => swapRequest.RequestedAt;
 
             return this.shiftSwapRepository.GetAllShiftSwapRequests()
@@ -198,7 +202,7 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            if (swapRequest.ColleagueId != colleagueId)
+            if (swapRequest.Colleague.StaffID != colleagueId)
             {
                 message = "You cannot accept this request.";
                 return false;
@@ -211,7 +215,7 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             var allShifts = this.shiftRepository.GetAllShifts();
-            bool HasTargetShiftId(Shift existingShift) => existingShift.Id == swapRequest.ShiftId;
+            bool HasTargetShiftId(Shift existingShift) => existingShift.Id == swapRequest.Shift.Id;
             var shift = allShifts.FirstOrDefault(HasTargetShiftId);
             if (shift == null)
             {
@@ -234,10 +238,10 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            this.shiftRepository.UpdateShiftStaffId(swapRequest.ShiftId, colleagueId);
+            this.shiftRepository.UpdateShiftStaffId(swapRequest.Shift.Id, colleagueId);
             this.shiftSwapRepository.UpdateShiftSwapRequestStatus(swapId, AcceptedStatus);
             this.notificationRepository.AddNotification(
-                swapRequest.RequesterId,
+                swapRequest.Requester.StaffID,
                 SwapAcceptedNotificationTitle,
                 $"Your swap request #{swapId} was accepted.");
 
@@ -268,7 +272,7 @@ namespace UBB_SE_2026_923_2.Services
                 return false;
             }
 
-            if (swapRequest.ColleagueId != colleagueId)
+            if (swapRequest.Colleague.StaffID != colleagueId)
             {
                 message = "You cannot reject this request.";
                 return false;
@@ -282,7 +286,7 @@ namespace UBB_SE_2026_923_2.Services
 
             this.shiftSwapRepository.UpdateShiftSwapRequestStatus(swapId, RejectedStatus);
             this.notificationRepository.AddNotification(
-                swapRequest.RequesterId,
+                swapRequest.Requester.StaffID,
                 SwapRejectedNotificationTitle,
                 $"Your swap request #{swapId} was rejected.");
             message = "Swap rejected.";

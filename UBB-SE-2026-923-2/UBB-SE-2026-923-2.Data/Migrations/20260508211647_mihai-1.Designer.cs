@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UBB_SE_2026_923_2.Data;
 
@@ -11,9 +12,11 @@ using UBB_SE_2026_923_2.Data;
 namespace UBB_SE_2026_923_2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260508211647_mihai-1")]
+    partial class mihai1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,8 +36,13 @@ namespace UBB_SE_2026_923_2.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("DoctorId")
+                    b.Property<int>("DoctorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("DoctorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
@@ -84,6 +92,10 @@ namespace UBB_SE_2026_923_2.Migrations
 
                     b.Property<int?>("AssignedDoctorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("AssignedDoctorName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -141,21 +153,13 @@ namespace UBB_SE_2026_923_2.Migrations
 
             modelBuilder.Entity("UBB_SE_2026_923_2.Models.HangoutParticipant", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("HangoutId")
                         .HasColumnType("int");
 
                     b.Property<int>("StaffId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("HangoutId");
+                    b.HasKey("HangoutId", "StaffId");
 
                     b.HasIndex("StaffId");
 
@@ -247,50 +251,33 @@ namespace UBB_SE_2026_923_2.Migrations
 
             modelBuilder.Entity("UBB_SE_2026_923_2.Models.ItemBatch", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ItemId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateOnly>("ExpirationDate")
                         .HasColumnType("date");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
                     b.Property<int>("NumberOfPacks")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId");
+                    b.HasKey("ItemId", "ExpirationDate");
 
                     b.ToTable("ItemBatches", (string)null);
                 });
 
             modelBuilder.Entity("UBB_SE_2026_923_2.Models.ItemSubstance", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<float>("Concentration")
-                        .HasColumnType("real");
-
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
                     b.Property<string>("SubstanceName")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.HasKey("Id");
+                    b.Property<float>("Concentration")
+                        .HasColumnType("real");
 
-                    b.HasIndex("ItemId");
+                    b.HasKey("ItemId", "SubstanceName");
 
                     b.HasIndex("SubstanceName");
 
@@ -406,16 +393,10 @@ namespace UBB_SE_2026_923_2.Migrations
 
             modelBuilder.Entity("UBB_SE_2026_923_2.Models.OrderItem", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("OrderId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<int>("OrderQuantity")
@@ -424,22 +405,20 @@ namespace UBB_SE_2026_923_2.Migrations
                     b.Property<float>("Price")
                         .HasColumnType("real");
 
-                    b.HasKey("Id");
+                    b.HasKey("OrderId", "ItemId");
 
                     b.HasIndex("ItemId");
-
-                    b.HasIndex("OrderId");
 
                     b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("UBB_SE_2026_923_2.Models.PeriodNote", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("NoteId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsDone")
                         .HasColumnType("bit");
@@ -449,36 +428,20 @@ namespace UBB_SE_2026_923_2.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<int>("NoteId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
+                    b.HasKey("UserId", "NoteId");
 
                     b.ToTable("PeriodNotes", (string)null);
                 });
 
             modelBuilder.Entity("UBB_SE_2026_923_2.Models.PharmacyHandover", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("PharmacistId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("HandoverDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PharmacistId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PharmacistId");
+                    b.HasKey("PharmacistId", "HandoverDate");
 
                     b.ToTable("PharmacyHandovers", (string)null);
                 });
@@ -525,16 +488,16 @@ namespace UBB_SE_2026_923_2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SwapId"));
 
-                    b.Property<int?>("ColleagueId")
+                    b.Property<int>("ColleagueId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("RequestedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("RequesterId")
+                    b.Property<int>("RequesterId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ShiftId")
+                    b.Property<int>("ShiftId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -758,37 +721,29 @@ namespace UBB_SE_2026_923_2.Migrations
 
             modelBuilder.Entity("UBB_SE_2026_923_2.Models.UserDiscount", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<float>("DiscountPercentage")
-                        .HasColumnType("real");
 
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<float>("DiscountPercentage")
+                        .HasColumnType("real");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "ItemId");
 
                     b.HasIndex("ItemId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserDiscounts", (string)null);
                 });
 
             modelBuilder.Entity("UBB_SE_2026_923_2.Models.UserNotification", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsFavorite")
                         .HasColumnType("bit");
@@ -796,17 +751,9 @@ namespace UBB_SE_2026_923_2.Migrations
                     b.Property<bool>("IsStockAlert")
                         .HasColumnType("bit");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "ItemId");
 
                     b.HasIndex("ItemId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserNotifications", (string)null);
                 });
@@ -835,7 +782,8 @@ namespace UBB_SE_2026_923_2.Migrations
                     b.HasOne("UBB_SE_2026_923_2.Models.Doctor", "Doctor")
                         .WithMany("Appointments")
                         .HasForeignKey("DoctorId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Doctor");
                 });
@@ -988,17 +936,20 @@ namespace UBB_SE_2026_923_2.Migrations
                     b.HasOne("UBB_SE_2026_923_2.Models.Staff", "Colleague")
                         .WithMany("ShiftSwapRequestsAsColleague")
                         .HasForeignKey("ColleagueId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("UBB_SE_2026_923_2.Models.Staff", "Requester")
                         .WithMany("ShiftSwapRequestsAsRequester")
                         .HasForeignKey("RequesterId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("UBB_SE_2026_923_2.Models.Shift", "Shift")
                         .WithMany()
                         .HasForeignKey("ShiftId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Colleague");
 

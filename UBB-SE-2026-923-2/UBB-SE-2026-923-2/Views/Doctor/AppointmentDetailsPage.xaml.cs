@@ -43,7 +43,7 @@ namespace UBB_SE_2026_923_2.Views.Doctor
             }
 
             PatientNameText.Text = this.currentAppointment.PatientName;
-            DoctorNameText.Text = this.currentAppointment.DoctorName;
+            DoctorNameText.Text = this.currentAppointment.Doctor.FullName;
             DateText.Text = this.currentAppointment.Date.ToString(DateFormat);
             TimeText.Text = $"{this.currentAppointment.StartTime.ToString(TimeFormat)} - {this.currentAppointment.EndTime.ToString(TimeFormat)}";
             StatusText.Text = this.currentAppointment.Status;

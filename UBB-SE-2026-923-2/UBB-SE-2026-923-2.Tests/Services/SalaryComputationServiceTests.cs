@@ -119,7 +119,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockHandoverRepository.Setup(repository => repository.GetAllPharmacyHandovers()).Returns(
                 Enumerable.Range(0, 20).Select(index => new PharmacyHandover
                 {
-                    PharmacistId = 1,
+                    Pharmacist = new Staff { StaffID = 1 },
                     HandoverDate = new DateTime(2025, 1, 10),
                 }).ToList());
 

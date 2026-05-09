@@ -23,48 +23,21 @@ namespace UBB_SE_2026_923_2.Repositories
         public async Task<IReadOnlyList<Appointment>> GetAllAppointmentsAsync()
         {
             await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
-            var appointmentRows = await databaseContext.Appointments
+            return await databaseContext.Appointments
                 .AsNoTracking()
-                .Select(appointment => new
-                {
-                    appointment.Id,
-                    appointment.DoctorId,
-                    appointment.PatientName,
-                    appointment.Date,
-                    appointment.StartTime,
-                    appointment.EndTime,
-                    appointment.Status,
-                    appointment.Type,
-                    appointment.Location,
-                    appointment.Notes,
-                })
+                .Include(appointment => appointment.Doctor)
                 .ToListAsync();
-
-            return appointmentRows
-                .Select(appointmentRow => new Appointment
-                {
-                    Id = appointmentRow.Id,
-                    DoctorId = appointmentRow.DoctorId,
-                    DoctorName = string.Empty,
-                    PatientName = appointmentRow.PatientName,
-                    Date = appointmentRow.Date,
-                    StartTime = appointmentRow.StartTime,
-                    EndTime = appointmentRow.EndTime,
-                    Status = appointmentRow.Status,
-                    Type = appointmentRow.Type,
-                    Location = appointmentRow.Location,
-                    Notes = appointmentRow.Notes,
-                })
-                .ToList();
         }
 
         public async Task AddAppointmentAsync(int patientId, int doctorId, DateTime startTime, DateTime endTime, string status)
         {
             await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
 
-            var appointment = new Appointment
+            var assignedDoctor = doctorId == 0 ? null : await databaseContext.Doctors.FindAsync(doctorId);
+
+            var newAppointment = new Appointment
             {
-                DoctorId = doctorId,
+                Doctor = assignedDoctor,
                 PatientName = patientId.ToString(),
                 Date = startTime.Date,
                 StartTime = startTime.TimeOfDay,
@@ -72,14 +45,16 @@ namespace UBB_SE_2026_923_2.Repositories
                 Status = status,
             };
 
-            databaseContext.Appointments.Add(appointment);
+            databaseContext.Appointments.Add(newAppointment);
             await databaseContext.SaveChangesAsync();
         }
 
         public async Task UpdateAppointmentStatusAsync(int appointmentId, string status)
         {
             await using var databaseContext = await this.databaseContextFactory.CreateDbContextAsync();
-            var appointmentRecord = await databaseContext.Appointments.FirstOrDefaultAsync(appointment => appointment.Id == appointmentId);
+            var appointmentRecord = await databaseContext.Appointments
+                .FirstOrDefaultAsync(appointment => appointment.Id == appointmentId);
+
             if (appointmentRecord is null)
             {
                 return;

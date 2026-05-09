@@ -26,7 +26,7 @@ public class ShiftsController : ControllerBase
     {
         var shift = new Shift
         {
-            StaffId = request.StaffId,
+            Staff = new Staff { StaffID = request.StaffId },
             Location = request.Location ?? string.Empty,
             StartTime = request.StartTime,
             EndTime = request.EndTime,

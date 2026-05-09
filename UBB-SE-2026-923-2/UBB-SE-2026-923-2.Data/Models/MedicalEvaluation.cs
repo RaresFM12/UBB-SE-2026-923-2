@@ -1,4 +1,4 @@
-﻿namespace UBB_SE_2026_923_2.Models
+namespace UBB_SE_2026_923_2.Models
 {
     using System;
 
@@ -23,9 +23,9 @@
 
         public DateTime EvaluationDate { get; set; }
 
-        // ---- EF Core foreign key + navigation to Doctor (TPH subtype of Staff) ----
-        public int? DoctorId { get; set; }
-
+        // EF Core navigation to Doctor (TPH subtype of Staff).
+        // Nullable because an evaluation may exist without an assigned evaluator.
+        // Persisted via shadow FK column "DoctorId".
         public Doctor? Evaluator { get; set; }
 
         public string FormattedDate => this.EvaluationDate.ToString(DateFormat);

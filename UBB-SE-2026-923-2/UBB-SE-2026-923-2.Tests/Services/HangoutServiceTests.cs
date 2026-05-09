@@ -63,7 +63,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
                 .ReturnsAsync(new List<Appointment>
                 {
-                    new Appointment { DoctorId = 1, Date = hangoutDate.Date, Status = "Scheduled", StartTime = TimeSpan.FromHours(9) },
+                    new Appointment { Doctor = new Doctor { StaffID = 1 }, Date = hangoutDate.Date, Status = "Scheduled", StartTime = TimeSpan.FromHours(9) },
                 });
 
             Assert.Throws<InvalidOperationException>(() =>
@@ -122,7 +122,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
                 .ReturnsAsync(new List<Appointment>
                 {
-                    new Appointment { DoctorId = 1, Date = hangoutDate.Date, Status = "Scheduled", StartTime = TimeSpan.FromHours(9) },
+                    new Appointment { Doctor = new Doctor { StaffID = 1 }, Date = hangoutDate.Date, Status = "Scheduled", StartTime = TimeSpan.FromHours(9) },
                 });
 
             Assert.Throws<InvalidOperationException>(() => this.service.JoinHangout(1, this.doctor1));

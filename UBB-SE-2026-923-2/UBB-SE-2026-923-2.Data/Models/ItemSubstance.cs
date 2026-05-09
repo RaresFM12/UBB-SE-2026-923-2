@@ -2,19 +2,20 @@ namespace UBB_SE_2026_923_2.Models
 {
     /// <summary>
     /// Active substance attached to an <see cref="Item"/> with a concentration.
-    /// Composite key (ItemId, SubstanceName). Replaces the legacy
-    /// <see cref="Item.ActiveSubstances"/> dictionary.
+    /// Surrogate primary key Id replaces the old composite (ItemId, SubstanceName) PK.
+    /// FK columns are maintained as EF Core shadow properties.
     /// </summary>
     public class ItemSubstance
     {
-        public int ItemId { get; set; }
-
-        public string SubstanceName { get; set; } = string.Empty;
+        // Surrogate primary key — replaces the old composite (ItemId, SubstanceName) PK.
+        public int Id { get; set; }
 
         public float Concentration { get; set; }
 
-        public Item? Item { get; set; }
+        // EF Core navigation properties — persisted via shadow FK columns
+        // "ItemId" and "SubstanceName".
+        public Item Item { get; set; } = null!;
 
-        public Substance? Substance { get; set; }
+        public Substance Substance { get; set; } = null!;
     }
 }

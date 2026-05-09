@@ -1,7 +1,6 @@
-﻿namespace UBB_SE_2026_923_2.Models
+namespace UBB_SE_2026_923_2.Models
 {
     using System;
-    using System.Text.Json.Serialization;
 
     public sealed class ERRequest
     {
@@ -17,16 +16,12 @@
 
         public string Status { get; set; } = PendingStatus;
 
-        public int? AssignedDoctorId { get; set; }
-
-        public string? AssignedDoctorName { get; set; }
-
-        // ---- EF Core navigation property (persisted) ----
-        // Excluded from JSON: AssignedDoctorId/Name already carry the data
-        // callers need; the full Doctor entity would balloon payload size.
-        [JsonIgnore]
+        // EF Core navigation property — persisted via shadow FK column "AssignedDoctorId".
+        // Nullable because an ER request may not yet have an assigned doctor.
         public Doctor? AssignedDoctor { get; set; }
     }
+
+    // ---- DTOs (not persisted, no FK scalars needed) ----
 
     public sealed class ERDispatchResult
     {

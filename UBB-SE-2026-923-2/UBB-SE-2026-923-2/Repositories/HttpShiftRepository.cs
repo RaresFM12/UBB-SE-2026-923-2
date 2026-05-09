@@ -31,8 +31,8 @@ namespace UBB_SE_2026_923_2.Repositories
 
         public void AddShift(Shift newShift)
         {
-            int staffId = newShift.StaffId != 0
-                ? newShift.StaffId
+            int staffId = newShift.Staff.StaffID != 0
+                ? newShift.Staff.StaffID
                 : (newShift.AppointedStaff?.StaffID ?? 0);
 
             var requestPayload = new

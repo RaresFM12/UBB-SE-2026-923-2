@@ -32,7 +32,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task GetUpcomingAppointmentsAsync_AppointmentInWindow_ReturnsIt()
         {
             var tomorrow = DateTime.Now.AddDays(1);
-            var appointment = new Appointment { Id = 1, DoctorId = 1, Date = tomorrow, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(9.5), Status = "Scheduled" };
+            var appointment = new Appointment { Id = 1, Doctor = new Doctor { StaffID = 1 }, Date = tomorrow, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(9.5), Status = "Scheduled" };
             this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
             var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
@@ -43,7 +43,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         public async Task GetUpcomingAppointmentsAsync_AppointmentOutsideWindow_ReturnsEmpty()
         {
             var farFuture = DateTime.Now.AddDays(60);
-            var appointment = new Appointment { Id = 1, DoctorId = 1, Date = farFuture, StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
+            var appointment = new Appointment { Id = 1, Doctor = new Doctor { StaffID = 1 }, Date = farFuture, StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
             this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
             var result = await this.service.GetUpcomingAppointmentsAsync(1, DateTime.Now, 0, 10);
@@ -56,7 +56,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var appointments = Enumerable.Range(1, 5).Select(index => new Appointment
             {
                 Id = index,
-                DoctorId = 1,
+                Doctor = new Doctor { StaffID = 1 },
                 Date = DateTime.Now.AddDays(index),
                 StartTime = TimeSpan.FromHours(9),
                 Status = "Scheduled"
@@ -93,7 +93,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public async Task GetAppointmentDetailsAsync_Found_ReturnsAppointment()
         {
-            var appointment = new Appointment { Id = 5, DoctorId = 1, Date = DateTime.Now, StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
+            var appointment = new Appointment { Id = 5, Doctor = new Doctor { StaffID = 1 }, Date = DateTime.Now, StartTime = TimeSpan.FromHours(9), Status = "Scheduled" };
             this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment> { appointment });
 
             var result = await this.service.GetAppointmentDetailsAsync(5);
@@ -115,9 +115,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
         {
             var appointments = new List<Appointment>
             {
-                new Appointment { Id = 1, DoctorId = 1, Date = DateTime.Now.AddDays(2), StartTime = TimeSpan.FromHours(10), Status = "Scheduled" },
-                new Appointment { Id = 2, DoctorId = 1, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" },
-                new Appointment { Id = 3, DoctorId = 2, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(8), Status = "Scheduled" }
+                new Appointment { Id = 1, Doctor = new Doctor { StaffID = 1 }, Date = DateTime.Now.AddDays(2), StartTime = TimeSpan.FromHours(10), Status = "Scheduled" },
+                new Appointment { Id = 2, Doctor = new Doctor { StaffID = 1 }, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(9), Status = "Scheduled" },
+                new Appointment { Id = 3, Doctor = new Doctor { StaffID = 2 }, Date = DateTime.Now.AddDays(1), StartTime = TimeSpan.FromHours(8), Status = "Scheduled" }
             };
             this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
 
@@ -195,7 +195,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public async Task FinishAppointmentAsync_ValidAppointment_UpdatesStatus()
         {
-            var appointment = new Appointment { Id = 99, DoctorId = 1, Status = "Scheduled", Date = DateTime.Now, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10) };
+            var appointment = new Appointment { Id = 99, Doctor = new Doctor { StaffID = 1 }, Status = "Scheduled", Date = DateTime.Now, StartTime = TimeSpan.FromHours(9), EndTime = TimeSpan.FromHours(10) };
             this.mockAppointmentRepository.Setup(repo => repo.GetAllAppointmentsAsync()).ReturnsAsync(new List<Appointment>());
 
             await this.service.FinishAppointmentAsync(appointment);

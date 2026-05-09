@@ -6,6 +6,8 @@ using UBB_SE_2026_923_2.Models;
 /// <summary>
 /// Single EF Core context for the entire application. Code-first; the schema
 /// is created and evolved exclusively through EF Core migrations.
+/// All foreign keys that were removed from model classes are maintained here
+/// as EF Core shadow properties using the string overload of HasForeignKey.
 /// </summary>
 public class AppDbContext : DbContext
 {
@@ -80,26 +82,26 @@ public class AppDbContext : DbContext
         databaseModelBuilder.Entity<Staff>(staffEntityBuilder =>
         {
             staffEntityBuilder.ToTable("Staff");
-            staffEntityBuilder.HasKey(staff => staff.StaffID);
-            staffEntityBuilder.Property(staff => staff.StaffID).ValueGeneratedOnAdd();
+            staffEntityBuilder.HasKey(staffMember => staffMember.StaffID);
+            staffEntityBuilder.Property(staffMember => staffMember.StaffID).ValueGeneratedOnAdd();
 
-            staffEntityBuilder.Property(staff => staff.Email).HasMaxLength(256);
-            staffEntityBuilder.Property(staff => staff.PasswordHash).HasMaxLength(512);
-            staffEntityBuilder.Property(staff => staff.Role).HasMaxLength(50).IsRequired();
-            staffEntityBuilder.Property(staff => staff.Department).HasMaxLength(100);
-            staffEntityBuilder.Property(staff => staff.FirstName).HasMaxLength(100);
-            staffEntityBuilder.Property(staff => staff.LastName).HasMaxLength(100);
-            staffEntityBuilder.Property(staff => staff.ContactInfo).HasMaxLength(200);
-            staffEntityBuilder.Property(staff => staff.LicenseNumber).HasMaxLength(100);
-            staffEntityBuilder.Property(staff => staff.Specialization).HasMaxLength(100);
-            staffEntityBuilder.Property(staff => staff.Status).HasMaxLength(50);
-            staffEntityBuilder.Property(staff => staff.Certification).HasMaxLength(200);
+            staffEntityBuilder.Property(staffMember => staffMember.Email).HasMaxLength(256);
+            staffEntityBuilder.Property(staffMember => staffMember.PasswordHash).HasMaxLength(512);
+            staffEntityBuilder.Property(staffMember => staffMember.Role).HasMaxLength(50).IsRequired();
+            staffEntityBuilder.Property(staffMember => staffMember.Department).HasMaxLength(100);
+            staffEntityBuilder.Property(staffMember => staffMember.FirstName).HasMaxLength(100);
+            staffEntityBuilder.Property(staffMember => staffMember.LastName).HasMaxLength(100);
+            staffEntityBuilder.Property(staffMember => staffMember.ContactInfo).HasMaxLength(200);
+            staffEntityBuilder.Property(staffMember => staffMember.LicenseNumber).HasMaxLength(100);
+            staffEntityBuilder.Property(staffMember => staffMember.Specialization).HasMaxLength(100);
+            staffEntityBuilder.Property(staffMember => staffMember.Status).HasMaxLength(50);
+            staffEntityBuilder.Property(staffMember => staffMember.Certification).HasMaxLength(200);
 
-            staffEntityBuilder.HasIndex(staff => staff.Email)
+            staffEntityBuilder.HasIndex(staffMember => staffMember.Email)
                   .IsUnique()
                   .HasFilter("[Email] IS NOT NULL AND [Email] <> ''");
 
-            staffEntityBuilder.HasDiscriminator(staff => staff.Role)
+            staffEntityBuilder.HasDiscriminator(staffMember => staffMember.Role)
                   .HasValue<Staff>("Staff")
                   .HasValue<Doctor>("Doctor")
                   .HasValue<Pharmacyst>("Pharmacist");
@@ -129,22 +131,22 @@ public class AppDbContext : DbContext
 
             userEntityBuilder.HasMany(user => user.Orders)
                   .WithOne(order => order.Client)
-                  .HasForeignKey(order => order.ClientId)
+                  .HasForeignKey("ClientId")
                   .OnDelete(DeleteBehavior.Restrict);
 
             userEntityBuilder.HasMany(user => user.PeriodNoteEntries)
                   .WithOne(periodNote => periodNote.User)
-                  .HasForeignKey(periodNote => periodNote.UserId)
+                  .HasForeignKey("UserId")
                   .OnDelete(DeleteBehavior.Cascade);
 
             userEntityBuilder.HasMany(user => user.UserDiscountEntries)
                   .WithOne(userDiscount => userDiscount.User)
-                  .HasForeignKey(userDiscount => userDiscount.UserId)
+                  .HasForeignKey("UserId")
                   .OnDelete(DeleteBehavior.Cascade);
 
             userEntityBuilder.HasMany(user => user.UserNotificationEntries)
                   .WithOne(userNotification => userNotification.User)
-                  .HasForeignKey(userNotification => userNotification.UserId)
+                  .HasForeignKey("UserId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -157,13 +159,9 @@ public class AppDbContext : DbContext
 
             substanceEntityBuilder.HasMany(substance => substance.ItemSubstanceEntries)
                   .WithOne(itemSubstanceLink => itemSubstanceLink.Substance)
-                  .HasForeignKey(itemSubstanceLink => itemSubstanceLink.SubstanceName)
+                  .HasForeignKey("SubstanceName")
                   .OnDelete(DeleteBehavior.Cascade);
 
-            // Reference data: curated list of pharmacological substances with
-            // their lethal dose. Items reference these by Name, so the seed
-            // values must exist before any Item -> ItemSubstance link can be
-            // created. Item rows themselves stay user-generated.
             substanceEntityBuilder.HasData(
                 new Substance { Name = "Ibuprofen", LethalDose = 3200.00f, Description = "Anti-inflammatory pain reliever" },
                 new Substance { Name = "Paracetamol", LethalDose = 4000.00f, Description = "Pain reliever and fever reducer" },
@@ -186,26 +184,30 @@ public class AppDbContext : DbContext
 
             itemEntityBuilder.HasMany(item => item.ItemSubstanceEntries)
                   .WithOne(itemSubstanceLink => itemSubstanceLink.Item)
-                  .HasForeignKey(itemSubstanceLink => itemSubstanceLink.ItemId)
+                  .HasForeignKey("ItemId")
                   .OnDelete(DeleteBehavior.Cascade);
 
             itemEntityBuilder.HasMany(item => item.ItemBatchEntries)
                   .WithOne(itemBatch => itemBatch.Item)
-                  .HasForeignKey(itemBatch => itemBatch.ItemId)
+                  .HasForeignKey("ItemId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         databaseModelBuilder.Entity<ItemSubstance>(itemSubstanceEntityBuilder =>
         {
             itemSubstanceEntityBuilder.ToTable("ItemSubstances");
-            itemSubstanceEntityBuilder.HasKey(itemSubstanceLink => new { itemSubstanceLink.ItemId, itemSubstanceLink.SubstanceName });
-            itemSubstanceEntityBuilder.Property(itemSubstanceLink => itemSubstanceLink.SubstanceName).HasMaxLength(255);
+            itemSubstanceEntityBuilder.HasKey(itemSubstanceLink => itemSubstanceLink.Id);
+            itemSubstanceEntityBuilder.Property(itemSubstanceLink => itemSubstanceLink.Id).ValueGeneratedOnAdd();
+
+            // Declare the string shadow FK explicitly so EF Core knows its column type.
+            itemSubstanceEntityBuilder.Property<string>("SubstanceName").HasMaxLength(255);
         });
 
         databaseModelBuilder.Entity<ItemBatch>(itemBatchEntityBuilder =>
         {
             itemBatchEntityBuilder.ToTable("ItemBatches");
-            itemBatchEntityBuilder.HasKey(itemBatch => new { itemBatch.ItemId, itemBatch.ExpirationDate });
+            itemBatchEntityBuilder.HasKey(itemBatch => itemBatch.Id);
+            itemBatchEntityBuilder.Property(itemBatch => itemBatch.Id).ValueGeneratedOnAdd();
         });
 
         databaseModelBuilder.Entity<Order>(orderEntityBuilder =>
@@ -216,47 +218,51 @@ public class AppDbContext : DbContext
 
             orderEntityBuilder.HasMany(order => order.OrderItemEntries)
                   .WithOne(orderItem => orderItem.Order)
-                  .HasForeignKey(orderItem => orderItem.OrderId)
+                  .HasForeignKey("OrderId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         databaseModelBuilder.Entity<OrderItem>(orderItemEntityBuilder =>
         {
             orderItemEntityBuilder.ToTable("OrderItems");
-            orderItemEntityBuilder.HasKey(orderItem => new { orderItem.OrderId, orderItem.ItemId });
+            orderItemEntityBuilder.HasKey(orderItem => orderItem.Id);
+            orderItemEntityBuilder.Property(orderItem => orderItem.Id).ValueGeneratedOnAdd();
 
             orderItemEntityBuilder.HasOne(orderItem => orderItem.Item)
                   .WithMany()
-                  .HasForeignKey(orderItem => orderItem.ItemId)
+                  .HasForeignKey("ItemId")
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
         databaseModelBuilder.Entity<UserDiscount>(userDiscountEntityBuilder =>
         {
             userDiscountEntityBuilder.ToTable("UserDiscounts");
-            userDiscountEntityBuilder.HasKey(userDiscount => new { userDiscount.UserId, userDiscount.ItemId });
+            userDiscountEntityBuilder.HasKey(userDiscount => userDiscount.Id);
+            userDiscountEntityBuilder.Property(userDiscount => userDiscount.Id).ValueGeneratedOnAdd();
 
             userDiscountEntityBuilder.HasOne(userDiscount => userDiscount.Item)
                   .WithMany()
-                  .HasForeignKey(userDiscount => userDiscount.ItemId)
+                  .HasForeignKey("ItemId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         databaseModelBuilder.Entity<UserNotification>(userNotificationEntityBuilder =>
         {
             userNotificationEntityBuilder.ToTable("UserNotifications");
-            userNotificationEntityBuilder.HasKey(userNotification => new { userNotification.UserId, userNotification.ItemId });
+            userNotificationEntityBuilder.HasKey(userNotification => userNotification.Id);
+            userNotificationEntityBuilder.Property(userNotification => userNotification.Id).ValueGeneratedOnAdd();
 
             userNotificationEntityBuilder.HasOne(userNotification => userNotification.Item)
                   .WithMany()
-                  .HasForeignKey(userNotification => userNotification.ItemId)
+                  .HasForeignKey("ItemId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         databaseModelBuilder.Entity<PeriodNote>(periodNoteEntityBuilder =>
         {
             periodNoteEntityBuilder.ToTable("PeriodNotes");
-            periodNoteEntityBuilder.HasKey(periodNote => new { periodNote.UserId, periodNote.NoteId });
+            periodNoteEntityBuilder.HasKey(periodNote => periodNote.Id);
+            periodNoteEntityBuilder.Property(periodNote => periodNote.Id).ValueGeneratedOnAdd();
             periodNoteEntityBuilder.Property(periodNote => periodNote.NoteBody).HasMaxLength(2000);
         });
     }
@@ -273,7 +279,7 @@ public class AppDbContext : DbContext
 
             shiftEntityBuilder.HasOne(shift => shift.Staff)
                   .WithMany(staffMember => staffMember.Shifts)
-                  .HasForeignKey(shift => shift.StaffId)
+                  .HasForeignKey("StaffId")
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -284,19 +290,27 @@ public class AppDbContext : DbContext
             shiftSwapRequestEntityBuilder.Property(shiftSwapRequest => shiftSwapRequest.SwapId).ValueGeneratedOnAdd();
             shiftSwapRequestEntityBuilder.Property(shiftSwapRequest => shiftSwapRequest.Status).HasConversion<string>().HasMaxLength(30);
 
+            // IsRequired(false) makes the FK columns nullable so that EF Core
+            // uses LEFT JOIN semantics when including these navigations.  Without
+            // it, EF Core in-memory applies inner-join semantics and silently
+            // excludes ShiftSwapRequest rows whose Shift/Requester/Colleague are
+            // not present in the store (e.g. Attach-stubs from a prior context).
             shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Shift)
                   .WithMany()
-                  .HasForeignKey(shiftSwapRequest => shiftSwapRequest.ShiftId)
+                  .HasForeignKey("ShiftId")
+                  .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
 
             shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Requester)
                   .WithMany(staffMember => staffMember.ShiftSwapRequestsAsRequester)
-                  .HasForeignKey(shiftSwapRequest => shiftSwapRequest.RequesterId)
+                  .HasForeignKey("RequesterId")
+                  .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
 
             shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Colleague)
                   .WithMany(staffMember => staffMember.ShiftSwapRequestsAsColleague)
-                  .HasForeignKey(shiftSwapRequest => shiftSwapRequest.ColleagueId)
+                  .HasForeignKey("ColleagueId")
+                  .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -306,7 +320,6 @@ public class AppDbContext : DbContext
             appointmentEntityBuilder.HasKey(appointment => appointment.Id);
             appointmentEntityBuilder.Property(appointment => appointment.Id).ValueGeneratedOnAdd();
             appointmentEntityBuilder.Property(appointment => appointment.PatientName).HasMaxLength(200);
-            appointmentEntityBuilder.Property(appointment => appointment.DoctorName).HasMaxLength(200);
             appointmentEntityBuilder.Property(appointment => appointment.Status).HasMaxLength(50);
             appointmentEntityBuilder.Property(appointment => appointment.Type).HasMaxLength(100);
             appointmentEntityBuilder.Property(appointment => appointment.Location).HasMaxLength(200);
@@ -314,7 +327,8 @@ public class AppDbContext : DbContext
 
             appointmentEntityBuilder.HasOne(appointment => appointment.Doctor)
                   .WithMany(doctor => doctor.Appointments)
-                  .HasForeignKey(appointment => appointment.DoctorId)
+                  .HasForeignKey("DoctorId")
+                  .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -330,7 +344,7 @@ public class AppDbContext : DbContext
 
             medicalEvaluationEntityBuilder.HasOne(medicalEvaluation => medicalEvaluation.Evaluator)
                   .WithMany(doctor => doctor.MedicalEvaluations)
-                  .HasForeignKey(medicalEvaluation => medicalEvaluation.DoctorId)
+                  .HasForeignKey("DoctorId")
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -342,11 +356,10 @@ public class AppDbContext : DbContext
             emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.Specialization).HasMaxLength(100);
             emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.Location).HasMaxLength(200);
             emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.Status).HasMaxLength(50);
-            emergencyRoomRequestEntityBuilder.Property(emergencyRoomRequest => emergencyRoomRequest.AssignedDoctorName).HasMaxLength(200);
 
             emergencyRoomRequestEntityBuilder.HasOne(emergencyRoomRequest => emergencyRoomRequest.AssignedDoctor)
                   .WithMany()
-                  .HasForeignKey(emergencyRoomRequest => emergencyRoomRequest.AssignedDoctorId)
+                  .HasForeignKey("AssignedDoctorId")
                   .OnDelete(DeleteBehavior.SetNull);
         });
 
@@ -361,7 +374,7 @@ public class AppDbContext : DbContext
 
             notificationEntityBuilder.HasOne(notification => notification.Recipient)
                   .WithMany(staffMember => staffMember.Notifications)
-                  .HasForeignKey(notification => notification.RecipientStaffId)
+                  .HasForeignKey("RecipientStaffId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -375,29 +388,31 @@ public class AppDbContext : DbContext
 
             hangoutEntityBuilder.HasMany(hangout => hangout.HangoutParticipantEntries)
                   .WithOne(hangoutParticipant => hangoutParticipant.Hangout)
-                  .HasForeignKey(hangoutParticipant => hangoutParticipant.HangoutId)
+                  .HasForeignKey("HangoutId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         databaseModelBuilder.Entity<HangoutParticipant>(hangoutParticipantEntityBuilder =>
         {
             hangoutParticipantEntityBuilder.ToTable("HangoutParticipants");
-            hangoutParticipantEntityBuilder.HasKey(hangoutParticipant => new { hangoutParticipant.HangoutId, hangoutParticipant.StaffId });
+            hangoutParticipantEntityBuilder.HasKey(hangoutParticipant => hangoutParticipant.Id);
+            hangoutParticipantEntityBuilder.Property(hangoutParticipant => hangoutParticipant.Id).ValueGeneratedOnAdd();
 
             hangoutParticipantEntityBuilder.HasOne(hangoutParticipant => hangoutParticipant.Staff)
                   .WithMany(staffMember => staffMember.HangoutParticipantEntries)
-                  .HasForeignKey(hangoutParticipant => hangoutParticipant.StaffId)
+                  .HasForeignKey("StaffId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
         databaseModelBuilder.Entity<PharmacyHandover>(pharmacyHandoverEntityBuilder =>
         {
             pharmacyHandoverEntityBuilder.ToTable("PharmacyHandovers");
-            pharmacyHandoverEntityBuilder.HasKey(pharmacyHandover => new { pharmacyHandover.PharmacistId, pharmacyHandover.HandoverDate });
+            pharmacyHandoverEntityBuilder.HasKey(pharmacyHandover => pharmacyHandover.Id);
+            pharmacyHandoverEntityBuilder.Property(pharmacyHandover => pharmacyHandover.Id).ValueGeneratedOnAdd();
 
             pharmacyHandoverEntityBuilder.HasOne(pharmacyHandover => pharmacyHandover.Pharmacist)
                   .WithMany()
-                  .HasForeignKey(pharmacyHandover => pharmacyHandover.PharmacistId)
+                  .HasForeignKey("PharmacistId")
                   .OnDelete(DeleteBehavior.Restrict);
         });
     }
@@ -411,7 +426,6 @@ public class AppDbContext : DbContext
             highRiskMedicineEntityBuilder.Property(highRiskMedicine => highRiskMedicine.MedicineName).HasMaxLength(200);
             highRiskMedicineEntityBuilder.Property(highRiskMedicine => highRiskMedicine.WarningMessage).HasMaxLength(1000);
 
-            // Reference data consumed by MedicalEvaluationService.CheckMedicineConflict.
             highRiskMedicineEntityBuilder.HasData(
                 new HighRiskMedicine
                 {

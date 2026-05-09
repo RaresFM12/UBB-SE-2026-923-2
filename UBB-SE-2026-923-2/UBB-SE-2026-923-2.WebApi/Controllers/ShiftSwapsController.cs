@@ -34,9 +34,17 @@ public class ShiftSwapsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<int> Create([FromBody] ShiftSwapRequest request)
+    public ActionResult<int> Create([FromBody] CreateShiftSwapRequest request)
     {
-        var id = this.repository.AddShiftSwapRequest(request);
+        var shiftSwapRequest = new ShiftSwapRequest
+        {
+            Shift = new Shift { Id = request.ShiftId },
+            Requester = new Staff { StaffID = request.RequesterId },
+            Colleague = new Staff { StaffID = request.ColleagueId },
+            RequestedAt = request.RequestedAt,
+            Status = request.Status,
+        };
+        var id = this.repository.AddShiftSwapRequest(shiftSwapRequest);
         return this.Ok(id);
     }
 
@@ -48,4 +56,6 @@ public class ShiftSwapsController : ControllerBase
     }
 
     public record UpdateStatusRequest(string Status);
+
+    public record CreateShiftSwapRequest(int ShiftId, int RequesterId, int ColleagueId, DateTime RequestedAt, ShiftSwapRequestStatus Status);
 }

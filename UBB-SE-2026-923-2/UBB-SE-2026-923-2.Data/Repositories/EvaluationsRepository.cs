@@ -30,7 +30,7 @@ namespace UBB_SE_2026_923_2.Repositories
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
             return databaseContext.MedicalEvaluations
                 .AsNoTracking()
-                .Include(evaluation => evaluation.Evaluator)
+                .Include(medicalEvaluation => medicalEvaluation.Evaluator)
                 .ToList();
         }
 
@@ -38,9 +38,11 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var newEvaluation = new MedicalEvaluation
+            Doctor? evaluatingDoctor = doctorId == 0 ? null : databaseContext.Doctors.Find(doctorId);
+
+            var newMedicalEvaluation = new MedicalEvaluation
             {
-                DoctorId = doctorId == 0 ? null : doctorId,
+                Evaluator = evaluatingDoctor,
                 PatientId = patientId.ToString(),
                 Symptoms = diagnosis,
                 Notes = notes,
@@ -48,14 +50,16 @@ namespace UBB_SE_2026_923_2.Repositories
                 EvaluationDate = DateTime.UtcNow,
             };
 
-            databaseContext.MedicalEvaluations.Add(newEvaluation);
+            databaseContext.MedicalEvaluations.Add(newMedicalEvaluation);
             databaseContext.SaveChanges();
         }
 
         public void UpdateEvaluation(int evaluationId, string diagnosis, string notes, string medications)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            var existingEvaluation = databaseContext.MedicalEvaluations.FirstOrDefault(evaluation => evaluation.EvaluationID == evaluationId);
+            var existingEvaluation = databaseContext.MedicalEvaluations
+                .FirstOrDefault(medicalEvaluation => medicalEvaluation.EvaluationID == evaluationId);
+
             if (existingEvaluation is null)
             {
                 return;
@@ -70,7 +74,9 @@ namespace UBB_SE_2026_923_2.Repositories
         public void DeleteEvaluation(int evaluationId)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            var evaluationToRemove = databaseContext.MedicalEvaluations.FirstOrDefault(evaluation => evaluation.EvaluationID == evaluationId);
+            var evaluationToRemove = databaseContext.MedicalEvaluations
+                .FirstOrDefault(medicalEvaluation => medicalEvaluation.EvaluationID == evaluationId);
+
             if (evaluationToRemove is null)
             {
                 return;

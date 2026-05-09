@@ -56,7 +56,7 @@ namespace UBB_SE_2026_923_2.Services
             var allAppointments = Task.Run(LoadAllAppointments).GetAwaiter().GetResult();
 
             bool IsConfirmedForDoctor(Appointment appointment) =>
-                appointment.DoctorId == doctorId
+                appointment.Doctor?.StaffID == doctorId
                 && string.Equals(appointment.Status, ConfirmedAppointmentStatus, StringComparison.OrdinalIgnoreCase);
             DateTime ByDate(Appointment appointment) => appointment.Date;
             TimeSpan ByStartTime(Appointment appointment) => appointment.StartTime;

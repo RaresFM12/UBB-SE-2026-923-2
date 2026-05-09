@@ -27,56 +27,65 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var order = new Order(0, clientId, pickUpDate, isCompleted, isExpired);
-            databaseContext.Orders.Add(order);
+            var clientUser = databaseContext.Users.Find(clientId);
+            if (clientUser == null)
+            {
+                clientUser = new User { Id = clientId };
+                databaseContext.Attach(clientUser);
+            }
+
+            var newOrder = new Order(0, clientUser, pickUpDate, isCompleted, isExpired);
+            databaseContext.Orders.Add(newOrder);
             databaseContext.SaveChanges();
-            return order.Id;
+            return newOrder.Id;
         }
 
         public void RemoveOrder(int orderIdToBeRemoved)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            var order = databaseContext.Orders.FirstOrDefault(order => order.Id == orderIdToBeRemoved);
-            if (order is null)
+            var orderToRemove = databaseContext.Orders.FirstOrDefault(order => order.Id == orderIdToBeRemoved);
+            if (orderToRemove is null)
             {
                 return;
             }
 
             // Cascade is configured Order → OrderItem; just remove the parent.
-            databaseContext.Orders.Remove(order);
+            databaseContext.Orders.Remove(orderToRemove);
             databaseContext.SaveChanges();
         }
 
-        public void UpdateOrder(Order newOrder)
+        public void UpdateOrder(Order updatedOrder)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            var existing = databaseContext.Orders
+            var existingOrder = databaseContext.Orders
                 .Include(order => order.OrderItemEntries)
-                .FirstOrDefault(order => order.Id == newOrder.Id);
+                .FirstOrDefault(order => order.Id == updatedOrder.Id);
 
-            if (existing is null)
+            if (existingOrder is null)
             {
                 return;
             }
 
-            existing.ClientId = newOrder.ClientId;
-            existing.PickUpDate = newOrder.PickUpDate;
-            existing.IsCompleted = newOrder.IsCompleted;
-            existing.IsExpired = newOrder.IsExpired;
+            existingOrder.PickUpDate = updatedOrder.PickUpDate;
+            existingOrder.IsCompleted = updatedOrder.IsCompleted;
+            existingOrder.IsExpired = updatedOrder.IsExpired;
 
             // Replace the line items from the legacy dictionary on the
             // incoming Order. Phase 3 will switch callers to mutate
             // OrderItemEntries directly.
-            databaseContext.OrderItems.RemoveRange(existing.OrderItemEntries);
-            existing.OrderItemEntries.Clear();
-            foreach (var keyValuePair in newOrder.ItemQuantitiesWithFinalPrice)
+            databaseContext.OrderItems.RemoveRange(existingOrder.OrderItemEntries);
+            existingOrder.OrderItemEntries.Clear();
+            foreach (var itemQuantityEntry in updatedOrder.ItemQuantitiesWithFinalPrice)
             {
-                existing.OrderItemEntries.Add(new OrderItem
+                int itemIdentifier = itemQuantityEntry.Key;
+                var itemEntity = databaseContext.Items.Find(itemIdentifier)
+                    ?? throw new ArgumentException($"Item with identifier {itemIdentifier} not found.");
+
+                existingOrder.OrderItemEntries.Add(new OrderItem
                 {
-                    OrderId = existing.Id,
-                    ItemId = keyValuePair.Key,
-                    OrderQuantity = keyValuePair.Value.Item1,
-                    Price = keyValuePair.Value.Item2,
+                    Item = itemEntity,
+                    OrderQuantity = itemQuantityEntry.Value.Item1,
+                    Price = itemQuantityEntry.Value.Item2,
                 });
             }
 
@@ -89,6 +98,7 @@ namespace UBB_SE_2026_923_2.Repositories
             var order = databaseContext.Orders
                 .AsNoTracking()
                 .Include(order => order.OrderItemEntries)
+                    .ThenInclude(orderItem => orderItem.Item)
                 .FirstOrDefault(order => order.Id == orderId);
 
             return order is null ? null! : ProjectIntoLegacyDictionary(order);
@@ -100,6 +110,7 @@ namespace UBB_SE_2026_923_2.Repositories
             var orders = databaseContext.Orders
                 .AsNoTracking()
                 .Include(order => order.OrderItemEntries)
+                    .ThenInclude(orderItem => orderItem.Item)
                 .ToList();
 
             foreach (var order in orders)
@@ -116,7 +127,8 @@ namespace UBB_SE_2026_923_2.Repositories
             var orders = databaseContext.Orders
                 .AsNoTracking()
                 .Include(order => order.OrderItemEntries)
-                .Where(order => order.ClientId == clientId)
+                    .ThenInclude(orderItem => orderItem.Item)
+                .Where(order => EF.Property<int>(order, "ClientId") == clientId)
                 .ToList();
 
             foreach (var order in orders)
@@ -137,9 +149,10 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             foreach (var orderItem in order.OrderItemEntries)
             {
-                if (!order.ItemQuantitiesWithFinalPrice.ContainsKey(orderItem.ItemId))
+                int itemIdentifier = orderItem.Item.Id;
+                if (!order.ItemQuantitiesWithFinalPrice.ContainsKey(itemIdentifier))
                 {
-                    order.AddItemToOrder(orderItem.ItemId, orderItem.OrderQuantity, orderItem.Price);
+                    order.AddItemToOrder(itemIdentifier, orderItem.OrderQuantity, orderItem.Price);
                 }
             }
 

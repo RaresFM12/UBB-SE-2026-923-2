@@ -1,4 +1,4 @@
-﻿namespace UBB_SE_2026_923_2.Models
+namespace UBB_SE_2026_923_2.Models
 {
     using System;
     using System.Text.Json.Serialization;
@@ -15,38 +15,32 @@
     {
         public int SwapId { get; set; }
 
-        public int ShiftId { get; set; }
-
-        public int RequesterId { get; set; }
-
-        public int ColleagueId { get; set; }
-
         public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
 
         public ShiftSwapRequestStatus Status { get; set; } = ShiftSwapRequestStatus.PENDING;
 
-        // ---- EF Core navigation properties (persisted) ----
-        // [JsonIgnore]: ShiftId/RequesterId/ColleagueId already carry the FKs;
-        // the full nested entities create cycles back through Staff.
+        // EF Core navigation properties — persisted via shadow FK columns
+        // "ShiftId", "RequesterId", "ColleagueId". JsonIgnore prevents the full
+        // nested Staff/Shift graph from cycling back through the object tree.
         [JsonIgnore]
-        public Shift? Shift { get; set; }
+        public Shift Shift { get; set; } = null!;
 
         [JsonIgnore]
-        public Staff? Requester { get; set; }
+        public Staff Requester { get; set; } = null!;
 
         [JsonIgnore]
-        public Staff? Colleague { get; set; }
+        public Staff Colleague { get; set; } = null!;
 
         public ShiftSwapRequest()
         {
         }
 
-        public ShiftSwapRequest(int swapId, int shiftId, int requesterId, int colleagueId)
+        public ShiftSwapRequest(int swapIdentifier, Shift shift, Staff requester, Staff colleague)
         {
-            this.SwapId = swapId;
-            this.ShiftId = shiftId;
-            this.RequesterId = requesterId;
-            this.ColleagueId = colleagueId;
+            this.SwapId = swapIdentifier;
+            this.Shift = shift;
+            this.Requester = requester;
+            this.Colleague = colleague;
             this.RequestedAt = DateTime.UtcNow;
             this.Status = ShiftSwapRequestStatus.PENDING;
         }

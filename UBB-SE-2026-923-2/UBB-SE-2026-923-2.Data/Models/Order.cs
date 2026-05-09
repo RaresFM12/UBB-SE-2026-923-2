@@ -1,4 +1,4 @@
-﻿namespace UBB_SE_2026_923_2.Models
+namespace UBB_SE_2026_923_2.Models
 {
     using System;
     using System.Collections.Generic;
@@ -17,8 +17,6 @@
             get { return "Order#" + this.Id; }
         }
 
-        public int ClientId { get; set; }
-
         public DateOnly PickUpDate { get; set; }
 
         public string PickUpDateString
@@ -35,16 +33,14 @@
 
         public bool IsExpired { get; set; }
 
-        // Legacy in-memory view — not persisted. Phase 2 will migrate callers
-        // onto OrderItemEntries below.
+        // Legacy in-memory view — not persisted. Callers use OrderItemEntries below.
         [NotMapped]
         public Dictionary<int, Tuple<int, float>> ItemQuantitiesWithFinalPrice { get; set; }
 
-        // ---- EF Core navigation properties (persisted) ----
-        // [JsonIgnore]: ClientId already carries the FK; OrderItemEntries are
-        // projected into the legacy dictionary by the server before returning.
+        // EF Core navigation properties — persisted via shadow FK columns.
+        // JsonIgnore: the full nested entities would balloon payload size.
         [JsonIgnore]
-        public User? Client { get; set; }
+        public User Client { get; set; } = null!;
 
         [JsonIgnore]
         public ICollection<OrderItem> OrderItemEntries { get; set; } = new List<OrderItem>();
@@ -54,12 +50,12 @@
             this.ItemQuantitiesWithFinalPrice = new Dictionary<int, Tuple<int, float>>();
         }
 
-        public Order(int id, int clientId, DateOnly pickUpDate,
+        public Order(int identifier, User client, DateOnly pickUpDate,
                      bool isCompleted = false, bool isExpired = false)
             : this()
         {
-            this.Id = id;
-            this.ClientId = clientId;
+            this.Id = identifier;
+            this.Client = client;
             this.PickUpDate = pickUpDate;
             this.IsCompleted = isCompleted;
             this.IsExpired = isExpired;

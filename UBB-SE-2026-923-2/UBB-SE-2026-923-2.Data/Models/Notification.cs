@@ -12,10 +12,8 @@ namespace UBB_SE_2026_923_2.Models
 
         public string ActionButtonText { get; set; } = string.Empty;
 
-        // ---- EF Core mapping for the Notifications table ----
-        public int RecipientStaffId { get; set; }
-
-        public Staff? Recipient { get; set; }
+        // EF Core navigation property — persisted via shadow FK column "RecipientStaffId".
+        public Staff Recipient { get; set; } = null!;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
