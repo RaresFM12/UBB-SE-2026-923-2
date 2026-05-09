@@ -186,5 +186,74 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(hospitalResult.Contains("Cardiology"), Is.True);
             Assert.That(hospitalResult.Contains("Surgery"), Is.True);
         }
+
+        // --- GetWeeklyHours ---
+        [Test]
+        public void GetWeeklyHours_ShiftsThisWeek_ReturnsTotalHours()
+        {
+            var now = DateTime.Now;
+            int daysFromMonday = (7 + (now.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var currentWeekMonday = now.Date.AddDays(-daysFromMonday);
+            var shiftThisWeek = new Shift(1, this.doctor1, "Ward A", currentWeekMonday.AddHours(8), currentWeekMonday.AddHours(16), ShiftStatus.SCHEDULED);
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shiftThisWeek });
+
+            var result = this.service.GetWeeklyHours(1);
+
+            Assert.That(result, Is.EqualTo(8f));
+        }
+
+        [Test]
+        public void GetWeeklyHours_NoShiftsThisWeek_ReturnsZero()
+        {
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
+
+            var result = this.service.GetWeeklyHours(1);
+
+            Assert.That(result, Is.EqualTo(0f));
+        }
+
+        // --- AddShift ---
+        [Test]
+        public void AddShift_ValidShift_CallsRepository()
+        {
+            var newShift = new Shift(0, this.doctor1, "Ward A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.SCHEDULED);
+
+            this.service.AddShift(newShift);
+
+            this.mockShiftRepository.Verify(repository => repository.AddShift(newShift), Times.Once);
+        }
+
+        [Test]
+        public void AddShift_AnyShift_DelegatesToRepository()
+        {
+            var anotherShift = new Shift(0, this.pharmacist1, "Pharmacy", DateTime.Now, DateTime.Now.AddHours(6), ShiftStatus.SCHEDULED);
+
+            this.service.AddShift(anotherShift);
+
+            this.mockShiftRepository.Verify(repository => repository.AddShift(anotherShift), Times.Once);
+        }
+
+        // --- GetFilteredStaff ---
+        [Test]
+        public void GetFilteredStaff_PharmacyLocation_ReturnsPharmacistsWithCertification()
+        {
+            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, this.pharmacist1 });
+
+            var result = this.service.GetFilteredStaff("Pharmacy", "CertA");
+
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0], Is.InstanceOf<Pharmacyst>());
+        }
+
+        [Test]
+        public void GetFilteredStaff_HospitalLocation_ReturnsDoctorsWithSpecialization()
+        {
+            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, this.doctor2, this.pharmacist1 });
+
+            var result = this.service.GetFilteredStaff("Hospital", "Cardiology");
+
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0].StaffID, Is.EqualTo(1));
+        }
     }
 }

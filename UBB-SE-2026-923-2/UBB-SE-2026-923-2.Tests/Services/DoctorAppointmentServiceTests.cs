@@ -203,5 +203,97 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockAppointmentRepository.Verify(repo => repo.UpdateAppointmentStatusAsync(99, "Finished"), Times.Once);
             Assert.That(appointment.Status, Is.EqualTo("Finished"));
         }
+
+        // --- BookAppointmentAsync ---
+        [Test]
+        public async Task BookAppointmentAsync_DoctorOffDuty_ThrowsException()
+        {
+            var offDutyDoctor = new Doctor { StaffID = 1, DoctorStatus = DoctorStatus.OFF_DUTY };
+            this.mockStaffRepository.Setup(repository => repository.GetStaffById(1)).Returns(offDutyDoctor);
+
+            var appointmentToBook = new Appointment
+            {
+                PatientName = "TestPatient",
+                Doctor = new Doctor { StaffID = 1 },
+                Date = DateTime.Now,
+                StartTime = TimeSpan.FromHours(9),
+            };
+
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await this.service.BookAppointmentAsync(appointmentToBook));
+        }
+
+        [Test]
+        public async Task BookAppointmentAsync_ValidAppointment_PersistsSuccessfully()
+        {
+            var availableDoctor = new Doctor { StaffID = 1, DoctorStatus = DoctorStatus.AVAILABLE };
+            this.mockStaffRepository.Setup(repository => repository.GetStaffById(1)).Returns(availableDoctor);
+
+            var appointmentToBook = new Appointment
+            {
+                PatientName = "TestPatient",
+                Doctor = new Doctor { StaffID = 1 },
+                Date = DateTime.Now,
+                StartTime = TimeSpan.FromHours(9),
+                EndTime = TimeSpan.FromHours(9.5),
+                Status = "Scheduled",
+            };
+
+            await this.service.BookAppointmentAsync(appointmentToBook);
+
+            this.mockAppointmentRepository.Verify(repository => repository.AddAppointmentAsync(
+                It.IsAny<int>(), 1, It.IsAny<DateTime>(), It.IsAny<DateTime>(), "Scheduled"), Times.Once);
+        }
+
+        // --- GetAppointmentsInRangeAsync ---
+        [Test]
+        public async Task GetAppointmentsInRangeAsync_AppointmentsInRange_ReturnsFiltered()
+        {
+            var rangeStart = DateTime.Now;
+            var rangeEnd = DateTime.Now.AddDays(7);
+            var appointmentInRange = new Appointment
+            {
+                Id = 1,
+                Doctor = new Doctor { StaffID = 1 },
+                Date = DateTime.Now.AddDays(1),
+                StartTime = TimeSpan.FromHours(9),
+                EndTime = TimeSpan.FromHours(10),
+                Status = "Scheduled",
+            };
+            var appointmentOutOfRange = new Appointment
+            {
+                Id = 2,
+                Doctor = new Doctor { StaffID = 1 },
+                Date = DateTime.Now.AddDays(30),
+                StartTime = TimeSpan.FromHours(9),
+                EndTime = TimeSpan.FromHours(10),
+                Status = "Scheduled",
+            };
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
+                .ReturnsAsync(new List<Appointment> { appointmentInRange, appointmentOutOfRange });
+
+            var result = await this.service.GetAppointmentsInRangeAsync(1, rangeStart, rangeEnd);
+
+            Assert.That(result.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task GetAppointmentsInRangeAsync_NoAppointmentsForDoctor_ReturnsEmpty()
+        {
+            var appointmentForOtherDoctor = new Appointment
+            {
+                Id = 1,
+                Doctor = new Doctor { StaffID = 2 },
+                Date = DateTime.Now.AddDays(1),
+                StartTime = TimeSpan.FromHours(9),
+                EndTime = TimeSpan.FromHours(10),
+                Status = "Scheduled",
+            };
+            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync())
+                .ReturnsAsync(new List<Appointment> { appointmentForOtherDoctor });
+
+            var result = await this.service.GetAppointmentsInRangeAsync(1, DateTime.Now, DateTime.Now.AddDays(7));
+
+            Assert.That(result.Count, Is.EqualTo(0));
+        }
     }
 }

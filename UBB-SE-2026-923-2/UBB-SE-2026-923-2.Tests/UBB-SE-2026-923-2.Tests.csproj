@@ -73,6 +73,19 @@
     <Compile Include="..\UBB-SE-2026-923-2\Services\MedicalEvaluationService.cs" Link="LinkedSources\MedicalEvaluationService.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\IFatigueAuditService.cs" Link="LinkedSources\IFatigueAuditService.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\FatigueAuditService.cs" Link="LinkedSources\FatigueAuditService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\IERDispatchService.cs" Link="LinkedSources\IERDispatchService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\ERDispatchService.cs" Link="LinkedSources\ERDispatchService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\IAdminService.cs" Link="LinkedSources\IAdminService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\AdminService.cs" Link="LinkedSources\AdminService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\IBasketService.cs" Link="LinkedSources\IBasketService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\BasketService.cs" Link="LinkedSources\BasketService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\IOrderService.cs" Link="LinkedSources\IOrderService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\OrderService.cs" Link="LinkedSources\OrderService.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Services\ServiceWrapper.cs" Link="LinkedSources\ServiceWrapper.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\ViewModels\Orders\BasketViewModel.cs" Link="LinkedSources\BasketViewModel.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Command\RelayCommand.cs" Link="LinkedSources\RelayCommand.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Command\RelayCommandWithOneParameter.cs" Link="LinkedSources\RelayCommandWithOneParameter.cs" />
+    <Compile Include="..\UBB-SE-2026-923-2\Command\AsyncRelayCommand.cs" Link="LinkedSources\AsyncRelayCommand.cs" />
   </ItemGroup>
 
 </Project>
