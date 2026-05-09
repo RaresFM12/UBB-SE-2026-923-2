@@ -39,8 +39,8 @@
             this.PatientName = item.PatientName ?? string.Empty;
             this.Date = item.Date;
             this.Notes = item.Notes ?? string.Empty;
-            this.DoctorId = item.DoctorId;
-            this.DoctorName = item.DoctorName ?? string.Empty;
+            this.DoctorId = item.Doctor?.StaffID ?? 0;
+            this.DoctorName = item.Doctor?.FullName ?? string.Empty;
             this.Type = item.Type ?? string.Empty;
             this.Location = item.Location ?? string.Empty;
             this.Status = item.Status ?? string.Empty;
@@ -52,8 +52,7 @@
         {
             Id = this.AppointmentItemId,
             PatientName = this.PatientName,
-            DoctorId = this.DoctorId,
-            DoctorName = this.DoctorName,
+            Doctor = new Doctor { StaffID = this.DoctorId },
             Date = this.Date,
             StartTime = this.StartTime,
             EndTime = this.EndTime,

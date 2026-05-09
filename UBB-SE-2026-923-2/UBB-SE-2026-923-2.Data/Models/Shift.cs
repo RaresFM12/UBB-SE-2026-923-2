@@ -8,16 +8,12 @@ namespace UBB_SE_2026_923_2.Models
     {
         public int Id { get; set; }
 
-        // ---- EF Core navigation property (persisted) ----
-        public int StaffId { get; set; }
-
+        // EF Core navigation property — persisted via shadow FK column "StaffId".
         public Staff Staff { get; set; } = null!;
 
         // Legacy interface-typed accessor preserved for existing call sites.
         // Delegates to the concrete Staff navigation so the EF-loaded entity
-        // is visible through the old API. Phase 2 migrates callers onto Staff.
-        // [JsonIgnore] — interface property cannot be deserialized over HTTP;
-        // the Staff navigation already carries the same instance.
+        // is visible through the old API.
         [NotMapped]
         [JsonIgnore]
         public IStaff AppointedStaff
@@ -42,11 +38,10 @@ namespace UBB_SE_2026_923_2.Models
         {
         }
 
-        public Shift(int id, IStaff appointedStaff, string location, DateTime startTime, DateTime endTime, ShiftStatus status)
+        public Shift(int identifier, IStaff appointedStaff, string location, DateTime startTime, DateTime endTime, ShiftStatus status)
         {
-            this.Id = id;
+            this.Id = identifier;
             this.AppointedStaff = appointedStaff;
-            this.StaffId = appointedStaff.StaffID;
             this.Location = location;
             this.StartTime = startTime;
             this.EndTime = endTime;

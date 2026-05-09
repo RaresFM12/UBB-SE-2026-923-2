@@ -21,9 +21,12 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
+            var recipientStaffMember = databaseContext.StaffMembers.Find(recipientStaffId)
+                ?? throw new ArgumentException($"Staff member with identifier {recipientStaffId} not found.", nameof(recipientStaffId));
+
             databaseContext.Notifications.Add(new Notification
             {
-                RecipientStaffId = recipientStaffId,
+                Recipient = recipientStaffMember,
                 Title = title,
                 Message = message,
                 CreatedAt = DateTime.UtcNow,

@@ -19,41 +19,62 @@ namespace UBB_SE_2026_923_2.Repositories
             this.databaseContextFactory = databaseContextFactory ?? throw new ArgumentNullException(nameof(databaseContextFactory));
         }
 
-        public int AddShiftSwapRequest(ShiftSwapRequest request)
+        public int AddShiftSwapRequest(ShiftSwapRequest shiftSwapRequest)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var entity = new ShiftSwapRequest
+            var shiftForSwap = databaseContext.Shifts.Find(shiftSwapRequest.Shift.Id)
+                ?? throw new ArgumentException($"Shift with identifier {shiftSwapRequest.Shift.Id} not found.", nameof(shiftSwapRequest));
+
+            var requesterStaffMember = databaseContext.StaffMembers.Find(shiftSwapRequest.Requester.StaffID)
+                ?? throw new ArgumentException($"Staff member with identifier {shiftSwapRequest.Requester.StaffID} not found.", nameof(shiftSwapRequest));
+
+            var colleagueStaffMember = databaseContext.StaffMembers.Find(shiftSwapRequest.Colleague.StaffID)
+                ?? throw new ArgumentException($"Staff member with identifier {shiftSwapRequest.Colleague.StaffID} not found.", nameof(shiftSwapRequest));
+
+            var newShiftSwapRequestEntity = new ShiftSwapRequest
             {
-                ShiftId = request.ShiftId,
-                RequesterId = request.RequesterId,
-                ColleagueId = request.ColleagueId,
-                RequestedAt = request.RequestedAt,
-                Status = request.Status,
+                Shift = shiftForSwap,
+                Requester = requesterStaffMember,
+                Colleague = colleagueStaffMember,
+                RequestedAt = shiftSwapRequest.RequestedAt,
+                Status = shiftSwapRequest.Status,
             };
 
-            databaseContext.ShiftSwapRequests.Add(entity);
+            databaseContext.ShiftSwapRequests.Add(newShiftSwapRequestEntity);
             databaseContext.SaveChanges();
-            return entity.SwapId;
+            return newShiftSwapRequestEntity.SwapId;
         }
 
         public IReadOnlyList<ShiftSwapRequest> GetAllShiftSwapRequests()
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            return databaseContext.ShiftSwapRequests.AsNoTracking().ToList();
+            return databaseContext.ShiftSwapRequests
+                .AsNoTracking()
+                .Include(shiftSwapRequest => shiftSwapRequest.Shift)
+                .Include(shiftSwapRequest => shiftSwapRequest.Requester)
+                .Include(shiftSwapRequest => shiftSwapRequest.Colleague)
+                .ToList();
         }
 
         public ShiftSwapRequest? GetShiftSwapRequestById(int swapId)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            return databaseContext.ShiftSwapRequests.AsNoTracking().FirstOrDefault(swapRequest => swapRequest.SwapId == swapId);
+            return databaseContext.ShiftSwapRequests
+                .AsNoTracking()
+                .Include(shiftSwapRequest => shiftSwapRequest.Shift)
+                .Include(shiftSwapRequest => shiftSwapRequest.Requester)
+                .Include(shiftSwapRequest => shiftSwapRequest.Colleague)
+                .FirstOrDefault(shiftSwapRequest => shiftSwapRequest.SwapId == swapId);
         }
 
         public void UpdateShiftSwapRequestStatus(int swapId, string status)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            var swapRequest = databaseContext.ShiftSwapRequests.FirstOrDefault(swapRequest => swapRequest.SwapId == swapId);
-            if (swapRequest is null)
+            var shiftSwapRequestToUpdate = databaseContext.ShiftSwapRequests
+                .FirstOrDefault(shiftSwapRequest => shiftSwapRequest.SwapId == swapId);
+
+            if (shiftSwapRequestToUpdate is null)
             {
                 return;
             }
@@ -63,7 +84,7 @@ namespace UBB_SE_2026_923_2.Repositories
             // canonical form on the next save.
             if (Enum.TryParse<ShiftSwapRequestStatus>(status, true, out var parsedStatus))
             {
-                swapRequest.Status = parsedStatus;
+                shiftSwapRequestToUpdate.Status = parsedStatus;
             }
 
             databaseContext.SaveChanges();

@@ -24,20 +24,29 @@ namespace UBB_SE_2026_923_2.Repositories
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
             return databaseContext.HangoutParticipants
                 .AsNoTracking()
-                .Select(participant => new { participant.HangoutId, participant.StaffId })
+                .Include(hangoutParticipant => hangoutParticipant.Hangout)
+                .Include(hangoutParticipant => hangoutParticipant.Staff)
                 .AsEnumerable()
-                .Select(participantRow => (participantRow.HangoutId, participantRow.StaffId))
+                .Select(hangoutParticipant => (hangoutParticipant.Hangout.HangoutID, hangoutParticipant.Staff.StaffID))
                 .ToList();
         }
 
         public void AddParticipant(int hangoutId, int staffId)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
+
+            var hangoutToJoin = databaseContext.Hangouts.Find(hangoutId)
+                ?? throw new ArgumentException($"Hangout with identifier {hangoutId} not found.", nameof(hangoutId));
+
+            var participatingStaffMember = databaseContext.StaffMembers.Find(staffId)
+                ?? throw new ArgumentException($"Staff member with identifier {staffId} not found.", nameof(staffId));
+
             databaseContext.HangoutParticipants.Add(new HangoutParticipant
             {
-                HangoutId = hangoutId,
-                StaffId = staffId,
+                Hangout = hangoutToJoin,
+                Staff = participatingStaffMember,
             });
+
             databaseContext.SaveChanges();
         }
     }

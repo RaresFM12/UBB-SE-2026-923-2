@@ -152,7 +152,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             var allHandovers = this.pharmacyHandoverRepository.GetAllPharmacyHandovers();
             bool MatchesPharmacistAndMonth(PharmacyHandover handover) =>
-                handover.PharmacistId == pharmacistStaffId
+                handover.Pharmacist.StaffID == pharmacistStaffId
                 && handover.HandoverDate.Month == month
                 && handover.HandoverDate.Year == year;
             return allHandovers.Count(MatchesPharmacistAndMonth);

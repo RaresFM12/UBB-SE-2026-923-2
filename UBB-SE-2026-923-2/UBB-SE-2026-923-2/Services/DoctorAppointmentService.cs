@@ -37,7 +37,7 @@ namespace UBB_SE_2026_923_2.Services
             DateTime to = from.AddDays(UpcomingAppointmentsWindowDays);
             var allAppointments = await this.dataSource.GetAllAppointmentsAsync();
 
-            bool IsForDoctor(Appointment appointment) => appointment.DoctorId == doctorUserId;
+            bool IsForDoctor(Appointment appointment) => appointment.Doctor?.StaffID == doctorUserId;
             bool IsWithinWindow(Appointment appointment)
             {
                 DateTime appointmentStart = appointment.Date.Add(appointment.StartTime);
@@ -86,7 +86,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             var allAppointments = await this.dataSource.GetAllAppointmentsAsync();
 
-            bool IsForDoctor(Appointment appointment) => appointment.DoctorId == doctorId;
+            bool IsForDoctor(Appointment appointment) => appointment.Doctor?.StaffID == doctorId;
             DateTime ByDate(Appointment appointment) => appointment.Date;
             TimeSpan ByStartTime(Appointment appointment) => appointment.StartTime;
 
@@ -106,7 +106,7 @@ namespace UBB_SE_2026_923_2.Services
             {
                 PatientName = patientName,
                 ExternalRefId = ExtractExternalRefId(patientName),
-                DoctorId = doctorId,
+                Doctor = new Doctor { StaffID = doctorId },
                 Date = date.Date,
                 StartTime = startTime,
                 EndTime = startTime.Add(TimeSpan.FromMinutes(DefaultAppointmentDurationMinutes)),
@@ -117,7 +117,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task BookAppointmentAsync(Appointment appointment)
         {
-            await this.EnsureDoctorIsBookableAsync(appointment.DoctorId);
+            await this.EnsureDoctorIsBookableAsync(appointment.Doctor.StaffID);
             if (string.IsNullOrWhiteSpace(appointment.ExternalRefId))
             {
                 appointment.ExternalRefId = ExtractExternalRefId(appointment.PatientName);
@@ -148,7 +148,7 @@ namespace UBB_SE_2026_923_2.Services
                     return false;
                 }
 
-                if (existingAppointment.DoctorId != appointment.DoctorId)
+                if (existingAppointment.Doctor?.StaffID != appointment.Doctor?.StaffID)
                 {
                     return false;
                 }
@@ -167,7 +167,7 @@ namespace UBB_SE_2026_923_2.Services
 
             if (concurrentAppointments == NoActiveAppointmentsCount)
             {
-                await this.staffRepository.UpdateStatusAsync(appointment.DoctorId, AvailableStatus);
+                await this.staffRepository.UpdateStatusAsync(appointment.Doctor?.StaffID ?? 0, AvailableStatus);
             }
         }
 
@@ -204,7 +204,7 @@ namespace UBB_SE_2026_923_2.Services
         {
             var rawAppointments = await this.dataSource.GetAllAppointmentsAsync();
 
-            bool IsForDoctor(Appointment appointment) => appointment.DoctorId == doctorId;
+            bool IsForDoctor(Appointment appointment) => appointment.Doctor?.StaffID == doctorId;
             bool IsInRange(Appointment appointment)
             {
                 var start = appointment.Date.Date + appointment.StartTime;
@@ -271,7 +271,7 @@ namespace UBB_SE_2026_923_2.Services
             DateTime end = appointment.Date.Date.Add(appointment.EndTime);
             string status = string.IsNullOrWhiteSpace(appointment.Status) ? ScheduledStatus : appointment.Status;
 
-            await this.dataSource.AddAppointmentAsync(patientId, appointment.DoctorId, start, end, status);
+            await this.dataSource.AddAppointmentAsync(patientId, appointment.Doctor.StaffID, start, end, status);
         }
 
         private static int ParsePatientId(string? patientName)
@@ -309,8 +309,7 @@ namespace UBB_SE_2026_923_2.Services
             return new Appointment
             {
                 Id = appointment.Id,
-                DoctorId = appointment.DoctorId,
-                DoctorName = (appointment.DoctorName ?? string.Empty).Trim(),
+                Doctor = appointment.Doctor,
                 PatientName = patientName,
                 ExternalRefId = ExtractExternalRefId(patientName),
                 Date = appointment.Date,

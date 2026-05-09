@@ -75,7 +75,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void AcceptSwapRequest_Valid_UpdatesAndNotifies()
         {
-            var swap = new ShiftSwapRequest(1, 10, 1, 2); // Request for Shift 10, from Dr 1 to Dr 2
+            var swap = new ShiftSwapRequest(1, new Shift { Id = 10 }, new Staff { StaffID = 1 }, new Staff { StaffID = 2 }); // Request for Shift 10, from Dr 1 to Dr 2
             this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(1)).Returns(swap);
 
             var targetShift = new Shift(10, this.doctor1, "A", DateTime.Now.AddDays(1), DateTime.Now.AddDays(1).AddHours(8), ShiftStatus.SCHEDULED);
@@ -97,12 +97,12 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(this.service.AcceptSwapRequest(1, 2, out _), Is.False);
 
             // Case 2: Wrong Colleague
-            var swapWrong = new ShiftSwapRequest(2, 10, 1, 3);
+            var swapWrong = new ShiftSwapRequest(2, new Shift { Id = 10 }, new Staff { StaffID = 1 }, new Staff { StaffID = 3 });
             this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(2)).Returns(swapWrong);
             Assert.That(this.service.AcceptSwapRequest(2, 2, out _), Is.False);
 
             // Case 3: Not Pending
-            var swapDone = new ShiftSwapRequest(3, 10, 1, 2) { Status = ShiftSwapRequestStatus.ACCEPTED };
+            var swapDone = new ShiftSwapRequest(3, new Shift { Id = 10 }, new Staff { StaffID = 1 }, new Staff { StaffID = 2 }) { Status = ShiftSwapRequestStatus.ACCEPTED };
             this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(3)).Returns(swapDone);
             Assert.That(this.service.AcceptSwapRequest(3, 2, out _), Is.False);
         }
@@ -110,7 +110,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void AcceptSwapRequest_Overlap_ReturnsFalse()
         {
-            var swap = new ShiftSwapRequest(1, 10, 1, 2);
+            var swap = new ShiftSwapRequest(1, new Shift { Id = 10 }, new Staff { StaffID = 1 }, new Staff { StaffID = 2 });
             this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(1)).Returns(swap);
 
             var now = DateTime.Now.AddDays(1);
@@ -126,7 +126,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         [Test]
         public void RejectSwapRequest_Valid_UpdatesAndNotifies()
         {
-            var swap = new ShiftSwapRequest(1, 10, 1, 2);
+            var swap = new ShiftSwapRequest(1, new Shift { Id = 10 }, new Staff { StaffID = 1 }, new Staff { StaffID = 2 });
             this.mockShiftSwapRepository.Setup(r => r.GetShiftSwapRequestById(1)).Returns(swap);
 
             var result = this.service.RejectSwapRequest(1, 2, out string message);

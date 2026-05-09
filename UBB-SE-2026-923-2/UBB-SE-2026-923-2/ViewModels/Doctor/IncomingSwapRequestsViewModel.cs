@@ -162,8 +162,8 @@ namespace UBB_SE_2026_923_2.ViewModels.Doctor
             new IncomingSwapRequestItemViewModel
             {
                 SwapId = request.SwapId,
-                ShiftId = request.ShiftId,
-                RequesterId = request.RequesterId,
+                ShiftId = request.Shift.Id,
+                RequesterId = request.Requester.StaffID,
                 RequestedAt = request.RequestedAt,
                 Status = request.Status.ToString(),
             };

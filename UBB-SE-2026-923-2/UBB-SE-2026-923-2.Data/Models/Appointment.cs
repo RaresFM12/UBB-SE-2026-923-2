@@ -1,4 +1,4 @@
-﻿namespace UBB_SE_2026_923_2.Models
+namespace UBB_SE_2026_923_2.Models
 {
     using System;
     using System.ComponentModel.DataAnnotations.Schema;
@@ -8,10 +8,6 @@
         public int Id { get; set; }
 
         public string PatientName { get; set; } = string.Empty;
-
-        public int DoctorId { get; set; }
-
-        public string DoctorName { get; set; } = string.Empty;
 
         public DateTime Date { get; set; }
 
@@ -28,12 +24,12 @@
         public string Notes { get; set; } = string.Empty;
 
         // External patient identifier supplied by the Patient Management team.
-        // Not persisted as a separate column yet; populated by services from
+        // Not persisted as a separate column; populated by services from
         // PatientName so callers can rely on a stable name for cross-team data.
         [NotMapped]
         public string ExternalRefId { get; set; } = string.Empty;
 
-        // ---- EF Core navigation property (persisted) ----
-        public Doctor? Doctor { get; set; }
+        // EF Core navigation property — persisted via shadow FK column "DoctorId".
+        public Doctor Doctor { get; set; } = null!;
     }
 }

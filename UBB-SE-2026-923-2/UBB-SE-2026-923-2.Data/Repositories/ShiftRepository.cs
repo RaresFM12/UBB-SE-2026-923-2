@@ -36,57 +36,65 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            int staffId = newShift.StaffId != 0 ? newShift.StaffId : newShift.AppointedStaff.StaffID;
+            int staffIdentifier = newShift.Staff?.StaffID ?? newShift.AppointedStaff.StaffID;
+            var staffMember = databaseContext.StaffMembers.Find(staffIdentifier)
+                ?? throw new ArgumentException($"Staff member with identifier {staffIdentifier} not found.", nameof(newShift));
 
-            var entity = new Shift
+            var newShiftEntity = new Shift
             {
-                StaffId = staffId,
+                Staff = staffMember,
                 Location = newShift.Location,
                 StartTime = newShift.StartTime,
                 EndTime = newShift.EndTime,
                 Status = newShift.Status,
             };
 
-            databaseContext.Shifts.Add(entity);
+            databaseContext.Shifts.Add(newShiftEntity);
             databaseContext.SaveChanges();
         }
 
         public void UpdateShiftStatus(int shiftId, ShiftStatus status)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            var shift = databaseContext.Shifts.FirstOrDefault(shift => shift.Id == shiftId);
-            if (shift is null)
+            var shiftToUpdate = databaseContext.Shifts.FirstOrDefault(shift => shift.Id == shiftId);
+            if (shiftToUpdate is null)
             {
                 return;
             }
 
-            shift.Status = status;
+            shiftToUpdate.Status = status;
             databaseContext.SaveChanges();
         }
 
         public void UpdateShiftStaffId(int shiftId, int newStaffId)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            var shift = databaseContext.Shifts.FirstOrDefault(shift => shift.Id == shiftId);
-            if (shift is null)
+            var shiftToUpdate = databaseContext.Shifts.FirstOrDefault(shift => shift.Id == shiftId);
+            if (shiftToUpdate is null)
             {
                 return;
             }
 
-            shift.StaffId = newStaffId;
+            var newStaffMember = databaseContext.StaffMembers.Find(newStaffId);
+            if (newStaffMember is null)
+            {
+                return;
+            }
+
+            shiftToUpdate.Staff = newStaffMember;
             databaseContext.SaveChanges();
         }
 
         public void DeleteShift(int shiftId)
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
-            var shift = databaseContext.Shifts.FirstOrDefault(shift => shift.Id == shiftId);
-            if (shift is null)
+            var shiftToDelete = databaseContext.Shifts.FirstOrDefault(shift => shift.Id == shiftId);
+            if (shiftToDelete is null)
             {
                 return;
             }
 
-            databaseContext.Shifts.Remove(shift);
+            databaseContext.Shifts.Remove(shiftToDelete);
             databaseContext.SaveChanges();
         }
     }
