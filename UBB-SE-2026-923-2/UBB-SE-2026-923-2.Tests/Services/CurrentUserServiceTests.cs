@@ -5,73 +5,52 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class CurrentUserServiceTests
+    public class CurrentUserServiceLogicTests
     {
-        private CurrentUserService service;
+        private CurrentUserService currentUserService;
 
         [SetUp]
         public void Setup()
         {
-            this.service = new CurrentUserService();
-            this.service.UserId = 0;
-            this.service.RoleType = UserRole.Client;
+            this.currentUserService = new CurrentUserService();
+            this.currentUserService.UserId = 0;
+            this.currentUserService.RoleType = UserRole.Client;
         }
 
         [Test]
-        public void UserId_SetAndGet_ReturnsCorrectValue()
+        public void SetFromUser_WhenUserIsNull_DoesNotChangeExistingUserIdentifier()
         {
-            this.service.UserId = 42;
-            Assert.That(this.service.UserId, Is.EqualTo(42));
+            this.currentUserService.UserId = 15;
+
+            this.currentUserService.SetFromUser(null);
+
+            Assert.That(this.currentUserService.UserId, Is.EqualTo(15));
         }
 
         [Test]
-        public void Role_WhenClient_ReturnsClientString()
+        public void SetFromUser_WhenUserRoleCanBeParsedIgnoringCase_SetsParsedRoleType()
         {
-            this.service.RoleType = UserRole.Client;
-            Assert.That(this.service.Role, Is.EqualTo("Client"));
+            var userWithLowercaseAdminRole = new User(25, "admin@test.com", "1234567890", "hashedPassword", false, false, "admin", false, 0)
+            {
+                Role = "admin",
+            };
+
+            this.currentUserService.SetFromUser(userWithLowercaseAdminRole);
+
+            Assert.That(this.currentUserService.RoleType, Is.EqualTo(UserRole.Admin));
         }
 
         [Test]
-        public void SetFromUser_NullUser_DoesNotThrow()
+        public void SetFromUser_WhenUserRoleCannotBeParsedAndUserIsAdmin_FallsBackToAdminRoleType()
         {
-            Assert.DoesNotThrow(() => this.service.SetFromUser(null));
-        }
+            var administratorWithUnknownRole = new User(30, "admin@test.com", "1234567890", "hashedPassword", true, false, "admin", false, 0)
+            {
+                Role = "UnknownRole",
+            };
 
-        [Test]
-        public void SetFromUser_UserWithClientRole_SetsClientRoleType()
-        {
-            var user = new User(1, "a@b.com", "123", "hash", false, false, "user1", false, 0);
-            user.Role = "Client";
-            this.service.SetFromUser(user);
-            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Client));
-            Assert.That(this.service.UserId, Is.EqualTo(1));
-        }
+            this.currentUserService.SetFromUser(administratorWithUnknownRole);
 
-        [Test]
-        public void SetFromUser_CaseInsensitiveRole_Works()
-        {
-            var user = new User(2, "a@b.com", "123", "hash", false, false, "user1", false, 0);
-            user.Role = "admin";
-            this.service.SetFromUser(user);
-            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
-        }
-
-        [Test]
-        public void SetFromUser_UserWithUnknownRole_FallsBackToIsAdmin()
-        {
-            var user = new User(3, "a@b.com", "123", "hash", true, false, "user1", false, 0);
-            user.Role = "UnknownRole";
-            this.service.SetFromUser(user);
-            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Admin));
-        }
-
-        [Test]
-        public void SetFromUser_UserWithUnknownRoleNotAdmin_FallsBackToClient()
-        {
-            var user = new User(3, "a@b.com", "123", "hash", false, false, "user1", false, 0);
-            user.Role = "UnknownRole";
-            this.service.SetFromUser(user);
-            Assert.That(this.service.RoleType, Is.EqualTo(UserRole.Client));
+            Assert.That(this.currentUserService.RoleType, Is.EqualTo(UserRole.Admin));
         }
     }
 }

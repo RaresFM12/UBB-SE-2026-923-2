@@ -1,7 +1,7 @@
 namespace UBB_SE_2026_923_2.Tests.Services
 {
+    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Moq;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
@@ -9,159 +9,191 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class ProductCatalogueServiceTests
+    public class ProductCatalogueServiceLogicTests
     {
         private Mock<IItemsRepository> mockItemsRepository;
-        private ProductCatalogueService service;
-
-        private List<Item> sampleItems;
+        private ProductCatalogueService productCatalogueService;
 
         [SetUp]
         public void Setup()
         {
             this.mockItemsRepository = new Mock<IItemsRepository>();
-            this.service = new ProductCatalogueService(this.mockItemsRepository.Object);
+            this.productCatalogueService = new ProductCatalogueService(this.mockItemsRepository.Object);
+        }
 
-            this.sampleItems = new List<Item>
+        [Test]
+        public void GetItems_WhenSearchTextHasDifferentCasing_ReturnsMatchingItems()
+        {
+            this.mockItemsRepository
+                .Setup(itemsRepository => itemsRepository.GetAllItems())
+                .Returns(new List<Item>
+                {
+                    CreateItem(1, "Paracetamol", "Painkillers", 10, 5, 0),
+                    CreateItem(2, "Ibuprofen", "Painkillers", 15, 5, 0),
+                });
+
+            var matchingItems = this.productCatalogueService.GetItems("PARA");
+
+            Assert.That(matchingItems.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GetItems_WhenCategoryFilterIsUsed_ReturnsOnlyItemsFromSelectedCategory()
+        {
+            this.mockItemsRepository
+                .Setup(itemsRepository => itemsRepository.GetAllItems())
+                .Returns(new List<Item>
+                {
+                    CreateItem(1, "Paracetamol", "Painkillers", 10, 5, 0),
+                    CreateItem(2, "Vitamin C", "Vitamins", 15, 5, 0),
+                });
+
+            var matchingItems = this.productCatalogueService.GetItems(
+                string.Empty,
+                categories: new List<string> { "Vitamins" });
+
+            Assert.That(matchingItems[0].Category, Is.EqualTo("Vitamins"));
+        }
+
+        [Test]
+        public void GetItems_WhenPriceRangeIsInvalid_ThrowsArgumentException()
+        {
+            this.mockItemsRepository
+                .Setup(itemsRepository => itemsRepository.GetAllItems())
+                .Returns(new List<Item>());
+
+            Assert.Throws<ArgumentException>(
+                () => this.productCatalogueService.GetItems(
+                    string.Empty,
+                    priceRanges: new List<(float minimum, float maximum)> { (20, 10) }));
+        }
+
+        [Test]
+        public void GetItems_WhenLowStockFilterIsUsed_ReturnsOnlyLowStockItems()
+        {
+            this.mockItemsRepository
+                .Setup(itemsRepository => itemsRepository.GetAllItems())
+                .Returns(new List<Item>
+                {
+                    CreateItem(1, "Low stock item", "Category", 10, 5, 0),
+                    CreateItem(2, "Out of stock item", "Category", 15, 0, 0),
+                    CreateItem(3, "Enough stock item", "Category", 20, 20, 0),
+                });
+
+            var matchingItems = this.productCatalogueService.GetItems(
+                string.Empty,
+                stockFilter: ProductCatalogueService.StockFilterLowStock);
+
+            Assert.That(matchingItems.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GetItems_WhenDiscountedFilterIsTrue_ReturnsOnlyDiscountedItems()
+        {
+            this.mockItemsRepository
+                .Setup(itemsRepository => itemsRepository.GetAllItems())
+                .Returns(new List<Item>
+                {
+                    CreateItem(1, "Discounted item", "Category", 10, 5, 0.2f),
+                    CreateItem(2, "Full price item", "Category", 15, 5, 0),
+                });
+
+            var matchingItems = this.productCatalogueService.GetItems(
+                string.Empty,
+                discounted: true);
+
+            Assert.That(matchingItems[0].Id, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GetItems_WhenSubstanceFilterIsUsed_ReturnsOnlyItemsContainingAllRequestedSubstances()
+        {
+            var itemWithBothSubstances = CreateItem(1, "Complex medicine", "Category", 10, 5, 0);
+            itemWithBothSubstances.ActiveSubstances = new Dictionary<string, float>
             {
-                CreateItem(1, "Aspirin", "Bayer", "pain", 10f, 20, 50, 0f, "wellness"),
-                CreateItem(2, "Ibuprofen", "Advil", "pain", 15f, 30, 100, 0.1f, "pain"),
-                CreateItem(3, "Vitamin C", "Nature", "vitamins", 5f, 60, 200, 0f, "vitamins"),
-                CreateItem(4, "Omega3", "Fish", "supplements", 25f, 90, 0, 0.2f, "supplements"),
-                CreateItem(5, "Paracetamol", "Generic", "pain", 8f, 10, 5, 0.05f, "pain"),
-                CreateItem(6, "Zinc", "Nature", "vitamins", 12f, 30, 15, 0f, "vitamins"),
-                CreateItem(7, "Iron", "Nature", "vitamins", 7f, 30, 0, 0f, "vitamins"),
-                CreateItem(8, "Calcium", "Pharma", "vitamins", 9f, 60, 30, 0.5f, "vitamins"),
-                CreateItem(9, "Magnesium", "Pharma", "vitamins", 11f, 30, 20, 0f, "vitamins"),
-                CreateItem(10, "Probiotics", "Bio", "supplements", 20f, 30, 50, 0.15f, "supplements"),
-                CreateItem(11, "Melatonin", "Sleep", "sleep", 6f, 30, 40, 0f, "sleep"),
-                CreateItem(12, "Collagen", "Beauty", "beauty", 30f, 60, 10, 0.1f, "beauty"),
+                { "Substance A", 1 },
+                { "Substance B", 2 },
             };
 
-            this.mockItemsRepository.Setup(repository => repository.GetAllItems()).Returns(this.sampleItems);
-        }
-
-        private static Item CreateItem(int id, string name, string producer, string label, float price, int pills, int quantity, float discount, string category)
-        {
-            var item = new Item(id, name, producer, category, price, pills, label, string.Empty, string.Empty, discount: discount, quantity: 0);
-            if (quantity > 0)
+            var itemWithOneSubstance = CreateItem(2, "Simple medicine", "Category", 15, 5, 0);
+            itemWithOneSubstance.ActiveSubstances = new Dictionary<string, float>
             {
-                item.Batches[System.DateOnly.FromDateTime(System.DateTime.Now.AddDays(30))] = quantity;
-            }
+                { "Substance A", 1 },
+            };
 
-            return item;
-        }
+            this.mockItemsRepository
+                .Setup(itemsRepository => itemsRepository.GetAllItems())
+                .Returns(new List<Item> { itemWithBothSubstances, itemWithOneSubstance });
 
-        // --- Search ---
-        [Test]
-        public void GetItems_NoFilters_ReturnsAllItems()
-        {
-            var result = this.service.GetItems(null, pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(12));
-        }
+            var matchingItems = this.productCatalogueService.GetItems(
+                string.Empty,
+                substances: new List<string> { "Substance A", "Substance B" });
 
-        [Test]
-        public void GetItems_SearchByName_FiltersCorrectly()
-        {
-            var result = this.service.GetItems("Aspirin", pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].Name, Is.EqualTo("Aspirin"));
+            Assert.That(matchingItems.Count, Is.EqualTo(1));
         }
 
         [Test]
-        public void GetItems_SearchNoMatch_ReturnsEmpty()
+        public void GetItems_WhenSortingByPriceDescending_ReturnsMostExpensiveItemFirst()
         {
-            var result = this.service.GetItems("NonExistent", pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(0));
-        }
+            this.mockItemsRepository
+                .Setup(itemsRepository => itemsRepository.GetAllItems())
+                .Returns(new List<Item>
+                {
+                    CreateItem(1, "Cheap item", "Category", 10, 5, 0),
+                    CreateItem(2, "Expensive item", "Category", 50, 5, 0),
+                });
 
-        // --- Categories ---
-        [Test]
-        public void GetItems_FilterByCategory_ReturnsMatching()
-        {
-            var result = this.service.GetItems(null, categories: new List<string> { "vitamins" }, pageSize: 100);
-            Assert.That(result.All(item => item.Category == "vitamins"), Is.True);
-        }
+            var sortedItems = this.productCatalogueService.GetItems(
+                string.Empty,
+                ascending: false,
+                sortBy: ProductCatalogueService.SortByPrice);
 
-        [Test]
-        public void GetItems_FilterByMultipleCategories_ReturnsAll()
-        {
-            var result = this.service.GetItems(null, categories: new List<string> { "vitamins", "pain" }, pageSize: 100);
-            Assert.That(result.All(item => item.Category == "vitamins" || item.Category == "pain"), Is.True);
-        }
-
-        // --- Price ---
-        [Test]
-        public void GetItems_FilterByPriceRange_ReturnsInRange()
-        {
-            var result = this.service.GetItems(null, priceRanges: new List<(float, float)> { (0f, 10f) }, pageSize: 100);
-            Assert.That(result.All(item => item.Price * (1 - item.DiscountPercentage) <= 10f), Is.True);
+            Assert.That(sortedItems[0].Id, Is.EqualTo(2));
         }
 
         [Test]
-        public void GetItems_FilterByPriceRange_InvalidRange_Throws()
+        public void GetItems_WhenPaginationIsUsed_ReturnsRequestedPageItems()
         {
-            Assert.Throws<System.ArgumentException>(() =>
-                this.service.GetItems(null, priceRanges: new List<(float, float)> { (20f, 5f) }, pageSize: 100));
+            this.mockItemsRepository
+                .Setup(itemsRepository => itemsRepository.GetAllItems())
+                .Returns(new List<Item>
+                {
+                    CreateItem(1, "First item", "Category", 10, 5, 0),
+                    CreateItem(2, "Second item", "Category", 15, 5, 0),
+                    CreateItem(3, "Third item", "Category", 20, 5, 0),
+                });
+
+            var paginatedItems = this.productCatalogueService.GetItems(
+                string.Empty,
+                page: 1,
+                pageSize: 2);
+
+            Assert.That(paginatedItems[0].Id, Is.EqualTo(3));
         }
 
-        // --- Stock ---
-        [Test]
-        public void GetItems_StockFilterInStock_ReturnsOnlyInStock()
+        private static Item CreateItem(
+            int itemIdentifier,
+            string itemName,
+            string category,
+            float price,
+            int quantity,
+            float discountPercentage)
         {
-            var result = this.service.GetItems(null, stockFilter: "in_stock", pageSize: 100);
-            Assert.That(result.All(item => item.Quantity > 0), Is.True);
-        }
-
-        [Test]
-        public void GetItems_StockFilterLowStock_ReturnsLowStock()
-        {
-            var result = this.service.GetItems(null, stockFilter: "low_stock", pageSize: 100);
-            Assert.That(result.All(item => item.Quantity > 0 && item.Quantity < 10), Is.True);
-        }
-
-        // --- Discount ---
-        [Test]
-        public void GetItems_DiscountedTrue_ReturnsOnlyDiscounted()
-        {
-            var result = this.service.GetItems(null, discounted: true, pageSize: 100);
-            Assert.That(result.All(item => item.DiscountPercentage > 0), Is.True);
-        }
-
-        // --- Substances ---
-        [Test]
-        public void GetItems_FilterBySubstance_ReturnsMatching()
-        {
-            this.sampleItems[0].ActiveSubstances["acetylsalicylic"] = 500f;
-            var result = this.service.GetItems(null, substances: new List<string> { "acetylsalicylic" }, pageSize: 100);
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].Name, Is.EqualTo("Aspirin"));
-        }
-
-        // --- Sorting ---
-        [Test]
-        public void GetItems_SortByPriceDescending_ReturnsSorted()
-        {
-            var result = this.service.GetItems(null, sortBy: "price", ascending: false, pageSize: 100);
-            for (int itemIndex = 1; itemIndex < result.Count; itemIndex++)
+            return new Item
             {
-                Assert.That(result[itemIndex].Price, Is.LessThanOrEqualTo(result[itemIndex - 1].Price));
-            }
-        }
-
-        // --- Pagination & Integration ---
-        [Test]
-        public void GetItems_Pagination_FirstPage()
-        {
-            var result = this.service.GetItems(null, page: 0, pageSize: 5);
-            Assert.That(result.Count, Is.EqualTo(5));
-        }
-
-        [Test]
-        public void GetItems_CombinedFilters_Work()
-        {
-            var result = this.service.GetItems("i", categories: new List<string> { "vitamins" }, discounted: false, pageSize: 100);
-            Assert.That(result.All(item => item.Category == "vitamins" && item.DiscountPercentage == 0 && item.Name.Contains("i", System.StringComparison.OrdinalIgnoreCase)), Is.True);
+                Id = itemIdentifier,
+                Name = itemName,
+                Producer = "Producer",
+                Category = category,
+                Price = price,
+                Quantity = quantity,
+                DiscountPercentage = discountPercentage,
+                ActiveSubstances = new Dictionary<string, float>(),
+                Batches = new Dictionary<DateOnly, int>
+                {
+                    { DateOnly.FromDateTime(DateTime.Today.AddDays(10)), quantity },
+                },
+            };
         }
     }
 }

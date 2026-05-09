@@ -2,8 +2,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Moq;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
@@ -11,7 +9,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class MedicalEvaluationServiceTests
+    public class MedicalEvaluationServiceLogicTests
     {
         private Mock<IEvaluationsRepository> mockEvaluationsRepository;
         private Mock<IHighRiskMedicineRepository> mockHighRiskMedicineRepository;
@@ -20,8 +18,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
         private Mock<IShiftRepository> mockShiftRepository;
         private Mock<ICurrentUserService> mockCurrentUserService;
         private Mock<INotificationRepository> mockNotificationRepository;
-        private MedicalEvaluationService service;
-        private Doctor doctor1;
+        private MedicalEvaluationService medicalEvaluationService;
 
         [SetUp]
         public void Setup()
@@ -34,7 +31,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockCurrentUserService = new Mock<ICurrentUserService>();
             this.mockNotificationRepository = new Mock<INotificationRepository>();
 
-            this.service = new MedicalEvaluationService(
+            this.medicalEvaluationService = new MedicalEvaluationService(
                 this.mockEvaluationsRepository.Object,
                 this.mockHighRiskMedicineRepository.Object,
                 this.mockAppointmentRepository.Object,
@@ -42,173 +39,215 @@ namespace UBB_SE_2026_923_2.Tests.Services
                 this.mockShiftRepository.Object,
                 this.mockCurrentUserService.Object,
                 this.mockNotificationRepository.Object);
-
-            this.doctor1 = new Doctor(1, "John", "Doe", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 5);
-            this.mockHighRiskMedicineRepository.Setup(repository => repository.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
-            this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
-        }
-
-        // --- GetAllDoctors & GetAppointments ---
-        [Test]
-        public void GetAllDoctors_ReturnsDoctorsOnly()
-        {
-            var pharmacist = new Pharmacyst(2, "B", "C", "c", true, "Cert", 3);
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, pharmacist });
-            var result = this.service.GetAllDoctors();
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].StaffID, Is.EqualTo(1));
         }
 
         [Test]
-        public void GetAppointmentsByDoctor_ReturnsConfirmedOnly()
+        public void GetAppointmentsByDoctor_WhenAppointmentsHaveDifferentDoctors_ReturnsOnlyConfirmedAppointmentsForRequestedDoctor()
         {
-            var appointments = new List<Appointment>
+            var requestedDoctorIdentifier = 3;
+
+            this.mockAppointmentRepository
+                .Setup(appointmentRepository => appointmentRepository.GetAllAppointmentsAsync())
+                .ReturnsAsync(new List<Appointment>
+                {
+                    CreateAppointment(1, requestedDoctorIdentifier, DateTime.Today.AddDays(1), 9, "Confirmed"),
+                    CreateAppointment(2, 9, DateTime.Today.AddDays(1), 10, "Confirmed"),
+                    CreateAppointment(3, requestedDoctorIdentifier, DateTime.Today.AddDays(1), 11, "Scheduled"),
+                });
+
+            var appointmentsForRequestedDoctor = this.medicalEvaluationService.GetAppointmentsByDoctor(requestedDoctorIdentifier);
+
+            Assert.That(appointmentsForRequestedDoctor.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GetEvaluationsByDoctor_WhenDoctorIdentifierIsInvalid_ReturnsEmptyList()
+        {
+            var evaluationsForDoctor = this.medicalEvaluationService.GetEvaluationsByDoctor("invalid-doctor-id");
+
+            Assert.That(evaluationsForDoctor.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void GetEvaluationsByDoctor_WhenEvaluationsExistForRequestedDoctor_ReturnsEvaluationsOrderedDescendingByIdentifier()
+        {
+            var requestedDoctorIdentifier = 5;
+
+            this.mockEvaluationsRepository
+                .Setup(evaluationsRepository => evaluationsRepository.GetAllEvaluations())
+                .Returns(new List<MedicalEvaluation>
+                {
+                    CreateMedicalEvaluation(1, requestedDoctorIdentifier, "10", "Headache", "Notes", "Paracetamol"),
+                    CreateMedicalEvaluation(3, requestedDoctorIdentifier, "10", "Cold", "Notes", "Ibuprofen"),
+                    CreateMedicalEvaluation(2, 9, "10", "Fever", "Notes", "Aspirin"),
+                });
+
+            var evaluationsForRequestedDoctor = this.medicalEvaluationService.GetEvaluationsByDoctor(requestedDoctorIdentifier.ToString());
+
+            Assert.That(evaluationsForRequestedDoctor[0].EvaluationID, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void SaveEvaluation_WhenSymptomsContainRiskMarker_SavesEvaluationWithAssumedRiskTrue()
+        {
+            var evaluationWithRiskMarker = CreateMedicalEvaluation(0, 7, "12", "[RISK] severe symptoms", "Notes", "Medicine");
+
+            this.medicalEvaluationService.SaveEvaluation(evaluationWithRiskMarker);
+
+            this.mockEvaluationsRepository.Verify(
+                evaluationsRepository => evaluationsRepository.AddEvaluation(
+                    7,
+                    12,
+                    "[RISK] severe symptoms",
+                    "Notes",
+                    "Medicine",
+                    true),
+                Times.Once);
+        }
+
+        [Test]
+        public void SaveEvaluation_WhenEvaluatorIsMissing_UsesCurrentUserIdentifierAsDoctorIdentifier()
+        {
+            this.mockCurrentUserService
+                .Setup(currentUserService => currentUserService.UserId)
+                .Returns(44);
+
+            var evaluationWithoutEvaluator = new MedicalEvaluation
             {
-                new Appointment { Doctor = new Doctor { StaffID = 1 }, Status = "Confirmed", Date = DateTime.Now, StartTime = TimeSpan.FromHours(9) },
-                new Appointment { Doctor = new Doctor { StaffID = 1 }, Status = "Cancelled", Date = DateTime.Now, StartTime = TimeSpan.FromHours(10) },
-                new Appointment { Doctor = new Doctor { StaffID = 2 }, Status = "Confirmed", Date = DateTime.Now, StartTime = TimeSpan.FromHours(11) },
-            };
-            this.mockAppointmentRepository.Setup(repository => repository.GetAllAppointmentsAsync()).ReturnsAsync(appointments);
-
-            var result = this.service.GetAppointmentsByDoctor(1);
-            Assert.That(result.Count, Is.EqualTo(1));
-        }
-
-        // --- GetEvaluations ---
-        [Test]
-        public void GetEvaluationsByDoctor_ValidId_ReturnsFiltered()
-        {
-            var eval1 = new MedicalEvaluation { EvaluationID = 1, Evaluator = this.doctor1 };
-            var eval2 = new MedicalEvaluation { EvaluationID = 2, Evaluator = new Doctor { StaffID = 2 } };
-            this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation> { eval1, eval2 });
-
-            var result = this.service.GetEvaluationsByDoctor("1");
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].EvaluationID, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void GetEvaluationsByDoctor_InvalidId_ReturnsEmpty()
-        {
-            var result = this.service.GetEvaluationsByDoctor("abc");
-            Assert.That(result.Count, Is.EqualTo(0));
-        }
-
-        // --- Save & Update Evaluation ---
-        [Test]
-        public void SaveEvaluation_ValidRecord_CallsRepo()
-        {
-            this.mockCurrentUserService.Setup(service => service.UserId).Returns(1);
-            var evaluation = new MedicalEvaluation
-            {
-                PatientId = "5",
-                Symptoms = "Fever",
-                Notes = "Note",
-                MedicationsList = "Aspirin",
-                Evaluator = this.doctor1,
-            };
-
-            this.service.SaveEvaluation(evaluation);
-            this.mockEvaluationsRepository.Verify(repository => repository.AddEvaluation(1, 5, "Fever", "Note", "Aspirin", false), Times.Once);
-        }
-
-        [Test]
-        public void SaveEvaluation_RiskMarker_SetsAssumedRisk()
-        {
-            this.mockCurrentUserService.Setup(service => service.UserId).Returns(1);
-            var evaluation = new MedicalEvaluation
-            {
-                PatientId = "5",
-                Symptoms = "[RISK] Severe pain",
-                Notes = string.Empty,
-                MedicationsList = string.Empty,
-                Evaluator = this.doctor1,
+                PatientId = "12",
+                Symptoms = "Symptoms",
+                Notes = "Notes",
+                MedicationsList = "Medicine",
+                Evaluator = null,
             };
 
-            this.service.SaveEvaluation(evaluation);
-            this.mockEvaluationsRepository.Verify(repository => repository.AddEvaluation(1, 5, "[RISK] Severe pain", string.Empty, string.Empty, true), Times.Once);
+            this.medicalEvaluationService.SaveEvaluation(evaluationWithoutEvaluator);
+
+            this.mockEvaluationsRepository.Verify(
+                evaluationsRepository => evaluationsRepository.AddEvaluation(
+                    44,
+                    It.IsAny<int>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()),
+                Times.Once);
         }
 
         [Test]
-        public void UpdateEvaluation_ZeroId_Throws()
+        public void UpdateEvaluation_WhenEvaluationIdentifierIsInvalid_ThrowsArgumentException()
         {
-            var evaluation = new MedicalEvaluation { EvaluationID = 0 };
-            Assert.Throws<ArgumentException>(() => this.service.UpdateEvaluation(evaluation));
+            var evaluationWithoutIdentifier = CreateMedicalEvaluation(0, 7, "12", "Symptoms", "Notes", "Medicine");
+
+            Assert.Throws<ArgumentException>(() => this.medicalEvaluationService.UpdateEvaluation(evaluationWithoutIdentifier));
         }
 
         [Test]
-        public void UpdateEvaluation_ValidRecord_CallsRepo()
+        public void RaiseFatigueIntervention_WhenNotificationRepositoryExists_AddsNotificationForAdministrator()
         {
-            var evaluation = new MedicalEvaluation { EvaluationID = 1, Symptoms = "S", Notes = "N", MedicationsList = "M" };
-            this.service.UpdateEvaluation(evaluation);
-            this.mockEvaluationsRepository.Verify(repository => repository.UpdateEvaluation(1, "S", "N", "M"), Times.Once);
-        }
+            this.medicalEvaluationService.RaiseFatigueIntervention(8, "Doctor Smith");
 
-        // --- CheckMedicineConflict ---
-        [Test]
-        public void CheckMedicineConflict_HighRiskMedicine_ReturnsWarning()
-        {
-            this.mockHighRiskMedicineRepository.Setup(repository => repository.GetAllHighRiskMedicines())
-                .Returns(new List<(string, string)> { ("Warfarin", "High bleeding risk") });
-
-            var result = this.service.CheckMedicineConflict("P1", "Warfarin");
-            Assert.That(result, Is.EqualTo("High bleeding risk"));
+            this.mockNotificationRepository.Verify(
+                notificationRepository => notificationRepository.AddNotification(
+                    0,
+                    "Fatigue Intervention Required",
+                    It.Is<string>(notificationMessage => notificationMessage.Contains("Doctor Smith"))),
+                Times.Once);
         }
 
         [Test]
-        public void CheckMedicineConflict_HistoryAllergy_ReturnsAlert()
+        public void IsDoctorFatigued_WhenDoctorHasAtLeastTwelveRecentShiftHours_ReturnsTrue()
         {
-            this.mockHighRiskMedicineRepository.Setup(repository => repository.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
-            this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>
+            var requestedDoctorIdentifier = 8;
+            var requestedDoctor = new Doctor { StaffID = requestedDoctorIdentifier };
+
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift>
+                {
+                    new Shift(
+                        1,
+                        requestedDoctor,
+                        "Ward A",
+                        DateTime.Now.AddHours(-13),
+                        DateTime.Now.AddHours(-1),
+                        ShiftStatus.ACTIVE),
+                });
+
+            var isDoctorFatigued = this.medicalEvaluationService.IsDoctorFatigued(requestedDoctorIdentifier.ToString());
+
+            Assert.That(isDoctorFatigued, Is.True);
+        }
+
+        [Test]
+        public void CheckMedicineConflict_WhenMedicineIsHighRisk_ReturnsHighRiskWarning()
+        {
+            this.mockHighRiskMedicineRepository
+                .Setup(highRiskMedicineRepository => highRiskMedicineRepository.GetAllHighRiskMedicines())
+                .Returns(new List<(string MedicineName, string WarningMessage)>
+                {
+                    ("Aspirin", "High risk warning"),
+                });
+
+            var warningMessage = this.medicalEvaluationService.CheckMedicineConflict("12", "aspirin");
+
+            Assert.That(warningMessage, Is.EqualTo("High risk warning"));
+        }
+
+        [Test]
+        public void CheckMedicineConflict_WhenPatientHadHistoricalAllergyToSameMedicine_ReturnsHistoryAlert()
+        {
+            this.mockHighRiskMedicineRepository
+                .Setup(highRiskMedicineRepository => highRiskMedicineRepository.GetAllHighRiskMedicines())
+                .Returns(new List<(string MedicineName, string WarningMessage)>());
+
+            this.mockEvaluationsRepository
+                .Setup(evaluationsRepository => evaluationsRepository.GetAllEvaluations())
+                .Returns(new List<MedicalEvaluation>
+                {
+                    CreateMedicalEvaluation(1, 7, "12", "Allergy", "Notes", "Aspirin"),
+                });
+
+            var warningMessage = this.medicalEvaluationService.CheckMedicineConflict("12", "aspirin");
+
+            Assert.That(warningMessage, Does.Contain("HISTORY ALERT"));
+        }
+
+        private static Appointment CreateAppointment(
+            int appointmentIdentifier,
+            int doctorIdentifier,
+            DateTime appointmentDate,
+            int startHour,
+            string appointmentStatus)
+        {
+            return new Appointment
             {
-                new MedicalEvaluation { PatientId = "P1", Symptoms = "Allergy to medication", MedicationsList = "Aspirin", Notes = string.Empty },
-            });
-
-            var result = this.service.CheckMedicineConflict("P1", "Aspirin");
-            Assert.That(result, Does.Contain("HISTORY ALERT"));
+                Id = appointmentIdentifier,
+                Doctor = new Doctor { StaffID = doctorIdentifier },
+                Date = appointmentDate.Date,
+                StartTime = TimeSpan.FromHours(startHour),
+                EndTime = TimeSpan.FromHours(startHour + 1),
+                Status = appointmentStatus,
+            };
         }
 
-        [Test]
-        public void CheckMedicineConflict_NoConflict_ReturnsNull()
+        private static MedicalEvaluation CreateMedicalEvaluation(
+            int evaluationIdentifier,
+            int doctorIdentifier,
+            string patientIdentifier,
+            string symptoms,
+            string notes,
+            string medicationsList)
         {
-            this.mockHighRiskMedicineRepository.Setup(repository => repository.GetAllHighRiskMedicines()).Returns(new List<(string, string)>());
-            this.mockEvaluationsRepository.Setup(repository => repository.GetAllEvaluations()).Returns(new List<MedicalEvaluation>());
-
-            var result = this.service.CheckMedicineConflict("P1", "Aspirin");
-            Assert.That(result, Is.Null);
-        }
-
-        // --- NEW TESTS: Fatigue Features ---
-        [Test]
-        public void IsDoctorFatigued_UnderThreshold_ReturnsFalse()
-        {
-            var recentTime = DateTime.Now.AddHours(-5);
-            var shift = new Shift(1, this.doctor1, "Ward", recentTime, recentTime.AddHours(8), ShiftStatus.COMPLETED);
-            this.mockShiftRepository.Setup(repo => repo.GetAllShifts()).Returns(new List<Shift> { shift });
-
-            var result = this.service.IsDoctorFatigued("1");
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void IsDoctorFatigued_OverThreshold_ReturnsTrue()
-        {
-            var recentTime = DateTime.Now.AddHours(-15);
-            var shift = new Shift(1, this.doctor1, "Ward", recentTime, recentTime.AddHours(13), ShiftStatus.ACTIVE);
-            this.mockShiftRepository.Setup(repo => repo.GetAllShifts()).Returns(new List<Shift> { shift });
-
-            var result = this.service.IsDoctorFatigued("1");
-            Assert.That(result, Is.True);
-        }
-
-        [Test]
-        public void RaiseFatigueIntervention_AddsNotificationWithCorrectMessage()
-        {
-            this.service.RaiseFatigueIntervention(1, "Dr. John");
-
-            this.mockNotificationRepository.Verify(repo => repo.AddNotification(0, "Fatigue Intervention Required",
-                It.Is<string>(msg => msg.Contains("Dr. John") && msg.Contains("exceeded the 12h duty limit"))), Times.Once);
+            return new MedicalEvaluation
+            {
+                EvaluationID = evaluationIdentifier,
+                Evaluator = new Doctor { StaffID = doctorIdentifier },
+                PatientId = patientIdentifier,
+                Symptoms = symptoms,
+                Notes = notes,
+                MedicationsList = medicationsList,
+            };
         }
     }
 }

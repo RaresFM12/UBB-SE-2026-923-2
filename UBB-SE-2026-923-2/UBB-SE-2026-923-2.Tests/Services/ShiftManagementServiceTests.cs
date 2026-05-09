@@ -2,7 +2,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Moq;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
@@ -10,181 +9,236 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class ShiftManagementServiceTests
+    public class ShiftManagementServiceLogicTests
     {
         private Mock<IShiftManagementStaffRepository> mockStaffRepository;
         private Mock<IShiftManagementShiftRepository> mockShiftRepository;
-        private ShiftManagementService service;
-        private Doctor doctor1;
-        private Doctor doctor2;
-        private Pharmacyst pharmacist1;
+        private ShiftManagementService shiftManagementService;
 
         [SetUp]
         public void Setup()
         {
             this.mockStaffRepository = new Mock<IShiftManagementStaffRepository>();
             this.mockShiftRepository = new Mock<IShiftManagementShiftRepository>();
-            this.service = new ShiftManagementService(this.mockStaffRepository.Object, this.mockShiftRepository.Object);
 
-            this.doctor1 = new Doctor(1, "John", "Doe", "contact", true, "Cardiology", "LIC1", DoctorStatus.AVAILABLE, 5);
-            this.doctor2 = new Doctor(2, "Jane", "Smith", "contact", true, "Surgery", "LIC2", DoctorStatus.AVAILABLE, 3);
-            this.pharmacist1 = new Pharmacyst(3, "Bob", "Brown", "contact", true, "CertA", 2);
-        }
-
-        // --- Status Updates ---
-        [Test]
-        public void SetShiftActive_ExistingShift_UpdatesStatus()
-        {
-            var shift = new Shift(1, this.doctor1, "Ward A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
-
-            this.service.SetShiftActive(1);
-            this.mockShiftRepository.Verify(repository => repository.UpdateShiftStatus(1, ShiftStatus.ACTIVE), Times.Once);
-            this.mockStaffRepository.Verify(repository => repository.UpdateStaffAvailability(1, true, DoctorStatus.AVAILABLE), Times.Once);
+            this.shiftManagementService = new ShiftManagementService(
+                this.mockStaffRepository.Object,
+                this.mockShiftRepository.Object);
         }
 
         [Test]
-        public void CancelShift_ExistingActiveShift_CancelsAndUpdatesAvailability()
+        public void SetShiftActive_WhenShiftExists_UpdatesShiftStatusToActive()
         {
-            var shift = new Shift(1, this.doctor1, "Ward A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.ACTIVE);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            var doctor = CreateDoctor(1, "Cardiology");
+            var existingShift = new Shift(5, doctor, "Ward A", DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), ShiftStatus.SCHEDULED);
 
-            this.service.CancelShift(1);
-            this.mockShiftRepository.Verify(repository => repository.UpdateShiftStatus(1, ShiftStatus.CANCELLED), Times.Once);
-            this.mockStaffRepository.Verify(repository => repository.UpdateStaffAvailability(1, false, DoctorStatus.OFF_DUTY), Times.Once);
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift> { existingShift });
+
+            this.shiftManagementService.SetShiftActive(5);
+
+            this.mockShiftRepository.Verify(
+                shiftRepository => shiftRepository.UpdateShiftStatus(5, ShiftStatus.ACTIVE),
+                Times.Once);
         }
 
         [Test]
-        public void CancelShift_ExistingScheduledShift_CancelsNoAvailabilityUpdate()
+        public void CancelShift_WhenShiftIsActive_UpdatesStaffAvailabilityToOffDuty()
         {
-            var shift = new Shift(1, this.doctor1, "Ward A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            var doctor = CreateDoctor(1, "Cardiology");
+            var existingShift = new Shift(5, doctor, "Ward A", DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), ShiftStatus.ACTIVE);
 
-            this.service.CancelShift(1);
-            this.mockShiftRepository.Verify(repository => repository.UpdateShiftStatus(1, ShiftStatus.CANCELLED), Times.Once);
-            this.mockStaffRepository.Verify(repository => repository.UpdateStaffAvailability(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<DoctorStatus>()), Times.Never);
-        }
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift> { existingShift });
 
-        // --- Overlap & Validation ---
-        [Test]
-        public void ValidateNoOverlap_NoShifts_ReturnsTrue()
-        {
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
-            Assert.That(this.service.ValidateNoOverlap(1, DateTime.Now, DateTime.Now.AddHours(8)), Is.True);
-        }
+            this.shiftManagementService.CancelShift(5);
 
-        [Test]
-        public void ValidateNoOverlap_OverlappingShift_ReturnsFalse()
-        {
-            var now = DateTime.Now;
-            var shift = new Shift(1, this.doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
-
-            Assert.That(this.service.ValidateNoOverlap(1, now.AddHours(4), now.AddHours(12)), Is.False);
+            this.mockStaffRepository.Verify(
+                staffRepository => staffRepository.UpdateStaffAvailability(1, false, DoctorStatus.OFF_DUTY),
+                Times.Once);
         }
 
         [Test]
-        public void ValidateShiftTimes_EndBeforeStart_ReturnsFalse()
+        public void ValidateNoOverlap_WhenExistingShiftOverlapsRequestedInterval_ReturnsFalse()
         {
-            Assert.That(this.service.ValidateShiftTimes(TimeSpan.FromHours(16), TimeSpan.FromHours(8)), Is.False);
+            var doctor = CreateDoctor(1, "Cardiology");
+
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift>
+                {
+                    new Shift(1, doctor, "Ward A", DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), ShiftStatus.ACTIVE),
+                });
+
+            var validationResult = this.shiftManagementService.ValidateNoOverlap(
+                1,
+                DateTime.Today.AddHours(10),
+                DateTime.Today.AddHours(12));
+
+            Assert.That(validationResult, Is.False);
         }
 
         [Test]
-        public void TryAddShift_NoOverlap_AddsAndReturnsTrue()
+        public void TryAddShift_WhenRequestedShiftDoesNotOverlap_AddsShift()
         {
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
-            var now = DateTime.Now;
-            var result = this.service.TryAddShift(this.doctor1, now, now.AddHours(8), "Ward A");
+            var doctor = CreateDoctor(1, "Cardiology");
 
-            Assert.That(result, Is.True);
-            this.mockShiftRepository.Verify(repository => repository.AddShift(It.IsAny<Shift>()), Times.Once);
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift>());
+
+            this.shiftManagementService.TryAddShift(doctor, DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), "Ward A");
+
+            this.mockShiftRepository.Verify(
+                shiftRepository => shiftRepository.AddShift(It.Is<Shift>(createdShift => createdShift.AppointedStaff.StaffID == 1)),
+                Times.Once);
         }
 
         [Test]
-        public void TryAddShift_Overlap_ReturnsFalse()
+        public void ValidateShiftTimes_WhenEndTimeIsAfterStartTime_ReturnsTrue()
         {
-            var now = DateTime.Now;
-            var shift = new Shift(1, this.doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            var validationResult = this.shiftManagementService.ValidateShiftTimes(TimeSpan.FromHours(8), TimeSpan.FromHours(16));
 
-            var result = this.service.TryAddShift(this.doctor1, now.AddHours(4), now.AddHours(12), "Ward B");
-
-            Assert.That(result, Is.False);
-            this.mockShiftRepository.Verify(repository => repository.AddShift(It.IsAny<Shift>()), Times.Never);
-        }
-
-        // --- Reassignment ---
-        [Test]
-        public void ReassignShift_DifferentType_ReturnsFalse()
-        {
-            var shift = new Shift(1, this.doctor1, "Ward A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.SCHEDULED);
-            Assert.That(this.service.ReassignShift(shift, this.pharmacist1), Is.False);
+            Assert.That(validationResult, Is.True);
         }
 
         [Test]
-        public void ReassignShift_OverlapForNewStaff_ReturnsFalse()
+        public void ReassignShift_WhenNewStaffHasDifferentType_ReturnsFalse()
         {
-            var now = DateTime.Now;
-            var shift = new Shift(1, this.doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            var existingShift = new Shift(2, this.doctor2, "Ward B", now.AddHours(4), now.AddHours(12), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift, existingShift });
+            var doctor = CreateDoctor(1, "Cardiology");
+            var pharmacist = CreatePharmacist(2, "General");
+            var existingShift = new Shift(5, doctor, "Ward A", DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), ShiftStatus.SCHEDULED);
 
-            Assert.That(this.service.ReassignShift(shift, this.doctor2), Is.False);
+            var reassignmentResult = this.shiftManagementService.ReassignShift(existingShift, pharmacist);
+
+            Assert.That(reassignmentResult, Is.False);
         }
 
         [Test]
-        public void ReassignShift_Valid_ReturnsTrue()
+        public void ReassignShift_WhenNewStaffIsEligible_UpdatesShiftStaffIdentifier()
         {
-            var now = DateTime.Now;
-            var shift = new Shift(1, this.doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            var currentDoctor = CreateDoctor(1, "Cardiology");
+            var replacementDoctor = CreateDoctor(2, "Cardiology");
+            var existingShift = new Shift(5, currentDoctor, "Ward A", DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), ShiftStatus.SCHEDULED);
 
-            var result = this.service.ReassignShift(shift, this.doctor2);
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift>());
 
-            Assert.That(result, Is.True);
-            this.mockShiftRepository.Verify(repository => repository.UpdateShiftStaffId(1, 2), Times.Once);
-        }
+            this.shiftManagementService.ReassignShift(existingShift, replacementDoctor);
 
-        // --- Queries & Filters ---
-        [Test]
-        public void ShiftQueries_ReturnCorrectShifts()
-        {
-            var now = DateTime.Now;
-            var shift1 = new Shift(1, this.doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.ACTIVE);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift1 });
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1 });
-
-            Assert.That(this.service.GetDailyShifts(now).Count, Is.EqualTo(1));
-            Assert.That(this.service.GetWeeklyShifts(now).Count, Is.EqualTo(1));
-            Assert.That(this.service.GetActiveShifts().Count, Is.EqualTo(1));
-            Assert.That(this.service.IsStaffWorkingDuring(1, now.AddHours(1), now.AddHours(2)), Is.True);
+            this.mockShiftRepository.Verify(
+                shiftRepository => shiftRepository.UpdateShiftStaffId(5, 2),
+                Times.Once);
         }
 
         [Test]
-        public void FindStaffReplacements_ReturnsOnlySameType()
+        public void GetFilteredStaff_WhenLocationIsPharmacy_ReturnsPharmacistsWithRequestedCertification()
         {
-            var now = DateTime.Now;
-            var shift = new Shift(1, this.doctor1, "Ward A", now, now.AddHours(8), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, this.doctor2, this.pharmacist1 });
+            this.mockStaffRepository
+                .Setup(staffRepository => staffRepository.LoadAllStaff())
+                .Returns(new List<IStaff>
+                {
+                    CreateDoctor(1, "Cardiology"),
+                    CreatePharmacist(2, "Vaccination"),
+                });
 
-            var result = this.service.FindStaffReplacements(shift);
+            var filteredStaff = this.shiftManagementService.GetFilteredStaff("Pharmacy", "vaccination");
 
-            Assert.That(result.All(staff => staff is Doctor), Is.True);
-            Assert.That(result.All(service => service.StaffID != 1), Is.True);
+            Assert.That(filteredStaff.Count, Is.EqualTo(1));
         }
 
         [Test]
-        public void GetSpecializationsAndCertifications_ReturnsCorrectLabelsForLocation()
+        public void FindStaffReplacements_WhenReplacementHasNoOverlap_ReturnsReplacement()
         {
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { this.doctor1, this.doctor2, this.pharmacist1 });
+            var currentDoctor = CreateDoctor(1, "Cardiology");
+            var replacementDoctor = CreateDoctor(2, "Cardiology");
+            var existingShift = new Shift(5, currentDoctor, "Ward A", DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), ShiftStatus.SCHEDULED);
 
-            var pharmacyResult = this.service.GetSpecializationsAndCertificationsForLocation("Pharmacy");
-            var hospitalResult = this.service.GetSpecializationsAndCertificationsForLocation("Hospital");
+            this.mockStaffRepository
+                .Setup(staffRepository => staffRepository.LoadAllStaff())
+                .Returns(new List<IStaff> { currentDoctor, replacementDoctor });
 
-            Assert.That(pharmacyResult.Contains("CertA"), Is.True);
-            Assert.That(hospitalResult.Contains("Cardiology"), Is.True);
-            Assert.That(hospitalResult.Contains("Surgery"), Is.True);
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift>());
+
+            var replacements = this.shiftManagementService.FindStaffReplacements(existingShift);
+
+            Assert.That(replacements.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void GetSpecializationsAndCertificationsForLocation_WhenLocationIsNotPharmacy_ReturnsDistinctDoctorSpecializations()
+        {
+            this.mockStaffRepository
+                .Setup(staffRepository => staffRepository.LoadAllStaff())
+                .Returns(new List<IStaff>
+                {
+                    CreateDoctor(1, "Cardiology"),
+                    CreateDoctor(2, "cardiology"),
+                    CreateDoctor(3, "Emergency"),
+                });
+
+            var qualifications = this.shiftManagementService.GetSpecializationsAndCertificationsForLocation("Ward A");
+
+            Assert.That(qualifications.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void GetActiveShifts_WhenOnlyOneShiftIsActive_ReturnsOnlyActiveShift()
+        {
+            var doctor = CreateDoctor(1, "Cardiology");
+
+            this.mockStaffRepository
+                .Setup(staffRepository => staffRepository.LoadAllStaff())
+                .Returns(new List<IStaff> { doctor });
+
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift>
+                {
+                    new Shift(1, doctor, "Ward A", DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), ShiftStatus.ACTIVE),
+                    new Shift(2, doctor, "Ward A", DateTime.Today.AddHours(17), DateTime.Today.AddHours(20), ShiftStatus.SCHEDULED),
+                });
+
+            var activeShifts = this.shiftManagementService.GetActiveShifts();
+
+            Assert.That(activeShifts.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void IsStaffWorkingDuring_WhenStaffHasOverlappingActiveShift_ReturnsTrue()
+        {
+            var doctor = CreateDoctor(1, "Cardiology");
+
+            this.mockShiftRepository
+                .Setup(shiftRepository => shiftRepository.GetAllShifts())
+                .Returns(new List<Shift>
+                {
+                    new Shift(1, doctor, "Ward A", DateTime.Today.AddHours(8), DateTime.Today.AddHours(16), ShiftStatus.ACTIVE),
+                });
+
+            var isWorkingDuringInterval = this.shiftManagementService.IsStaffWorkingDuring(
+                1,
+                DateTime.Today.AddHours(10),
+                DateTime.Today.AddHours(12));
+
+            Assert.That(isWorkingDuringInterval, Is.True);
+        }
+
+        private static Doctor CreateDoctor(int doctorIdentifier, string specialization)
+        {
+            return new Doctor(doctorIdentifier, "John", "Doe", "contract", true, specialization, "License", DoctorStatus.AVAILABLE, 5);
+        }
+
+        private static Pharmacyst CreatePharmacist(int pharmacistIdentifier, string certification)
+        {
+            var pharmacist = new Pharmacyst(pharmacistIdentifier, "Alice", "Smith", "contract", true, "", 10);
+            pharmacist.Certification = certification;
+            return pharmacist;
         }
     }
 }

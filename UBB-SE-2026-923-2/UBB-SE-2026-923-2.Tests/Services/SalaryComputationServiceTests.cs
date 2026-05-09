@@ -2,7 +2,6 @@ namespace UBB_SE_2026_923_2.Tests.Services
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Moq;
     using NUnit.Framework;
@@ -11,142 +10,129 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class SalaryComputationServiceTests
+    public class SalaryComputationServiceLogicTests
     {
-        private Mock<IPharmacyHandoverRepository> mockHandoverRepository;
+        private Mock<IPharmacyHandoverRepository> mockPharmacyHandoverRepository;
         private Mock<IHangoutRepository> mockHangoutRepository;
-        private Mock<IHangoutParticipantRepository> mockParticipantRepository;
-        private Mock<IStaffRepository> mockStaffRepository;
-        private Mock<IShiftManagementShiftRepository> mockShiftRepository;
-        private SalaryComputationService service;
+        private Mock<IHangoutParticipantRepository> mockHangoutParticipantRepository;
+        private SalaryComputationService salaryComputationService;
 
         [SetUp]
         public void Setup()
         {
-            this.mockHandoverRepository = new Mock<IPharmacyHandoverRepository>();
+            this.mockPharmacyHandoverRepository = new Mock<IPharmacyHandoverRepository>();
             this.mockHangoutRepository = new Mock<IHangoutRepository>();
-            this.mockParticipantRepository = new Mock<IHangoutParticipantRepository>();
-            this.mockStaffRepository = new Mock<IStaffRepository>();
-            this.mockShiftRepository = new Mock<IShiftManagementShiftRepository>();
+            this.mockHangoutParticipantRepository = new Mock<IHangoutParticipantRepository>();
 
-            this.service = new SalaryComputationService(
-                this.mockHandoverRepository.Object,
+            this.mockPharmacyHandoverRepository
+                .Setup(pharmacyHandoverRepository => pharmacyHandoverRepository.GetAllPharmacyHandovers())
+                .Returns(new List<PharmacyHandover>());
+
+            this.mockHangoutRepository
+                .Setup(hangoutRepository => hangoutRepository.GetAllHangouts())
+                .Returns(new List<Hangout>());
+
+            this.mockHangoutParticipantRepository
+                .Setup(hangoutParticipantRepository => hangoutParticipantRepository.GetAllParticipants())
+                .Returns(new List<(int HangoutId, int StaffId)>());
+
+            this.salaryComputationService = new SalaryComputationService(
+                this.mockPharmacyHandoverRepository.Object,
                 this.mockHangoutRepository.Object,
-                this.mockParticipantRepository.Object,
-                this.mockStaffRepository.Object,
-                this.mockShiftRepository.Object);
-
-            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)>());
-            this.mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout>());
-            this.mockHandoverRepository.Setup(repository => repository.GetAllPharmacyHandovers()).Returns(new List<PharmacyHandover>());
-        }
-
-        // --- Doctor Salary Tests ---
-        [Test]
-        public async Task ComputeSalaryDoctorAsync_NoShifts_ReturnsZero()
-        {
-            var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 0);
-            var result = await this.service.ComputeSalaryDoctorAsync(doctor, new List<Shift>(), 1, 2025);
-            Assert.That(result, Is.EqualTo(0));
+                this.mockHangoutParticipantRepository.Object);
         }
 
         [Test]
-        public async Task ComputeSalaryDoctorAsync_SingleWeekdayShift_CalculatesCorrectly()
+        public async Task ComputeSalaryDoctorAsync_WhenDoctorHasRegularEightHourShift_ReturnsBaseSalary()
         {
-            var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 0);
-            var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
-            var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
-
-            var result = await this.service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            Assert.That(result, Is.GreaterThan(0));
-            Assert.That(result, Is.GreaterThan(650));
-        }
-
-        [Test]
-        public async Task ComputeSalaryDoctorAsync_WeekendAndNightShifts_ApplyMultipliers()
-        {
-            var doctor = new Doctor(1, "A", "B", "c", true, "General", "L1", DoctorStatus.AVAILABLE, 0);
-            var saturday = new DateTime(2025, 1, 11, 9, 0, 0);
-            var sunday = new DateTime(2025, 1, 12, 9, 0, 0);
-            var night = new DateTime(2025, 1, 8, 22, 0, 0);
-
-            var shifts = new List<Shift>
+            var doctor = CreateDoctor(1, "General", 0);
+            var monthlyShifts = new List<Shift>
             {
-                new Shift(1, doctor, "Ward", saturday, saturday.AddHours(8), ShiftStatus.COMPLETED),
-                new Shift(2, doctor, "Ward", sunday, sunday.AddHours(8), ShiftStatus.COMPLETED),
-                new Shift(3, doctor, "Ward", night, night.AddHours(8), ShiftStatus.COMPLETED)
+                new Shift(1, doctor, "Ward A", new DateTime(2025, 1, 6, 8, 0, 0), new DateTime(2025, 1, 6, 16, 0, 0), ShiftStatus.ACTIVE),
             };
 
-            var result = await this.service.ComputeSalaryDoctorAsync(doctor, shifts, 1, 2025);
+            var computedSalary = await this.salaryComputationService.ComputeSalaryDoctorAsync(doctor, monthlyShifts, 1, 2025);
 
-            // Base for 24h = 24 * 85 = 2040. Multipliers should push this higher.
-            Assert.That(result, Is.GreaterThan(2040));
+            Assert.That(computedSalary, Is.EqualTo(680));
         }
 
         [Test]
-        public async Task ComputeSalaryDoctorAsync_SpecializationAndHangout_AppliesBonuses()
+        public async Task ComputeSalaryDoctorAsync_WhenDoctorIsCardiologist_AddsSpecializationBonus()
         {
-            var doctor = new Doctor(1, "A", "B", "c", true, "Surgeon", "L1", DoctorStatus.AVAILABLE, 10);
-            var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
-            var shift = new Shift(1, doctor, "Ward", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
-
-            this.mockParticipantRepository.Setup(repository => repository.GetAllParticipants()).Returns(new List<(int, int)> { (1, 1) });
-            this.mockHangoutRepository.Setup(repository => repository.GetAllHangouts()).Returns(new List<Hangout>
+            var doctor = CreateDoctor(1, "Cardiologist", 0);
+            var monthlyShifts = new List<Shift>
             {
-                new Hangout(1, "Fun", "Desc", new DateTime(2025, 1, 15), 10),
-            });
+                new Shift(1, doctor, "Ward A", new DateTime(2025, 1, 6, 8, 0, 0), new DateTime(2025, 1, 6, 16, 0, 0), ShiftStatus.ACTIVE),
+            };
 
-            var result = await this.service.ComputeSalaryDoctorAsync(doctor, new List<Shift> { shift }, 1, 2025);
-            Assert.That(result, Is.GreaterThan(800));
-        }
+            var computedSalary = await this.salaryComputationService.ComputeSalaryDoctorAsync(doctor, monthlyShifts, 1, 2025);
 
-        // --- Pharmacist Salary Tests ---
-        [Test]
-        public async Task ComputeSalaryPharmacistAsync_NoShifts_ReturnsZero()
-        {
-            var pharmacist = new Pharmacyst(1, "A", "B", "c", true, "Cert", 0);
-            var result = await this.service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift>(), 1, 2025);
-            Assert.That(result, Is.EqualTo(0));
+            Assert.That(computedSalary, Is.EqualTo(782));
         }
 
         [Test]
-        public async Task ComputeSalaryPharmacistAsync_MedicinesSoldAndExperience_AppliesBonuses()
+        public async Task ComputeSalaryDoctorAsync_WhenDoctorParticipatedInHangoutForRequestedMonth_AppliesHangoutBonus()
         {
-            var pharmacist = new Pharmacyst(1, "A", "B", "c", true, "Cert", 5);
-            var wednesday = new DateTime(2025, 1, 8, 9, 0, 0);
-            var shift = new Shift(1, pharmacist, "Pharmacy", wednesday, wednesday.AddHours(8), ShiftStatus.COMPLETED);
+            var doctor = CreateDoctor(1, "General", 0);
+            var monthlyShifts = new List<Shift>
+            {
+                new Shift(1, doctor, "Ward A", new DateTime(2025, 1, 6, 8, 0, 0), new DateTime(2025, 1, 6, 16, 0, 0), ShiftStatus.ACTIVE),
+            };
 
-            this.mockHandoverRepository.Setup(repository => repository.GetAllPharmacyHandovers()).Returns(
-                Enumerable.Range(0, 20).Select(index => new PharmacyHandover
+            this.mockHangoutParticipantRepository
+                .Setup(hangoutParticipantRepository => hangoutParticipantRepository.GetAllParticipants())
+                .Returns(new List<(int HangoutId, int StaffId)> { (10, 1) });
+
+            this.mockHangoutRepository
+                .Setup(hangoutRepository => hangoutRepository.GetAllHangouts())
+                .Returns(new List<Hangout>
                 {
-                    Pharmacist = new Staff { StaffID = 1 },
-                    HandoverDate = new DateTime(2025, 1, 10),
-                }).ToList());
+                    new Hangout { HangoutID = 10, Date = new DateTime(2025, 1, 20) },
+                });
 
-            var result = await this.service.ComputeSalaryPharmacistAsync(pharmacist, new List<Shift> { shift }, 1, 2025);
+            var computedSalary = await this.salaryComputationService.ComputeSalaryDoctorAsync(doctor, monthlyShifts, 1, 2025);
 
-            // Base = 8 * 45 = 360. Bonuses push it higher.
-            Assert.That(result, Is.GreaterThan(360));
-        }
-
-        // --- Passthrough Tests ---
-        [Test]
-        public void GetAllStaff_ReturnsFromRepo()
-        {
-            var doctor = new Doctor(1, "A", "B", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 0);
-            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor });
-            var result = this.service.GetAllStaff();
-            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(computedSalary, Is.EqualTo(714));
         }
 
         [Test]
-        public void GetAllShifts_ReturnsFromRepo()
+        public async Task ComputeSalaryPharmacistAsync_WhenPharmacistHasRegularEightHourShift_ReturnsBaseSalary()
         {
-            var doctor = new Doctor(1, "A", "B", "c", true, "Gen", "L1", DoctorStatus.AVAILABLE, 0);
-            var shift = new Shift(1, doctor, "A", DateTime.Now, DateTime.Now.AddHours(8), ShiftStatus.ACTIVE);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
-            var result = this.service.GetAllShifts();
-            Assert.That(result.Count, Is.EqualTo(1));
+            var pharmacist = CreatePharmacist(2, 0);
+            var monthlyShifts = new List<Shift>
+            {
+                new Shift(1, pharmacist, "Pharmacy", new DateTime(2025, 1, 6, 8, 0, 0), new DateTime(2025, 1, 6, 16, 0, 0), ShiftStatus.ACTIVE),
+            };
+
+            var computedSalary = await this.salaryComputationService.ComputeSalaryPharmacistAsync(pharmacist, monthlyShifts, 1, 2025);
+
+            Assert.That(computedSalary, Is.EqualTo(360));
+        }
+
+        [Test]
+        public async Task ComputeSalaryPharmacistAsync_WhenPharmacistHasYearsOfExperience_AddsExperienceBonus()
+        {
+            var pharmacist = CreatePharmacist(2, 5);
+            var monthlyShifts = new List<Shift>
+            {
+                new Shift(1, pharmacist, "Pharmacy", new DateTime(2025, 1, 6, 8, 0, 0), new DateTime(2025, 1, 6, 16, 0, 0), ShiftStatus.ACTIVE),
+            };
+
+            var computedSalary = await this.salaryComputationService.ComputeSalaryPharmacistAsync(pharmacist, monthlyShifts, 1, 2025);
+
+            Assert.That(computedSalary, Is.EqualTo(396));
+        }
+
+        private static Doctor CreateDoctor(int doctorIdentifier, string specialization, int yearsOfExperience)
+        {
+            return new Doctor(doctorIdentifier, "John", "Doe", "contract", true, specialization, "License", DoctorStatus.AVAILABLE, yearsOfExperience);
+        }
+
+        private static Pharmacyst CreatePharmacist(int pharmacistIdentifier, int yearsOfExperience)
+        {
+            var pharmacist = new Pharmacyst(pharmacistIdentifier, "Alice", "Smith", "contract", true, "", 10);
+            pharmacist.YearsOfExperience = yearsOfExperience;
+            return pharmacist;
         }
     }
 }

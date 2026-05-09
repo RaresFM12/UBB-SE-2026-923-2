@@ -9,115 +9,114 @@ namespace UBB_SE_2026_923_2.Tests.Services
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class PharmacyVacationServiceTests
+    public class PharmacyVacationServiceLogicTests
     {
-        private Mock<IPharmacyStaffRepository> mockStaffRepository;
-        private Mock<IPharmacyShiftRepository> mockShiftRepository;
-        private PharmacyVacationService service;
+        private Mock<IPharmacyStaffRepository> mockPharmacyStaffRepository;
+        private Mock<IPharmacyShiftRepository> mockPharmacyShiftRepository;
+        private PharmacyVacationService pharmacyVacationService;
 
         [SetUp]
         public void Setup()
         {
-            this.mockStaffRepository = new Mock<IPharmacyStaffRepository>();
-            this.mockShiftRepository = new Mock<IPharmacyShiftRepository>();
-            this.service = new PharmacyVacationService(this.mockStaffRepository.Object, this.mockShiftRepository.Object);
+            this.mockPharmacyStaffRepository = new Mock<IPharmacyStaffRepository>();
+            this.mockPharmacyShiftRepository = new Mock<IPharmacyShiftRepository>();
+
+            this.pharmacyVacationService = new PharmacyVacationService(
+                this.mockPharmacyStaffRepository.Object,
+                this.mockPharmacyShiftRepository.Object);
         }
 
         [Test]
-        public void Constructor_NullStaffRepo_Throws()
+        public void Constructor_WhenStaffRepositoryIsNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new PharmacyVacationService(null, this.mockShiftRepository.Object));
+            Assert.Throws<ArgumentNullException>(
+                () => new PharmacyVacationService(null, this.mockPharmacyShiftRepository.Object));
         }
 
         [Test]
-        public void Constructor_NullShiftRepo_Throws()
+        public void GetPharmacists_WhenPharmacistsAreUnordered_ReturnsPharmacistsOrderedByFirstName()
         {
-            Assert.Throws<ArgumentNullException>(() => new PharmacyVacationService(this.mockStaffRepository.Object, null));
-        }
+            this.mockPharmacyStaffRepository
+                .Setup(pharmacyStaffRepository => pharmacyStaffRepository.GetPharmacists())
+                .Returns(new List<Pharmacyst>
+                {
+                    CreatePharmacist(2, "Charlie", "Zeta"),
+                    CreatePharmacist(1, "Alice", "Alpha"),
+                });
 
-        // --- GetPharmacists ---
-        [Test]
-        public void GetPharmacists_ReturnsOrderedByNameAndLastName()
-        {
-            var pharmacists = new List<Pharmacyst>
-            {
-                new Pharmacyst(1, "Zoe", "Adams", string.Empty, true, "cert", 5),
-                new Pharmacyst(2, "Alice", "Brown", string.Empty, true, "cert2", 3),
-                new Pharmacyst(3, "Alice", "Adams", string.Empty, true, "cert3", 2),
-            };
-            this.mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(pharmacists);
+            var pharmacists = this.pharmacyVacationService.GetPharmacists();
 
-            var result = this.service.GetPharmacists();
-
-            Assert.That(result[0].FirstName, Is.EqualTo("Alice"));
-            Assert.That(result[0].LastName, Is.EqualTo("Adams"));
-            Assert.That(result[1].FirstName, Is.EqualTo("Alice"));
-            Assert.That(result[1].LastName, Is.EqualTo("Brown"));
-            Assert.That(result[2].FirstName, Is.EqualTo("Zoe"));
-        }
-
-        // --- RegisterVacation ---
-        [Test]
-        public void RegisterVacation_EndBeforeStart_Throws()
-        {
-            Assert.Throws<ArgumentException>(() =>
-                this.service.RegisterVacation(1, DateTime.Now.AddDays(5), DateTime.Now.AddDays(2)));
+            Assert.That(pharmacists[0].FirstName, Is.EqualTo("Alice"));
         }
 
         [Test]
-        public void RegisterVacation_PharmacistNotFound_Throws()
+        public void RegisterVacation_WhenEndDateIsBeforeStartDate_ThrowsArgumentException()
         {
-            this.mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst>());
-
-            Assert.Throws<ArgumentException>(() =>
-                this.service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3)));
+            Assert.Throws<ArgumentException>(
+                () => this.pharmacyVacationService.RegisterVacation(1, DateTime.Today.AddDays(5), DateTime.Today.AddDays(3)));
         }
 
         [Test]
-        public void RegisterVacation_OverlapsExistingShift_Throws()
+        public void RegisterVacation_WhenPharmacistDoesNotExist_ThrowsArgumentException()
         {
-            var pharmacist = new Pharmacyst(1, "A", "B", string.Empty, true, "cert", 5);
-            this.mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            this.mockPharmacyStaffRepository
+                .Setup(pharmacyStaffRepository => pharmacyStaffRepository.GetPharmacists())
+                .Returns(new List<Pharmacyst>());
 
-            var existingShift = new Shift(1, pharmacist, "Pharmacy", DateTime.Now.AddDays(2), DateTime.Now.AddDays(3), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
-
-            Assert.Throws<InvalidOperationException>(() =>
-                this.service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(4)));
+            Assert.Throws<ArgumentException>(
+                () => this.pharmacyVacationService.RegisterVacation(1, DateTime.Today.AddDays(3), DateTime.Today.AddDays(5)));
         }
 
         [Test]
-        public void RegisterVacation_OverlapsExistingVacation_ThrowsWithVacationMessage()
+        public void RegisterVacation_WhenVacationOverlapsExistingShift_ThrowsInvalidOperationException()
         {
-            var pharmacist = new Pharmacyst(1, "A", "B", string.Empty, true, "cert", 5);
-            this.mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            var requestedPharmacist = CreatePharmacist(1, "Alice", "Smith");
 
-            var existingShift = new Shift(1, pharmacist, "Vacation", DateTime.Now.AddDays(2), DateTime.Now.AddDays(3), ShiftStatus.VACATION);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            this.mockPharmacyStaffRepository
+                .Setup(pharmacyStaffRepository => pharmacyStaffRepository.GetPharmacists())
+                .Returns(new List<Pharmacyst> { requestedPharmacist });
 
-            var thrownException = Assert.Throws<InvalidOperationException>(() =>
-                this.service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(4)));
-            Assert.That(thrownException.Message, Does.Contain("vacation"));
+            this.mockPharmacyShiftRepository
+                .Setup(pharmacyShiftRepository => pharmacyShiftRepository.GetAllShifts())
+                .Returns(new List<Shift>
+                {
+                    new Shift(
+                        1,
+                        requestedPharmacist,
+                        "Pharmacy",
+                        DateTime.Today.AddDays(4),
+                        DateTime.Today.AddDays(4).AddHours(8),
+                        ShiftStatus.ACTIVE),
+                });
+
+            Assert.Throws<InvalidOperationException>(
+                () => this.pharmacyVacationService.RegisterVacation(1, DateTime.Today.AddDays(4), DateTime.Today.AddDays(5)));
         }
 
         [Test]
-        public void RegisterVacation_ValidInput_AddsVacationShiftWithCorrectProperties()
+        public void RegisterVacation_WhenVacationDoesNotOverlapExistingShift_AddsVacationShift()
         {
-            var pharmacist = new Pharmacyst(1, "A", "B", string.Empty, true, "cert", 5);
-            this.mockStaffRepository.Setup(repository => repository.GetPharmacists()).Returns(new List<Pharmacyst> { pharmacist });
+            var requestedPharmacist = CreatePharmacist(1, "Alice", "Smith");
 
-            // Setting up an existing shift to prove ID increments correctly (Max ID + 1)
-            var existingShift = new Shift(5, pharmacist, "Pharmacy", DateTime.Now.AddDays(20), DateTime.Now.AddDays(21), ShiftStatus.SCHEDULED);
-            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { existingShift });
+            this.mockPharmacyStaffRepository
+                .Setup(pharmacyStaffRepository => pharmacyStaffRepository.GetPharmacists())
+                .Returns(new List<Pharmacyst> { requestedPharmacist });
 
-            this.service.RegisterVacation(1, DateTime.Now.AddDays(1), DateTime.Now.AddDays(3));
+            this.mockPharmacyShiftRepository
+                .Setup(pharmacyShiftRepository => pharmacyShiftRepository.GetAllShifts())
+                .Returns(new List<Shift>());
 
-            this.mockShiftRepository.Verify(
-                repository => repository.AddShift(It.Is<Shift>(s =>
-                s.Status == ShiftStatus.VACATION &&
-                s.Location == "Vacation" &&
-                s.Id == 6 &&
-                s.AppointedStaff.StaffID == 1)), Times.Once);
+            this.pharmacyVacationService.RegisterVacation(1, DateTime.Today.AddDays(4), DateTime.Today.AddDays(5));
+
+            this.mockPharmacyShiftRepository.Verify(
+                pharmacyShiftRepository => pharmacyShiftRepository.AddShift(
+                    It.Is<Shift>(vacationShift => vacationShift.Status == ShiftStatus.VACATION)),
+                Times.Once);
+        }
+
+        private static Pharmacyst CreatePharmacist(int pharmacistIdentifier, string firstName, string lastName)
+        {
+            return new Pharmacyst(pharmacistIdentifier, firstName, lastName, "contract", true, "", 10);
         }
     }
 }

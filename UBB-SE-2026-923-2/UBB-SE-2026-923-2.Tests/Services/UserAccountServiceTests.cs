@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
     using Moq;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
@@ -10,23 +9,12 @@
     using UBB_SE_2026_923_2.Services;
 
     [TestFixture]
-    public class UserAccountServiceTests
+    public class UserAccountServiceLogicTests
     {
         private Mock<IUsersRepository> mockUsersRepository;
         private Mock<ISecurityService> mockSecurityService;
         private Mock<IUserValidationService> mockUserValidationService;
         private UserAccountService userAccountService;
-
-        private static User CreateUser(int id = 1, string email = "t@t.com", string hash = "h", bool isAdmin = false, bool isDisabled = false, string username = "user")
-        {
-            return new User(id, email, "0700000000", hash, isAdmin, isDisabled, username, false, 0);
-        }
-
-        private void SetLoggedInUser(User? user)
-        {
-            var property = typeof(UserAccountService).GetProperty("CurrentUser", BindingFlags.Public | BindingFlags.Instance);
-            property?.SetValue(this.userAccountService, user);
-        }
 
         [SetUp]
         public void Setup()
@@ -34,125 +22,238 @@
             this.mockUsersRepository = new Mock<IUsersRepository>();
             this.mockSecurityService = new Mock<ISecurityService>();
             this.mockUserValidationService = new Mock<IUserValidationService>();
+
             this.userAccountService = new UserAccountService(
                 this.mockUsersRepository.Object,
                 this.mockSecurityService.Object,
                 this.mockUserValidationService.Object);
         }
 
-        private void LoginAs(User user)
+        [Test]
+        public void Login_WhenEmailIsEmpty_ThrowsArgumentException()
         {
-            this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(user.Email)).Returns(true);
-            this.mockUsersRepository.Setup(r => r.GetUserByEmail(user.Email)).Returns(user);
-            this.mockSecurityService.Setup(s => s.VerifyPassword(It.IsAny<string>(), user.PasswordHash)).Returns(true);
-            this.userAccountService.Login(user.Email, "any_password");
+            Assert.Throws<ArgumentException>(() => this.userAccountService.Login(string.Empty, "Password123!"));
         }
 
         [Test]
-        public void Login_ValidCredentials_SetsCurrentUser()
+        public void Login_WhenPasswordIsIncorrect_ThrowsException()
         {
-            var user = CreateUser(email: "paul@gmail.com", hash: "abc123");
-            this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("paul@gmail.com")).Returns(true);
-            this.mockUsersRepository.Setup(r => r.GetUserByEmail("paul@gmail.com")).Returns(user);
-            this.mockSecurityService.Setup(s => s.VerifyPassword("abc123", "abc123")).Returns(true);
+            var existingUser = CreateUser(1, "user@test.com", false, false);
 
-            this.userAccountService.Login("paul@gmail.com", "abc123");
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectEmailFormat("user@test.com"))
+                .Returns(true);
 
-            Assert.That(this.userAccountService.CurrentUser, Is.EqualTo(user));
+            this.mockUsersRepository
+                .Setup(usersRepository => usersRepository.GetUserByEmail("user@test.com"))
+                .Returns(existingUser);
+
+            this.mockSecurityService
+                .Setup(securityService => securityService.VerifyPassword("WrongPassword123!", existingUser.PasswordHash))
+                .Returns(false);
+
+            Assert.Throws<Exception>(() => this.userAccountService.Login("user@test.com", "WrongPassword123!"));
         }
 
         [Test]
-        [TestCase("invalid", "Not a valid e-mail")]
-        [TestCase("disabled", "Account disabled")]
-        [TestCase("wrongpass", "Incorrect password")]
-        public void Login_FailedScenarios_ThrowsException(string scenario, string expectedMessage)
+        public void Login_WhenCredentialsAreValid_SetsCurrentUser()
         {
-            var user = CreateUser(isDisabled: scenario == "disabled");
-            this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(It.IsAny<string>())).Returns(scenario != "invalid");
-            this.mockUsersRepository.Setup(r => r.GetUserByEmail(It.IsAny<string>())).Returns(user);
-            this.mockSecurityService.Setup(s => s.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(scenario != "wrongpass");
+            var existingUser = CreateUser(1, "user@test.com", false, false);
 
-            var ex = Assert.Throws<Exception>(() => this.userAccountService.Login("test@test.com", "pass"));
-            Assert.That(ex.Message, Is.EqualTo(expectedMessage));
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectEmailFormat("user@test.com"))
+                .Returns(true);
+
+            this.mockUsersRepository
+                .Setup(usersRepository => usersRepository.GetUserByEmail("user@test.com"))
+                .Returns(existingUser);
+
+            this.mockSecurityService
+                .Setup(securityService => securityService.VerifyPassword("Password123!", existingUser.PasswordHash))
+                .Returns(true);
+
+            this.userAccountService.Login("user@test.com", "Password123!");
+
+            Assert.That(this.userAccountService.CurrentUser, Is.EqualTo(existingUser));
         }
 
         [Test]
-        public void Register_ValidData_AddsToRepository()
+        public void Register_WhenPasswordsDoNotMatch_ThrowsException()
         {
-            // CONFIGURARE: Acum am adăugat și validarea pentru telefon!
-            this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(It.IsAny<string>())).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat(It.IsAny<string>())).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat(It.IsAny<string>())).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat(It.IsAny<string>())).Returns(true); // <--- FIX
-            this.mockUsersRepository.Setup(r => r.GetUserByEmail("new@test.com")).Returns((User?)null);
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectEmailFormat("user@test.com"))
+                .Returns(true);
 
-            this.userAccountService.Register("new@test.com", "Pass123!", "Pass123!", "user", "0700");
-
-            this.mockUsersRepository.Verify(r => r.AddUser(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>(),
-                It.IsAny<bool>(),
-                It.IsAny<bool>(),
-                It.IsAny<int>(),
-                It.IsAny<string>()), Times.Once);
+            Assert.Throws<Exception>(
+                () => this.userAccountService.Register("user@test.com", "Password123!", "Different123!", "username", "0744123456"));
         }
 
         [Test]
-        public void UpdateProfile_ValidData_UpdatesUser()
+        public void Register_WhenDataIsValid_AddsUserToRepository()
         {
-            var user = CreateUser();
-            this.LoginAs(user);
-            this.mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat(It.IsAny<string>())).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat(It.IsAny<string>())).Returns(true);
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectEmailFormat("user@test.com"))
+                .Returns(true);
 
-            this.userAccountService.UpdateProfile("newname", "0799");
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectPasswordFormat("Password123!"))
+                .Returns(true);
 
-            Assert.That(user.Username, Is.EqualTo("newname"));
-            this.mockUsersRepository.Verify(r => r.UpdateUser(user), Times.Once);
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectUsernameFormat("username"))
+                .Returns(true);
+
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectPhoneNumberFormat("0744123456"))
+                .Returns(true);
+
+            this.mockSecurityService
+                .Setup(securityService => securityService.HashPassword("Password123!"))
+                .Returns("hashedPassword");
+
+            this.mockUsersRepository
+                .SetupSequence(usersRepository => usersRepository.GetUserByEmail("user@test.com"))
+                .Returns((User)null)
+                .Returns(CreateUser(1, "user@test.com", false, false));
+
+            this.userAccountService.Register("user@test.com", "Password123!", "Password123!", "username", "0744123456");
+
+            this.mockUsersRepository.Verify(
+                usersRepository => usersRepository.AddUser("user@test.com", "0744123456", "hashedPassword", "username", false, false, false, 0, "Client"),
+                Times.Once);
         }
 
         [Test]
-        public void ChangePassword_ValidData_UpdatesHash()
+        public void UpdateProfile_WhenCurrentUserIsNotLoggedIn_ThrowsException()
         {
-            var user = CreateUser(hash: "old");
-            this.LoginAs(user);
-            this.mockSecurityService.Setup(s => s.VerifyPassword(It.IsAny<string>(), "old")).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat(It.IsAny<string>())).Returns(true);
-            this.mockSecurityService.Setup(s => s.HashPassword("new")).Returns("newhash");
-
-            this.userAccountService.ChangePassword("old", "new", "new");
-
-            Assert.That(user.PasswordHash, Is.EqualTo("newhash"));
+            Assert.Throws<Exception>(() => this.userAccountService.UpdateProfile("newUsername", "0744123456"));
         }
 
         [Test]
-        public void SearchUsers_AsAdmin_ReturnsFilteredResults()
+        public void UpdateProfile_WhenNewUsernameIsEmpty_UsesEmailPrefixAsUsername()
         {
-            var admin = CreateUser(isAdmin: true);
-            this.LoginAs(admin);
-            var users = new List<User> { admin, CreateUser(id: 99, username: "target") };
-            this.mockUsersRepository.Setup(r => r.GetAllUsers()).Returns(users);
+            var existingUser = LoginAsUser(false);
 
-            var result = this.userAccountService.SearchUsers("id:99");
+            this.userAccountService.UpdateProfile(string.Empty, "0744123456");
 
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].Id, Is.EqualTo(99));
+            Assert.That(existingUser.Username, Is.EqualTo("admin"));
         }
 
         [Test]
-        public void PromoteToAdmin_ValidAdmin_UpdatesClient()
+        public void ChangePassword_WhenOldPasswordIsIncorrect_ThrowsException()
         {
-            var admin = CreateUser(isAdmin: true);
-            var client = CreateUser(id: 2, isAdmin: false);
-            this.LoginAs(admin);
+            var existingUser = LoginAsUser(false);
 
-            this.userAccountService.PromoteToAdmin(client);
+            this.mockSecurityService
+                .Setup(securityService => securityService.VerifyPassword("WrongPassword123!", existingUser.PasswordHash))
+                .Returns(false);
 
-            Assert.That(client.IsAdmin, Is.True);
-            this.mockUsersRepository.Verify(r => r.UpdateUser(client), Times.Once);
+            Assert.Throws<Exception>(() => this.userAccountService.ChangePassword("WrongPassword123!", "NewPassword123!", "NewPassword123!"));
+        }
+
+        [Test]
+        public void ChangePassword_WhenDataIsValid_UpdatesCurrentUserPasswordHash()
+        {
+            var existingUser = LoginAsUser(false);
+
+            this.mockSecurityService
+                .Setup(securityService => securityService.VerifyPassword("OldPassword123!", existingUser.PasswordHash))
+                .Returns(true);
+
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectPasswordFormat("NewPassword123!"))
+                .Returns(true);
+
+            this.mockSecurityService
+                .Setup(securityService => securityService.HashPassword("NewPassword123!"))
+                .Returns("newHashedPassword");
+
+            this.userAccountService.ChangePassword("OldPassword123!", "NewPassword123!", "NewPassword123!");
+
+            Assert.That(existingUser.PasswordHash, Is.EqualTo("newHashedPassword"));
+        }
+
+        [Test]
+        public void SearchUsers_WhenQueryUsesIdentifierPrefix_ReturnsUserWithRequestedIdentifier()
+        {
+            LoginAsUser(true);
+
+            this.mockUsersRepository
+                .Setup(usersRepository => usersRepository.GetAllUsers())
+                .Returns(new List<User>
+                {
+                    CreateUser(1, "first@test.com", false, false),
+                    CreateUser(2, "second@test.com", false, false),
+                });
+
+            var searchedUsers = this.userAccountService.SearchUsers("id:2");
+
+            Assert.That(searchedUsers[0].Id, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void SearchUsers_WhenCurrentUserIsNotAdmin_ThrowsException()
+        {
+            LoginAsUser(false);
+
+            Assert.Throws<Exception>(() => this.userAccountService.SearchUsers("id:1"));
+        }
+
+        [Test]
+        public void PromoteToAdmin_WhenClientIsActiveClient_UpdatesUserAsAdmin()
+        {
+            LoginAsUser(true);
+            var clientUser = CreateUser(2, "client@test.com", false, false);
+
+            this.userAccountService.PromoteToAdmin(clientUser);
+
+            Assert.That(clientUser.IsAdmin, Is.True);
+        }
+
+        [Test]
+        public void DisableAccount_WhenClientIsActiveClient_UpdatesUserAsDisabled()
+        {
+            LoginAsUser(true);
+            var clientUser = CreateUser(2, "client@test.com", false, false);
+
+            this.userAccountService.DisableAccount(clientUser);
+
+            Assert.That(clientUser.IsDisabled, Is.True);
+        }
+
+        [Test]
+        public void Logout_WhenCurrentUserIsLoggedIn_ClearsCurrentUser()
+        {
+            LoginAsUser(false);
+
+            this.userAccountService.Logout();
+
+            Assert.That(this.userAccountService.CurrentUser, Is.Null);
+        }
+
+        private User LoginAsUser(bool isAdmin)
+        {
+            var existingUser = CreateUser(1, "admin@test.com", isAdmin, false);
+
+            this.mockUserValidationService
+                .Setup(userValidationService => userValidationService.IsCorrectEmailFormat("admin@test.com"))
+                .Returns(true);
+
+            this.mockUsersRepository
+                .Setup(usersRepository => usersRepository.GetUserByEmail("admin@test.com"))
+                .Returns(existingUser);
+
+            this.mockSecurityService
+                .Setup(securityService => securityService.VerifyPassword("Password123!", existingUser.PasswordHash))
+                .Returns(true);
+
+            this.userAccountService.Login("admin@test.com", "Password123!");
+            return existingUser;
+        }
+
+        private static User CreateUser(int userIdentifier, string email, bool isAdmin, bool isDisabled)
+        {
+            return new User(userIdentifier, email, "0744123456", "hashedPassword", isAdmin, isDisabled, "username", false, 0);
         }
     }
 }

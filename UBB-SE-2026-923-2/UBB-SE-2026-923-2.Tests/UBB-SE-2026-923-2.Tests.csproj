@@ -36,6 +36,11 @@
   <!-- Link service source files from the WinUI project so we can unit-test them
        without pulling in the entire Windows App SDK dependency tree. -->
   <ItemGroup>
+	<Compile Include="..\UBB-SE-2026-923-2\ViewModels\Orders\BasketViewModel.cs" Link="LinkedSources\BasketViewModel.cs" />	<Compile Include="..\UBB-SE-2026-923-2\Services\OrderService.cs" Link="LinkedSources\OrderService.cs" />
+	<Compile Include="..\UBB-SE-2026-923-2\ViewModels\Orders\BasketViewModel.cs" Link="LinkedSources\BasketViewModel.cs" />	<Compile Include="..\UBB-SE-2026-923-2\Services\OrderService.cs" Link="LinkedSources\OrderService.cs" />
+	<Compile Include="..\UBB-SE-2026-923-2\Services\ERDispatchService.cs" Link="LinkedSources\ERDispatchService.cs" />
+	<Compile Include="..\UBB-SE-2026-923-2\Services\AdminService.cs" Link="LinkedSources\AdminService.cs" />
+	<Compile Include="..\UBB-SE-2026-923-2\Services\IAdminService.cs" Link="LinkedSources\IAdminService.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\ISecurityService.cs" Link="LinkedSources\ISecurityService.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\SecurityService.cs" Link="LinkedSources\SecurityService.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Services\IUserValidationService.cs" Link="LinkedSources\IUserValidationService.cs" />
