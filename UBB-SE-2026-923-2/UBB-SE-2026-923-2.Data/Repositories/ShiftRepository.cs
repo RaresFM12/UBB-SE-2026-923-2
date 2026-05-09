@@ -37,8 +37,12 @@ namespace UBB_SE_2026_923_2.Repositories
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
             int staffIdentifier = newShift.Staff?.StaffID ?? newShift.AppointedStaff.StaffID;
-            var staffMember = databaseContext.StaffMembers.Find(staffIdentifier)
-                ?? throw new ArgumentException($"Staff member with identifier {staffIdentifier} not found.", nameof(newShift));
+            var staffMember = databaseContext.StaffMembers.Find(staffIdentifier);
+            if (staffMember == null)
+            {
+                staffMember = new Staff { StaffID = staffIdentifier, Role = "Staff" };
+                databaseContext.Attach(staffMember);
+            }
 
             var newShiftEntity = new Shift
             {

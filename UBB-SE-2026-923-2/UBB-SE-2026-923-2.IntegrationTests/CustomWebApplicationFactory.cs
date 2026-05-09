@@ -8,7 +8,7 @@ namespace UBB_SE_2026_923_2.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly string _dbName = "IntegrationTestDb_" + Guid.NewGuid().ToString();
+    private readonly string databaseName = "IntegrationTestDb_" + Guid.NewGuid().ToString();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -19,16 +19,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                          || d.ServiceType == typeof(IDbContextFactory<AppDbContext>))
                 .ToList();
 
-            foreach (var d in descriptorsToRemove)
+            foreach (var descriptorToRemove in descriptorsToRemove)
             {
-                services.Remove(d);
+                services.Remove(descriptorToRemove);
             }
 
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseInMemoryDatabase(_dbName));
-
             services.AddDbContextFactory<AppDbContext>(options =>
-                options.UseInMemoryDatabase(_dbName), ServiceLifetime.Scoped);
+                options.UseInMemoryDatabase(this.databaseName));
         });
 
         builder.UseEnvironment("Development");

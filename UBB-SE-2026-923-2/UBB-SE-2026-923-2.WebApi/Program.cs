@@ -6,7 +6,14 @@ using UBB_SE_2026_923_2.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddControllers()
+    .AddControllers(options =>
+    {
+        // Navigation properties on domain models are never populated when the
+        // model is returned from GET and then round-tripped back in PUT bodies.
+        // Suppressing implicit-required on non-nullable reference types prevents
+        // ASP.NET Core from rejecting those null navigations during model validation.
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    })
     .AddJsonOptions(options =>
     {
         // EF navigation collections form cycles between entities; ignore them

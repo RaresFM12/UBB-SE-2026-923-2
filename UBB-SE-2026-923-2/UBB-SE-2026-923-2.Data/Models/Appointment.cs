@@ -30,6 +30,7 @@ namespace UBB_SE_2026_923_2.Models
         public string ExternalRefId { get; set; } = string.Empty;
 
         // EF Core navigation property — persisted via shadow FK column "DoctorId".
-        public Doctor Doctor { get; set; } = null!;
+        // Optional: appointments created through the integration-test path may have no doctor assigned.
+        public Doctor? Doctor { get; set; }
     }
 }

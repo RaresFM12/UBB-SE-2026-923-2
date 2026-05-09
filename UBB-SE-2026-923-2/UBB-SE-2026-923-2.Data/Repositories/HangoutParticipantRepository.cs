@@ -35,11 +35,19 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var hangoutToJoin = databaseContext.Hangouts.Find(hangoutId)
-                ?? throw new ArgumentException($"Hangout with identifier {hangoutId} not found.", nameof(hangoutId));
+            var hangoutToJoin = databaseContext.Hangouts.Find(hangoutId);
+            if (hangoutToJoin == null)
+            {
+                hangoutToJoin = new Hangout { HangoutID = hangoutId };
+                databaseContext.Attach(hangoutToJoin);
+            }
 
-            var participatingStaffMember = databaseContext.StaffMembers.Find(staffId)
-                ?? throw new ArgumentException($"Staff member with identifier {staffId} not found.", nameof(staffId));
+            var participatingStaffMember = databaseContext.StaffMembers.Find(staffId);
+            if (participatingStaffMember == null)
+            {
+                participatingStaffMember = new Staff { StaffID = staffId };
+                databaseContext.Attach(participatingStaffMember);
+            }
 
             databaseContext.HangoutParticipants.Add(new HangoutParticipant
             {

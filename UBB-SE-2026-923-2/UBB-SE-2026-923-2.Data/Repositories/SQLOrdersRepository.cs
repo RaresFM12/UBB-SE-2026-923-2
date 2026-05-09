@@ -27,8 +27,12 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var clientUser = databaseContext.Users.Find(clientId)
-                ?? throw new ArgumentException($"User with identifier {clientId} not found.", nameof(clientId));
+            var clientUser = databaseContext.Users.Find(clientId);
+            if (clientUser == null)
+            {
+                clientUser = new User { Id = clientId };
+                databaseContext.Attach(clientUser);
+            }
 
             var newOrder = new Order(0, clientUser, pickUpDate, isCompleted, isExpired);
             databaseContext.Orders.Add(newOrder);
@@ -124,7 +128,7 @@ namespace UBB_SE_2026_923_2.Repositories
                 .AsNoTracking()
                 .Include(order => order.OrderItemEntries)
                     .ThenInclude(orderItem => orderItem.Item)
-                .Where(order => order.Client.Id == clientId)
+                .Where(order => EF.Property<int>(order, "ClientId") == clientId)
                 .ToList();
 
             foreach (var order in orders)

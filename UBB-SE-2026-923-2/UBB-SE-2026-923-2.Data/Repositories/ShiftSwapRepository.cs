@@ -23,14 +23,26 @@ namespace UBB_SE_2026_923_2.Repositories
         {
             using var databaseContext = this.databaseContextFactory.CreateDbContext();
 
-            var shiftForSwap = databaseContext.Shifts.Find(shiftSwapRequest.Shift.Id)
-                ?? throw new ArgumentException($"Shift with identifier {shiftSwapRequest.Shift.Id} not found.", nameof(shiftSwapRequest));
+            var shiftForSwap = databaseContext.Shifts.Find(shiftSwapRequest.Shift.Id);
+            if (shiftForSwap == null)
+            {
+                shiftForSwap = new Shift { Id = shiftSwapRequest.Shift.Id };
+                databaseContext.Attach(shiftForSwap);
+            }
 
-            var requesterStaffMember = databaseContext.StaffMembers.Find(shiftSwapRequest.Requester.StaffID)
-                ?? throw new ArgumentException($"Staff member with identifier {shiftSwapRequest.Requester.StaffID} not found.", nameof(shiftSwapRequest));
+            var requesterStaffMember = databaseContext.StaffMembers.Find(shiftSwapRequest.Requester.StaffID);
+            if (requesterStaffMember == null)
+            {
+                requesterStaffMember = new Staff { StaffID = shiftSwapRequest.Requester.StaffID };
+                databaseContext.Attach(requesterStaffMember);
+            }
 
-            var colleagueStaffMember = databaseContext.StaffMembers.Find(shiftSwapRequest.Colleague.StaffID)
-                ?? throw new ArgumentException($"Staff member with identifier {shiftSwapRequest.Colleague.StaffID} not found.", nameof(shiftSwapRequest));
+            var colleagueStaffMember = databaseContext.StaffMembers.Find(shiftSwapRequest.Colleague.StaffID);
+            if (colleagueStaffMember == null)
+            {
+                colleagueStaffMember = new Staff { StaffID = shiftSwapRequest.Colleague.StaffID };
+                databaseContext.Attach(colleagueStaffMember);
+            }
 
             var newShiftSwapRequestEntity = new ShiftSwapRequest
             {

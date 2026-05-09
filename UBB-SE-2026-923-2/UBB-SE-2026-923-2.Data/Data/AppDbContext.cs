@@ -290,19 +290,27 @@ public class AppDbContext : DbContext
             shiftSwapRequestEntityBuilder.Property(shiftSwapRequest => shiftSwapRequest.SwapId).ValueGeneratedOnAdd();
             shiftSwapRequestEntityBuilder.Property(shiftSwapRequest => shiftSwapRequest.Status).HasConversion<string>().HasMaxLength(30);
 
+            // IsRequired(false) makes the FK columns nullable so that EF Core
+            // uses LEFT JOIN semantics when including these navigations.  Without
+            // it, EF Core in-memory applies inner-join semantics and silently
+            // excludes ShiftSwapRequest rows whose Shift/Requester/Colleague are
+            // not present in the store (e.g. Attach-stubs from a prior context).
             shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Shift)
                   .WithMany()
                   .HasForeignKey("ShiftId")
+                  .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
 
             shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Requester)
                   .WithMany(staffMember => staffMember.ShiftSwapRequestsAsRequester)
                   .HasForeignKey("RequesterId")
+                  .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
 
             shiftSwapRequestEntityBuilder.HasOne(shiftSwapRequest => shiftSwapRequest.Colleague)
                   .WithMany(staffMember => staffMember.ShiftSwapRequestsAsColleague)
                   .HasForeignKey("ColleagueId")
+                  .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -320,6 +328,7 @@ public class AppDbContext : DbContext
             appointmentEntityBuilder.HasOne(appointment => appointment.Doctor)
                   .WithMany(doctor => doctor.Appointments)
                   .HasForeignKey("DoctorId")
+                  .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
