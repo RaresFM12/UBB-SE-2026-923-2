@@ -28,8 +28,8 @@
             // Parameterless overload kept for legacy call sites that don't go
             // through DI yet. Repositories are resolved from the application
             // service provider so the EF Core implementations are used.
-            this.itemRepository = App.Services.GetRequiredService<IItemsRepository>();
-            this.substanceRepository = App.Services.GetRequiredService<ISubstancesRepository>();
+            this.itemRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IItemsRepository>();
+            this.substanceRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<ISubstancesRepository>();
         }
 
         public List<Item> GetAllItems()
