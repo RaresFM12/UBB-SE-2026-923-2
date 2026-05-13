@@ -43,11 +43,11 @@ namespace UBB_SE_2026_923_2.Services
             // repositories from the application service provider; the
             // evaluations repository still uses the legacy ADO.NET connection
             // string until it is migrated in Phase 2.
-            this.SubstancesRepository = App.Services.GetRequiredService<ISubstancesRepository>();
-            this.ItemsRepository = App.Services.GetRequiredService<IItemsRepository>();
-            this.UsersRepository = App.Services.GetRequiredService<IUsersRepository>();
-            this.OrdersRepository = App.Services.GetRequiredService<IOrdersRepository>();
-            this.EvaluationsRepository = App.Services.GetRequiredService<IEvaluationsRepository>();
+            this.SubstancesRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<ISubstancesRepository>();
+            this.ItemsRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IItemsRepository>();
+            this.UsersRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IUsersRepository>();
+            this.OrdersRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IOrdersRepository>();
+            this.EvaluationsRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IEvaluationsRepository>();
             this.PrescriptionService = new PrescriptionService(this.ItemsRepository, this.EvaluationsRepository);
         }
 
@@ -63,7 +63,7 @@ namespace UBB_SE_2026_923_2.Services
             this.ItemsRepository = itemsRepository;
             this.UsersRepository = usersRepository;
             this.OrdersRepository = ordersRepository;
-            this.EvaluationsRepository = evaluationsRepository ?? App.Services.GetRequiredService<IEvaluationsRepository>();
+            this.EvaluationsRepository = evaluationsRepository ?? UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IEvaluationsRepository>();
             this.PrescriptionService = new PrescriptionService(itemsRepository, this.EvaluationsRepository);
             this.injectedActiveUser = activeUser;
         }

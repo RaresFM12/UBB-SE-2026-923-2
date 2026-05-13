@@ -47,6 +47,7 @@
   -->
   <ItemGroup>
     <ProjectReference Include="..\UBB-SE-2026-923-2.Data\UBB-SE-2026-923-2.Data.csproj" />
+    <ProjectReference Include="..\UBB-SE-2026-923-2.Shared\UBB-SE-2026-923-2.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />

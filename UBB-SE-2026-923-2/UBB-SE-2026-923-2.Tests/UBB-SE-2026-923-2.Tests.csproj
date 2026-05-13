@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -30,58 +30,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- All services and HTTP repositories now live in .Shared; reference it directly. -->
     <ProjectReference Include="..\UBB-SE-2026-923-2.Data\UBB-SE-2026-923-2.Data.csproj" />
+    <ProjectReference Include="..\UBB-SE-2026-923-2.Shared\UBB-SE-2026-923-2.Shared.csproj" />
   </ItemGroup>
 
-  <!-- Link service source files from the WinUI project so we can unit-test them
-       without pulling in the entire Windows App SDK dependency tree. -->
+  <!-- A few desktop-side helpers still need to be linked in for tests that exercise
+       the WinUI BasketViewModel and the RelayCommand classes, since those types
+       remain in the desktop project. -->
   <ItemGroup>
-    <Compile Include="..\UBB-SE-2026-923-2\Services\ISecurityService.cs" Link="LinkedSources\ISecurityService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\SecurityService.cs" Link="LinkedSources\SecurityService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IUserValidationService.cs" Link="LinkedSources\IUserValidationService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\UserValidationService.cs" Link="LinkedSources\UserValidationService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IUserAccountService.cs" Link="LinkedSources\IUserAccountService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\UserAccountService.cs" Link="LinkedSources\UserAccountService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\ICurrentUserService.cs" Link="LinkedSources\ICurrentUserService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\CurrentUserService.cs" Link="LinkedSources\CurrentUserService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IProductCatalogueService.cs" Link="LinkedSources\IProductCatalogueService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\ProductCatalogueService.cs" Link="LinkedSources\ProductCatalogueService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IWellnessItemsService.cs" Link="LinkedSources\IWellnessItemsService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\WellnessItemsService.cs" Link="LinkedSources\WellnessItemsService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IPrescriptionService.cs" Link="LinkedSources\IPrescriptionService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\PrescriptionService.cs" Link="LinkedSources\PrescriptionService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IPharmacyScheduleService.cs" Link="LinkedSources\IPharmacyScheduleService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\PharmacyScheduleService.cs" Link="LinkedSources\PharmacyScheduleService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IPharmacyVacationService.cs" Link="LinkedSources\IPharmacyVacationService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\PharmacyVacationService.cs" Link="LinkedSources\PharmacyVacationService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IShiftManagementService.cs" Link="LinkedSources\IShiftManagementService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\ShiftManagementService.cs" Link="LinkedSources\ShiftManagementService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IShiftSwapService.cs" Link="LinkedSources\IShiftSwapService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\ShiftSwapService.cs" Link="LinkedSources\ShiftSwapService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\ISalaryComputationService.cs" Link="LinkedSources\ISalaryComputationService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\SalaryComputationService.cs" Link="LinkedSources\SalaryComputationService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IHangoutService.cs" Link="LinkedSources\IHangoutService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\HangoutService.cs" Link="LinkedSources\HangoutService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IPeriodTrackerService.cs" Link="LinkedSources\IPeriodTrackerService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\PeriodTrackerService.cs" Link="LinkedSources\PeriodTrackerService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\PeriodTrackerState.cs" Link="LinkedSources\PeriodTrackerState.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\RaresICurrentUserService.cs" Link="LinkedSources\RaresICurrentUserService.cs" />
-    <!-- Repository interfaces are in UBB-SE-2026-923-2.Data (already project-referenced above) -->
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IDoctorAppointmentService.cs" Link="LinkedSources\IDoctorAppointmentService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\DoctorAppointmentService.cs" Link="LinkedSources\DoctorAppointmentService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IMedicalEvaluationService.cs" Link="LinkedSources\IMedicalEvaluationService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\MedicalEvaluationService.cs" Link="LinkedSources\MedicalEvaluationService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IFatigueAuditService.cs" Link="LinkedSources\IFatigueAuditService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\FatigueAuditService.cs" Link="LinkedSources\FatigueAuditService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IERDispatchService.cs" Link="LinkedSources\IERDispatchService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\ERDispatchService.cs" Link="LinkedSources\ERDispatchService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IAdminService.cs" Link="LinkedSources\IAdminService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\AdminService.cs" Link="LinkedSources\AdminService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IBasketService.cs" Link="LinkedSources\IBasketService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\BasketService.cs" Link="LinkedSources\BasketService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\IOrderService.cs" Link="LinkedSources\IOrderService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\OrderService.cs" Link="LinkedSources\OrderService.cs" />
-    <Compile Include="..\UBB-SE-2026-923-2\Services\ServiceWrapper.cs" Link="LinkedSources\ServiceWrapper.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\ViewModels\Orders\BasketViewModel.cs" Link="LinkedSources\BasketViewModel.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Command\RelayCommand.cs" Link="LinkedSources\RelayCommand.cs" />
     <Compile Include="..\UBB-SE-2026-923-2\Command\RelayCommandWithOneParameter.cs" Link="LinkedSources\RelayCommandWithOneParameter.cs" />
