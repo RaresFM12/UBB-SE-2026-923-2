@@ -73,18 +73,43 @@ namespace UBB_SE_2026_923_2.Shared
 
         private static void RegisterServices(IServiceCollection services)
         {
+            // Cross-cutting / current-user.
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<RaresICurrentUserService, CurrentUserServiceAdapter>();
 
+            // Account / auth collaborators. Scoped so the Web project gets a
+            // fresh instance per request; the desktop builds its own instance
+            // via ServiceWrapper.Initialize and is unaffected.
+            services.AddSingleton<ISecurityService, SecurityService>();
+            services.AddSingleton<IUserValidationService, UserValidationService>();
+            services.AddScoped<IUserAccountService, UserAccountService>();
+
+            // Feature services.
+            services.AddSingleton<IAdminService, AdminService>();
             services.AddSingleton<IDoctorAppointmentService, DoctorAppointmentService>();
             services.AddSingleton<IERDispatchService, ERDispatchService>();
             services.AddSingleton<IFatigueAuditService, FatigueAuditService>();
             services.AddSingleton<IHangoutService, HangoutService>();
+            services.AddSingleton<IMedicalEvaluationService, MedicalEvaluationService>();
             services.AddSingleton<IPharmacyScheduleService, PharmacyScheduleService>();
             services.AddSingleton<IPharmacyVacationService, PharmacyVacationService>();
             services.AddSingleton<IShiftManagementService, ShiftManagementService>();
             services.AddSingleton<IShiftSwapService, ShiftSwapService>();
-            services.AddSingleton<IMedicalEvaluationService, MedicalEvaluationService>();
+            services.AddSingleton<IProductCatalogueService, ProductCatalogueService>();
+            services.AddSingleton<IWellnessItemsService, WellnessItemsService>();
+
+            // OrderService has a parameterless constructor that falls back to
+            // SharedServiceProvider for legacy desktop call sites; PrescriptionService
+            // is constructed inside OrderService and also registered for direct use.
+            services.AddSingleton<IOrderService, OrderService>();
+            services.AddSingleton<IBasketService, BasketService>();
+            services.AddSingleton<IPrescriptionService>(sp =>
+                new PrescriptionService(
+                    sp.GetRequiredService<IItemsRepository>(),
+                    sp.GetRequiredService<IEvaluationsRepository>()));
+
+            services.AddSingleton<IPeriodTrackerService, PeriodTrackerService>();
+            services.AddSingleton<IPeriodTrackerServiceFactory, PeriodTrackerServiceFactory>();
 
             static ISalaryComputationService CreateSalaryComputationService(IServiceProvider serviceProvider) =>
                 new SalaryComputationService(
