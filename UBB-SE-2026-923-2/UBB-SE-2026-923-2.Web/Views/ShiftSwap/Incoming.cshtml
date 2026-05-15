@@ -1,0 +1,63 @@
+﻿@model IEnumerable<UBB_SE_2026_923_2.Models.ShiftSwapRequest>
+@using UBB_SE_2026_923_2.Models
+
+@{
+    ViewData["Title"] = "Incoming Swap Requests";
+}
+
+<div class="row mt-1">
+    <div class="col-md-6">
+        <div class="card border-primary shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title text-primary fw-semibold mb-3">Incoming Swap Requests</h4>
+
+                @if (!string.IsNullOrEmpty(ViewBag.StatusMessage as string))
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-1"></i> @ViewBag.StatusMessage
+                    </div>
+                }
+
+                @if (!Model.Any())
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-1"></i> No pending requests.
+                    </div>
+                }
+                else
+                {
+                    <div class="list-group">
+                        @foreach (var request in Model)
+                        {
+                            <div class="list-group-item border border-primary rounded mb-2">
+                                <p class="mb-2">
+                                    <strong>From:</strong>
+                                    @request.Requester?.FirstName @request.Requester?.LastName<br />
+                                    <strong>Shift:</strong>
+                                    @request.Shift?.StartTime.ToString("dd MMM yyyy")
+                                    @request.Shift?.StartTime.ToString("HH:mm") –
+                                    @request.Shift?.EndTime.ToString("HH:mm")<br />
+                                    <strong>Location:</strong> @request.Shift?.Location<br />
+                                    <strong>Requested:</strong>
+                                    @request.RequestedAt.ToString("dd MMM yyyy HH:mm")
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <form asp-action="Accept" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="swapId" value="@request.SwapId" />
+                                        <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                                    </form>
+                                    <form asp-action="Reject" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="swapId" value="@request.SwapId" />
+                                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -33,13 +33,13 @@ namespace UBB_SE_2026_923_2.Services
 
         public List<Shift> GetFutureShiftsForStaff(int staffId)
         {
+            var allShifts = this.shiftRepository.GetAllShifts();
+
             bool IsFutureShiftForStaff(Shift shift) =>
-                shift.AppointedStaff.StaffID == staffId && shift.StartTime > DateTime.Now;
+                shift.AppointedStaff.StaffID == staffId && shift.StartTime > DateTime.UtcNow;
             DateTime SortKey(Shift shift) => shift.StartTime;
-            return this.shiftRepository.GetAllShifts()
-                .Where(IsFutureShiftForStaff)
-                .OrderBy(SortKey)
-                .ToList();
+
+            return allShifts.Where(IsFutureShiftForStaff).OrderBy(s => s.StartTime).ToList();
         }
 
         private static string NormalizeForComparison(string? text) => (text ?? string.Empty).Trim().ToLowerInvariant();
@@ -291,6 +291,11 @@ namespace UBB_SE_2026_923_2.Services
                 $"Your swap request #{swapId} was rejected.");
             message = "Swap rejected.";
             return true;
+        }
+
+        public List<ShiftSwapRequest> GetAllShiftSwapRequests()
+        {
+            return this.shiftSwapRepository.GetAllShiftSwapRequests().ToList();
         }
     }
 }

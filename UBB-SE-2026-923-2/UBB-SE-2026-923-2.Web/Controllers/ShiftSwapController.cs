@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using UBB_SE_2026_923_2.Repositories;
+using System.Security.Claims;
+using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Services;
+using UBB_SE_2026_923_2.Web.Models;
 
 namespace UBB_SE_2026_923_2.Web.Controllers
 {
-    [Authorize(Roles = "Manager,Nurse")] // TODO re-check this in the destop app, see exaclty which roles have this permission
+    [Authorize(Roles = "Doctor")]
     public class ShiftSwapController : Controller
     {
         private readonly IShiftSwapService _shiftSwapService;
@@ -16,79 +17,117 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             _shiftSwapService = shiftSwapService;
         }
 
-        // GET: ShiftSwapController
-        public ActionResult Index()
+        private int? GetCurrentStaffId()
         {
-            return View();
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(userEmail)) return null;
+
+            var doctors = _shiftSwapService.GetAllDoctors();
+            var matchingDoctor = doctors.FirstOrDefault(d => d.Email == userEmail);
+            return matchingDoctor?.StaffID;
         }
 
-        // GET: ShiftSwapController/Details/5
-        public ActionResult Details(int id)
+        public ActionResult Index(int? selectedShiftId)
         {
-            return View();
+            var staffId = GetCurrentStaffId();
+            if (staffId == null)
+                return View(new ShiftSwapIndexViewModel());
+
+            var allSwaps = _shiftSwapService.GetAllShiftSwapRequests(); // you need to expose this
+
+            var vm = new ShiftSwapIndexViewModel
+            {
+                FutureShifts = _shiftSwapService.GetFutureShiftsForStaff(staffId.Value),
+                SelectedShiftId = selectedShiftId,
+                StatusMessage = TempData["StatusMessage"]?.ToString() ?? string.Empty,
+                PendingShiftIds = allSwaps
+                    .Where(s => s.Requester?.StaffID == staffId.Value && s.Status == ShiftSwapRequestStatus.PENDING)
+                    .Select(s => s.Shift?.Id ?? 0)
+                    .ToHashSet()
+            };
+
+            if (selectedShiftId.HasValue)
+            {
+                bool alreadyRequested = allSwaps.Any(s =>
+                    s.Shift?.Id == selectedShiftId.Value &&
+                    s.Requester?.StaffID == staffId.Value &&
+                    s.Status == ShiftSwapRequestStatus.PENDING);
+
+                vm.AlreadyRequested = alreadyRequested;
+
+                if (!alreadyRequested)
+                {
+                    vm.EligibleColleagues = _shiftSwapService
+                        .GetEligibleSwapColleaguesForShift(staffId.Value, selectedShiftId.Value, out var error);
+
+                    if (!string.IsNullOrEmpty(error))
+                        vm.StatusMessage = error;
+                }
+            }
+
+            return View(vm);
         }
 
-        // GET: ShiftSwapController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: ShiftSwapController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult RequestSwap(int shiftId, int colleagueId)
         {
-            try
+            var staffId = GetCurrentStaffId();
+            if (staffId == null)
             {
+                TempData["StatusMessage"] = "Could not find your staff profile.";
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
+
+            _shiftSwapService.RequestShiftSwap(staffId.Value, shiftId, colleagueId, out var message);
+            TempData["StatusMessage"] = message;
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: ShiftSwapController/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult Incoming()
         {
-            return View();
+            var staffId = GetCurrentStaffId();
+            if (staffId == null)
+            {
+                ViewBag.StatusMessage = "Could not find your staff profile.";
+                return View(new List<ShiftSwapRequest>());
+            }
+
+            ViewBag.StatusMessage = TempData["StatusMessage"]?.ToString() ?? string.Empty;
+            var requests = _shiftSwapService.GetIncomingSwapRequests(staffId.Value);
+            return View(requests);
         }
 
-        // POST: ShiftSwapController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Accept(int swapId, int? selectedDoctorId)
         {
-            try
+            var staffId = GetCurrentStaffId();
+            if (staffId == null || swapId <= 0)
             {
-                return RedirectToAction(nameof(Index));
+                TempData["StatusMessage"] = "Invalid request.";
+                return RedirectToAction(nameof(Incoming), new { selectedDoctorId });
             }
-            catch
-            {
-                return View();
-            }
+
+            _shiftSwapService.AcceptSwapRequest(swapId, staffId.Value, out var message);
+            TempData["StatusMessage"] = message;
+            return RedirectToAction(nameof(Incoming), new { selectedDoctorId });
         }
 
-        // GET: ShiftSwapController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: ShiftSwapController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Reject(int swapId, int? selectedDoctorId)
         {
-            try
+            var staffId = GetCurrentStaffId();
+            if (staffId == null || swapId <= 0)
             {
-                return RedirectToAction(nameof(Index));
+                TempData["StatusMessage"] = "Invalid request.";
+                return RedirectToAction(nameof(Incoming), new { selectedDoctorId });
             }
-            catch
-            {
-                return View();
-            }
+
+            _shiftSwapService.RejectSwapRequest(swapId, staffId.Value, out var message);
+            TempData["StatusMessage"] = message;
+            return RedirectToAction(nameof(Incoming), new { selectedDoctorId });
         }
     }
 }

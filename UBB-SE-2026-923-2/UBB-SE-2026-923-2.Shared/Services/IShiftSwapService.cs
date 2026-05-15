@@ -18,5 +18,7 @@ namespace UBB_SE_2026_923_2.Services
         bool RejectSwapRequest(int swapId, int colleagueId, out string message);
 
         List<Doctor> GetAllDoctors();
+
+        List<ShiftSwapRequest> GetAllShiftSwapRequests();
     }
 }

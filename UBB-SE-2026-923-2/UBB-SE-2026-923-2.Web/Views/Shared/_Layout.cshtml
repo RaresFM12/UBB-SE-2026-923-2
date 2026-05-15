@@ -40,6 +40,16 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="DoctorAppointments" asp-action="Index">Appointments</a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Index">Shift Swap Requests</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Incoming">Incoming Swap Requests</a>
+                                </li>
+
+
                             }
 
                             @if (User.IsInRole("Pharmacist") || User.IsInRole("Admin"))
