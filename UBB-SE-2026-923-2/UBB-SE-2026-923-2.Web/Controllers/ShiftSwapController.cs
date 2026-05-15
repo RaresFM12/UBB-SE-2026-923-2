@@ -35,7 +35,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             var allSwaps = _shiftSwapService.GetAllShiftSwapRequests(); // you need to expose this
 
-            var vm = new ShiftSwapIndexViewModel
+            var shiftSwapIndexViewModel = new ShiftSwapIndexViewModel
             {
                 FutureShifts = _shiftSwapService.GetFutureShiftsForStaff(staffId.Value),
                 SelectedShiftId = selectedShiftId,
@@ -53,19 +53,19 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                     s.Requester?.StaffID == staffId.Value &&
                     s.Status == ShiftSwapRequestStatus.PENDING);
 
-                vm.AlreadyRequested = alreadyRequested;
+                shiftSwapIndexViewModel.AlreadyRequested = alreadyRequested;
 
                 if (!alreadyRequested)
                 {
-                    vm.EligibleColleagues = _shiftSwapService
+                    shiftSwapIndexViewModel.EligibleColleagues = _shiftSwapService
                         .GetEligibleSwapColleaguesForShift(staffId.Value, selectedShiftId.Value, out var error);
 
                     if (!string.IsNullOrEmpty(error))
-                        vm.StatusMessage = error;
+                        shiftSwapIndexViewModel.StatusMessage = error;
                 }
             }
 
-            return View(vm);
+            return View(shiftSwapIndexViewModel);
         }
 
         [HttpPost]
