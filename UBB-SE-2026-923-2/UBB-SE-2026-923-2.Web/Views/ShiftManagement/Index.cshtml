@@ -27,8 +27,8 @@
             <tr>
                 <td>@(shift.AppointedStaff?.FirstName) @(shift.AppointedStaff?.LastName)</td>
                 <td>@shift.Location</td>
-                <td>@shift.StartTime.ToString("g")</td>
-                <td>@shift.EndTime.ToString("g")</td>
+                <td>@shift.StartTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
+                <td>@shift.EndTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
                 <td>
                     <span class="badge @(shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.ACTIVE ? "bg-success" : (shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.CANCELLED ? "bg-danger" : "bg-secondary"))">
                         @shift.Status
@@ -37,13 +37,13 @@
                 <td>
                     @if (shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.SCHEDULED)
                     {
-                        <form asp-action="Activate" asp-route-id="@shift.Id" method="post" class="d-inline">
+                        <form asp-action="Activate" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-outline-success">Activate</button>
                         </form>
                     }
                     @if (shift.Status != UBB_SE_2026_923_2.Models.ShiftStatus.CANCELLED)
                     {
-                        <form asp-action="Cancel" asp-route-id="@shift.Id" method="post" class="d-inline">
+                        <form asp-action="Cancel" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this shift?');">Cancel</button>
                         </form>
                     }
