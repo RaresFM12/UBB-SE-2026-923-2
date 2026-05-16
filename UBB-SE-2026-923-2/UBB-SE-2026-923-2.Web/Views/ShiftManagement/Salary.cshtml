@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Compute Salary";
+    var staffList = ViewBag.StaffList as IEnumerable<UBB_SE_2026_923_2.Models.IStaff>;
+}
+
+<h2>Compute Staff Salary</h2>
+
+<div class="row mt-4">
+    <div class="col-md-5">
+        <div class="card p-4">
+            <form asp-action="ComputeSalary" method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label">Staff Member</label>
+                    <select name="staffId" class="form-select" required>
+                        <option value="">-- Select Staff --</option>
+                        @if (staffList != null)
+                        {
+                            foreach (var staff in staffList)
+                            {
+                                <option value="@staff.StaffID">@staff.FirstName @staff.LastName</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label">Month</label>
+                    <select name="month" class="form-select" required>
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            <option value="@i">@System.Globalization.DateTimeFormatInfo.CurrentInfo.GetMonthName(i)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="control-label">Year</label>
+                    <input type="number" name="year" class="form-control" value="@DateTime.Now.Year" required />
+                </div>
+
+                <button type="submit" class="btn btn-success">Calculate Salary</button>
+                <a asp-action="Index" class="btn btn-secondary">Back to Shifts</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        @if (ViewBag.CalculatedSalary != null)
+        {
+            <div class="alert alert-success mt-0 h-100 d-flex flex-column justify-content-center align-items-center">
+                <h4 class="mb-3">Salary Calculation Result</h4>
+                <p class="fs-5 text-center">The calculated salary for <strong>@ViewBag.SelectedStaffName</strong> is:</p>
+                <h1 class="display-4 fw-bold">$@Math.Round((double)ViewBag.CalculatedSalary, 2)</h1>
+            </div>
+        }
+    </div>
+</div>
