@@ -1,6 +1,7 @@
 namespace UBB_SE_2026_923_2.IntegrationTests
 {
     using System.Collections.Generic;
+    using Microsoft.AspNetCore.Antiforgery;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,9 @@ namespace UBB_SE_2026_923_2.IntegrationTests
             {
                 services.RemoveAll<IUsersRepository>();
                 services.AddSingleton<IUsersRepository>(this.UsersRepository);
+
+                services.RemoveAll<IAntiforgery>();
+                services.AddSingleton<IAntiforgery, FakeAntiforgery>();
 
                 services.PostConfigure<AuthenticationOptions>(options =>
                 {
