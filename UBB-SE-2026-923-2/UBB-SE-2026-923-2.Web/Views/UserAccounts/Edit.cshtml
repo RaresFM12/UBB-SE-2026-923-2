@@ -1,0 +1,44 @@
+@model UBB_SE_2026_923_2.Web.Models.UserAccountEditViewModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<h2 class="mb-3">Profile</h2>
+
+@if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+
+<form asp-action="Edit" method="post" class="card shadow-sm">
+    <div class="card-body">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Username" class="form-label"></label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PhoneNumber" class="form-label"></label>
+            <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" />
+            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a asp-action="ChangePassword" class="btn btn-outline-secondary">Change password</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

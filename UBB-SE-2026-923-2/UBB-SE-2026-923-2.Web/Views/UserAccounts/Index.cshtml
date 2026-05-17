@@ -1,0 +1,73 @@
+@model UBB_SE_2026_923_2.Web.Models.UserAccountListViewModel
+@{
+    ViewData["Title"] = "User accounts";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+    <h2 class="mb-2">User accounts</h2>
+    <a asp-action="Create" class="btn btn-primary">Add account</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-8">
+        <input asp-for="Query" class="form-control" placeholder="Search (id:123, username:john, mail:john@company.com)" />
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (Model.Users.Count == 0)
+{
+    <div class="alert alert-info">No user accounts found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.Email</td>
+                        <td>@(string.IsNullOrWhiteSpace(user.Username) ? "(no username)" : user.Username)</td>
+                        <td>@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "(no phone)" : user.PhoneNumber)</td>
+                        <td>@user.DisplayRole</td>
+                        <td>@user.Status</td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                            @if (user.CanDisable)
+                            {
+                                <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger">Disable</a>
+                            }
+                            @if (user.CanPromote)
+                            {
+                                <form asp-action="Promote" asp-route-id="@user.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Promote</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,56 @@
+namespace UBB_SE_2026_923_2.IntegrationTests
+{
+    using System.Collections.Generic;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Testing;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using UBB_SE_2026_923_2.IntegrationTests.Fakes;
+    using UBB_SE_2026_923_2.Repositories;
+
+    public sealed class WebMvcApplicationFactory : WebApplicationFactory<UBB_SE_2026_923_2.Web.Program>
+    {
+        public FakeUsersRepository UsersRepository { get; } = new FakeUsersRepository();
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                var settings = new Dictionary<string, string?>
+                {
+                    ["WebApiBaseUrl"] = "http://localhost",
+                };
+
+                config.AddInMemoryCollection(settings);
+            });
+
+            builder.ConfigureServices(services =>
+            {
+                services.RemoveAll<IUsersRepository>();
+                services.AddSingleton<IUsersRepository>(this.UsersRepository);
+
+                services.PostConfigure<AuthenticationOptions>(options =>
+                {
+                    options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+                    options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+                    options.DefaultScheme = TestAuthHandler.SchemeName;
+                });
+
+                services.AddAuthentication(TestAuthHandler.SchemeName)
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                        TestAuthHandler.SchemeName,
+                        _ => { });
+
+                services.PostConfigure<MvcOptions>(options =>
+                {
+                    options.Filters.Add(new IgnoreAntiforgeryTokenAttribute());
+                });
+            });
+
+            builder.UseEnvironment("Development");
+        }
+    }
+}

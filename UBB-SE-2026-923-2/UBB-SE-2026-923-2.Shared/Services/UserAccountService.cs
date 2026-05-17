@@ -67,6 +67,18 @@ namespace UBB_SE_2026_923_2.Services
             this.CurrentUser = foundUser;
         }
 
+        public User? LoadCurrentUser(int userId)
+        {
+            if (userId <= 0)
+            {
+                this.CurrentUser = null;
+                return null;
+            }
+
+            this.CurrentUser = this.UsersRepository.GetUserById(userId);
+            return this.CurrentUser;
+        }
+
         public void Register(
             string email,
             string password,

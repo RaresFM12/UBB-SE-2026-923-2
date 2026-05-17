@@ -1,0 +1,44 @@
+@model UBB_SE_2026_923_2.Web.Models.UserAccountDetailsViewModel
+@{
+    ViewData["Title"] = "User details";
+}
+
+<h2 class="mb-3">User details</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Id</dt>
+            <dd class="col-sm-9">@Model.Id</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">Username</dt>
+            <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Username) ? "(no username)" : Model.Username)</dd>
+
+            <dt class="col-sm-3">Phone</dt>
+            <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "(no phone)" : Model.PhoneNumber)</dd>
+
+            <dt class="col-sm-3">Role</dt>
+            <dd class="col-sm-9">@Model.DisplayRole</dd>
+
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">@(Model.IsDisabled ? "Disabled" : "Active")</dd>
+
+            <dt class="col-sm-3">Loyalty points</dt>
+            <dd class="col-sm-9">@Model.LoyaltyPoints</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="d-flex gap-2">
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to list</a>
+    @if (!Model.IsAdmin && !Model.IsDisabled)
+    {
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Disable</a>
+        <form asp-action="Promote" asp-route-id="@Model.Id" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-primary">Promote to admin</button>
+        </form>
+    }
+</div>
