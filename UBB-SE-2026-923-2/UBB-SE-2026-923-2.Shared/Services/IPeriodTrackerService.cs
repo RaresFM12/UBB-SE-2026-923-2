@@ -10,6 +10,8 @@
 
         PeriodTrackerState GetTrackerState();
 
+        PeriodTrackerDashboardSnapshot GetDashboardSnapshot(int monthOffset);
+
         Dictionary<int, Tuple<string, bool>> GetNotes();
 
         int GetMaxNoteId();

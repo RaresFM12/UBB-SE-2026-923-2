@@ -4,40 +4,51 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using UBB_SE_2026_923_2.Models;
+using UBB_SE_2026_923_2.Services;
 
 namespace UBB_SE_2026_923_2.IntegrationTests
 {
     [TestFixture]
     public class PeriodTrackerIntegrationTests
     {
-        private PeriodTrackerWebApplicationFactory _factory;
-        private HttpClient _client;
+        private WebApplicationFactory<UBB_SE_2026_923_2.Web.Program> _anonymousFactory;
+        private PeriodTrackerWebApplicationFactory _authenticatedFactory;
+        private HttpClient _anonymousClient;
+        private HttpClient _authenticatedClient;
 
         [SetUp]
         public void Setup()
         {
-            _factory = new PeriodTrackerWebApplicationFactory();
-            _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+            _anonymousFactory = new WebApplicationFactory<UBB_SE_2026_923_2.Web.Program>();
+            _anonymousClient = _anonymousFactory.CreateClient(new WebApplicationFactoryClientOptions
             {
-                AllowAutoRedirect = false // Crucial for verifying 302 redirect security gates
+                AllowAutoRedirect = false 
+            });
+
+            _authenticatedFactory = new PeriodTrackerWebApplicationFactory();
+            _authenticatedClient = _authenticatedFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false
             });
         }
 
         [TearDown]
         public void TearDown()
         {
-            _client?.Dispose();
-            _factory?.Dispose();
+            _anonymousClient?.Dispose();
+            _anonymousFactory?.Dispose();
+            _authenticatedClient?.Dispose();
+            _authenticatedFactory?.Dispose();
         }
 
         [Test]
         public async Task Index_Get_AnonymousUser_RedirectsToLoginSystemGate()
         {
-            // Act: Try to request the secure dashboard landing view route without cookies
-            var response = await _client.GetAsync("/PeriodTracker");
+            var response = await _anonymousClient.GetAsync("/PeriodTracker");
 
-            // Assert: Must verify the [Authorize] routing policy intercepts the request with an HTTP 302
             Assert.AreEqual(HttpStatusCode.Redirect, response.StatusCode);
 
             var locationHeader = response.Headers.Location?.ToString() ?? "";
@@ -47,27 +58,22 @@ namespace UBB_SE_2026_923_2.IntegrationTests
         [Test]
         public async Task Details_Get_AnonymousUser_RedirectsToLoginSystemGate()
         {
-            // Act: Secure report details endpoint audit
-            var response = await _client.GetAsync("/PeriodTracker/Details");
+            var response = await _anonymousClient.GetAsync("/PeriodTracker/Details");
 
-            // Assert: Ensure unauthorized access to raw cycle logs is strictly blocked
             Assert.AreEqual(HttpStatusCode.Redirect, response.StatusCode);
         }
 
         [Test]
         public async Task Edit_Get_AnonymousUser_RedirectsToLoginSystemGate()
         {
-            // Act: Audit access to settings mutation route
-            var response = await _client.GetAsync("/PeriodTracker/Edit");
+            var response = await _anonymousClient.GetAsync("/PeriodTracker/Edit");
 
-            // Assert: Ensure configuration modification is protected
             Assert.AreEqual(HttpStatusCode.Redirect, response.StatusCode);
         }
 
         [Test]
         public async Task Calculate_Post_MissingAntiforgeryToken_BlocksOrRedirectsSecuredPipeline()
         {
-            // Arrange: Preparing raw model data parameters without an anti-forgery validation payload
             var badPayload = new Dictionary<string, string>
             {
                 { "startPeriodDate", DateTime.Today.ToString("yyyy-MM-dd") },
@@ -77,10 +83,8 @@ namespace UBB_SE_2026_923_2.IntegrationTests
             };
             var requestContent = new FormUrlEncodedContent(badPayload);
 
-            // Act: Submit data modification attempt directly through the HTTP POST route
-            var response = await _client.PostAsync("/PeriodTracker/Create", requestContent);
+            var response = await _anonymousClient.PostAsync("/PeriodTracker/Create", requestContent);
 
-            // Assert: The ASP.NET Core pipeline must catch the unverified cross-site scripting profile
             bool isThrottledBySecurity = response.StatusCode == HttpStatusCode.BadRequest ||
                                          response.StatusCode == HttpStatusCode.Redirect;
 
@@ -90,19 +94,25 @@ namespace UBB_SE_2026_923_2.IntegrationTests
         [Test]
         public async Task CreateNote_Post_MissingAntiforgeryToken_BlocksOrRedirectsSecuredPipeline()
         {
-            // Arrange: Attempt to add an unauthorized clinical annotation log item 
             var payload = new Dictionary<string, string> { { "noteBody", "Unauthorized Script Note Injection" } };
             var requestContent = new FormUrlEncodedContent(payload);
 
-            // Act
-            var response = await _client.PostAsync("/PeriodTracker/CreateNote", requestContent);
+            var response = await _anonymousClient.PostAsync("/PeriodTracker/CreateNote", requestContent);
 
-            // Assert
             bool isThrottledBySecurity = response.StatusCode == HttpStatusCode.BadRequest ||
-                                         // If the app handles forgery via redirect loops
                                          response.StatusCode == HttpStatusCode.Redirect;
 
             Assert.IsTrue(isThrottledBySecurity);
+        }
+
+        [Test]
+        public async Task Index_Get_AuthenticatedClient_ReturnsOk()
+        {
+            var response = await _authenticatedClient.GetAsync("/PeriodTracker");
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            var html = await response.Content.ReadAsStringAsync();
+            Assert.That(html, Does.Contain("Period Tracker Center"));
         }
     }
 }
