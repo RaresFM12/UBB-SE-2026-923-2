@@ -1,146 +1,213 @@
 ﻿@model UBB_SE_2026_923_2.Web.Models.PeriodTrackerViewModel
 @{
     ViewData["Title"] = "Period Tracker Dashboard";
+    var configurationAction = Model.HasPeriodTracker ? "Edit" : "Create";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <h2 class="text-primary mb-0">🌸 Period Tracker Center</h2>
-        @if (Model.HasPeriodTracker)
-        {
-                <div class="badge bg-light text-dark border p-2">
-                    <strong>Next Cycle:</strong> @Model.NextPeriodDateString (@Model.NextPeriodDistanceString)
-                </div>
-        }
+<div class="container py-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4 pb-3 border-bottom">
+        <div>
+            <h1 class="h3 mb-1 text-primary">Period Tracker Center</h1>
+            <p class="text-muted mb-0">Configure the cycle, review the current phase, manage notes, and buy recommended items from one place.</p>
+        </div>
+
+        <div class="btn-group" role="group" aria-label="Period tracker pages">
+            @if (Model.HasPeriodTracker)
+            {
+                <a asp-action="Details" asp-controller="PeriodTracker" class="btn btn-outline-secondary">Details</a>
+                <a asp-action="Edit" asp-controller="PeriodTracker" class="btn btn-outline-primary">Edit</a>
+                <a asp-action="Delete" asp-controller="PeriodTracker" class="btn btn-outline-danger">Delete</a>
+            }
+            else
+            {
+                <a asp-action="Create" asp-controller="PeriodTracker" class="btn btn-outline-success">Create</a>
+            }
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 bg-light">
-                <div class="card-header bg-dark text-white fw-bold">Calculate Parameters</div>
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-dark text-white fw-semibold">Cycle configuration</div>
                 <div class="card-body">
-                    <form asp-action="Calculate" method="post">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Start Period Date</label>
-                            <input type="date" class="form-control" name="startPeriodDate" value="@Model.StartPeriodDate.ToString("yyyy-MM-dd")" required />
+                    <form asp-action="@configurationAction" asp-controller="PeriodTracker" method="post" class="vstack gap-3">
+                        @Html.AntiForgeryToken()
+                        <div>
+                            <label class="form-label small fw-semibold">Start period date</label>
+                            <input type="date" class="form-control" name="StartPeriodDate" value="@Model.StartPeriodDate.ToString("yyyy-MM-dd")" required />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Cycle Days (20-45)</label>
-                            <input type="number" class="form-control" name="cycleDays" value="@Model.CycleDays" min="20" max="45" required />
+
+                        <div>
+                            <label class="form-label small fw-semibold">Cycle days</label>
+                            <input type="number" class="form-control" name="CycleDays" value="@Model.CycleDays" min="20" max="45" required />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Period Length (1-9)</label>
-                            <input type="number" class="form-control" name="periodLasts" value="@Model.PeriodLasts" min="1" max="9" required />
+
+                        <div>
+                            <label class="form-label small fw-semibold">Period lasts</label>
+                            <input type="number" class="form-control" name="PeriodLasts" value="@Model.PeriodLasts" min="1" max="9" required />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">PMS Severity Option</label>
-                            <select class="form-select" name="pmsOption">
-                                <!option value="0" @(Model.PMSOption == 0 ? "selected" : "")>No symptoms</!option>
-                                <!option value="1" @(Model.PMSOption == 1 ? "selected" : "")>Mild symptoms</!option>
-                                <!option value="2" @(Model.PMSOption == 2 ? "selected" : "")>Moderate symptoms</!option>
-                                <!option value="3" @(Model.PMSOption == 3 ? "selected" : "")>Severe symptoms</!option>
+
+                        <div>
+                            <label class="form-label small fw-semibold">PMS symptoms appear</label>
+                            <select class="form-select" name="PMSOption">
+                                @if (Model.PMSOption == 0)
+                                {
+                                    <option value="0" selected>Not applicable</option>
+                                    <option value="1">1-3 days before period</option>
+                                    <option value="2">4-7 days before period</option>
+                                    <option value="3">7-14 days before period</option>
+                                }
+                                else if (Model.PMSOption == 1)
+                                {
+                                    <option value="0">Not applicable</option>
+                                    <option value="1" selected>1-3 days before period</option>
+                                    <option value="2">4-7 days before period</option>
+                                    <option value="3">7-14 days before period</option>
+                                }
+                                else if (Model.PMSOption == 2)
+                                {
+                                    <option value="0">Not applicable</option>
+                                    <option value="1">1-3 days before period</option>
+                                    <option value="2" selected>4-7 days before period</option>
+                                    <option value="3">7-14 days before period</option>
+                                }
+                                else
+                                {
+                                    <option value="0">Not applicable</option>
+                                    <option value="1">1-3 days before period</option>
+                                    <option value="2">4-7 days before period</option>
+                                    <option value="3" selected>7-14 days before period</option>
+                                }
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold">Calculate Tracker</button>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">Save cycle</button>
+                            @if (Model.HasPeriodTracker)
+                            {
+                                <a asp-action="Details" asp-controller="PeriodTracker" class="btn btn-outline-secondary">View</a>
+                            }
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4 mb-4">
+        <div class="col-lg-4">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center fw-bold">
-                    <a href="@Url.Action("Index", new { monthOffset = Model.MonthOffset - 1 })" class="btn btn-sm btn-outline-light py-0">&larr;</a>
-                    <span>@Model.CurrentMonthName</span>
-                    <a href="@Url.Action("Index", new { monthOffset = Model.MonthOffset + 1 })" class="btn btn-sm btn-outline-light py-0">&rarr;</a>
+                <div class="card-header bg-info text-white fw-semibold d-flex justify-content-between align-items-center">
+                    <a asp-action="Index" asp-controller="PeriodTracker" asp-route-monthOffset="@(Model.MonthOffset - 1)" class="btn btn-sm btn-light">&larr;</a>
+                    <span>@(string.IsNullOrWhiteSpace(Model.CurrentMonthName) ? "Cycle overview" : Model.CurrentMonthName)</span>
+                    <a asp-action="Index" asp-controller="PeriodTracker" asp-route-monthOffset="@(Model.MonthOffset + 1)" class="btn btn-sm btn-light">&rarr;</a>
                 </div>
                 <div class="card-body">
-                            @if (Model.HasPeriodTracker)
-                            {
-                            <div class="text-center my-2 border-bottom pb-3">
-                                <span class="text-muted d-block small text-uppercase">Current Status</span>
-                                <h3 class="text-info fw-bold mb-2">@Model.CurrentPhaseString</h3>
-                                <span class="badge bg-dark px-3 py-2">Cycle Day @Model.CurrentDayOfCycle</span>
-                            </div>
+                    @if (Model.HasPeriodTracker)
+                    {
+                        <div class="text-center mb-4 border-bottom pb-3">
+                            <div class="small text-muted text-uppercase fw-semibold">Current phase</div>
+                            <div class="h4 text-info fw-semibold mb-2">@Model.CurrentPhaseString</div>
+                            <span class="badge text-bg-dark px-3 py-2">Cycle day @Model.CurrentDayOfCycle</span>
+                        </div>
 
-                            <div class="row text-center my-3 g-2">
-                                <div class="col-6">
-                                    <div class="p-2 bg-light rounded border-top border-danger border-3">
-                                        <span class="small text-muted d-block">Until Period</span>
-                                        <strong class="text-danger h5 mb-0">@Model.NextPeriodDistanceString</strong>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="p-2 bg-light rounded border-top border-success border-3">
-                                        <span class="small text-muted d-block">Until Ovulation</span>
-                                        <strong class="text-success h5 mb-0">@Model.OvulationDistanceString</strong>
-                                    </div>
+                        <div class="row g-3 row-cols-1">
+                            <div class="col">
+                                <div class="border-start border-4 border-danger bg-light rounded p-3 h-100">
+                                    <div class="small text-muted fw-semibold">Period window</div>
+                                    <div class="fw-semibold">@Model.PeriodIntervalText</div>
                                 </div>
                             </div>
+                            <div class="col">
+                                <div class="border-start border-4 border-warning bg-light rounded p-3 h-100">
+                                    <div class="small text-muted fw-semibold">Low fertility window</div>
+                                    <div class="fw-semibold">@Model.LowFertilityIntervalText</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="border-start border-4 border-success bg-light rounded p-3 h-100">
+                                    <div class="small text-muted fw-semibold">Ovulation window</div>
+                                    <div class="fw-semibold">@Model.OvulationIntervalText</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="border-start border-4 border-secondary bg-light rounded p-3 h-100">
+                                    <div class="small text-muted fw-semibold">PMS tracking phase</div>
+                                    <div class="fw-semibold">@Model.PmsIntervalText</div>
+                                </div>
+                            </div>
+                        </div>
 
-                            <div class="mt-2">
-                                <div class="p-2 border-start border-4 border-danger bg-light mb-2" style="font-size: 0.85rem;">
-                                    <span class="d-block text-muted fw-bold">🔴 Period Window</span>
-                                    <span>@Model.PeriodIntervalText</span>
-                                </div>
-                                <div class="p-2 border-start border-4 border-warning bg-light mb-2" style="font-size: 0.85rem;">
-                                    <span class="d-block text-muted fw-bold">🟡 Low Fertility Window</span>
-                                    <span>@Model.LowFertilityIntervalText</span>
-                                </div>
-                                <div class="p-2 border-start border-4 border-success bg-light mb-2" style="font-size: 0.85rem;">
-                                    <span class="d-block text-muted fw-bold">🟢 Ovulation Window</span>
-                                    <span>@Model.OvulationIntervalText</span>
-                                </div>
-                                <div class="p-2 border-start border-4 bg-light mb-2" style="border-left-color: #6f42c1 !important; font-size: 0.85rem;">
-                                    <span class="d-block text-muted fw-bold" style="color: #6f42c1;">常规 PMS Phase</span>
-                                    <span>@Model.PmsIntervalText</span>
-                                </div>
-                            </div>
-                            }
-                            else
-                            {
-                            <div class="text-center text-muted py-5">
-                                <p>No valid calendar calculations registered.</p>
-                                <span class="small">Please configure your cycle history parameters to build data graphs.</span>
-                            </div>
-                            }
+                        <p class="small text-muted text-center mt-3 mb-0">Next period estimate: <strong>@Model.NextPeriodDateString</strong> (@Model.NextPeriodDistanceString)</p>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-5">
+                            <p class="mb-1">No tracker configured yet.</p>
+                            <span class="small">Save your cycle configuration to see the period statistics.</span>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4 mb-4">
+        <div class="col-lg-4">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center fw-bold">
-                    <span>📋 Health Tracking Notes</span>
-                    @if (Model.CanAddNote)
-                    {
-                            <button type="button" class="btn btn-sm btn-light text-success font-weight-bold p-0 px-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#addNoteModal">+</button>
-                    }
+                <div class="card-header bg-success text-white fw-semibold d-flex justify-content-between align-items-center">
+                    <span>Daily symptom notes</span>
+                    <span class="badge text-bg-light text-dark">@Model.Notes.Count / 4</span>
                 </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush mb-0">
+                <div class="card-body p-0 d-flex flex-column">
+                    <div class="list-group list-group-flush flex-grow-1">
                         @if (!Model.Notes.Any())
                         {
-                                <li class="list-group-item text-center text-muted py-4 small">No monitoring notes present. Click '+' to log symptoms!</li>
+                            <div class="list-group-item text-center text-muted py-4">No logs entered yet.</div>
                         }
+
                         @foreach (var note in Model.Notes)
                         {
-                                <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
-                                    <div class="d-flex align-items-center flex-grow-1 me-2">
-                                        <form asp-action="EditNote" method="post" class="mb-0 me-2 d-flex align-items-center">
-                                            <input type="hidden" name="noteId" value="@note.NoteId" />
-                                            <input type="hidden" name="noteBody" value="@note.NoteBody" />
-                                            <input type="checkbox" class="form-check-input" style="cursor:pointer;" onchange="this.form.submit()" name="isDone" value="true" @(note.IsDone ? "checked" : "") />
-                                        </form>
-                                        <span class="text-break small @(note.IsDone ? "text-decoration-line-through text-muted fst-italic" : "")">@note.NoteBody</span>
-                                    </div>
-                                    <form asp-action="RemoveNote" method="post" class="mb-0">
+                            <div class="list-group-item">
+                                <div class="d-flex gap-2 align-items-start">
+                                    <form asp-action="EditNote" asp-controller="PeriodTracker" method="post" class="flex-grow-1">
+                                        @Html.AntiForgeryToken()
                                         <input type="hidden" name="noteId" value="@note.NoteId" />
-                                        <button type="submit" class="btn btn-sm text-danger border-0 p-0 px-1 font-weight-bold">&times;</button>
+                                        <div class="d-flex gap-2 align-items-start">
+                                            @if (note.IsDone)
+                                            {
+                                                <input type="checkbox" class="form-check-input mt-2" name="isDone" value="true" checked onchange="this.form.submit()" />
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" class="form-check-input mt-2" name="isDone" value="true" onchange="this.form.submit()" />
+                                            }
+
+                                            <textarea class="form-control form-control-sm @(note.IsDone ? "text-decoration-line-through text-muted" : string.Empty)" name="noteBody" rows="2" onchange="this.form.submit()">@note.NoteBody</textarea>
+                                        </div>
                                     </form>
-                                </li>
+
+                                    <form asp-action="RemoveNote" asp-controller="PeriodTracker" method="post" class="ms-1">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="noteId" value="@note.NoteId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">&times;</button>
+                                    </form>
+                                </div>
+                            </div>
                         }
-                    </ul>
+                    </div>
+
+                    <div class="border-top p-3 bg-light">
+                        @if (Model.CanAddNote)
+                        {
+                            <form asp-action="CreateNote" asp-controller="PeriodTracker" method="post" class="vstack gap-2">
+                                @Html.AntiForgeryToken()
+                                <label class="form-label small fw-semibold mb-0">Add a new note</label>
+                                <textarea class="form-control" name="noteBody" rows="3" placeholder="Describe symptoms, reminders, or observations" required></textarea>
+                                <button type="submit" class="btn btn-success w-100">Add note</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary mb-0 small">Note limit reached. Remove one note before adding another.</div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,66 +215,46 @@
 
     @if (Model.HasPeriodTracker && Model.ShopItems.Any())
     {
-            <div class="mt-4 pt-3 border-top">
-                <h4 class="text-secondary mb-3">Recommended Related Wellness Items</h4>
-            @if (Model.IsInMenstrualPhase)
-            {
-                        <div class="alert alert-warning py-2 small fw-bold text-dark mb-3">
-                            ✨ Menstrual Phase active detected! A 20% discount has been calculated on all suggested items below.
-                        </div>
-            }
-                <div class="row row-cols-2 row-cols-md-4 g-3">
+        <div class="mt-4 pt-4 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0 text-secondary">Recommended related wellness items</h2>
+                @if (Model.IsInMenstrualPhase)
+                {
+                    <span class="badge text-bg-warning text-dark">20% discount active</span>
+                }
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
                 @foreach (var shopItem in Model.ShopItems)
                 {
-                            <div class="col">
-                                <div class="card h-100 shadow-sm border-0 border-top border-primary border-3 text-center p-2">
-                                    <div class="card-body p-1">
-                                        <h6 class="card-title text-truncate small mb-1">@shopItem.RawItem.Name</h6>
-                                        <p class="card-text text-muted mb-1" style="font-size:0.75rem;">@shopItem.RawItem.Producer</p>
-                                        <div class="my-2">
-                                    @if (shopItem.HasDiscountApplied)
-                                    {
-                                                    <span class="text-decoration-line-through text-danger small me-1">@shopItem.RawItem.Price Lei</span>
-                                                    <span class="text-success fw-bold">@shopItem.DisplayPrice.ToString("0.00") Lei</span>
-                                    }
-                                    else
-                                    {
-                                                    <span class="text-dark fw-bold">@shopItem.RawItem.Price Lei</span>
-                                    }
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-transparent border-0 p-1">
-                                        <form asp-action="AddProductToBasket" method="post">
-                                            <input type="hidden" name="itemId" value="@shopItem.RawItem.Id" />
-                                            <input type="hidden" name="discountPercentage" value="@(shopItem.HasDiscountApplied ? 20.0f : 0.0f)" />
-                                            <button type="submit" class="btn btn-sm btn-outline-primary w-100 py-1 font-weight-bold" style="font-size:0.8rem;">Add to Basket</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                }
-                </div>
-            </div>
-    }
-</div>
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0 border-top border-primary">
+                            <div class="card-body text-center">
+                                <h3 class="h6 text-truncate mb-1">@shopItem.RawItem.Name</h3>
+                                <div class="text-muted small mb-2">@shopItem.RawItem.Producer</div>
 
-<div class="modal fade" id="addNoteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form asp-action="CreateNote" method="post" class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h6 class="modal-title mb-0">Log Health Symptoms</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                @if (shopItem.HasDiscountApplied)
+                                {
+                                    <div class="small text-danger text-decoration-line-through">@shopItem.RawItem.Price Lei</div>
+                                    <div class="fw-semibold text-success">@shopItem.DisplayPrice.ToString("0.00") Lei</div>
+                                }
+                                else
+                                {
+                                    <div class="fw-semibold">@shopItem.RawItem.Price Lei</div>
+                                }
+                            </div>
+                            <div class="card-footer bg-transparent border-0 pt-0">
+                                <form asp-action="AddProductToBasket" asp-controller="PeriodTracker" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="itemId" value="@shopItem.RawItem.Id" />
+                                    <input type="hidden" name="discountPercentage" value="@(shopItem.HasDiscountApplied ? 20.0f : 0.0f)" />
+                                    <button type="submit" class="btn btn-outline-primary w-100">Add to basket</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Observations Description</label>
-                    <textarea class="form-control" name="noteBody" rows="4" placeholder="Enter physical symptoms, emotional trends, or reminder items..." required></textarea>
-                </div>
-            </div>
-            <div class="modal-footer bg-light p-2">
-                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-sm btn-success">Save Notes Entry</button>
-            </div>
-        </form>
-    </div>
+        </div>
+    }
 </div>

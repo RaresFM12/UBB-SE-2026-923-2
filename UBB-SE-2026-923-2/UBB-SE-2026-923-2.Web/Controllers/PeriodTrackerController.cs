@@ -25,6 +25,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             _basketService = basketService;
         }
 
+        // GET: PeriodTracker
         [HttpGet]
         public IActionResult Index(int monthOffset = 0)
         {
@@ -35,8 +36,8 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             {
                 HasPeriodTracker = state.HasPeriodTracker,
                 StartPeriodDate = state.StartPeriodDate.DateTime,
-                CycleDays = state.CycleDays,
-                PeriodLasts = state.PeriodLasts,
+                CycleDays = (int)state.CycleDays,
+                PeriodLasts = (int)state.PeriodLasts,
                 PMSOption = state.PremenstrualSyndromeOption,
                 MonthOffset = monthOffset,
                 Notes = notesDict.OrderBy(n => n.Key).Select(n => new WebNoteItemViewModel
@@ -49,7 +50,6 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             if (viewModel.HasPeriodTracker && viewModel.CycleDays > 0)
             {
-                // Run the analytical calendar engine mirroring your desktop project formulas
                 RunCalendarCalculations(viewModel);
                 PopulateRecommendedProducts(viewModel);
             }
@@ -57,12 +57,145 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             return View(viewModel);
         }
 
+        // GET: PeriodTracker/Details
+        [HttpGet]
+        public IActionResult Details()
+        {
+            var state = _periodTrackerService.GetTrackerState();
+            if (!state.HasPeriodTracker) return RedirectToAction(nameof(Create));
+
+            var viewModel = new PeriodTrackerViewModel
+            {
+                HasPeriodTracker = state.HasPeriodTracker,
+                StartPeriodDate = state.StartPeriodDate.DateTime,
+                CycleDays = (int)state.CycleDays,
+                PeriodLasts = (int)state.PeriodLasts,
+                PMSOption = state.PremenstrualSyndromeOption
+            };
+            RunCalendarCalculations(viewModel);
+            return View(viewModel);
+        }
+
+        // GET: PeriodTracker/Create
+        [HttpGet]
+        public IActionResult Create()
+        {
+            var state = _periodTrackerService.GetTrackerState();
+            if (state.HasPeriodTracker) return RedirectToAction(nameof(Index));
+
+            return View(new PeriodTrackerViewModel());
+        }
+
+        // POST: PeriodTracker/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(PeriodTrackerViewModel model)
+        {
+            _periodTrackerService.UpdatePeriodTracker(model.StartPeriodDate, model.CycleDays, model.PeriodLasts, model.PMSOption);
+            _periodTrackerService.SaveCurrentUser();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: PeriodTracker/Edit
+        [HttpGet]
+        public IActionResult Edit()
+        {
+            var state = _periodTrackerService.GetTrackerState();
+            if (!state.HasPeriodTracker) return RedirectToAction(nameof(Create));
+
+            var viewModel = new PeriodTrackerViewModel
+            {
+                StartPeriodDate = state.StartPeriodDate.DateTime,
+                CycleDays = (int)state.CycleDays,
+                PeriodLasts = (int)state.PeriodLasts,
+                PMSOption = state.PremenstrualSyndromeOption
+            };
+            return View(viewModel);
+        }
+
+        // POST: PeriodTracker/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(PeriodTrackerViewModel model)
+        {
+            _periodTrackerService.UpdatePeriodTracker(model.StartPeriodDate, model.CycleDays, model.PeriodLasts, model.PMSOption);
+            _periodTrackerService.SaveCurrentUser();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: PeriodTracker/Delete
+        [HttpGet]
+        public IActionResult Delete()
+        {
+            var state = _periodTrackerService.GetTrackerState();
+            if (!state.HasPeriodTracker) return RedirectToAction(nameof(Index));
+
+            var viewModel = new PeriodTrackerViewModel
+            {
+                StartPeriodDate = state.StartPeriodDate.DateTime,
+                CycleDays = (int)state.CycleDays
+            };
+            return View(viewModel);
+        }
+
+        // POST: PeriodTracker/Delete
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed()
+        {
+            _periodTrackerService.UpdatePeriodTracker(DateTimeOffset.MinValue, 0, 0, 0);
+
+            var existingNotes = _periodTrackerService.GetNotes();
+            foreach (var noteId in existingNotes.Keys.ToList())
+            {
+                _periodTrackerService.DeleteNote(noteId);
+            }
+
+            _periodTrackerService.SaveCurrentUser();
+            return RedirectToAction(nameof(Index));
+        }
+
+        /* Standard Sub-Actions used by the view forms */
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateNote(string noteBody)
+        {
+            _periodTrackerService.AddNote(noteBody ?? "New Entry");
+            _periodTrackerService.SaveCurrentUser();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditNote(int noteId, string noteBody, bool isDone)
+        {
+            _periodTrackerService.UpdateNote(noteId, noteBody ?? string.Empty, isDone);
+            _periodTrackerService.SaveCurrentUser();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RemoveNote(int noteId)
+        {
+            _periodTrackerService.DeleteNote(noteId);
+            _periodTrackerService.SaveCurrentUser();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddProductToBasket(int itemId, float discountPercentage)
+        {
+            _basketService.AddToBasket(itemId, 1, discountPercentage);
+            return RedirectToAction(nameof(Index));
+        }
+
         private void RunCalendarCalculations(PeriodTrackerViewModel vm)
         {
             DateTime today = DateTime.Today;
             DateTime computedStart = vm.StartPeriodDate.Date;
 
-            // Fast-forward or reverse logic tracking the exact actual period occurrence
             while (computedStart.AddDays(vm.CycleDays) <= today)
             {
                 computedStart = computedStart.AddDays(vm.CycleDays);
@@ -72,7 +205,6 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                 computedStart = computedStart.AddDays(-vm.CycleDays);
             }
 
-            // Apply manual Month Offset variations via user navigation button interactions
             computedStart = computedStart.AddDays(vm.MonthOffset * vm.CycleDays);
 
             DateTime endPeriod = computedStart.AddDays(vm.PeriodLasts);
@@ -82,7 +214,6 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             DateTime endOvulation = computedStart.AddDays(15);
             DateTime nextPeriod = computedStart.AddDays(vm.CycleDays);
 
-            // Seed internal statistics display components
             vm.CurrentMonthName = computedStart.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
             vm.PeriodIntervalText = $"{computedStart.Day} {computedStart:MMMM} - {endPeriod.Day} {endPeriod:MMMM}";
             vm.LowFertilityIntervalText = vm.PeriodLasts < 8 ? $"{startLowFertility.Day} {startLowFertility:MMMM} - {endLowFertility.Day} {endLowFertility:MMMM}" : "No low fertility days this month";
@@ -107,16 +238,11 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             else vm.CurrentPhaseString = "Out of Scope Cycle";
 
             vm.NextPeriodDateString = nextPeriod.ToString("d");
-
-            // --- 3 STATS CALCULATIONS ---
-            // 1. In which day of the cycle you are right now
             vm.CurrentDayOfCycle = (int)(today - computedStart).TotalDays + 1;
 
-            // 2. Days left until the next period
             double daysLeftPeriod = Math.Max(0, Math.Ceiling((nextPeriod - today).TotalDays));
             vm.NextPeriodDistanceString = $"{daysLeftPeriod} days left";
 
-            // 3. Days left until ovulation
             if (today < startOvulation)
             {
                 vm.DaysUntilOvulation = (int)Math.Ceiling((startOvulation - today).TotalDays);
@@ -129,7 +255,6 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             }
             else
             {
-                // If passed, calculate until next month's ovulation window
                 DateTime nextMonthOvulation = nextPeriod.AddDays(11);
                 vm.DaysUntilOvulation = (int)Math.Ceiling((nextMonthOvulation - today).TotalDays);
                 vm.OvulationDistanceString = $"In {vm.DaysUntilOvulation} days";
@@ -139,7 +264,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         private void PopulateRecommendedProducts(PeriodTrackerViewModel vm)
         {
             var wellnessItems = _wellnessItemsService.GetWellnessItems();
-            float discountModifier = vm.IsInMenstrualPhase ? 20.0f : 0.0f; // Menstrual phase extra 20% discount trigger
+            float discountModifier = vm.IsInMenstrualPhase ? 20.0f : 0.0f;
 
             foreach (var item in wellnessItems)
             {
@@ -153,57 +278,6 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                     HasDiscountApplied = vm.IsInMenstrualPhase
                 });
             }
-        }
-
-        [HttpPost]
-        public IActionResult Calculate(DateTime startPeriodDate, int cycleDays, int periodLasts, int pmsOption)
-        {
-            // Business Rule Validation limits mapped natively
-            if (periodLasts < 1 || periodLasts > 9 || cycleDays < 20 || cycleDays > 45)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            _periodTrackerService.UpdatePeriodTracker(startPeriodDate, cycleDays, periodLasts, pmsOption);
-            _periodTrackerService.SaveCurrentUser();
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        public IActionResult CreateNote(string noteBody)
-        {
-            var notes = _periodTrackerService.GetNotes();
-            if (notes.Count < 4)
-            {
-                // Accept empty entries or dynamic texts cleanly
-                _periodTrackerService.AddNote(noteBody ?? "New Health Entry");
-                _periodTrackerService.SaveCurrentUser();
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        public IActionResult EditNote(int noteId, string noteBody, bool isDone)
-        {
-            _periodTrackerService.UpdateNote(noteId, noteBody ?? string.Empty, isDone);
-            _periodTrackerService.SaveCurrentUser();
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        public IActionResult RemoveNote(int noteId)
-        {
-            _periodTrackerService.DeleteNote(noteId);
-            _periodTrackerService.SaveCurrentUser();
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        public IActionResult AddProductToBasket(int itemId, float discountPercentage)
-        {
-            // Connect directly to your interface implementation
-            _basketService.AddToBasket(itemId, 1, discountPercentage);
-            return RedirectToAction(nameof(Index));
         }
     }
 }
