@@ -3,6 +3,7 @@ namespace UBB_SE_2026_923_2.Web
     using System;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using UBB_SE_2026_923_2.Shared;
+    using UBB_SE_2026_923_2.Services;
 
     public class Program
     {
@@ -32,6 +33,10 @@ namespace UBB_SE_2026_923_2.Web
 
             var app = builder.Build();
 
+
+            
+            // -----------------------------------------------------------
+
             // Expose the same provider to the Shared business-logic layer so
             // services that still resolve dependencies from the static locator
             // (legacy parameterless constructors) keep working.
@@ -50,6 +55,36 @@ namespace UBB_SE_2026_923_2.Web
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // --- UPDATE THIS INLINE LAMBDA MIDDLEWARE IN PROGRAM.CS ---
+            app.Use(async (context, next) =>
+            {
+                // 1. Rebuild the shared singleton tracking instances natively
+                ServiceWrapper.Initialize();
+
+                // 2. If the user is authenticated via cookie, restore their context into the legacy engine
+                if (context.User.Identity?.IsAuthenticated == true)
+                {
+                    var nameIdentifierClaim = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (int.TryParse(nameIdentifierClaim, out int loggedInUserId))
+                    {
+                        // Pull the user repository directly from the active request container
+                        var userRepository = context.RequestServices.GetRequiredService<Repositories.IUsersRepository>();
+                        var databaseUserRecord = userRepository.GetUserById(loggedInUserId);
+
+                        if (databaseUserRecord != null)
+                        {
+                            // Inject the active identity context into the private property storage
+                            var serviceInstance = ServiceWrapper.UserAccountService;
+                            var currentUserProperty = typeof(UserAccountService)
+                                .GetProperty("CurrentUser", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+
+                            currentUserProperty?.SetValue(serviceInstance, databaseUserRecord);
+                        }
+                    }
+                }
+                await next();
+            });
 
             app.MapControllerRoute(
                 name: "default",
