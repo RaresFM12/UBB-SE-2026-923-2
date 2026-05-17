@@ -1,0 +1,60 @@
+@model List<HangoutViewModel>
+@{
+    ViewData["Title"] = "Hangouts";
+}
+
+<h2 class="mb-4">Hangouts</h2>
+
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">Schedule Hangout</a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No hangouts scheduled.</p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (HangoutViewModel hangout in Model)
+        {
+            <div class="col">
+                <div class="card h-100 @(hangout.IsFull ? "border-secondary" : "border-primary")">
+                    <div class="card-body">
+                        <h5 class="card-title">@hangout.Title</h5>
+                        <p class="card-text text-muted">@hangout.Description</p>
+                        <p class="card-text">
+                            <small class="text-muted">Date: @hangout.FormattedDate</small>
+                        </p>
+                        <p class="card-text">
+                            Participants: @hangout.ParticipantCount / @hangout.MaxParticipants
+                            @if (hangout.IsFull)
+                            {
+                                <span class="badge bg-secondary ms-1">Full</span>
+                            }
+                        </p>
+                    </div>
+                    @if (!hangout.IsFull)
+                    {
+                        <div class="card-footer">
+                            <form asp-action="Join" method="post" class="d-flex gap-2 align-items-center">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="hangoutId" value="@hangout.HangoutId" />
+                                <input type="number" name="staffId" class="form-control form-control-sm" placeholder="Your Staff ID" min="1" required />
+                                <button type="submit" class="btn btn-sm btn-primary">Join</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
