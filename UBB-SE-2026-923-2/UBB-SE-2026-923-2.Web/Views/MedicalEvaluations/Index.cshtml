@@ -1,0 +1,67 @@
+﻿@model IEnumerable<UBB_SE_2026_923_2.Models.MedicalEvaluation>
+@{
+    ViewData["Title"] = "Medical Evaluations";
+    var doctorList = ViewBag.DoctorList as IEnumerable<UBB_SE_2026_923_2.Models.Doctor>;
+}
+
+<h2>Medical Evaluations</h2>
+
+@if (ViewData["WarningMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>@ViewData["WarningMessage"]</strong>
+    </div>
+}
+
+<div class="card p-3 mb-4 bg-light">
+    <form asp-action="Index" method="get" class="d-flex align-items-center">
+        <label class="me-3 fw-bold">Select Doctor to view cases:</label>
+        <select name="doctorId" class="form-select w-25 me-3" onchange="this.form.submit()">
+            <option value="">-- Choose Doctor --</option>
+            @if (doctorList != null)
+            {
+                foreach (var doctor in doctorList)
+                {
+                    bool isSelected = ViewBag.SelectedDoctorId == doctor.StaffID.ToString();
+                    <option value="@doctor.StaffID" selected="@isSelected">@doctor.FirstName @doctor.LastName</option>
+                }
+            }
+        </select>
+        <a asp-action="Create" class="btn btn-primary ms-auto">New Evaluation</a>
+    </form>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Patient ID</th>
+                <th>Symptoms / Diagnosis</th>
+                <th>Medications</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.EvaluationID</td>
+                    <td>@item.PatientId</td>
+                    <td>@item.Symptoms</td>
+                    <td>@item.MedicationsList</td>
+                    <td>
+                        <a asp-action="Details" asp-route-evaluationId="@item.EvaluationID" class="btn btn-sm btn-info">Details</a>
+                        <a asp-action="Edit" asp-route-evaluationId="@item.EvaluationID" class="btn btn-sm btn-warning">Edit</a>
+                        <a asp-action="Delete" asp-route-evaluationId="@item.EvaluationID" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (!string.IsNullOrEmpty(ViewBag.SelectedDoctorId))
+{
+    <p class="text-muted">No evaluations found for this doctor.</p>
+}
