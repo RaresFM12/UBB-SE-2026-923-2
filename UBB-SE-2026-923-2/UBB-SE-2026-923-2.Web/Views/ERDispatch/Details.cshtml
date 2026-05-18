@@ -1,0 +1,30 @@
+@model UBB_SE_2026_923_2.Models.ERRequest
+@{
+    ViewData["Title"] = $"ER Request #{Model.Id}";
+}
+
+<h1 class="h3 mb-3">ER Request #@Model.Id</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Specialization</dt>
+    <dd class="col-sm-9">@Model.Specialization</dd>
+
+    <dt class="col-sm-3">Location</dt>
+    <dd class="col-sm-9">@Model.Location</dd>
+
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9"><span class="badge bg-secondary">@Model.Status</span></dd>
+
+    <dt class="col-sm-3">Created</dt>
+    <dd class="col-sm-9">@Model.CreatedAt.ToString("f")</dd>
+
+    <dt class="col-sm-3">Assigned Doctor</dt>
+    <dd class="col-sm-9">
+        @(Model.AssignedDoctor == null
+            ? "—"
+            : $"{Model.AssignedDoctor.FirstName} {Model.AssignedDoctor.LastName}".Trim())
+    </dd>
+</dl>
+
+<a asp-action="Index" class="btn btn-secondary btn-sm">Back to dashboard</a>
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Edit status</a>
