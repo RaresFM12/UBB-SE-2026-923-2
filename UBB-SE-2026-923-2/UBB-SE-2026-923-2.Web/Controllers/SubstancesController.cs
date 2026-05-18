@@ -26,6 +26,23 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         }
 
         [HttpGet]
+        public IActionResult Details(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return this.NotFound();
+            }
+
+            Substance substance = this.adminService.GetSubstanceByName(name);
+            if (substance == null)
+            {
+                return this.NotFound();
+            }
+
+            return this.View(substance);
+        }
+
+        [HttpGet]
         public IActionResult Create()
         {
             return this.View(new SubstanceViewModel());

@@ -39,5 +39,52 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             return this.View(viewModel);
         }
+
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            return this.View();
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return this.View();
+        }
+
+        [HttpPost]
+        [ActionName("Create")]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreatePost()
+        {
+            return this.RedirectToAction(nameof(this.Index));
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            return this.View();
+        }
+
+        [HttpPost]
+        [ActionName("Edit")]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditPost(int id)
+        {
+            return this.RedirectToAction(nameof(this.Index));
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            return this.View();
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            return this.RedirectToAction(nameof(this.Index));
+        }
     }
 }

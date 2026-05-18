@@ -210,6 +210,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         private static Dictionary<string, float> ParseSubstancesText(string substancesText)
         {
+            const int ExpectedPartCount = 2;
             var activeSubstances = new Dictionary<string, float>();
 
             if (string.IsNullOrWhiteSpace(substancesText))
@@ -219,8 +220,8 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             foreach (string line in substancesText.Split(LineDelimiters, StringSplitOptions.RemoveEmptyEntries))
             {
-                string[] parts = line.Split(SubstanceLineDelimiter, 2);
-                if (parts.Length != 2)
+                string[] parts = line.Split(SubstanceLineDelimiter, ExpectedPartCount);
+                if (parts.Length != ExpectedPartCount)
                 {
                     continue;
                 }
@@ -237,6 +238,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         private static Dictionary<DateOnly, int> ParseBatchesText(string batchesText)
         {
+            const int ExpectedPartCount = 2;
             var batches = new Dictionary<DateOnly, int>();
 
             if (string.IsNullOrWhiteSpace(batchesText))
@@ -246,8 +248,8 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             foreach (string line in batchesText.Split(LineDelimiters, StringSplitOptions.RemoveEmptyEntries))
             {
-                string[] parts = line.Split(SubstanceLineDelimiter, 2);
-                if (parts.Length != 2)
+                string[] parts = line.Split(SubstanceLineDelimiter, ExpectedPartCount);
+                if (parts.Length != ExpectedPartCount)
                 {
                     continue;
                 }

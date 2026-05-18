@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(dir /s /b \"C:\\\\Users\\\\MIHAI\\\\source\\\\repos\\\\UBB-SE-2026-923-2\")",
+      "Bash(findstr /i \"CODING\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\MIHAI\\\\source\\\\repos\\\\UBB-SE-2026-923-2\" -Recurse -Filter \"*CODING*\")",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}

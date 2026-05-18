@@ -73,7 +73,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                     viewModel.Title,
                     viewModel.Description,
                     viewModel.Date,
-                    viewModel.MaxParticipants,
+                    viewModel.MaxParticipantsCount,
                     creator);
 
                 return this.RedirectToAction(nameof(this.Index));
@@ -90,6 +90,56 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                 viewModel.Doctors = await this.LoadDoctorOptionsAsync();
                 return this.View(viewModel);
             }
+        }
+
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            bool HasMatchingId(Hangout hangout) => hangout.HangoutID == id;
+            Hangout hangout = this.hangoutService.GetAllHangouts().Find(HasMatchingId);
+            if (hangout == null)
+            {
+                return this.NotFound();
+            }
+
+            HangoutViewModel viewModel = new HangoutViewModel
+            {
+                HangoutId = hangout.HangoutID,
+                Title = hangout.Title,
+                Description = hangout.Description,
+                FormattedDate = hangout.FormattedDate,
+                ParticipantCount = hangout.ParticipantList.Count,
+                MaxParticipants = hangout.MaxParticipants,
+                IsFull = hangout.ParticipantList.Count >= hangout.MaxParticipants,
+            };
+
+            return this.View(viewModel);
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            return this.View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, object model)
+        {
+            return this.RedirectToAction(nameof(this.Index));
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            return this.View();
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            return this.RedirectToAction(nameof(this.Index));
         }
 
         [HttpPost]
