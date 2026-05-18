@@ -1,0 +1,44 @@
+@model UBB_SE_2026_923_2.Models.AuditViolation
+@{
+    ViewData["Title"] = "Violation Details";
+    var suggestion = ViewBag.Suggestion as UBB_SE_2026_923_2.Models.AutoSuggestRecommendation;
+}
+
+<h2>Violation Details &mdash; Shift #@Model.ShiftId</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Shift ID</dt>
+            <dd class="col-sm-9">@Model.ShiftId</dd>
+
+            <dt class="col-sm-3">Staff</dt>
+            <dd class="col-sm-9">@Model.StaffName (ID @Model.StaffId)</dd>
+
+            <dt class="col-sm-3">Start</dt>
+            <dd class="col-sm-9">@Model.ShiftStart.ToString("dddd dd MMM yyyy HH:mm")</dd>
+
+            <dt class="col-sm-3">End</dt>
+            <dd class="col-sm-9">@Model.ShiftEnd.ToString("dddd dd MMM yyyy HH:mm")</dd>
+
+            <dt class="col-sm-3">Rule</dt>
+            <dd class="col-sm-9"><span class="badge bg-danger">@Model.Rule</span></dd>
+
+            <dt class="col-sm-3">Message</dt>
+            <dd class="col-sm-9">@Model.Message</dd>
+        </dl>
+    </div>
+</div>
+
+@if (suggestion != null && suggestion.SuggestedStaffId.HasValue)
+{
+    <div class="card mb-4">
+        <div class="card-header">Suggested Reassignment</div>
+        <div class="card-body">
+            <p><strong>@suggestion.SuggestedStaffName</strong> &mdash; @suggestion.Reason</p>
+            <a asp-action="Reassign" asp-route-shiftId="@Model.ShiftId" class="btn btn-success">Reassign</a>
+        </div>
+    </div>
+}
+
+<a asp-action="Index" class="btn btn-outline-secondary">Back to Audit</a>
