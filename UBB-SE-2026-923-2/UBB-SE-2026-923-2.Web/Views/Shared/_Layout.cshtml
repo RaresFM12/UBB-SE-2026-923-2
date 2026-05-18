@@ -31,7 +31,7 @@
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin</a>
+                                    <a class="nav-link text-dark" asp-controller="Items" asp-action="Index">Admin</a>
                                 </li>
                             }
 
@@ -52,6 +52,13 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Orders" asp-action="Index">Orders</a>
                             </li>
+
+                            @if (User.IsInRole("Doctor"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Hangouts" asp-action="Index">Hangouts</a>
+                                </li>
+                            }
                         }
                     </ul>
 

@@ -2,26 +2,30 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using UBB_SE_2026_923_2.Models;
     using UBB_SE_2026_923_2.Services;
     using UBB_SE_2026_923_2.Web.Models;
 
-    [Authorize]
+    [Authorize(Roles = "Doctor")]
     public class HangoutsController : Controller
     {
         private readonly IHangoutService hangoutService;
+        private readonly IDoctorAppointmentService doctorAppointmentService;
 
-        public HangoutsController(IHangoutService hangoutService)
+        public HangoutsController(IHangoutService hangoutService, IDoctorAppointmentService doctorAppointmentService)
         {
             this.hangoutService = hangoutService;
+            this.doctorAppointmentService = doctorAppointmentService;
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             List<Hangout> hangouts = this.hangoutService.GetAllHangouts();
+            List<DoctorOptionViewModel> doctors = await this.LoadDoctorOptionsAsync();
 
             HangoutViewModel MapHangoutToViewModel(Hangout hangout) =>
                 new HangoutViewModel
@@ -35,29 +39,33 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                     IsFull = hangout.ParticipantList.Count >= hangout.MaxParticipants,
                 };
 
-            List<HangoutViewModel> viewModels = hangouts.ConvertAll(MapHangoutToViewModel);
-            return this.View(viewModels);
+            var viewModel = new HangoutsIndexViewModel
+            {
+                Hangouts = hangouts.ConvertAll(MapHangoutToViewModel),
+                Doctors = doctors,
+            };
+
+            return this.View(viewModel);
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return this.View(new CreateHangoutViewModel());
+            List<DoctorOptionViewModel> doctors = await this.LoadDoctorOptionsAsync();
+            return this.View(new CreateHangoutViewModel { Doctors = doctors });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(CreateHangoutViewModel viewModel)
+        public async Task<IActionResult> Create(CreateHangoutViewModel viewModel)
         {
             if (!this.ModelState.IsValid)
             {
+                viewModel.Doctors = await this.LoadDoctorOptionsAsync();
                 return this.View(viewModel);
             }
 
-            // The service requires an IStaff instance to identify the creator.
-            // The StaffID is provided explicitly in the form because staff identity
-            // is separate from the web User authentication principal.
-            var creator = new Staff { StaffID = viewModel.CreatorStaffId };
+            var creator = new Staff { StaffID = viewModel.SelectedDoctorId };
 
             try
             {
@@ -73,11 +81,13 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             catch (ArgumentException argumentException)
             {
                 this.ModelState.AddModelError(string.Empty, argumentException.Message);
+                viewModel.Doctors = await this.LoadDoctorOptionsAsync();
                 return this.View(viewModel);
             }
             catch (InvalidOperationException operationException)
             {
                 this.ModelState.AddModelError(string.Empty, operationException.Message);
+                viewModel.Doctors = await this.LoadDoctorOptionsAsync();
                 return this.View(viewModel);
             }
         }
@@ -102,6 +112,27 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             }
 
             return this.RedirectToAction(nameof(this.Index));
+        }
+
+        private async Task<List<DoctorOptionViewModel>> LoadDoctorOptionsAsync()
+        {
+            IReadOnlyList<(int DoctorId, string DoctorName)> doctors =
+                await this.doctorAppointmentService.GetAllDoctorsAsync();
+
+            DoctorOptionViewModel MapDoctorToOption((int DoctorId, string DoctorName) doctor) =>
+                new DoctorOptionViewModel
+                {
+                    DoctorId = doctor.DoctorId,
+                    DoctorName = doctor.DoctorName,
+                };
+
+            var result = new List<DoctorOptionViewModel>();
+            foreach ((int DoctorId, string DoctorName) doctor in doctors)
+            {
+                result.Add(MapDoctorToOption(doctor));
+            }
+
+            return result;
         }
     }
 }

@@ -1,4 +1,4 @@
-@model List<HangoutViewModel>
+@model HangoutsIndexViewModel
 @{
     ViewData["Title"] = "Hangouts";
 }
@@ -17,14 +17,31 @@
     </div>
 }
 
-@if (!Model.Any())
+<div class="mb-4 d-flex align-items-center gap-3">
+    <label for="currentDoctor" class="form-label fw-bold mb-0">You are:</label>
+    @if (!Model.Doctors.Any())
+    {
+        <span class="text-muted">No doctors available.</span>
+    }
+    else
+    {
+        <select id="currentDoctor" class="form-select w-auto">
+            @foreach (DoctorOptionViewModel doctor in Model.Doctors)
+            {
+                <option value="@doctor.DoctorId">@doctor.DoctorName</option>
+            }
+        </select>
+    }
+</div>
+
+@if (!Model.Hangouts.Any())
 {
     <p class="text-muted">No hangouts scheduled.</p>
 }
 else
 {
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @foreach (HangoutViewModel hangout in Model)
+        @foreach (HangoutViewModel hangout in Model.Hangouts)
         {
             <div class="col">
                 <div class="card h-100 @(hangout.IsFull ? "border-secondary" : "border-primary")">
@@ -42,13 +59,13 @@ else
                             }
                         </p>
                     </div>
-                    @if (!hangout.IsFull)
+                    @if (!hangout.IsFull && Model.Doctors.Any())
                     {
                         <div class="card-footer">
-                            <form asp-action="Join" method="post" class="d-flex gap-2 align-items-center">
+                            <form asp-action="Join" method="post">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="hangoutId" value="@hangout.HangoutId" />
-                                <input type="number" name="staffId" class="form-control form-control-sm" placeholder="Your Staff ID" min="1" required />
+                                <input type="hidden" name="staffId" class="staff-id-input" value="" />
                                 <button type="submit" class="btn btn-sm btn-primary">Join</button>
                             </form>
                         </div>
@@ -57,4 +74,16 @@ else
             </div>
         }
     </div>
+}
+
+@section Scripts {
+    <script>
+        (function ($) {
+            function syncDoctorId() {
+                $('.staff-id-input').val($('#currentDoctor').val());
+            }
+            syncDoctorId();
+            $('#currentDoctor').on('change', syncDoctorId);
+        }(jQuery));
+    </script>
 }

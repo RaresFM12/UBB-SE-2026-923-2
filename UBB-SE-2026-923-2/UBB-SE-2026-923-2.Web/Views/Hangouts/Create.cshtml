@@ -35,10 +35,22 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="CreatorStaffId" class="form-label"></label>
-                <input asp-for="CreatorStaffId" class="form-control" type="number" />
-                <div class="form-text">Enter your Staff ID to identify yourself as the organiser.</div>
-                <span asp-validation-for="CreatorStaffId" class="text-danger"></span>
+                <label class="form-label">Organiser</label>
+                @if (!Model.Doctors.Any())
+                {
+                    <p class="text-muted">No doctors available.</p>
+                }
+                else
+                {
+                    <select asp-for="SelectedDoctorId" class="form-select">
+                        <option value="">— select a doctor —</option>
+                        @foreach (DoctorOptionViewModel doctor in Model.Doctors)
+                        {
+                            <option value="@doctor.DoctorId">@doctor.DoctorName</option>
+                        }
+                    </select>
+                }
+                <span asp-validation-for="SelectedDoctorId" class="text-danger"></span>
             </div>
 
             <div class="mt-3">

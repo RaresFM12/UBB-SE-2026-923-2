@@ -1,0 +1,70 @@
+@model AdminStatisticsViewModel
+@{
+    ViewData["Title"] = "Statistics";
+}
+
+<h2 class="mb-4">Statistics</h2>
+
+<div class="mb-3">
+    <a asp-controller="Items" asp-action="Index" class="btn btn-secondary">Back to Items</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Top 30 Items by Order Count</h4>
+        @if (!Model.TopItems.Any())
+        {
+            <p class="text-muted">No data available.</p>
+        }
+        else
+        {
+            <table class="table table-striped table-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Item</th>
+                        <th>Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (TopItemViewModel topItem in Model.TopItems)
+                    {
+                        <tr>
+                            <td>@topItem.ItemId</td>
+                            <td>@topItem.ItemName</td>
+                            <td>@topItem.OrderCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div class="col-md-6">
+        <h4>Top 30 Substances by Usage</h4>
+        @if (!Model.TopSubstances.Any())
+        {
+            <p class="text-muted">No data available.</p>
+        }
+        else
+        {
+            <table class="table table-striped table-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Substance</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (KeyValuePair<string, int> entry in Model.TopSubstances)
+                    {
+                        <tr>
+                            <td>@entry.Key</td>
+                            <td>@entry.Value</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

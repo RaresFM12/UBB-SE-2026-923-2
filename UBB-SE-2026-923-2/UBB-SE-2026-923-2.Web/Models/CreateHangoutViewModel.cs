@@ -1,6 +1,7 @@
 namespace UBB_SE_2026_923_2.Web.Models
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
     public class CreateHangoutViewModel
@@ -20,7 +21,9 @@ namespace UBB_SE_2026_923_2.Web.Models
         public int MaxParticipants { get; set; } = 10;
 
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Creator Staff Id must be a positive number.")]
-        public int CreatorStaffId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Please select a doctor.")]
+        public int SelectedDoctorId { get; set; }
+
+        public List<DoctorOptionViewModel> Doctors { get; set; } = new List<DoctorOptionViewModel>();
     }
 }
