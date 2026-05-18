@@ -54,12 +54,20 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="FatigueAudit" asp-action="Index">Fatigue Audit</a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Index">User Accounts</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="DoctorAppointments" asp-action="Index">Appointments</a>
+                                </li>
                             }
 
                             @if (User.IsInRole("Doctor"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="DoctorAppointments" asp-action="Index">Appointments</a>
+                                    <a class="nav-link text-dark" asp-controller="DoctorAppointments" asp-action="Schedule">Schedule</a>
                                 </li>
 
                                 <li class="nav-item">
@@ -114,6 +122,9 @@
                         }
                         else
                         {
+                            <li class="nav-item">
+                                <a class="btn btn-outline-primary btn-sm me-2" asp-controller="UserAccounts" asp-action="Create">Register</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="btn btn-primary btn-sm" asp-controller="Login" asp-action="Index">Sign in</a>
                             </li>

@@ -86,7 +86,8 @@ namespace UBB_SE_2026_923_2.Services
 
         public List<Shift> GetWeeklyShifts(DateTime date)
         {
-            var weekStart = date.AddDays(-(int)DateTime.Now.DayOfWeek + (int)DayOfWeek.Monday);
+            int daysFromMonday = (DaysInWeek + (date.DayOfWeek - DayOfWeek.Monday)) % DaysInWeek;
+            var weekStart = date.Date.AddDays(-daysFromMonday);
             var weekEnd = weekStart.AddDays(DaysInWeek);
 
             bool IsInWeek(Shift shift) => shift.StartTime >= weekStart && shift.StartTime < weekEnd;

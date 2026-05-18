@@ -18,9 +18,9 @@ public static class AppSettings
     private const string WebApiBaseUrlKey = "WebApiBaseUrl";
 
     private const string FallbackConnectionString =
-        @"Data Source=DESKTOP-C5LH746\\SQLEXPRESS;Initial Catalog=HospitalDatabase;Integrated Security=True;Encrypt=True;Trust Server Certificate=True";
+        @"Data Source=.\SQLEXPRESS;Initial Catalog=HospitalDatabase;Integrated Security=True;Encrypt=True;Trust Server Certificate=True";
 
-    private const string FallbackWebApiBaseUrl = "https://localhost:7100/";
+    private const string FallbackWebApiBaseUrl = "https://localhost:5100/";
 
     private static readonly Lazy<IConfigurationRoot> ConfigurationLazy = new(BuildConfiguration);
 

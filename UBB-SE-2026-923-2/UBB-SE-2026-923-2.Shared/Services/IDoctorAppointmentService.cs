@@ -26,5 +26,7 @@ namespace UBB_SE_2026_923_2.Services
         Task CancelAppointmentAsync(Appointment appointment);
 
         Task<IReadOnlyList<Shift>> GetShiftsForStaffInRangeAsync(int doctorId, DateTime fromDate, DateTime toDate);
+
+        Task<int?> GetDoctorIdByEmailAsync(string email);
     }
 }

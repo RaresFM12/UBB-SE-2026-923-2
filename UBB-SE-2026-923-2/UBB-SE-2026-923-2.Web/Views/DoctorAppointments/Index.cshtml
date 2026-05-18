@@ -1,0 +1,79 @@
+@using System
+@using System.Linq
+@model UBB_SE_2026_923_2.Web.Models.DoctorAppointmentListViewModel
+@{
+    ViewData["Title"] = "Doctor appointments";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+    <h2 class="mb-2">Doctor appointments</h2>
+    <a asp-action="Create" class="btn btn-primary">Book appointment</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-6">
+        <label class="form-label" for="doctorSelect">Doctor</label>
+        <select id="doctorSelect" name="doctorId" class="form-select">
+            @foreach (var doctor in Model.Doctors)
+            {
+                <option value="@doctor.DoctorId" selected="@(doctor.DoctorId == Model.SelectedDoctorId ? "selected" : null)">@doctor.DoctorName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-6 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (Model.Appointments.Count == 0)
+{
+    <div class="alert alert-info">No appointments found.</div>
+}
+else
+{
+    @foreach (var day in Model.Appointments.GroupBy(item => item.Date.Date).OrderBy(group => group.Key))
+    {
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>@day.Key.ToString("dddd, MMM dd")</strong>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Doctor</th>
+                            <th>Patient</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appointment in day.OrderBy(item => item.StartTime))
+                        {
+                            <tr>
+                                <td>@appointment.Id</td>
+                                <td>@appointment.DoctorName</td>
+                                <td>@appointment.PatientName</td>
+                                <td>@appointment.StartTime.ToString(@"hh\:mm") - @appointment.EndTime.ToString(@"hh\:mm")</td>
+                                <td>@appointment.Status</td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@appointment.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                                    <a asp-action="Edit" asp-route-id="@appointment.Id" class="btn btn-sm btn-outline-primary">Update</a>
+                                    <a asp-action="Delete" asp-route-id="@appointment.Id" class="btn btn-sm btn-outline-danger">Cancel</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

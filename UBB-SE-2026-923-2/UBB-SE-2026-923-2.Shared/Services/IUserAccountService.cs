@@ -7,6 +7,8 @@ namespace UBB_SE_2026_923_2.Services
     {
         User? CurrentUser { get; }
 
+        User? LoadCurrentUser(int userId);
+
         void Login(string email, string password);
 
         void Register(

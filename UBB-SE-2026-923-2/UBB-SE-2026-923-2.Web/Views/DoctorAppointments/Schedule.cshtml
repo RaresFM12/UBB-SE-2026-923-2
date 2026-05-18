@@ -1,0 +1,67 @@
+@using System
+@using System.Linq
+@model UBB_SE_2026_923_2.Web.Models.DoctorAppointmentScheduleViewModel
+@{
+    ViewData["Title"] = "My schedule";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+    <h2 class="mb-2">My schedule</h2>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <label class="form-label" for="fromDate">From</label>
+        <input id="fromDate" name="fromDate" class="form-control" type="date" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="toDate">To</label>
+        <input id="toDate" name="toDate" class="form-control" type="date" value="@Model.ToDate.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-4 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-outline-primary">Update</button>
+        <a asp-action="Schedule" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (Model.Appointments.Count == 0)
+{
+    <div class="alert alert-info">No appointments scheduled for this range.</div>
+}
+else
+{
+    @foreach (var day in Model.Appointments.GroupBy(item => item.Date.Date).OrderBy(group => group.Key))
+    {
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>@day.Key.ToString("dddd, MMM dd")</strong>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appointment in day.OrderBy(item => item.StartTime))
+                        {
+                            <tr>
+                                <td>@appointment.PatientName</td>
+                                <td>@appointment.StartTime.ToString(@"hh\:mm") - @appointment.EndTime.ToString(@"hh\:mm")</td>
+                                <td>@appointment.Status</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
