@@ -1,0 +1,95 @@
+@model UBB_SE_2026_923_2.Web.Models.ResolvePrescriptionViewModel
+@{
+    ViewData["Title"] = "Prescriptions";
+}
+
+<h1 class="h3 mb-3">Resolve Prescription</h1>
+
+<p class="text-muted">
+    Enter a prescription ID (the evaluation ID written on the patient's slip).
+    The pharmacist tool resolves it into the in-stock items to dispense and flags
+    any high-risk medicines on the original prescription.
+</p>
+
+<div class="row">
+    <div class="col-md-6 col-lg-5">
+        <div class="card mb-4">
+            <div class="card-body">
+                <form asp-action="Index" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="PrescriptionId" class="form-label"></label>
+                        <input asp-for="PrescriptionId" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="PrescriptionId" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Resolve</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.HasResult)
+{
+    @if (Model.HighRiskWarnings.Count > 0)
+    {
+        <div class="alert alert-warning">
+            <strong>High-risk medicines on this prescription:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach (var warning in Model.HighRiskWarnings)
+                {
+                    <li>@warning</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header bg-success-subtle">
+            Items to dispense
+            <span class="badge bg-light text-dark">@Model.ResolvedRows.Count</span>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.ResolvedRows.Count == 0)
+            {
+                <p class="text-muted small m-3 mb-0">No items resolved for this prescription.</p>
+            }
+            else
+            {
+                <table class="table table-sm table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Producer</th>
+                            <th class="text-end">Pills / box</th>
+                            <th class="text-end">Boxes</th>
+                            <th class="text-end">Unit price</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.ResolvedRows)
+                        {
+                            <tr>
+                                <td>@row.ItemId</td>
+                                <td>@row.ItemName</td>
+                                <td>@row.Producer</td>
+                                <td class="text-end">@row.PillsPerBox</td>
+                                <td class="text-end">@row.BoxQuantity</td>
+                                <td class="text-end">@row.UnitPrice.ToString("0.00") RON</td>
+                                <td class="text-end">@row.TotalPrice.ToString("0.00") RON</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
