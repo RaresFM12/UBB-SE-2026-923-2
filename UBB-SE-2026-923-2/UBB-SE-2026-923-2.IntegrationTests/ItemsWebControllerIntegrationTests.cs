@@ -19,13 +19,13 @@ public class ItemsWebControllerIntegrationTests
     private const string ItemSubstancesText = "AcetylsalicylicAcid:500";
     private const string ItemBatchesText = "2027-12-31:50";
 
-    private WebMvcApplicationFactory factory;
+    private AdminWebApplicationFactory factory;
     private HttpClient httpClient;
 
     [SetUp]
     public void Setup()
     {
-        this.factory = new WebMvcApplicationFactory();
+        this.factory = new AdminWebApplicationFactory();
         this.httpClient = this.factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false,
@@ -52,7 +52,7 @@ public class ItemsWebControllerIntegrationTests
     {
         HttpResponseMessage getResponse = await this.httpClient.GetAsync("/Items/Create");
         string html = await getResponse.Content.ReadAsStringAsync();
-        string token = WebMvcApplicationFactory.ExtractAntiForgeryToken(html);
+        string token = AdminWebApplicationFactory.ExtractAntiForgeryToken(html);
 
         var formData = new Dictionary<string, string>
         {

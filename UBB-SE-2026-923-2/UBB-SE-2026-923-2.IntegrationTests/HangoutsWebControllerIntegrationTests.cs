@@ -13,13 +13,13 @@ public class HangoutsWebControllerIntegrationTests
     private const string HangoutMaxParticipants = "5";
     private const string HangoutSelectedDoctorId = "1";
 
-    private WebMvcApplicationFactory factory;
+    private HangoutsWebApplicationFactory factory;
     private HttpClient httpClient;
 
     [SetUp]
     public void Setup()
     {
-        this.factory = new WebMvcApplicationFactory();
+        this.factory = new HangoutsWebApplicationFactory();
         this.httpClient = this.factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false,
@@ -46,7 +46,7 @@ public class HangoutsWebControllerIntegrationTests
     {
         HttpResponseMessage getResponse = await this.httpClient.GetAsync("/Hangouts/Create");
         string html = await getResponse.Content.ReadAsStringAsync();
-        string token = WebMvcApplicationFactory.ExtractAntiForgeryToken(html);
+        string token = HangoutsWebApplicationFactory.ExtractAntiForgeryToken(html);
 
         var formData = new Dictionary<string, string>
         {

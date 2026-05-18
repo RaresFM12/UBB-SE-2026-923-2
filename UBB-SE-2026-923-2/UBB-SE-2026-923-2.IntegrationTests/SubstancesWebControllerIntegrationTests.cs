@@ -10,13 +10,13 @@ public class SubstancesWebControllerIntegrationTests
     private const string SubstanceLethalDose = "600";
     private const string SubstanceDescription = "Non-steroidal anti-inflammatory drug";
 
-    private WebMvcApplicationFactory factory;
+    private AdminWebApplicationFactory factory;
     private HttpClient httpClient;
 
     [SetUp]
     public void Setup()
     {
-        this.factory = new WebMvcApplicationFactory();
+        this.factory = new AdminWebApplicationFactory();
         this.httpClient = this.factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false,
@@ -43,7 +43,7 @@ public class SubstancesWebControllerIntegrationTests
     {
         HttpResponseMessage getResponse = await this.httpClient.GetAsync("/Substances/Create");
         string html = await getResponse.Content.ReadAsStringAsync();
-        string token = WebMvcApplicationFactory.ExtractAntiForgeryToken(html);
+        string token = AdminWebApplicationFactory.ExtractAntiForgeryToken(html);
 
         var formData = new Dictionary<string, string>
         {
