@@ -18,19 +18,35 @@ public class ShiftSwapsController : ControllerBase
     [HttpGet]
     public ActionResult<IReadOnlyList<ShiftSwapRequest>> GetAll()
     {
-        return this.Ok(this.repository.GetAllShiftSwapRequests());
+        var requests = repository.GetAllShiftSwapRequests();
+        var result = requests.Select(r => new
+        {
+            r.SwapId,
+            r.RequestedAt,
+            r.Status,
+            ShiftId = r.Shift.Id,
+            RequesterId = r.Requester.StaffID,
+            ColleagueId = r.Colleague.StaffID
+        });
+        return Ok(result);
     }
 
     [HttpGet("{swapId:int}")]
-    public ActionResult<ShiftSwapRequest> GetById(int swapId)
+    public IActionResult GetById(int swapId)
     {
         var swap = this.repository.GetShiftSwapRequestById(swapId);
         if (swap is null)
-        {
             return this.NotFound();
-        }
 
-        return this.Ok(swap);
+        return this.Ok(new
+        {
+            swap.SwapId,
+            swap.RequestedAt,
+            swap.Status,
+            ShiftId = swap.Shift.Id,
+            RequesterId = swap.Requester.StaffID,
+            ColleagueId = swap.Colleague.StaffID
+        });
     }
 
     [HttpPost]

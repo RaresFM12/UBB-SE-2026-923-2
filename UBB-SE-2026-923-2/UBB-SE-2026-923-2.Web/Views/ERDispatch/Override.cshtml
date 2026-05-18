@@ -1,0 +1,41 @@
+@using UBB_SE_2026_923_2.Models
+@model UBB_SE_2026_923_2.Web.Models.OverrideViewModel
+@{
+    ViewData["Title"] = "Manual Override";
+}
+
+<h1 class="h3 mb-1">Manual Override</h1>
+<p class="text-muted">Request @Model.RequestSummary</p>
+
+<div class="alert alert-secondary small">
+    Manual override only accepts doctors who are currently
+    <strong>IN_EXAMINATION</strong> and within 30 minutes of their shift end.
+</div>
+
+@if (Model.Candidates.Count == 0)
+{
+    <div class="alert alert-warning">No eligible override candidates for this request.</div>
+    <a asp-action="Index" class="btn btn-secondary btn-sm">Back to dashboard</a>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Override" asp-route-id="@Model.RequestId" method="post">
+                <div class="mb-3">
+                    <label for="selectedDoctorId" class="form-label">Eligible doctor</label>
+                    <select id="selectedDoctorId" name="selectedDoctorId" class="form-select">
+                        @foreach (DoctorProfile candidate in Model.Candidates)
+                        {
+                            <option value="@candidate.DoctorId">
+                                @candidate.FullName (ends in @candidate.MinutesToEnd min)
+                            </option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Apply override</button>
+                <a asp-action="Index" class="btn btn-link">Cancel</a>
+            </form>
+        </div>
+    </div>
+}

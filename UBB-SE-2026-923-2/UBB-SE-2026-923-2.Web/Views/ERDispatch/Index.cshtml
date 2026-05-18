@@ -1,0 +1,57 @@
+@using UBB_SE_2026_923_2.Web.Models
+@model UBB_SE_2026_923_2.Web.Models.ErDispatchDashboardViewModel
+@{
+    ViewData["Title"] = "ER Dispatch";
+
+    var pendingTable = new ErDispatchTableViewModel
+    {
+        Title = "Pending",
+        HeaderCss = "bg-warning-subtle",
+        Kind = "pending",
+        Rows = Model.Pending,
+    };
+    var unmatchedTable = new ErDispatchTableViewModel
+    {
+        Title = "Unmatched — needs manual override",
+        HeaderCss = "bg-danger-subtle",
+        Kind = "unmatched",
+        Rows = Model.Unmatched,
+    };
+    var assignedTable = new ErDispatchTableViewModel
+    {
+        Title = "Assigned",
+        HeaderCss = "bg-success-subtle",
+        Kind = "assigned",
+        Rows = Model.Assigned,
+    };
+    var cancelledTable = new ErDispatchTableViewModel
+    {
+        Title = "Cancelled",
+        HeaderCss = "bg-secondary-subtle",
+        Kind = "cancelled",
+        Rows = Model.Cancelled,
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Automated ER Dispatch &amp; Doctor Status Management</h1>
+    <div class="d-flex gap-2">
+        <form asp-action="Simulate" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Simulate Incoming (3)</button>
+        </form>
+        <form asp-action="DispatchAll" method="post" class="d-inline">
+            <button type="submit" class="btn btn-primary btn-sm">Run Dispatch (all pending)</button>
+        </form>
+        <a asp-action="Create" class="btn btn-success btn-sm">New ER Request</a>
+    </div>
+</div>
+
+@if (TempData["StatusMessage"] != null)
+{
+    <div class="alert alert-info py-2">@TempData["StatusMessage"]</div>
+}
+
+<partial name="_RequestTable" model="pendingTable" />
+<partial name="_RequestTable" model="unmatchedTable" />
+<partial name="_RequestTable" model="assignedTable" />
+<partial name="_RequestTable" model="cancelledTable" />

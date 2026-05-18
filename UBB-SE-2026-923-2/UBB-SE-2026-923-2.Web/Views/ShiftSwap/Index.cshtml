@@ -1,0 +1,114 @@
+﻿@model UBB_SE_2026_923_2.Web.Models.ShiftSwapIndexViewModel
+@using UBB_SE_2026_923_2.Models
+
+@{
+    ViewData["Title"] = "Shift Swap Request";
+}
+
+<div class="row g-4 mt-1">
+
+    <div class="col-md-8">
+        <div class="card border-primary shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title text-primary fw-semibold mb-3">My Future Shifts</h4>
+
+                @if (!Model.FutureShifts.Any())
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-1"></i> You have no future shifts available for swap requests.
+                    </div>
+                }
+                else
+                {
+                    <div class="list-group">
+                        @foreach (var shift in Model.FutureShifts)
+                        {
+                            var isSelected = Model.SelectedShiftId == shift.Id;
+                            var isPending = Model.PendingShiftIds.Contains(shift.Id);
+                            <a href="?selectedShiftId=@shift.Id"
+                                   class="list-group-item list-group-item-action @(isSelected ? "active border-primary" : "")">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="fw-semibold">@shift.StartTime.ToString("dd MMM yyyy")</div>
+                                        <div class="@(isSelected ? "text-white-50" : "text-muted") small">
+                                            @shift.StartTime.ToString("HH:mm") – @shift.EndTime.ToString("HH:mm")
+                                        </div>
+                                        <div class="@(isSelected ? "text-white-50" : "text-muted") small">
+                                            @shift.Location
+                                        </div>
+                                    </div>
+                                    @if (isPending)
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending swap</span>
+                                    }
+                                </div>
+                                <span class="badge @(isSelected ? "bg-white text-primary" : "bg-primary") mt-1">
+                                    @shift.Status
+                                </span>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-primary shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title text-primary fw-semibold mb-1">Request Shift Swap</h4>
+                <p class="text-muted small mb-3">Choose colleague (same role/profile)</p>
+
+                @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-1"></i> @Model.StatusMessage
+                    </div>
+                }
+
+                @if (!Model.SelectedShiftId.HasValue)
+                {
+                    <div class="alert alert-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Select a shift on the left first.
+                    </div>
+                }
+                else if (Model.AlreadyRequested)
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-clock-history me-1"></i> You already have a pending swap request for this shift.
+                    </div>
+                }
+                else if (!Model.EligibleColleagues.Any() && string.IsNullOrEmpty(Model.StatusMessage))
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-1"></i> No eligible colleagues available for this shift.
+                    </div>
+                }
+                else if (Model.EligibleColleagues.Any())
+                {
+                    <form asp-action="RequestSwap" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="shiftId" value="@Model.SelectedShiftId" />
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Select colleague</label>
+                            <select name="colleagueId" class="form-select" required>
+                                <option value="">-- Select colleague --</option>
+                                @foreach (var colleague in Model.EligibleColleagues)
+                                {
+                                    var staff = colleague as Staff;
+                                    <option value="@colleague.StaffID">
+                                        @(staff?.FirstName) @(staff?.LastName)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Request Swap</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>

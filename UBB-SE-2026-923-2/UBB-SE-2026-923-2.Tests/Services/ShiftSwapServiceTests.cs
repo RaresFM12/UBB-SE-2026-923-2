@@ -185,5 +185,76 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             Assert.That(result.Count, Is.EqualTo(0));
         }
+
+        [Test]
+        public void GetAllShiftSwapRequests_EmptyRepository_ReturnsEmptyList()
+        {
+            this.mockShiftSwapRepository.Setup(repository => repository.GetAllShiftSwapRequests())
+                .Returns(new List<ShiftSwapRequest>());
+
+            var result = this.service.GetAllShiftSwapRequests();
+
+            Assert.That(result, Is.Empty);
+        }
+
+        [Test]
+        public void GetAllShiftSwapRequests_RepositoryHasItems_ReturnsAllItems()
+        {
+            var swapRequests = new List<ShiftSwapRequest>
+            {
+                new ShiftSwapRequest { SwapId = 1, Status = ShiftSwapRequestStatus.PENDING },
+                new ShiftSwapRequest { SwapId = 2, Status = ShiftSwapRequestStatus.ACCEPTED },
+                new ShiftSwapRequest { SwapId = 3, Status = ShiftSwapRequestStatus.REJECTED }
+            };
+            this.mockShiftSwapRepository.Setup(repository => repository.GetAllShiftSwapRequests())
+                .Returns(swapRequests);
+
+            var result = this.service.GetAllShiftSwapRequests();
+
+            Assert.That(result.Count, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void GetAllShiftSwapRequests_RepositoryHasItems_ReturnsCorrectIds()
+        {
+            var swapRequests = new List<ShiftSwapRequest>
+            {
+                new ShiftSwapRequest { SwapId = 10, Status = ShiftSwapRequestStatus.PENDING },
+                new ShiftSwapRequest { SwapId = 20, Status = ShiftSwapRequestStatus.PENDING }
+            };
+            this.mockShiftSwapRepository.Setup(repository => repository.GetAllShiftSwapRequests())
+                .Returns(swapRequests);
+
+            var result = this.service.GetAllShiftSwapRequests();
+
+            Assert.That(result.Select(r => r.SwapId), Is.EquivalentTo(new[] { 10, 20 }));
+        }
+
+        [Test]
+        public void GetAllShiftSwapRequests_CalledOnce_CallsRepositoryExactlyOnce()
+        {
+            this.mockShiftSwapRepository.Setup(repository => repository.GetAllShiftSwapRequests())
+                .Returns(new List<ShiftSwapRequest>());
+
+            this.service.GetAllShiftSwapRequests();
+
+            this.mockShiftSwapRepository.Verify(repository => repository.GetAllShiftSwapRequests(), Times.Once);
+        }
+
+        [Test]
+        public void GetAllShiftSwapRequests_RepositoryHasSingleItem_ReturnsSingleItem()
+        {
+            var swapRequests = new List<ShiftSwapRequest>
+            {
+                new ShiftSwapRequest { SwapId = 5, Status = ShiftSwapRequestStatus.PENDING }
+            };
+            this.mockShiftSwapRepository.Setup(repository => repository.GetAllShiftSwapRequests())
+                .Returns(swapRequests);
+
+            var result = this.service.GetAllShiftSwapRequests();
+
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0].SwapId, Is.EqualTo(5));
+        }
     }
 }

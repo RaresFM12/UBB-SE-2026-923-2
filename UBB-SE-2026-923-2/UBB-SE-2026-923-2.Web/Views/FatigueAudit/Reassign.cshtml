@@ -1,0 +1,32 @@
+@model UBB_SE_2026_923_2.Models.AutoSuggestRecommendation
+@{
+    ViewData["Title"] = "Confirm Reassignment";
+}
+
+<h2>Confirm Shift Reassignment</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Shift ID</dt>
+            <dd class="col-sm-9">@Model.ShiftId</dd>
+
+            <dt class="col-sm-3">Current Staff</dt>
+            <dd class="col-sm-9">@Model.OriginalStaffName (ID @Model.OriginalStaffId)</dd>
+
+            <dt class="col-sm-3">Suggested Staff</dt>
+            <dd class="col-sm-9">@Model.SuggestedStaffName (ID @Model.SuggestedStaffId)</dd>
+
+            <dt class="col-sm-3">Reason</dt>
+            <dd class="col-sm-9">@Model.Reason</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Reassign" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="shiftId" value="@Model.ShiftId" />
+    <input type="hidden" name="newStaffId" value="@Model.SuggestedStaffId" />
+    <button type="submit" class="btn btn-success">Confirm Reassignment</button>
+    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancel</a>
+</form>

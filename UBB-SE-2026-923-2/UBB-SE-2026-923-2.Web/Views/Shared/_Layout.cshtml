@@ -19,6 +19,7 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+               
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
@@ -28,10 +29,30 @@
                             @* Each feature owner: add a <li> here pointing at your controller.
                                Use @if (User.IsInRole("Admin")) { ... } to gate role-specific entries. *@
 
+                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="MedicalEvaluations" asp-action="Index">Medical Evaluations</a>
+                                </li>
+                            }
+
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin</a>
+                                    <a class="nav-link text-dark" asp-controller="Items" asp-action="Index">Admin</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ShiftManagement" asp-action="Index">Shift Management</a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ERDispatch" asp-action="Index">ER Dispatch</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="FatigueAudit" asp-action="Index">Fatigue Audit</a>
                                 </li>
 
                                 <li class="nav-item">
@@ -48,6 +69,16 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="DoctorAppointments" asp-action="Schedule">Schedule</a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Index">Shift Swap Requests</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Incoming">Incoming Swap Requests</a>
+                                </li>
+
+
                             }
 
                             @if (User.IsInRole("Pharmacist") || User.IsInRole("Admin"))
@@ -57,13 +88,22 @@
                                 </li>
                             }
 
+                            @if (User.IsInRole("Client")) {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="PeriodTracker" asp-action="Index">Period Tracker</a>
+                                </li>
+                            }
+
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Orders" asp-action="Index">Orders</a>
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Edit">Profile</a>
-                            </li>
+                            @if (User.IsInRole("Doctor"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Hangouts" asp-action="Index">Hangouts</a>
+                                </li>
+                            }
                         }
                     </ul>
 

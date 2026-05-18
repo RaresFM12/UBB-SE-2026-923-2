@@ -154,5 +154,114 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             Assert.That(result.IsSuccess, Is.False);
         }
+
+        // --- GetAllRequestsAsync (web slice) ---
+        [Test]
+        public async Task GetAllRequestsAsync_ReturnsEveryRequestFromRepository()
+        {
+            this.mockRequestRepository.Setup(repository => repository.GetAllRequests())
+                .Returns(new List<ERRequest>
+                {
+                    new ERRequest { Id = 1, Status = "PENDING" },
+                    new ERRequest { Id = 2, Status = "ASSIGNED" },
+                });
+
+            var result = await this.service.GetAllRequestsAsync();
+
+            Assert.That(result.Count, Is.EqualTo(2));
+        }
+
+        // --- GetRequestByIdAsync (web slice) ---
+        [Test]
+        public async Task GetRequestByIdAsync_ExistingId_ReturnsThatRequest()
+        {
+            this.mockRequestRepository.Setup(repository => repository.GetRequestById(7))
+                .Returns(new ERRequest { Id = 7, Specialization = "Cardiology" });
+
+            var result = await this.service.GetRequestByIdAsync(7);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Id, Is.EqualTo(7));
+        }
+
+        [Test]
+        public async Task GetRequestByIdAsync_MissingId_ReturnsNull()
+        {
+            this.mockRequestRepository.Setup(repository => repository.GetRequestById(99))
+                .Returns((ERRequest)null);
+
+            var result = await this.service.GetRequestByIdAsync(99);
+
+            Assert.That(result, Is.Null);
+        }
+
+        // --- CreateRequestAsync (web slice) ---
+        [Test]
+        public async Task CreateRequestAsync_CreatesPendingRequestAndReturnsNewId()
+        {
+            this.mockRequestRepository
+                .Setup(repository => repository.AddRequest("Neurology", "Ward B", "PENDING"))
+                .Returns(42);
+
+            var newId = await this.service.CreateRequestAsync("Neurology", "Ward B");
+
+            Assert.That(newId, Is.EqualTo(42));
+            this.mockRequestRepository.Verify(
+                repository => repository.AddRequest("Neurology", "Ward B", "PENDING"),
+                Times.Once);
+        }
+
+        // --- UpdateRequestStatusAsync (web slice: Edit / soft-cancel) ---
+        [Test]
+        public async Task UpdateRequestStatusAsync_DelegatesToRepositoryWithoutDoctor()
+        {
+            await this.service.UpdateRequestStatusAsync(3, "CANCELLED");
+
+            this.mockRequestRepository.Verify(
+                repository => repository.UpdateRequestStatus(3, "CANCELLED", null, null),
+                Times.Once);
+        }
+
+        [Test]
+        public async Task UpdateRequestStatusAsync_ReopenToPending_DelegatesToRepository()
+        {
+            await this.service.UpdateRequestStatusAsync(3, "PENDING");
+
+            this.mockRequestRepository.Verify(
+                repository => repository.UpdateRequestStatus(3, "PENDING", null, null),
+                Times.Once);
+        }
+
+        [TestCase("ASSIGNED")]
+        [TestCase("UNMATCHED")]
+        [TestCase("bogus")]
+        public void UpdateRequestStatusAsync_EngineOwnedOrUnknownStatus_ThrowsAndDoesNotPersist(string status)
+        {
+            Assert.ThrowsAsync<InvalidOperationException>(
+                async () => await this.service.UpdateRequestStatusAsync(3, status));
+
+            this.mockRequestRepository.Verify(
+                repository => repository.UpdateRequestStatus(
+                    It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<string?>()),
+                Times.Never);
+        }
+
+        // --- DispatchAllPendingAsync (web slice: Run Dispatch button) ---
+        [Test]
+        public async Task DispatchAllPendingAsync_TwoPendingRequests_ReturnsOneResultPerRequest()
+        {
+            this.mockRequestRepository.Setup(repository => repository.GetAllRequests())
+                .Returns(new List<ERRequest>
+                {
+                    new ERRequest { Id = 1, Status = "PENDING", Specialization = "Cardiology", Location = "Ward A", CreatedAt = DateTime.Now },
+                    new ERRequest { Id = 2, Status = "PENDING", Specialization = "Neurology", Location = "Ward B", CreatedAt = DateTime.Now },
+                });
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift>());
+            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff>());
+
+            var results = await this.service.DispatchAllPendingAsync();
+
+            Assert.That(results.Count, Is.EqualTo(2));
+        }
     }
 }

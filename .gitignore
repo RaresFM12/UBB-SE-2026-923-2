@@ -73,3 +73,5 @@ $RECYCLE.BIN/
 
 # Crash dumps
 *.dmp
+/UBB-SE-2026-923-2/UBB-SE-2026-923-2.WebApi/Sql/HospitalDatabase_Setup.sql
+/UBB-SE-2026-923-2/UBB-SE-2026-923-2.WebApi/Sql/HospitalDatabase_Setup.sql
