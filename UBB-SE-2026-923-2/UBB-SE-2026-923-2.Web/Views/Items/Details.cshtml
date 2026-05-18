@@ -1,0 +1,77 @@
+@model Item
+@{
+    ViewData["Title"] = "Item Details";
+}
+
+<h2 class="mb-4">Item Details</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Name</dt>
+    <dd class="col-sm-9">@Model.Name</dd>
+
+    <dt class="col-sm-3">Producer</dt>
+    <dd class="col-sm-9">@Model.Producer</dd>
+
+    <dt class="col-sm-3">Category</dt>
+    <dd class="col-sm-9">@Model.Category</dd>
+
+    <dt class="col-sm-3">Price</dt>
+    <dd class="col-sm-9">@Model.Price.ToString("F2")</dd>
+
+    <dt class="col-sm-3">Number of Pills</dt>
+    <dd class="col-sm-9">@Model.NumberOfPills</dd>
+
+    <dt class="col-sm-3">Quantity</dt>
+    <dd class="col-sm-9">@Model.Quantity</dd>
+
+    <dt class="col-sm-3">Label</dt>
+    <dd class="col-sm-9">@Model.Label</dd>
+
+    <dt class="col-sm-3">Description</dt>
+    <dd class="col-sm-9">@Model.Description</dd>
+
+    <dt class="col-sm-3">Image Path</dt>
+    <dd class="col-sm-9">@Model.ImagePath</dd>
+
+    <dt class="col-sm-3">Discount %</dt>
+    <dd class="col-sm-9">@Model.DiscountPercentage</dd>
+
+    <dt class="col-sm-3">Active Substances</dt>
+    <dd class="col-sm-9">
+        @if (Model.ActiveSubstances.Count == 0)
+        {
+            <span class="text-muted">None</span>
+        }
+        else
+        {
+            <ul class="list-unstyled mb-0">
+                @foreach (KeyValuePair<string, float> substance in Model.ActiveSubstances)
+                {
+                    <li>@substance.Key — @substance.Value.ToString("F2")</li>
+                }
+            </ul>
+        }
+    </dd>
+
+    <dt class="col-sm-3">Batches (Expiry : Packs)</dt>
+    <dd class="col-sm-9">
+        @if (Model.Batches.Count == 0)
+        {
+            <span class="text-muted">None</span>
+        }
+        else
+        {
+            <ul class="list-unstyled mb-0">
+                @foreach (KeyValuePair<DateOnly, int> batch in Model.Batches)
+                {
+                    <li>@batch.Key.ToString("yyyy-MM-dd") — @batch.Value packs</li>
+                }
+            </ul>
+        }
+    </dd>
+</dl>
+
+<div class="mt-3">
+    <a asp-controller="Items" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">Edit</a>
+    <a asp-controller="Items" asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
