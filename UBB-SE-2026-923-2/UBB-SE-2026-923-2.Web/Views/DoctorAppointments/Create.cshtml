@@ -1,0 +1,51 @@
+@model UBB_SE_2026_923_2.Web.Models.DoctorAppointmentCreateViewModel
+@{
+    ViewData["Title"] = "Book appointment";
+}
+
+<h2 class="mb-3">Book appointment</h2>
+
+<form asp-action="Create" method="post" class="row g-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-6">
+        <label asp-for="PatientName" class="form-label"></label>
+        <input asp-for="PatientName" class="form-control" placeholder="123" />
+        <div class="form-text">Use the patient id as an integer (e.g., 123).</div>
+        <span asp-validation-for="PatientName" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="DoctorId" class="form-label"></label>
+        <select asp-for="DoctorId" class="form-select">
+            @foreach (var doctor in Model.Doctors)
+            {
+                <option value="@doctor.DoctorId">@doctor.DoctorName</option>
+            }
+        </select>
+        <span asp-validation-for="DoctorId" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Date" class="form-label"></label>
+        <input asp-for="Date" class="form-control" type="date" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="StartTime" class="form-label"></label>
+        <input asp-for="StartTime" class="form-control" type="time" step="60" />
+        <span asp-validation-for="StartTime" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Location" class="form-label"></label>
+        <input asp-for="Location" class="form-control" placeholder="Room 12" />
+        <span asp-validation-for="Location" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>

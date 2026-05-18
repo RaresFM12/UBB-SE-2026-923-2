@@ -1,0 +1,43 @@
+@model UBB_SE_2026_923_2.Web.Models.DoctorAppointmentDetailsViewModel
+@{
+    ViewData["Title"] = "Appointment details";
+}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+    <h2 class="mb-2">Appointment details</h2>
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Update status</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Cancel</a>
+        </div>
+    }
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Doctor</dt>
+    <dd class="col-sm-9">@Model.DoctorName</dd>
+
+    <dt class="col-sm-3">Patient</dt>
+    <dd class="col-sm-9">@Model.PatientName</dd>
+
+    <dt class="col-sm-3">Date</dt>
+    <dd class="col-sm-9">@Model.Date.ToString("yyyy-MM-dd")</dd>
+
+    <dt class="col-sm-3">Time</dt>
+    <dd class="col-sm-9">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</dd>
+
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+
+    <dt class="col-sm-3">Type</dt>
+    <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Type) ? "N/A" : Model.Type)</dd>
+
+    <dt class="col-sm-3">Location</dt>
+    <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Location) ? "TBD" : Model.Location)</dd>
+
+    <dt class="col-sm-3">Notes</dt>
+    <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Notes) ? "None" : Model.Notes)</dd>
+</dl>
+
+<a asp-action="Index" class="btn btn-outline-secondary">Back to list</a>

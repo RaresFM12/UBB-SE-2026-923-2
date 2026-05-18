@@ -13,6 +13,7 @@ namespace UBB_SE_2026_923_2.Services
         private const int DefaultAppointmentDurationMinutes = 30;
         private const int DefaultPatientId = 0;
         private const int NoActiveAppointmentsCount = 0;
+        private const double MaxConsecutiveHours = 12.0;
         private const string ScheduledStatus = "Scheduled";
         private const string FinishedStatus = "Finished";
         private const string CanceledStatus = "Canceled";
@@ -100,7 +101,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task CreateAppointmentAsync(string patientName, int doctorId, DateTime date, TimeSpan startTime)
         {
-            await this.EnsureDoctorIsBookableAsync(doctorId);
+            await this.EnsureDoctorIsBookableAsync(doctorId, date, startTime);
 
             var appointment = new Appointment
             {
@@ -117,7 +118,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public async Task BookAppointmentAsync(Appointment appointment)
         {
-            await this.EnsureDoctorIsBookableAsync(appointment.Doctor.StaffID);
+            await this.EnsureDoctorIsBookableAsync(appointment.Doctor.StaffID, appointment.Date, appointment.StartTime);
             if (string.IsNullOrWhiteSpace(appointment.ExternalRefId))
             {
                 appointment.ExternalRefId = ExtractExternalRefId(appointment.PatientName);
@@ -171,7 +172,7 @@ namespace UBB_SE_2026_923_2.Services
             }
         }
 
-        private async Task EnsureDoctorIsBookableAsync(int doctorId)
+        private async Task EnsureDoctorIsBookableAsync(int doctorId, DateTime date, TimeSpan startTime)
         {
             var doctor = this.staffRepository.GetStaffById(doctorId) as Doctor;
             if (doctor == null)
@@ -185,7 +186,55 @@ namespace UBB_SE_2026_923_2.Services
                     $"Doctor #{doctorId} is OFF_DUTY and cannot accept new appointments.");
             }
 
+            if (this.shiftRepository != null)
+            {
+                DateTime appointmentStart = date.Date.Add(startTime);
+                if (this.IsDoctorOverConsecutiveLimit(doctorId, appointmentStart))
+                {
+                    throw new InvalidOperationException(
+                        $"Doctor #{doctorId} exceeded the {MaxConsecutiveHours:F0}h consecutive duty limit.");
+                }
+            }
+
             await Task.CompletedTask;
+        }
+
+        private bool IsDoctorOverConsecutiveLimit(int doctorId, DateTime appointmentStart)
+        {
+            var shifts = (this.shiftRepository?.GetAllShifts() ?? new List<Shift>())
+                .Where(shift => shift.AppointedStaff.StaffID == doctorId && shift.Status != ShiftStatus.CANCELLED)
+                .OrderBy(shift => shift.StartTime)
+                .ToList();
+
+            if (shifts.Count == 0)
+            {
+                return false;
+            }
+
+            int index = shifts.FindIndex(shift => shift.StartTime <= appointmentStart && shift.EndTime >= appointmentStart);
+            if (index < 0)
+            {
+                return false;
+            }
+
+            DateTime blockStart = shifts[index].StartTime;
+
+            for (int shiftIndex = index - 1; shiftIndex >= 0; shiftIndex--)
+            {
+                var previous = shifts[shiftIndex];
+                if (previous.EndTime < blockStart)
+                {
+                    break;
+                }
+
+                if (previous.StartTime < blockStart)
+                {
+                    blockStart = previous.StartTime;
+                }
+            }
+
+            double consecutiveHours = (appointmentStart - blockStart).TotalHours;
+            return consecutiveHours >= MaxConsecutiveHours;
         }
 
         private static string ExtractExternalRefId(string? patientName)
@@ -262,6 +311,20 @@ namespace UBB_SE_2026_923_2.Services
                 .ToList();
 
             return Task.Run(LoadAndFilter);
+        }
+
+        public Task<int?> GetDoctorIdByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return Task.FromResult<int?>(null);
+            }
+
+            var doctor = this.staffRepository.LoadAllStaff()
+                .OfType<Doctor>()
+                .FirstOrDefault(staff => string.Equals(staff.Email, email, StringComparison.OrdinalIgnoreCase));
+
+            return Task.FromResult(doctor?.StaffID);
         }
 
         private async Task PersistAppointmentAsync(Appointment appointment)

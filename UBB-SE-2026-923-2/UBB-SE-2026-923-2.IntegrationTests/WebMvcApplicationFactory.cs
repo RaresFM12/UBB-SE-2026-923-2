@@ -16,6 +16,17 @@ namespace UBB_SE_2026_923_2.IntegrationTests
     {
         public FakeUsersRepository UsersRepository { get; } = new FakeUsersRepository();
 
+        public FakeStaffRepository StaffRepository { get; } = new FakeStaffRepository();
+
+        public FakeAppointmentRepository AppointmentsRepository { get; }
+
+        public FakeShiftRepository ShiftRepository { get; } = new FakeShiftRepository();
+
+        public WebMvcApplicationFactory()
+        {
+            this.AppointmentsRepository = new FakeAppointmentRepository(this.StaffRepository);
+        }
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureAppConfiguration((_, config) =>
@@ -32,6 +43,19 @@ namespace UBB_SE_2026_923_2.IntegrationTests
             {
                 services.RemoveAll<IUsersRepository>();
                 services.AddSingleton<IUsersRepository>(this.UsersRepository);
+
+                services.RemoveAll<IStaffRepository>();
+                services.AddSingleton<IStaffRepository>(this.StaffRepository);
+
+                services.RemoveAll<IAppointmentRepository>();
+                services.AddSingleton<IAppointmentRepository>(this.AppointmentsRepository);
+
+                services.RemoveAll<IShiftRepository>();
+                services.RemoveAll<IShiftManagementShiftRepository>();
+                services.RemoveAll<IPharmacyShiftRepository>();
+                services.AddSingleton<IShiftRepository>(this.ShiftRepository);
+                services.AddSingleton<IShiftManagementShiftRepository>(this.ShiftRepository);
+                services.AddSingleton<IPharmacyShiftRepository>(this.ShiftRepository);
 
                 services.RemoveAll<IAntiforgery>();
                 services.AddSingleton<IAntiforgery, FakeAntiforgery>();
