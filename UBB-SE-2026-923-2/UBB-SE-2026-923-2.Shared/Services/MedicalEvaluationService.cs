@@ -242,5 +242,11 @@ namespace UBB_SE_2026_923_2.Services
 
         private static bool ContainsRiskMarker(string? symptoms) =>
             (symptoms ?? string.Empty).IndexOf(RiskMarker, StringComparison.OrdinalIgnoreCase) > NotFoundIndex;
+
+        public MedicalEvaluation? GetEvaluationById(int evaluationId)
+        {
+            bool IsMatchingEvaluation(MedicalEvaluation evaluation) => evaluation.EvaluationID == evaluationId;
+            return this.evaluationsRepository.GetAllEvaluations().FirstOrDefault(IsMatchingEvaluation);
+        }
     }
 }

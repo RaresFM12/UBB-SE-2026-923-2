@@ -29,10 +29,20 @@
                             @* Each feature owner: add a <li> here pointing at your controller.
                                Use @if (User.IsInRole("Admin")) { ... } to gate role-specific entries. *@
 
+                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="MedicalEvaluations" asp-action="Index">Medical Evaluations</a>
+                                </li>
+                            }
+
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ShiftManagement" asp-action="Index">Shift Management</a>
                                 </li>
                             }
 
@@ -41,6 +51,16 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="DoctorAppointments" asp-action="Index">Appointments</a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Index">Shift Swap Requests</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Incoming">Incoming Swap Requests</a>
+                                </li>
+
+
                             }
 
                             @if (User.IsInRole("Pharmacist") || User.IsInRole("Admin"))

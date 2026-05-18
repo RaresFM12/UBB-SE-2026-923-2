@@ -1,0 +1,54 @@
+﻿@model IEnumerable<UBB_SE_2026_923_2.Models.Shift>
+@{
+    ViewData["Title"] = "Shift Management";
+}
+
+<h2>Shift Management</h2>
+
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">Schedule New Shift</a>
+    <a asp-action="Salary" class="btn btn-success">Compute Salaries</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Staff Name</th>
+            <th>Location</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var shift in Model)
+        {
+            <tr>
+                <td>@(shift.AppointedStaff?.FirstName) @(shift.AppointedStaff?.LastName)</td>
+                <td>@shift.Location</td>
+                <td>@shift.StartTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
+                <td>@shift.EndTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
+                <td>
+                    <span class="badge @(shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.ACTIVE ? "bg-success" : (shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.CANCELLED ? "bg-danger" : "bg-secondary"))">
+                        @shift.Status
+                    </span>
+                </td>
+                <td>
+                    @if (shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.SCHEDULED)
+                    {
+                        <form asp-action="Activate" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-success">Activate</button>
+                        </form>
+                    }
+                    @if (shift.Status != UBB_SE_2026_923_2.Models.ShiftStatus.CANCELLED)
+                    {
+                        <form asp-action="Cancel" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this shift?');">Cancel</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

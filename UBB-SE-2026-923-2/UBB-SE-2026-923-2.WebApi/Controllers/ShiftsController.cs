@@ -21,6 +21,15 @@ public class ShiftsController : ControllerBase
         return this.Ok(this.repository.GetAllShifts());
     }
 
+    [HttpGet("{id:int}")]
+    public ActionResult<Shift> GetById(int id)
+    {
+        var shift = this.repository.GetAllShifts().FirstOrDefault(s => s.Id == id);
+        if (shift is null)
+            return this.NotFound();
+        return this.Ok(shift);
+    }
+
     [HttpPost]
     public IActionResult Create([FromBody] CreateShiftRequest request)
     {
