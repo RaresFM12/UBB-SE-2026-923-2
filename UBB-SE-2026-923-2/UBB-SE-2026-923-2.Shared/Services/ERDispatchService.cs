@@ -13,6 +13,7 @@ namespace UBB_SE_2026_923_2.Services
         private const string PendingStatus = "PENDING";
         private const string AssignedStatus = "ASSIGNED";
         private const string UnmatchedStatus = "UNMATCHED";
+        private const string CancelledStatus = "CANCELLED";
         private const string DefaultSpecialization = "General";
         private const string FallbackLocation = "Ward A";
         private const string ERAssignmentNotificationTitle = "ER Assignment";
@@ -235,6 +236,58 @@ namespace UBB_SE_2026_923_2.Services
             {
                 this.dispatchLock.Release();
             }
+        }
+
+        public Task<IReadOnlyList<ERRequest>> GetAllRequestsAsync()
+        {
+            return Task.FromResult(this.requestRepository.GetAllRequests());
+        }
+
+        public Task<ERRequest?> GetRequestByIdAsync(int requestId)
+        {
+            return Task.FromResult(this.requestRepository.GetRequestById(requestId));
+        }
+
+        public Task<int> CreateRequestAsync(string specialization, string location)
+        {
+            var newId = this.requestRepository.AddRequest(specialization, location, PendingStatus);
+            return Task.FromResult(newId);
+        }
+
+        public Task UpdateRequestStatusAsync(int requestId, string status)
+        {
+            // ASSIGNED / UNMATCHED are outcomes the dispatch engine owns
+            // (DispatchERRequestAsync / ManualOverrideAsync write them via the
+            // repository directly). An administrator may only re-open a request
+            // (PENDING) or cancel it (CANCELLED); anything else would create a
+            // state the desktop's workflow can never produce.
+            if (!IsManuallySettableStatus(status))
+            {
+                throw new InvalidOperationException(
+                    $"Status '{status}' cannot be set manually. ASSIGNED and UNMATCHED are decided by " +
+                    "dispatch; only PENDING (re-open) or CANCELLED (cancel) may be set by an administrator.");
+            }
+
+            // No assigned doctor change here: Edit only mutates the status
+            // (e.g. re-open) and Delete soft-cancels to CANCELLED.
+            this.requestRepository.UpdateRequestStatus(requestId, status, null, null);
+            return Task.CompletedTask;
+        }
+
+        private static bool IsManuallySettableStatus(string status) =>
+            IsSameValue(status, PendingStatus) || IsSameValue(status, CancelledStatus);
+
+        public async Task<IReadOnlyList<ERDispatchResult>> DispatchAllPendingAsync()
+        {
+            var pendingRequestIds = await this.GetPendingRequestIdsAsync();
+            var results = new List<ERDispatchResult>(pendingRequestIds.Count);
+
+            foreach (var requestId in pendingRequestIds)
+            {
+                results.Add(await this.DispatchERRequestAsync(requestId));
+            }
+
+            return results;
         }
 
         private DoctorProfile? FindBestMatchingDoctor(ERRequest request)

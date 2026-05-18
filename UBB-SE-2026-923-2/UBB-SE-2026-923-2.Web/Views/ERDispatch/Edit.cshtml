@@ -1,0 +1,45 @@
+@model UBB_SE_2026_923_2.Web.Models.EditERRequestStatusViewModel
+@{
+    ViewData["Title"] = $"Edit ER Request #{Model.Id}";
+}
+
+<h1 class="h3 mb-3">Edit ER Request #@Model.Id</h1>
+
+<p class="text-muted">
+    Only the status can be changed: the WebApi exposes a status-patch endpoint
+    but no way to rewrite specialization or location.
+</p>
+
+<div class="row">
+    <div class="col-md-6 col-lg-5">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Specialization" />
+            <input type="hidden" asp-for="Location" />
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Request</label>
+                <input class="form-control" value="@Model.Specialization @@ @Model.Location" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label"></label>
+                <select asp-for="Status" class="form-select">
+                    @foreach (var status in UBB_SE_2026_923_2.Web.Models.EditERRequestStatusViewModel.AvailableStatuses)
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+                <span asp-validation-for="Status" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save status</button>
+            <a asp-action="Index" class="btn btn-link">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

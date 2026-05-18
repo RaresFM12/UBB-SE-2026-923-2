@@ -1,0 +1,62 @@
+@model UBB_SE_2026_923_2.Web.Models.ErDispatchTableViewModel
+
+<div class="card mb-4">
+    <div class="card-header @Model.HeaderCss">
+        @Model.Title <span class="badge bg-light text-dark">@Model.Rows.Count</span>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Rows.Count == 0)
+        {
+            <p class="text-muted small m-3 mb-0">No requests.</p>
+        }
+        else
+        {
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Specialization</th>
+                        <th>Location</th>
+                        <th>Created</th>
+                        <th>Assigned Doctor</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model.Rows)
+                    {
+                        <tr>
+                            <td>@request.Id</td>
+                            <td>@request.Specialization</td>
+                            <td>@request.Location</td>
+                            <td>@request.CreatedAt.ToString("g")</td>
+                            <td>
+                                @(request.AssignedDoctor == null
+                                    ? "—"
+                                    : $"{request.AssignedDoctor.FirstName} {request.AssignedDoctor.LastName}".Trim())
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@request.Id" class="btn btn-link btn-sm p-0 me-2">Details</a>
+                                @if (Model.Kind == "pending")
+                                {
+                                    <form asp-action="Dispatch" asp-route-id="@request.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-link btn-sm p-0 me-2">Dispatch</button>
+                                    </form>
+                                }
+                                @if (Model.Kind == "unmatched")
+                                {
+                                    <a asp-action="Override" asp-route-id="@request.Id" class="btn btn-link btn-sm p-0 me-2">Override</a>
+                                }
+                                @if (Model.Kind != "cancelled")
+                                {
+                                    <a asp-action="Edit" asp-route-id="@request.Id" class="btn btn-link btn-sm p-0 me-2">Edit</a>
+                                    <a asp-action="Delete" asp-route-id="@request.Id" class="btn btn-link btn-sm p-0 text-danger">Cancel</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

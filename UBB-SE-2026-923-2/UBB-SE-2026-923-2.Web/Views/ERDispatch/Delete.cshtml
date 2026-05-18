@@ -1,0 +1,28 @@
+@model UBB_SE_2026_923_2.Models.ERRequest
+@{
+    ViewData["Title"] = $"Cancel ER Request #{Model.Id}";
+}
+
+<h1 class="h3 mb-3 text-danger">Cancel ER Request #@Model.Id?</h1>
+
+<div class="alert alert-warning">
+    There is no hard delete for ER requests. Confirming will set the status to
+    <strong>CANCELLED</strong> (the WebApi has no DELETE endpoint).
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Specialization</dt>
+    <dd class="col-sm-9">@Model.Specialization</dd>
+
+    <dt class="col-sm-3">Location</dt>
+    <dd class="col-sm-9">@Model.Location</dd>
+
+    <dt class="col-sm-3">Current status</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button type="submit" class="btn btn-danger">Confirm cancel</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>

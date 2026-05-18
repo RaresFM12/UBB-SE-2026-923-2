@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\UBB-SE-2026-923-2.WebApi\UBB-SE-2026-923-2.WebApi.csproj" />
     <ProjectReference Include="..\UBB-SE-2026-923-2.Data\UBB-SE-2026-923-2.Data.csproj" />
+    <ProjectReference Include="..\UBB-SE-2026-923-2.Web\UBB-SE-2026-923-2.Web.csproj" />
   </ItemGroup>
 
 </Project>
