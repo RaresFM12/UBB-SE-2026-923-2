@@ -41,13 +41,11 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Items" asp-action="Index">Admin</a>
                                 </li>
+
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="ShiftManagement" asp-action="Index">Shift Management</a>
                                 </li>
-                            }
 
-                            @if (User.IsInRole("Admin"))
-                            {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="ERDispatch" asp-action="Index">ER Dispatch</a>
                                 </li>
@@ -62,14 +60,18 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="DoctorAppointments" asp-action="Index">Appointments</a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="DoctorSchedule" asp-action="Index">Doctor Schedule</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="PharmacySchedule" asp-action="Index">Pharmacy Schedule</a>
+                                </li>
                             }
 
                             @if (User.IsInRole("Doctor"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="DoctorAppointments" asp-action="Schedule">Schedule</a>
-                                </li>
-
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Index">Shift Swap Requests</a>
                                 </li>
@@ -78,13 +80,19 @@
                                     <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Incoming">Incoming Swap Requests</a>
                                 </li>
 
-
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="DoctorSchedule" asp-action="Index">My Schedule</a>
+                                </li>
                             }
 
                             @if (User.IsInRole("Pharmacist") || User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="PharmacyVacation" asp-action="Index">Request Vacation</a>
                                 </li>
                             }
 
@@ -105,13 +113,14 @@
                                 </li>
                             }
                             
-                            @if (User.IsInRole("Pharmacist") || User.IsInRole("Admin"))
+                            @if (User.IsInRole("Pharmacist"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="PharmacySchedule" asp-action="Index">My Schedule</a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="PharmacyVacation" asp-action="Index">Request Vacation</a>
+                                    <a class="nav-link text-dark" asp-controller="PharmacyVacation" asp-action="Index">Vacation Window</a>
                                 </li>
                             }
                         }

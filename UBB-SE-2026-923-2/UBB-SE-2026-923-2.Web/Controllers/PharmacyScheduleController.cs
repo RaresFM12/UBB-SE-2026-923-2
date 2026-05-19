@@ -24,28 +24,39 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             if (string.IsNullOrEmpty(userEmail)) return null;
 
             var pharmacists = _scheduleService.GetPharmacists();
-            var matchingPharmacist = pharmacists.FirstOrDefault(p => p.ContactInfo == userEmail); // Assuming ContactInfo holds email
+            var matchingPharmacist = pharmacists.FirstOrDefault(p => p.Email == userEmail); // ← was ContactInfo
             return matchingPharmacist?.StaffID;
         }
 
-        public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate)
+        public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate, int? selectedPharmacistId)
         {
-            var staffId = GetCurrentPharmacistId();
-            if (staffId == null)
+            var pharmacists = _scheduleService.GetPharmacists();
+            ViewBag.Pharmacists = pharmacists;
+            ViewBag.IsAdmin = User.IsInRole("Admin");
+
+            int? effectiveStaffId;
+
+            if (User.IsInRole("Admin"))
+                effectiveStaffId = selectedPharmacistId;
+            else
+                effectiveStaffId = GetCurrentPharmacistId();
+
+            ViewBag.SelectedPharmacistId = effectiveStaffId;
+
+            if (effectiveStaffId == null)
             {
-                ViewBag.StatusMessage = "Could not find your staff profile.";
+                ViewBag.StartDate = DateTime.Now.ToString("yyyy-MM-dd");
+                ViewBag.EndDate = DateTime.Now.AddMonths(1).ToString("yyyy-MM-dd");
                 return View(new List<Shift>());
             }
 
-            // Default to seeing the schedule for the current month if no dates are provided
             var rangeStart = startDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             var rangeEnd = endDate ?? rangeStart.AddMonths(1).AddDays(-1);
 
             ViewBag.StartDate = rangeStart.ToString("yyyy-MM-dd");
             ViewBag.EndDate = rangeEnd.ToString("yyyy-MM-dd");
 
-            var shifts = await _scheduleService.GetShiftsAsync(staffId.Value, rangeStart, rangeEnd);
-
+            var shifts = await _scheduleService.GetShiftsAsync(effectiveStaffId.Value, rangeStart, rangeEnd);
             return View(shifts);
         }
     }
