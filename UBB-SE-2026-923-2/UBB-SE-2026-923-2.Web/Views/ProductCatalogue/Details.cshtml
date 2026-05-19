@@ -1,0 +1,84 @@
+﻿@model UBB_SE_2026_923_2.Web.Models.CatalogueItemViewModel
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container mt-5">
+    <a asp-action="Index" class="btn btn-link text-decoration-none mb-3">&larr; Back to Catalogue</a>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+            <div class="alert alert-danger fw-bold shadow-sm">@TempData["ErrorMessage"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+            <div class="alert alert-success fw-bold shadow-sm">@TempData["SuccessMessage"]</div>
+    }
+
+    <div class="row bg-white rounded shadow-sm p-4 border-top border-primary border-3">
+        <div class="col-md-5 text-center p-4 d-flex align-items-center justify-content-center bg-light rounded border">
+            <img src="~/@Model.ImagePath" class="img-fluid" alt="@Model.Name" style="max-height: 350px; object-fit: contain;">
+        </div>
+
+        <div class="col-md-7 ps-md-5 mt-4 mt-md-0">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-secondary text-capitalize">@Model.Category</span>
+                <span class="text-muted small fw-bold">@Model.Label</span>
+            </div>
+
+            <h2 class="fw-bold mb-1">@Model.Name</h2>
+            <p class="text-muted text-uppercase small fw-bold mb-3 border-bottom pb-2">By @Model.Producer</p>
+
+            <div class="d-flex align-items-baseline mb-3">
+                @if (Model.HasDiscount)
+                {
+                        <h3 class="text-muted text-decoration-line-through me-3 mb-0">@Model.OldPrice.ToString("F2")</h3>
+                        <h2 class="text-success fw-bold mb-0 me-3">@Model.FinalPrice.ToString("F2") lei</h2>
+                        <span class="badge bg-danger fs-6 shadow-sm">@Math.Round(Model.DiscountPercentage, 2)% OFF</span>
+                }
+                else
+                {
+                        <h2 class="fw-bold mb-0 text-dark">@Model.OldPrice.ToString("F2") lei</h2>
+                }
+            </div>
+
+            <p class="fs-6 fw-bold @Model.StockColorClass mb-4 bg-light d-inline-block px-3 py-1 rounded border">@Model.StockText</p>
+
+            <table class="table table-sm table-bordered mt-2 mb-4 bg-light">
+                <tbody>
+                    <tr>
+                        <td class="fw-bold w-25 text-secondary">Box Content</td>
+                        <td>@Model.NumberOfPills Pills</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-secondary">Active Substances</td>
+                        <td>@Model.SubstancesText</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <form asp-action="AddToCart" method="post" class="mb-4 bg-light p-3 border rounded shadow-sm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="itemId" value="@Model.Id" />
+
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <label class="form-label fw-bold small text-secondary">Quantity</label>
+                        <input type="number" name="quantity" class="form-control fw-bold text-center" value="1" min="1" max="@(Math.Min(50, Model.Quantity))" @(Model.CanAddToCart ? "" : "disabled") style="width: 90px;">
+                    </div>
+                    <div class="col">
+                        <label class="form-label d-block">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary fw-bold w-100 shadow-sm" @(Model.CanAddToCart ? "" : "disabled")>
+                            @(Model.CanAddToCart ? "🛒 Add to Basket" : "❌ Out of Stock")
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-4">
+                <h6 class="fw-bold border-bottom pb-2 text-secondary">Product Description</h6>
+                <p class="text-dark small lh-lg" style="white-space: pre-wrap;">@(string.IsNullOrWhiteSpace(Model.Description) ? "No detailed description available." : Model.Description)</p>
+            </div>
+        </div>
+    </div>
+</div>

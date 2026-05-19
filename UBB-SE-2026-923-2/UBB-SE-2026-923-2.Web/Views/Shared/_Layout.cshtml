@@ -107,6 +107,10 @@
                                 <a class="nav-link text-dark" asp-controller="Orders" asp-action="Index">Orders</a>
                             </li>
 
+                            <li class="nav-item">
+                                <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="ProductCatalogue" asp-action="Index">Product Catalogue</a>
+                            </li>
+
                             @if (User.IsInRole("Doctor"))
                             {
                                 <li class="nav-item">
