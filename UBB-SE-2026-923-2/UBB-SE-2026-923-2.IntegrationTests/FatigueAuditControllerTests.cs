@@ -4,43 +4,15 @@ namespace UBB_SE_2026_923_2.IntegrationTests
     using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
-    using System.Security.Claims;
-    using System.Text.Encodings.Web;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using NUnit.Framework;
     using UBB_SE_2026_923_2.Models;
     using UBB_SE_2026_923_2.Services;
-
-    public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
-    {
-        public TestAuthHandler(
-            IOptionsMonitor<AuthenticationSchemeOptions> options,
-            ILoggerFactory logger,
-            UrlEncoder encoder)
-            : base(options, logger, encoder)
-        {
-        }
-
-        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-        {
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, "TestAdmin"),
-                new Claim(ClaimTypes.Role, "Admin"),
-            };
-            var identity = new ClaimsIdentity(claims, "TestScheme");
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, "TestScheme");
-            return Task.FromResult(AuthenticateResult.Success(ticket));
-        }
-    }
 
     internal sealed class StubFatigueAuditService : IFatigueAuditService
     {

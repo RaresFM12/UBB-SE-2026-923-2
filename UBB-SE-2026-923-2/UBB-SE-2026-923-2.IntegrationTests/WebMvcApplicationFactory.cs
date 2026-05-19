@@ -14,7 +14,7 @@ namespace UBB_SE_2026_923_2.IntegrationTests
 
     public sealed class WebMvcApplicationFactory : WebApplicationFactory<UBB_SE_2026_923_2.Web.Program>
     {
-        public FakeUsersRepository UsersRepository { get; } = new FakeUsersRepository();
+        public UBB_SE_2026_923_2.IntegrationTests.Fakes.FakeUsersRepository UsersRepository { get; } = new UBB_SE_2026_923_2.IntegrationTests.Fakes.FakeUsersRepository();
 
         public FakeStaffRepository StaffRepository { get; } = new FakeStaffRepository();
 
