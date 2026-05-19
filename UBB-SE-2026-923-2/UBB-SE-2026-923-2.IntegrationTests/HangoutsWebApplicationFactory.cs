@@ -109,4 +109,9 @@ public class FakeDoctorAppointmentService : IDoctorAppointmentService
 
     public Task<IReadOnlyList<Shift>> GetShiftsForStaffInRangeAsync(int doctorId, DateTime fromDate, DateTime toDate) =>
         throw new NotImplementedException();
+
+    public Task<int?> GetDoctorIdByEmailAsync(string email)
+    {
+        throw new NotImplementedException();
+    }
 }

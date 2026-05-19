@@ -3,6 +3,7 @@
     using System;
     using Microsoft.UI.Xaml;
     using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Media.Imaging;
     using Microsoft.UI.Xaml.Navigation;
     using UBB_SE_2026_923_2.Models;
     using UBB_SE_2026_923_2.Services;
@@ -53,6 +54,14 @@
             this.Frame.Navigate(
                 typeof(ProductDetailsPage),
                 (uiItem.OriginalItem, this.ViewModel.CurrentUser, this.ViewModel.OrderService));
+        }
+
+        private void OnProductImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            if (sender is Image image)
+            {
+                image.Source = new BitmapImage(new Uri("ms-appx:///Assets/StoreLogo.png"));
+            }
         }
     }
 }

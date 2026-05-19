@@ -1,0 +1,178 @@
+﻿@model UBB_SE_2026_923_2.Web.Models.CatalogueIndexViewModel
+@{
+    ViewData["Title"] = "Product Catalogue";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body bg-light">
+                    <form asp-action="Index" method="get" id="filterForm">
+                        <h5 class="fw-bold mb-3">Search & Filter</h5>
+
+                        <div class="input-group mb-4">
+                            <input type="text" class="form-control" name="searchText" value="@Model.SearchText" placeholder="Search products...">
+                            <button class="btn btn-primary" type="submit">🔍</button>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="fw-bold small text-uppercase">Sort By</label>
+                            <select class="form-select mb-2" name="sortBy" onchange="this.form.submit()">
+                                <!option value="default" @(Model.SortBy == "default" ? "selected" : "")>Default</!option>
+                                <!option value="price" @(Model.SortBy == "price" ? "selected" : "")>Price</!option>
+                                <!option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>Newest</!option>
+                            </select>
+                            <select class="form-select" name="sortDirection" onchange="this.form.submit()">
+                                <!option value="asc" @(Model.SortDirection == "asc" ? "selected" : "")>Ascending</!option>
+                                <!option value="desc" @(Model.SortDirection == "desc" ? "selected" : "")>Descending</!option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="fw-bold small text-uppercase d-block mb-2">Category</label>
+                            @foreach (var cat in new[] { "pain relief", "wellness", "cold and flu", "allergy", "digestion", "skincare", "first aid" })
+                            {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="categories" value="@cat" id="cat_@cat" @(Model.SelectedCategories.Contains(cat) ? "checked" : "")>
+                                        <label class="form-check-label text-capitalize" for="cat_@cat">@cat</label>
+                                    </div>
+                            }
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="fw-bold small text-uppercase d-block mb-2">Price Range</label>
+                            @foreach (var range in new[] { "0-49", "50-99", "100-199", "200-499", "500+" })
+                            {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="priceRanges" value="@range" id="price_@range" @(Model.SelectedPriceRanges.Contains(range) ? "checked" : "")>
+                                        <label class="form-check-label" for="price_@range">@range lei</label>
+                                    </div>
+                            }
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="fw-bold small text-uppercase d-block mb-2">Stock Availability</label>
+                            <select class="form-select" name="stockFilter">
+                                <!option value="all" @(Model.StockFilter == "all" ? "selected" : "")>All Items</!option>
+                                <!option value="in_stock" @(Model.StockFilter == "in_stock" ? "selected" : "")>In Stock (>0)</!option>
+                                <!option value="low_stock" @(Model.StockFilter == "low_stock" ? "selected" : "")>Low Stock (<10)</!option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="fw-bold small text-uppercase d-block mb-2">Discount Filter</label>
+                            <select class="form-select" name="discountFilter">
+                                <!option value="all" @(Model.DiscountFilter == "all" ? "selected" : "")>All Products</!option>
+                                <!option value="yes" @(Model.DiscountFilter == "yes" ? "selected" : "")>Discounted Only</!option>
+                                <!option value="no" @(Model.DiscountFilter == "no" ? "selected" : "")>Non-Discounted</!option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-bold">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            @if (!Model.Products.Any())
+            {
+                    <div class="text-center py-5">
+                        <h4 class="text-muted">@(string.IsNullOrWhiteSpace(Model.SearchText) ? "No products match the selected filters." : "No products found.")</h4>
+                    </div>
+            }
+            else
+            {
+                    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+                    @foreach (var item in Model.Products)
+                    {
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm text-center border-0">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-dark d-block">
+                                            <div class="position-relative">
+                                                <img src="~/@item.ImagePath" class="card-img-top p-3" alt="@item.Name" style="height: 180px; object-fit: contain;" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';">
+                                        @if (item.HasDiscount)
+                                        {
+                                                        <span class="badge bg-danger position-absolute top-0 start-0 m-2">-@Math.Round(item.DiscountPercentage, 2)%</span>
+                                        }
+                                            </div>
+                                            <div class="card-body pt-0 pb-2">
+                                                <h6 class="card-title text-truncate fw-bold mb-1">@item.Name</h6>
+                                                <p class="text-muted small mb-2">@item.Producer</p>
+
+                                                <div class="mb-2">
+                                            @if (item.HasDiscount)
+                                            {
+                                                            <span class="text-decoration-line-through text-muted small d-block">@item.OldPrice.ToString("F2") lei</span>
+                                                            <span class="text-success fw-bold fs-5">@item.FinalPrice.ToString("F2") lei</span>
+                                            }
+                                            else
+                                            {
+                                                            <span class="text-dark fw-bold fs-5 d-block mt-3">@item.OldPrice.ToString("F2") lei</span>
+                                            }
+                                                </div>
+                                                <p class="small fw-bold @item.StockColorClass mb-0">@item.StockText</p>
+                                            </div>
+                                        </a>
+
+                                        <div class="card-footer bg-transparent border-0 pt-0">
+                                            <form asp-action="AddToCart" method="post">
+                                        @Html.AntiForgeryToken()
+                                                <input type="hidden" name="itemId" value="@item.Id" />
+                                                <input type="hidden" name="quantity" value="1" />
+                                                <button type="submit" class="btn btn-outline-primary w-100 fw-bold" @(item.CanAddToCart ? "" : "disabled")>
+                                                    Add to basket
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                    }
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-5 mb-4 border-top pt-3">
+                        <form asp-action="Index" method="get">
+                            <input type="hidden" name="searchText" value="@Model.SearchText" />
+                            <input type="hidden" name="stockFilter" value="@Model.StockFilter" />
+                            <input type="hidden" name="discountFilter" value="@Model.DiscountFilter" />
+                            <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                            <input type="hidden" name="sortDirection" value="@Model.SortDirection" />
+                        @foreach (var cat in Model.SelectedCategories)
+                        {
+                            <input type="hidden" name="categories" value="@cat" />
+                        }
+                        @foreach (var r in Model.SelectedPriceRanges)
+                        {
+                            <input type="hidden" name="priceRanges" value="@r" />
+                        }
+
+                            <input type="hidden" name="pageIndex" value="@(Model.CurrentPage - 1)" />
+                            <button type="submit" class="btn btn-secondary" @(Model.HasPreviousPage ? "" : "disabled")>&larr; Previous Page</button>
+                        </form>
+
+                        <span class="fw-bold text-muted">Page @(Model.CurrentPage + 1)</span>
+
+                        <form asp-action="Index" method="get">
+                            <input type="hidden" name="searchText" value="@Model.SearchText" />
+                            <input type="hidden" name="stockFilter" value="@Model.StockFilter" />
+                            <input type="hidden" name="discountFilter" value="@Model.DiscountFilter" />
+                            <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                            <input type="hidden" name="sortDirection" value="@Model.SortDirection" />
+                        @foreach (var cat in Model.SelectedCategories)
+                        {
+                            <input type="hidden" name="categories" value="@cat" />
+                        }
+                        @foreach (var r in Model.SelectedPriceRanges)
+                        {
+                            <input type="hidden" name="priceRanges" value="@r" />
+                        }
+
+                            <input type="hidden" name="pageIndex" value="@(Model.CurrentPage + 1)" />
+                            <button type="submit" class="btn btn-primary" @(Model.HasNextPage ? "" : "disabled")>Next Page &rarr;</button>
+                        </form>
+                    </div>
+            }
+        </div>
+    </div>
+</div>

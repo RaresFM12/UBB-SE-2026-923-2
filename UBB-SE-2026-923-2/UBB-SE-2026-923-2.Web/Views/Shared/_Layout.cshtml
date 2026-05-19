@@ -29,19 +29,55 @@
                             @* Each feature owner: add a <li> here pointing at your controller.
                                Use @if (User.IsInRole("Admin")) { ... } to gate role-specific entries. *@
 
-                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Edit">Profile</a>
+                            </li>
+
+                            @if (!User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="ProductCatalogue" asp-action="Index">Product Catalogue</a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Client"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Basket" asp-action="Index">Shopping Cart</a>
+                                </li>
+                            }
+
+                            @if (!User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Orders" asp-action="Index">Orders</a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Client"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="PeriodTracker" asp-action="Index">Period Tracker</a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Doctor"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="MedicalEvaluations" asp-action="Index">Medical Evaluations</a>
                                 </li>
                             }
 
-                            @if (User.IsInRole("Admin"))
+                            @if (User.IsInRole("Admin") || User.IsInRole("Pharmacist"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Items" asp-action="Index">Admin</a>
+                                    <a class="nav-link text-dark" asp-controller="Items" asp-action="Index">Inventory</a>
                                 </li>
 
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="ShiftManagement" asp-action="Index">Shift Management</a>
                                 </li>
@@ -54,7 +90,7 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Index">User Accounts</a>
+                                    <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Index">Accounts Management</a>
                                 </li>
 
                                 <li class="nav-item">
@@ -85,7 +121,7 @@
                                 </li>
                             }
 
-                            @if (User.IsInRole("Pharmacist") || User.IsInRole("Admin"))
+                            @if (User.IsInRole("Pharmacist"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a>
@@ -98,13 +134,9 @@
 
                             @if (User.IsInRole("Client")) {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="PeriodTracker" asp-action="Index">Period Tracker</a>
+                                    <a class="nav-link text-dark" asp-controller="PharmacyVacation" asp-action="Index">Vacation Window</a>
                                 </li>
                             }
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Orders" asp-action="Index">Orders</a>
-                            </li>
 
                             @if (User.IsInRole("Doctor"))
                             {

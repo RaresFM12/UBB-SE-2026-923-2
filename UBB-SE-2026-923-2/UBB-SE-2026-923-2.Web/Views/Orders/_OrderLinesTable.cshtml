@@ -1,0 +1,25 @@
+@model List<OrderLineItemViewModel>
+
+<div class="table-responsive mb-3">
+    <table class="table table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Medicine</th>
+                <th>Producer</th>
+                <th>Quantity</th>
+                <th>Final price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (OrderLineItemViewModel line in Model)
+            {
+                <tr>
+                    <td>@line.Name</td>
+                    <td>@line.Producer</td>
+                    <td>@line.Quantity</td>
+                    <td>@line.FinalPrice.ToString("F2") RON</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
