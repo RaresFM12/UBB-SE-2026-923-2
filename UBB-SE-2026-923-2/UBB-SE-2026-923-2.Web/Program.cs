@@ -4,6 +4,7 @@ namespace UBB_SE_2026_923_2.Web
     using Microsoft.AspNetCore.Authentication.Cookies;
     using UBB_SE_2026_923_2.Shared;
     using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.Web.Models;
 
     public class Program
     {
@@ -74,6 +75,8 @@ namespace UBB_SE_2026_923_2.Web
 
                         if (databaseUserRecord != null)
                         {
+                            BasketStore.Restore(databaseUserRecord);
+
                             // Inject the active identity context into the private property storage
                             var serviceInstance = ServiceWrapper.UserAccountService;
                             var currentUserProperty = typeof(UserAccountService)

@@ -1,0 +1,79 @@
+@model OrderManagementViewModel
+@{
+    ViewData["Title"] = "Order management";
+}
+
+<h2 class="mb-4">Order management</h2>
+
+@if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form asp-action="Manage" method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-3">
+        <label asp-for="UserId" class="form-label">User ID</label>
+        <input asp-for="UserId" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label asp-for="OrderId" class="form-label">Order ID</label>
+        <input asp-for="OrderId" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <div class="form-check">
+            <input asp-for="IncompleteOnly" class="form-check-input" />
+            <label asp-for="IncompleteOnly" class="form-check-label">Only incomplete orders</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="ExpiredOnly" class="form-check-input" />
+            <label asp-for="ExpiredOnly" class="form-check-label">Only expired orders</label>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+        <a asp-action="Manage" class="btn btn-outline-secondary ms-1">Reset</a>
+    </div>
+</form>
+
+@if (!Model.Orders.Any())
+{
+    <div class="alert alert-info">No orders found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Order ID</th>
+                    <th>User email</th>
+                    <th>Status</th>
+                    <th>Pickup date</th>
+                    <th>Expiration date</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (OrderListItemViewModel order in Model.Orders)
+                {
+                    string rowClass = order.IsExpired ? "table-danger" : string.Empty;
+                    string badgeClass = order.IsExpired ? "bg-danger" : order.IsCompleted ? "bg-success" : "bg-warning text-dark";
+                    <tr class="@rowClass">
+                        <td>Order#@order.Id</td>
+                        <td>@order.UserEmail</td>
+                        <td><span class="badge @badgeClass">@order.Status</span></td>
+                        <td>@order.PickUpDateString</td>
+                        <td>@order.ExpirationDateString</td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@order.Id" asp-route-adminView="true" class="btn btn-sm btn-outline-secondary">Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

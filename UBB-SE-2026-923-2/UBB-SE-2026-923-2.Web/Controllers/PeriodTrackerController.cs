@@ -159,6 +159,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         public IActionResult AddProductToBasket(int itemId, float discountPercentage)
         {
             _basketService.AddToBasket(itemId, 1, discountPercentage);
+            BasketStore.Save(ServiceWrapper.UserAccountService.CurrentUser);
             return RedirectToAction(nameof(Index));
         }
 

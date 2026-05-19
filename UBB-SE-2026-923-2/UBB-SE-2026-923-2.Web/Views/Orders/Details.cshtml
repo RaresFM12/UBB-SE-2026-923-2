@@ -1,0 +1,47 @@
+@model OrderDetailsViewModel
+@{
+    ViewData["Title"] = $"Order #{Model.Id}";
+}
+
+<h2 class="mb-4">Order#@Model.Id</h2>
+
+@if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">User email</dt>
+            <dd class="col-sm-9">@Model.UserEmail</dd>
+            <dt class="col-sm-3">Pickup date</dt>
+            <dd class="col-sm-9">@Model.PickUpDateString</dd>
+            <dt class="col-sm-3">Expiration date</dt>
+            <dd class="col-sm-9">@Model.ExpirationDateString</dd>
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">@Model.Status</dd>
+        </dl>
+    </div>
+</div>
+
+@if (Model.AdminView && !Model.IsCompleted && !Model.IsExpired)
+{
+    <form asp-action="Complete" method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+        <partial name="_OrderLinesEditor" model="Model.Items" />
+        <button type="submit" class="btn btn-success">Complete</button>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary ms-1">Modify</a>
+        <a asp-action="Manage" class="btn btn-outline-secondary ms-1">Back</a>
+    </form>
+}
+else
+{
+    <partial name="_OrderLinesTable" model="Model.Items" />
+    <a asp-action="@(Model.AdminView ? "Manage" : "Index")" class="btn btn-outline-secondary">Back</a>
+}
