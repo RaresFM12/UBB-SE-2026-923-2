@@ -134,6 +134,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             try
             {
                 this.orderService.PlaceOrderFromBasket(viewModel.PickUpDate);
+                BasketStore.Clear(this.orderService.ActiveUser);
                 this.TempData["SuccessMessage"] = "Order placed successfully.";
                 return this.RedirectToAction(nameof(this.Index));
             }
@@ -348,7 +349,16 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             }
 
             User? currentUser = this.LoadCurrentUser();
-            return currentUser != null && this.GetClientId(order) == currentUser.Id ? order : null;
+            if (currentUser == null)
+            {
+                return null;
+            }
+
+            bool orderBelongsToCurrentUser = this.orderService.OrdersRepository
+                .GetOrdersOfClient(currentUser.Id)
+                .Any(clientOrder => clientOrder.Id == id);
+
+            return orderBelongsToCurrentUser ? order : null;
         }
 
         private OrderCheckoutViewModel BuildCheckoutViewModel(DateOnly? pickUpDate = null)
@@ -442,8 +452,19 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                 return order.Client.Id;
             }
 
-            Order freshOrder = this.orderService.OrdersRepository.GetOrder(order.Id);
-            return freshOrder?.Client?.Id;
+            foreach (User user in this.orderService.UsersRepository.GetAllUsers())
+            {
+                bool orderBelongsToUser = this.orderService.OrdersRepository
+                    .GetOrdersOfClient(user.Id)
+                    .Any(clientOrder => clientOrder.Id == order.Id);
+
+                if (orderBelongsToUser)
+                {
+                    return user.Id;
+                }
+            }
+
+            return null;
         }
 
         private string GetClientEmail(Order order)

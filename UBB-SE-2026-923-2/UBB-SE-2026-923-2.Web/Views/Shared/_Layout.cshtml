@@ -88,9 +88,18 @@
                                 </li>
                             }
 
-                            @if (User.IsInRole("Client")) {
+                            @if (User.IsInRole("Client"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Basket" asp-action="Index">Shopping Cart</a>
+                                </li>
+
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="PeriodTracker" asp-action="Index">Period Tracker</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Edit">Profile</a>
                                 </li>
                             }
 
