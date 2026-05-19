@@ -104,6 +104,16 @@
                                     <a class="nav-link text-dark" asp-controller="Hangouts" asp-action="Index">Hangouts</a>
                                 </li>
                             }
+                            
+                            @if (User.IsInRole("Pharmacist") || User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="PharmacySchedule" asp-action="Index">My Schedule</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="PharmacyVacation" asp-action="Index">Request Vacation</a>
+                                </li>
+                            }
                         }
                     </ul>
 

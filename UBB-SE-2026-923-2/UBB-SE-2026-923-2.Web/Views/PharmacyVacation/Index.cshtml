@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Register Vacation";
+}
+
+<h2>Register a New Vacation</h2>
+
+@if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
+{
+        <div class="alert alert-success">
+        @ViewBag.SuccessMessage
+        </div>
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+        <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+        </div>
+}
+
+<div class="card mb-4" style="max-width: 600px;">
+    <div class="card-body">
+        <form asp-action="Index" method="post">
+            <div class="mb-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" required>
+            </div>
+            <div class="mb-3">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" required>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Submit Vacation Request</button>
+        </form>
+    </div>
+</div>
