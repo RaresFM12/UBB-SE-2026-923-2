@@ -117,6 +117,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             try
             {
                 _orderService.AddToBasket(itemId, quantity);
+                BasketStore.Save(_orderService.ActiveUser);
                 TempData["SuccessMessage"] = "Item added to basket successfully!";
             }
             catch (Exception)

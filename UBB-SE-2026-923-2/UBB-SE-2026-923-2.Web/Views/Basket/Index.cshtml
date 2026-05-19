@@ -30,6 +30,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Medicine</th>
+                            <th>Image</th>
                             <th>Producer</th>
                             <th>Discount</th>
                             <th>Quantity</th>
@@ -43,6 +44,9 @@
                             <tr>
                                 <td>
                                     <strong>@item.ItemName</strong>
+                                </td>
+                                <td>
+                                    <img src="@item.ItemThumbnailImagePath" class="rounded border bg-white p-1" alt="@item.ItemName" style="width: 72px; height: 72px; object-fit: contain;" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';">
                                 </td>
                                 <td>@item.ItemProducer</td>
                                 <td>

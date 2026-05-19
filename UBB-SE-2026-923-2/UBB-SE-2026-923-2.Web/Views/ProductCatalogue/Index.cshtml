@@ -91,7 +91,7 @@
                                     <div class="card h-100 shadow-sm text-center border-0">
                                         <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-dark d-block">
                                             <div class="position-relative">
-                                                <img src="~/@item.ImagePath" class="card-img-top p-3" alt="@item.Name" style="height: 180px; object-fit: contain;">
+                                                <img src="~/@item.ImagePath" class="card-img-top p-3" alt="@item.Name" style="height: 180px; object-fit: contain;" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';">
                                         @if (item.HasDiscount)
                                         {
                                                         <span class="badge bg-danger position-absolute top-0 start-0 m-2">-@Math.Round(item.DiscountPercentage, 2)%</span>
