@@ -36,9 +36,12 @@
                                 </li>
                             }
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductCatalogue" asp-action="Index">Product Catalogue</a>
-                            </li>
+                            @if (!User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="ProductCatalogue" asp-action="Index">Product Catalogue</a>
+                                </li>
+                            }
 
                             @if (User.IsInRole("Client"))
                             {
@@ -47,9 +50,12 @@
                                 </li>
                             }
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Orders" asp-action="Index">Orders</a>
-                            </li>
+                            @if (!User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Orders" asp-action="Index">Orders</a>
+                                </li>
+                            }
 
                             @if (User.IsInRole("Client"))
                             {
@@ -58,7 +64,7 @@
                                 </li>
                             }
 
-                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                            @if (User.IsInRole("Doctor"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="MedicalEvaluations" asp-action="Index">Medical Evaluations</a>
@@ -68,7 +74,7 @@
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Items" asp-action="Index">Admin</a>
+                                    <a class="nav-link text-dark" asp-controller="Items" asp-action="Index">Inventory</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="ShiftManagement" asp-action="Index">Shift Management</a>
@@ -85,7 +91,7 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Index">User Accounts</a>
+                                    <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Index">Accounts Management</a>
                                 </li>
 
                                 <li class="nav-item">
@@ -110,7 +116,7 @@
 
                             }
 
-                            @if (User.IsInRole("Pharmacist") || User.IsInRole("Admin"))
+                            @if (User.IsInRole("Pharmacist"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a>
