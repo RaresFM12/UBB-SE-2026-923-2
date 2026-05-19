@@ -1,0 +1,26 @@
+﻿@model UBB_SE_2026_923_2.Models.Shift
+@{
+    ViewData["Title"] = "Delete Shift";
+}
+
+<h2>Cancel Shift Confirmation</h2>
+
+<div class="alert alert-danger mt-3">
+    <h4>Are you sure you want to cancel this shift?</h4>
+    <p>This will free up the staff member for other assignments.</p>
+</div>
+
+<div class="card p-4">
+    <dl class="row">
+        <dt class="col-sm-3">Staff</dt>
+        <dd class="col-sm-9">@Model.AppointedStaff?.FirstName @Model.AppointedStaff?.LastName</dd>
+
+        <dt class="col-sm-3">Time</dt>
+        <dd class="col-sm-9">@Model.StartTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</dd>
+    </dl>
+
+    <form asp-action="Cancel" asp-route-shiftId="@Model.Id" method="post">
+        <button type="submit" class="btn btn-danger">Yes, Cancel Shift</button>
+        <a asp-action="Index" class="btn btn-secondary">No, Go Back</a>
+    </form>
+</div>
