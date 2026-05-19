@@ -55,14 +55,21 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         // POST: PeriodTracker/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(PeriodTrackerViewModel model)
+        public IActionResult Create(PeriodTrackerInputModel input)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                // Rebuild the dashboard model strictly for returning the user to the form
+                return View(new PeriodTrackerViewModel
+                {
+                    StartPeriodDate = DateOnly.FromDateTime(input.StartPeriodDate),
+                    CycleDays = input.CycleDays,
+                    PeriodLasts = input.PeriodLasts,
+                    PMSOption = input.PMSOption
+                });
             }
 
-            _periodTrackerService.UpdatePeriodTracker(model.StartPeriodDate.ToDateTime(TimeOnly.MinValue), model.CycleDays, model.PeriodLasts, model.PMSOption);
+            _periodTrackerService.UpdatePeriodTracker(input.StartPeriodDate, input.CycleDays, input.PeriodLasts, input.PMSOption);
             _periodTrackerService.SaveCurrentUser();
             return RedirectToAction(nameof(Index));
         }
@@ -83,14 +90,20 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         // POST: PeriodTracker/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(PeriodTrackerViewModel model)
+        public IActionResult Edit(PeriodTrackerInputModel input)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View(new PeriodTrackerViewModel
+                {
+                    StartPeriodDate = DateOnly.FromDateTime(input.StartPeriodDate),
+                    CycleDays = input.CycleDays,
+                    PeriodLasts = input.PeriodLasts,
+                    PMSOption = input.PMSOption
+                });
             }
 
-            _periodTrackerService.UpdatePeriodTracker(model.StartPeriodDate.ToDateTime(TimeOnly.MinValue), model.CycleDays, model.PeriodLasts, model.PMSOption);
+            _periodTrackerService.UpdatePeriodTracker(input.StartPeriodDate, input.CycleDays, input.PeriodLasts, input.PMSOption);
             _periodTrackerService.SaveCurrentUser();
             return RedirectToAction(nameof(Index));
         }

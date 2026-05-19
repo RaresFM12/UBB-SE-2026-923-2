@@ -56,4 +56,11 @@ namespace UBB_SE_2026_923_2.Web.Models
         public float DisplayPrice { get; set; }
         public bool HasDiscountApplied { get; set; }
     }
+    public class PeriodTrackerInputModel
+    {
+        public DateTime StartPeriodDate { get; set; }
+        public int CycleDays { get; set; }
+        public int PeriodLasts { get; set; }
+        public int PMSOption { get; set; }
+    }
 }
