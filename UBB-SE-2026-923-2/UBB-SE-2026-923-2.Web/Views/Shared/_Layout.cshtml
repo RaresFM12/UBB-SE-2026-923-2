@@ -29,12 +29,9 @@
                             @* Each feature owner: add a <li> here pointing at your controller.
                                Use @if (User.IsInRole("Admin")) { ... } to gate role-specific entries. *@
 
-                            @if (User.IsInRole("Client"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Edit">Profile</a>
-                                </li>
-                            }
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="UserAccounts" asp-action="Edit">Profile</a>
+                            </li>
 
                             @if (!User.IsInRole("Admin"))
                             {
@@ -71,11 +68,15 @@
                                 </li>
                             }
 
-                            @if (User.IsInRole("Admin"))
+                            @if (User.IsInRole("Admin") || User.IsInRole("Pharmacist"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Items" asp-action="Index">Inventory</a>
                                 </li>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="ShiftManagement" asp-action="Index">Shift Management</a>
                                 </li>
@@ -108,18 +109,15 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Index">Shift Swap Requests</a>
                                 </li>
-
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="ShiftSwap" asp-action="Incoming">Incoming Swap Requests</a>
-                                </li>
-
-
                             }
 
                             @if (User.IsInRole("Pharmacist"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="PharmacyVacation" asp-action="Index">Vacation Window</a>
                                 </li>
                             }
 
