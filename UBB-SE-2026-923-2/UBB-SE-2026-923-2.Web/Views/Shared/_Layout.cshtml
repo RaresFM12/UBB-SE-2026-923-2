@@ -121,23 +121,6 @@
                                 </li>
                             }
 
-                            @if (User.IsInRole("Pharmacist"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="PharmacyVacation" asp-action="Index">Request Vacation</a>
-                                </li>
-                            }
-
-                            @if (User.IsInRole("Client")) {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="PharmacyVacation" asp-action="Index">Vacation Window</a>
-                                </li>
-                            }
-
                             @if (User.IsInRole("Doctor"))
                             {
                                 <li class="nav-item">
@@ -147,6 +130,10 @@
                             
                             @if (User.IsInRole("Pharmacist"))
                             {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a>
+                                </li>
+
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="PharmacySchedule" asp-action="Index">My Schedule</a>
                                 </li>
