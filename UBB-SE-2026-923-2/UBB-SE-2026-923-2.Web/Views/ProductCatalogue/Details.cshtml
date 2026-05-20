@@ -75,6 +75,18 @@
                 </div>
             </form>
 
+            @if (Model.ShowStockAlertButton)
+            {
+                <form asp-action="ToggleStockAlert" method="post" class="mb-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit"
+                            class="btn btn-warning fw-bold w-100 shadow-sm @(Model.IsStockAlertActive ? "btn-secondary" : "btn-warning")">
+                        &#128276; @Model.StockAlertButtonText
+                    </button>
+                </form>
+            }
+
             <div class="mt-4">
                 <h6 class="fw-bold border-bottom pb-2 text-secondary">Product Description</h6>
                 <p class="text-dark small lh-lg" style="white-space: pre-wrap;">@(string.IsNullOrWhiteSpace(Model.Description) ? "No detailed description available." : Model.Description)</p>

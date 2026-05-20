@@ -1,0 +1,58 @@
+namespace UBB_SE_2026_923_2.Web.ViewComponents
+{
+    using System.Linq;
+    using System.Security.Claims;
+    using Microsoft.AspNetCore.Mvc;
+    using UBB_SE_2026_923_2.Services;
+    using UBB_SE_2026_923_2.Web.Models;
+
+    public class NotificationsViewComponent : ViewComponent
+    {
+        private readonly IAdminService adminService;
+        private readonly IUserAccountService userAccountService;
+
+        public NotificationsViewComponent(IAdminService adminService, IUserAccountService userAccountService)
+        {
+            this.adminService = adminService;
+            this.userAccountService = userAccountService;
+        }
+
+        public IViewComponentResult Invoke()
+        {
+            if (this.UserClaimsPrincipal?.Identity?.IsAuthenticated != true)
+            {
+                return this.View(new NotificationsDropdownViewModel());
+            }
+
+            var idClaim = this.UserClaimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idClaim, out int userId))
+            {
+                return this.View(new NotificationsDropdownViewModel());
+            }
+
+            this.userAccountService.LoadCurrentUser(userId);
+            var currentUser = this.userAccountService.CurrentUser;
+
+            if (currentUser == null)
+            {
+                return this.View(new NotificationsDropdownViewModel());
+            }
+
+            var notifications = this.adminService.GetNotificationsForUser(currentUser);
+
+            var viewModel = new NotificationsDropdownViewModel
+            {
+                Notifications = notifications
+                    .Select(notification => new NotificationItemViewModel
+                    {
+                        Title = notification.Title,
+                        Body = notification.Message,
+                        ActionButtonText = notification.ActionButtonText,
+                    })
+                    .ToList(),
+            };
+
+            return this.View(viewModel);
+        }
+    }
+}

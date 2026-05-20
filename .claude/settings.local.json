@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\doruf\\\\info\\\\ubb\\\\iss\\\\UBB-SE-2026-923-2\\\\UBB-SE-2026-923-2\" -Recurse -Directory)",
-      "Bash(Select-Object -First 20)"
+      "Bash(Select-Object -First 20)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\doruf\\\\info\\\\ubb\\\\iss\\\\UBB-SE-2026-923-2\" -Directory)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\doruf\\\\info\\\\ubb\\\\iss\\\\UBB-SE-2026-923-2\" -Recurse -Directory)",
+      "Bash(Format-Table FullName)"
     ]
   }
 }
