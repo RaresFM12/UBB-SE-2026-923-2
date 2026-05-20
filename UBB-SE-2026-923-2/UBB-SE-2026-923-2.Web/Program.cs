@@ -2,6 +2,7 @@ namespace UBB_SE_2026_923_2.Web
 {
     using System;
     using Microsoft.AspNetCore.Authentication.Cookies;
+    using Microsoft.AspNetCore.Authorization;
     using UBB_SE_2026_923_2.Shared;
     using UBB_SE_2026_923_2.Services;
     using UBB_SE_2026_923_2.Web.Models;
@@ -17,10 +18,12 @@ namespace UBB_SE_2026_923_2.Web
 
             string apiBase = builder.Configuration["WebApiBaseUrl"]
                 ?? throw new InvalidOperationException("WebApiBaseUrl not set in configuration.");
-            builder.Services.AddBusinessLogic(new Uri(apiBase));
+            string apiKey = builder.Configuration["WebApiAccessKey"]
+                ?? throw new InvalidOperationException("WebApiAccessKey not set in configuration.");
+            builder.Services.AddBusinessLogic(new Uri(apiBase), apiKey);
 
-            // Cookie authentication: every controller action is gated with
-            // [Authorize] (or [AllowAnonymous] for login/register).
+            // Cookie authentication and a fallback policy so all MVC endpoints
+            // require authentication unless explicitly marked [AllowAnonymous].
             builder.Services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -30,7 +33,12 @@ namespace UBB_SE_2026_923_2.Web
                     options.ExpireTimeSpan = TimeSpan.FromHours(8);
                     options.SlidingExpiration = true;
                 });
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
 
             var app = builder.Build();
 
