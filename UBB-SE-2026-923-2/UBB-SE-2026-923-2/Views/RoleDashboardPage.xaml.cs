@@ -85,11 +85,6 @@ namespace UBB_SE_2026_923_2.Views
                     this.Add("See Schedule", "pharmacist-schedule", typeof(PharmacySchedulePage));
                     this.Add("Vacation Window", "pharmacist-vacation", typeof(PharmacistVacationPage));
                     this.Add("Salary", "pharmacist-salary", typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
-                    this.Add("Product Catalogue", "pharmacist-catalogue", typeof(CatalogPage), catalogParameter);
-                    this.Add("Order Management", "pharmacist-orders", typeof(OrderManagementPage), this.orderService);
-                    this.Add("Edit Inventory", "pharmacist-edit", typeof(EditPage));
-                    this.Add("Statistics", "pharmacist-statistics", typeof(StatisticsPage));
-                    this.Add("Notifications", "pharmacist-notifications", typeof(Notifications));
                     break;
 
                 case UserRole.Doctor:
@@ -99,9 +94,6 @@ namespace UBB_SE_2026_923_2.Views
                     this.Add("See Schedule", "doctor-schedule", typeof(DoctorSchedulePage));
                     this.Add("Salary", "doctor-salary", typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
                     this.Add("Hang Out", "doctor-hangout", typeof(HangOutPlaceholderPage));
-                    this.Add("Product Catalogue", "doctor-catalogue", typeof(CatalogPage), catalogParameter);
-                    this.Add("Order History", "doctor-orders", typeof(OrderHistoryPage), this.orderService);
-                    this.Add("Period Tracker", "doctor-period-tracker", typeof(PeriodTrackerPage), this.periodTrackerViewModel);
                     break;
 
                 case UserRole.Client:

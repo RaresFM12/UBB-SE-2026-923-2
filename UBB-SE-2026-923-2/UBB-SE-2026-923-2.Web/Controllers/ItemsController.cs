@@ -10,7 +10,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
     using UBB_SE_2026_923_2.Services;
     using UBB_SE_2026_923_2.Web.Models;
 
-    [Authorize(Roles = "Admin,Pharmacist")]
+    [Authorize(Roles = "Admin")]
     public class ItemsController : Controller
     {
         private const string BatchDateFormat = "yyyy-MM-dd";

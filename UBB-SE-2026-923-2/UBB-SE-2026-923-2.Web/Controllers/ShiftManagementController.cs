@@ -125,6 +125,7 @@ public class ShiftManagementController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Manager,Pharmacist,Doctor")]
     public IActionResult Salary()
     {
         this.ViewBag.StaffList = this.salaryComputationService.GetAllStaff();
@@ -133,6 +134,7 @@ public class ShiftManagementController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager,Pharmacist,Doctor")]
     public async Task<IActionResult> ComputeSalary(int staffId, int month, int year)
     {
         this.ViewBag.StaffList = this.salaryComputationService.GetAllStaff();
