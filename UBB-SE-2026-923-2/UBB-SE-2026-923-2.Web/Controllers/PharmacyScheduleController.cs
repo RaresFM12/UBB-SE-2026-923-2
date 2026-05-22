@@ -32,12 +32,12 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         {
             var pharmacists = _scheduleService.GetPharmacists();
             ViewBag.Pharmacists = pharmacists;
-            ViewBag.IsAdmin = User.IsInRole("Admin");
+            ViewBag.IsAdmin = User.IsInRole("Admin") || User.IsInRole("Pharmacist");
 
             int? effectiveStaffId;
 
-            if (User.IsInRole("Admin"))
-                effectiveStaffId = selectedPharmacistId;
+            if (User.IsInRole("Admin") || User.IsInRole("Pharmacist"))
+                effectiveStaffId = selectedPharmacistId ?? GetCurrentPharmacistId();
             else
                 effectiveStaffId = GetCurrentPharmacistId();
 
