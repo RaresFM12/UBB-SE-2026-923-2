@@ -1,4 +1,4 @@
-﻿@model UBB_SE_2026_923_2.Web.Models.DoctorScheduleViewModel
+@model UBB_SE_2026_923_2.Web.ViewModels.DoctorScheduleViewModel
 @using UBB_SE_2026_923_2.Models
 
 @{
@@ -12,7 +12,7 @@
 <div class="card mb-4">
     <div class="card-body">
         <form asp-action="Index" method="get" class="row g-3 align-items-end">
-            @if (User.IsInRole("Admin"))
+            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
             {
                 <div class="col-auto">
                     <label class="form-label">Select Doctor</label>

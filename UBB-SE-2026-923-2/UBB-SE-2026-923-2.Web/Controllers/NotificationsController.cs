@@ -5,9 +5,9 @@ namespace UBB_SE_2026_923_2.Web.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using UBB_SE_2026_923_2.Services;
-    using UBB_SE_2026_923_2.Web.Models;
+    using UBB_SE_2026_923_2.Web.ViewModels;
 
-    [Authorize]
+    [Authorize(Roles = "Client")]
     public class NotificationsController : Controller
     {
         private readonly IAdminService adminService;

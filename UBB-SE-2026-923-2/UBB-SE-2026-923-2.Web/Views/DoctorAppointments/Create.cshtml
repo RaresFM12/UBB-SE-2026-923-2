@@ -1,4 +1,4 @@
-@model UBB_SE_2026_923_2.Web.Models.DoctorAppointmentCreateViewModel
+@model UBB_SE_2026_923_2.Web.ViewModels.DoctorAppointmentCreateViewModel
 @{
     ViewData["Title"] = "Book appointment";
 }
@@ -36,12 +36,6 @@
         <label asp-for="StartTime" class="form-label"></label>
         <input asp-for="StartTime" class="form-control" type="time" step="60" />
         <span asp-validation-for="StartTime" class="text-danger"></span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Location" class="form-label"></label>
-        <input asp-for="Location" class="form-control" placeholder="Room 12" />
-        <span asp-validation-for="Location" class="text-danger"></span>
     </div>
 
     <div class="col-12 d-flex gap-2">

@@ -1,4 +1,4 @@
-﻿@model UBB_SE_2026_923_2.Web.Models.ShiftSwapIndexViewModel
+@model UBB_SE_2026_923_2.Web.ViewModels.ShiftSwapIndexViewModel
 @using UBB_SE_2026_923_2.Models
 
 @{
@@ -31,7 +31,7 @@
                                     <div>
                                         <div class="fw-semibold">@shift.StartTime.ToString("dd MMM yyyy")</div>
                                         <div class="@(isSelected ? "text-white-50" : "text-muted") small">
-                                            @shift.StartTime.ToString("HH:mm") – @shift.EndTime.ToString("HH:mm")
+                                            @shift.StartTime.ToString("HH:mm") � @shift.EndTime.ToString("HH:mm")
                                         </div>
                                         <div class="@(isSelected ? "text-white-50" : "text-muted") small">
                                             @shift.Location

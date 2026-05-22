@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace UBB_SE_2026_923_2.Web.Models
+namespace UBB_SE_2026_923_2.Web.ViewModels
 {
     public class CatalogueIndexViewModel
     {

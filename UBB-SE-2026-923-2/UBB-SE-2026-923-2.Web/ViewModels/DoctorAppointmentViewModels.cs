@@ -1,4 +1,4 @@
-namespace UBB_SE_2026_923_2.Web.Models
+namespace UBB_SE_2026_923_2.Web.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -52,9 +52,6 @@ namespace UBB_SE_2026_923_2.Web.Models
         [DataType(DataType.Time)]
         [Display(Name = "Start time")]
         public TimeSpan StartTime { get; set; } = TimeSpan.FromHours(9);
-
-        [Display(Name = "Location")]
-        public string? Location { get; set; }
 
         public List<DoctorOptionViewModel> Doctors { get; set; } = new();
     }

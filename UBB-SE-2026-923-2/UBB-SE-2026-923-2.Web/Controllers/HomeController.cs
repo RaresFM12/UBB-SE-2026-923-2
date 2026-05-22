@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using UBB_SE_2026_923_2.Web.Models;
+using UBB_SE_2026_923_2.Web.ViewModels;
 
 namespace UBB_SE_2026_923_2.Web.Controllers;
 
