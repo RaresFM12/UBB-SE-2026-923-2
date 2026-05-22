@@ -3,60 +3,379 @@
     ViewData["Title"] = "Order history";
 }
 
-<h2 class="mb-4">Your Orders</h2>
+<style>
+    :root {
+        --app-accent: #2F6F5E;
+        --app-surface: #F4F8F6;
+        --app-text-primary: #111827;
+        --app-text-secondary: #4A7D6E;
+        --app-error: #DC2626;
+        --app-success: #10B981;
+        --app-warning: #F59E0B;
+        --app-border-radius: 6px;
+    }
 
-@if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
-{
-    <div class="alert alert-success">@Model.SuccessMessage</div>
-}
-@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-{
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
-}
+    .inventory-container {
+        padding: 20px;
+        background-color: #FFFFFF;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
 
-<form asp-action="Index" method="get" class="mb-3">
-    <div class="form-check">
-        <input asp-for="ShowExpired" class="form-check-input" onchange="this.form.submit()" />
-        <label asp-for="ShowExpired" class="form-check-label">Show expired orders</label>
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 15px;
+    }
+
+    .nav-tabs-center {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        border-radius: var(--app-border-radius);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        padding: 8px 16px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: var(--app-accent);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #2a5d50;
+    }
+
+    .btn-secondary {
+        background-color: #6B7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #4B5563;
+    }
+
+    .btn-outline-danger {
+        border: 1px solid var(--app-error);
+        color: var(--app-error);
+        background-color: transparent;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #fee2e2;
+    }
+
+    .toggle-switch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toggle-switch input[type="checkbox"] {
+        width: 40px;
+        height: 24px;
+        cursor: pointer;
+        appearance: none;
+        background-color: #ddd;
+        border-radius: 12px;
+        outline: none;
+        position: relative;
+        transition: background-color 0.3s;
+    }
+
+    .toggle-switch input[type="checkbox"]:checked {
+        background-color: var(--app-accent);
+    }
+
+    .toggle-switch input[type="checkbox"]:before {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: white;
+        top: 2px;
+        left: 2px;
+        transition: left 0.3s;
+    }
+
+    .toggle-switch input[type="checkbox"]:checked:before {
+        left: 18px;
+    }
+
+    .toggle-switch label {
+        color: var(--app-text-primary);
+        font-weight: 500;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .table-wrapper {
+        border: 1px solid var(--app-accent);
+        border-radius: var(--app-border-radius);
+        overflow: hidden;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;
+        max-width: 1300px;
+        margin-left: auto;
+        margin-right: auto;
+        align-self: center;
+    }
+
+    .table-scroll-container {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    .table {
+        margin: 0;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .table thead {
+        background-color: var(--app-surface);
+        border-bottom: 2px solid var(--app-accent);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table thead th {
+        color: var(--app-text-primary);
+        font-weight: 600;
+        padding: 12px;
+        border: none;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid var(--app-accent);
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--app-surface);
+    }
+
+    .table tbody tr.selected {
+        background-color: #e8f5e9;
+    }
+
+    .table tbody td {
+        padding: 12px;
+        color: var(--app-text-primary);
+        vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 250px;
+    }
+
+    .status-expired {
+        color: var(--app-error);
+        font-weight: bold;
+    }
+
+    .status-completed {
+        color: var(--app-success);
+        font-weight: bold;
+    }
+
+    .status-incomplete {
+        color: var(--app-warning);
+        font-weight: bold;
+    }
+
+    .bottom-actions {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        padding: 20px;
+        border-top: 1px solid var(--app-surface);
+    }
+
+    .no-orders-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #9CA3AF;
+        font-size: 16px;
+    }
+
+    .scrollbar-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .scrollbar-container::-webkit-scrollbar-track {
+        background: var(--app-surface);
+    }
+
+    .scrollbar-container::-webkit-scrollbar-thumb {
+        background: var(--app-accent);
+        border-radius: 4px;
+    }
+
+    .scrollbar-container::-webkit-scrollbar-thumb:hover {
+        background: #2a5d50;
+    }
+</style>
+
+<div class="inventory-container">
+    <!-- Top Bar with Toggle -->
+    <div class="top-bar">
+        <div></div>
+        <div class="toggle-switch">
+            <span style="color: var(--app-text-primary); font-weight: 500;">Show expired orders</span>
+            <input type="checkbox" id="showExpiredToggle" onchange="filterOrders()">
+        </div>
     </div>
-</form>
 
-@if (!Model.Orders.Any())
-{
-    <div class="alert alert-info">No orders found.</div>
-}
-else
-{
-    <div class="row g-3">
-        @foreach (OrderListItemViewModel order in Model.Orders)
-        {
-            string borderClass = order.IsExpired ? "border-danger" : "border-primary";
-            string badgeClass = order.IsExpired ? "bg-danger" : order.IsCompleted ? "bg-success" : "bg-warning text-dark";
+    <!-- Center Navigation Buttons -->
+    <div class="nav-tabs-center">
+        <a asp-controller="Items" asp-action="Index" class="btn btn-secondary">Items</a>
+        <a asp-controller="Substances" asp-action="Index" class="btn btn-secondary">Substances</a>
+        <button class="btn btn-primary">Orders</button>
+    </div>
 
-            <div class="col-12">
-                <div class="card @borderClass">
-                    <div class="card-body d-flex flex-wrap justify-content-between gap-3 align-items-center">
-                        <div>
-                            <h5 class="card-title mb-2">Order#@order.Id</h5>
-                            <div class="text-muted">Pickup: @order.PickUpDateString</div>
-                            <div class="text-muted">Expiration: @order.ExpirationDateString</div>
-                            <span class="badge @badgeClass mt-2">@order.Status</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-outline-secondary">Details</a>
-                            @if (!order.IsCompleted && !order.IsExpired)
-                            {
-                                <a asp-action="Edit" asp-route-id="@order.Id" class="btn btn-outline-primary">Modify</a>
-                                <a asp-action="Delete" asp-route-id="@order.Id" class="btn btn-outline-danger">Cancel Order</a>
-                            }
-                            @if (order.IsExpired)
-                            {
-                                <a asp-action="Resubmit" asp-route-id="@order.Id" class="btn btn-primary">Resubmit</a>
-                            }
-                        </div>
-                    </div>
-                </div>
+    <!-- Table -->
+    @if (!Model.Orders.Any())
+    {
+        <div class="no-orders-message">
+            <p>No orders found.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <div class="table-scroll-container scrollbar-container">
+                <table class="table" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User Email</th>
+                            <th>Status</th>
+                            <th>Pickup Date</th>
+                            <th>Expiration Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (OrderListItemViewModel order in Model.Orders)
+                        {
+                            string statusClass = order.IsExpired ? "status-expired" : (order.IsCompleted ? "status-completed" : "status-incomplete");
+                            <tr class="data-row" data-id="@order.Id" data-expired="@order.IsExpired" data-completed="@order.IsCompleted" onclick="selectRow(this)">
+                                <td>@order.Id</td>
+                                <td>@order.UserEmail ?? ""</td>
+                                <td class="@statusClass">@order.Status</td>
+                                <td>@order.PickUpDateString</td>
+                                <td>@order.ExpirationDateString</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        }
+        </div>
+    }
+
+    <!-- Bottom Action Buttons -->
+    <div class="bottom-actions">
+        <button class="btn btn-primary" onclick="viewOrderDetails()">Details</button>
+        <button class="btn btn-primary" onclick="editOrder()">Modify</button>
+        <button class="btn btn-outline-danger" onclick="cancelOrder()">Cancel Order</button>
     </div>
-}
+</div>
+
+<script>
+    let selectedRow = null;
+
+    function selectRow(row) {
+        if (selectedRow) {
+            selectedRow.classList.remove('selected');
+        }
+        row.classList.add('selected');
+        selectedRow = row;
+    }
+
+    function filterOrders() {
+        const showExpired = document.getElementById('showExpiredToggle').checked;
+        const rows = document.querySelectorAll('.data-row');
+
+        rows.forEach(row => {
+            const isExpired = row.dataset.expired === 'True';
+            const isCompleted = row.dataset.completed === 'True';
+
+            if (showExpired || (!isExpired && !isCompleted)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function viewOrderDetails() {
+        if (!selectedRow) {
+            alert('Please select an order first!');
+            return;
+        }
+        const orderId = selectedRow.dataset.id;
+        window.location.href = `/Orders/Details?id=${orderId}`;
+    }
+
+    function editOrder() {
+        if (!selectedRow) {
+            alert('Please select an order first!');
+            return;
+        }
+        const isCompleted = selectedRow.dataset.completed === 'True';
+        const isExpired = selectedRow.dataset.expired === 'True';
+
+        if (isCompleted || isExpired) {
+            alert('You can only modify incomplete, non-expired orders!');
+            return;
+        }
+
+        const orderId = selectedRow.dataset.id;
+        window.location.href = `/Orders/Edit?id=${orderId}`;
+    }
+
+    function cancelOrder() {
+        if (!selectedRow) {
+            alert('Please select an order first!');
+            return;
+        }
+
+        const isCompleted = selectedRow.dataset.completed === 'True';
+        const isExpired = selectedRow.dataset.expired === 'True';
+
+        if (isCompleted || isExpired) {
+            alert('You can only cancel incomplete, non-expired orders!');
+            return;
+        }
+
+        if (confirm('Are you sure you want to cancel this order?')) {
+            const orderId = selectedRow.dataset.id;
+            window.location.href = `/Orders/Delete?id=${orderId}`;
+        }
+    }
+
+    // Initialize visibility on page load
+    window.addEventListener('load', function() {
+        filterOrders();
+    });
+</script>
