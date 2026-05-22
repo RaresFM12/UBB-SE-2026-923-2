@@ -1,4 +1,4 @@
-namespace UBB_SE_2026_923_2.Web.Models
+namespace UBB_SE_2026_923_2.Web.ViewModels
 {
     using System.Collections.Generic;
 

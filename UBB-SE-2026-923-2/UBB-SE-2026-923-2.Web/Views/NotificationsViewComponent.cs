@@ -1,10 +1,10 @@
-namespace UBB_SE_2026_923_2.Web.ViewComponents
+namespace UBB_SE_2026_923_2.Web.Views
 {
     using System.Linq;
     using System.Security.Claims;
     using Microsoft.AspNetCore.Mvc;
     using UBB_SE_2026_923_2.Services;
-    using UBB_SE_2026_923_2.Web.Models;
+    using UBB_SE_2026_923_2.Web.ViewModels;
 
     public class NotificationsViewComponent : ViewComponent
     {

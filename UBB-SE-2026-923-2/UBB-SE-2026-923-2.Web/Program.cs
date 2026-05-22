@@ -5,7 +5,7 @@ namespace UBB_SE_2026_923_2.Web
     using Microsoft.AspNetCore.Authorization;
     using UBB_SE_2026_923_2.Shared;
     using UBB_SE_2026_923_2.Services;
-    using UBB_SE_2026_923_2.Web.Models;
+    using UBB_SE_2026_923_2.Web.ViewModels;
 
     public class Program
     {

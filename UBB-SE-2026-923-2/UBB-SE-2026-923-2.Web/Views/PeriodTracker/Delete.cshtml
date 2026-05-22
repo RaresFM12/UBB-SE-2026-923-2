@@ -1,4 +1,4 @@
-﻿@model UBB_SE_2026_923_2.Web.Models.PeriodTrackerViewModel
+@model UBB_SE_2026_923_2.Web.ViewModels.PeriodTrackerViewModel
 @{
     ViewData["Title"] = "De-provision Tracker Framework";
 }
@@ -6,7 +6,7 @@
 <div class="container mt-4" style="max-width: 500px;">
     <div class="card border-0 shadow-sm border-top border-danger border-3">
         <div class="card-header bg-dark text-white fw-bold">
-            <h5 class="mb-0 small text-uppercase py-1">⚠️ Confirm Profile Reset</h5>
+            <h5 class="mb-0 small text-uppercase py-1">?? Confirm Profile Reset</h5>
         </div>
         <div class="card-body p-4 text-center">
             <p class="fw-bold text-dark mb-2">Are you sure you want to completely clear your tracking settings?</p>
@@ -14,8 +14,8 @@
 
             <div class="alert alert-light border small text-start p-2 mb-4 bg-light">
                 <strong>Current Configuration:</strong><br />
-                • Active Boundary Anchor: @Model.StartPeriodDate.ToShortDateString()<br />
-                • Configured Cycle Duration: @Model.CycleDays Days
+                � Active Boundary Anchor: @Model.StartPeriodDate.ToShortDateString()<br />
+                � Configured Cycle Duration: @Model.CycleDays Days
             </div>
 
             <form asp-action="Delete" method="post" class="mb-0">
