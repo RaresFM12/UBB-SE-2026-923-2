@@ -22,7 +22,6 @@
 
                             @if (shopItem.HasDiscountApplied || shopItem.RawItem.DiscountPercentage > 0)
                             {
-                                // Calculate final price if the 20% menstrual discount isn't active but a catalog discount is
                                 float catalogDiscount = shopItem.RawItem.DiscountPercentage;
                                 float finalPrice = shopItem.HasDiscountApplied
                                     ? shopItem.DisplayPrice
