@@ -1,0 +1,90 @@
+@model UBB_SE_2026_923_2.Web.Models.PeriodTrackerViewModel
+
+@{
+    var today = DateTime.Today;
+    var ovulationDate = today.AddDays(Model.DaysUntilOvulation);
+}
+
+<div class="d-flex flex-column align-items-center w-100">
+    @if (Model.HasPeriodTracker)
+    {
+        <h2 class="mb-4 fw-bold" style="color: #1a2530;">@(string.IsNullOrWhiteSpace(Model.CurrentMonthName) ? today.ToString("MMMM") : Model.CurrentMonthName)</h2>
+
+        <!-- Top 3 Boxes -->
+        <div class="row g-3 mb-5 w-100 justify-content-center">
+            <div class="col-12 col-md-4">
+                <div class="card h-100 rounded-3" style="border: 1px solid #196f53; background-color: #f8faf9;">
+                    <div class="card-body p-4 text-start">
+                        <div class="d-flex align-items-center mb-4" style="color: #196f53;">
+                            <i class="bi bi-calendar-event fs-5 me-2"></i>
+                            <span class="fw-bold fs-5">Today</span>
+                        </div>
+                        <h3 class="fw-bold mb-2">@today.ToString("dd.MM.yyyy")</h3>
+                        <div style="color: #e84c6c;">@Model.CurrentPhaseString</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="card h-100 rounded-3" style="border: 1px solid #196f53; background-color: #f8faf9;">
+                    <div class="card-body p-4 text-start">
+                        <div class="d-flex align-items-center mb-4" style="color: #196f53;">
+                            <i class="bi bi-star fs-5 me-2"></i>
+                            <span class="fw-bold fs-5">Next Period</span>
+                        </div>
+                        <h3 class="fw-bold mb-2">@Model.NextPeriodDateString</h3>
+                        <div style="color: #e84c6c;">@Model.NextPeriodDistanceString</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="card h-100 rounded-3" style="border: 1px solid #196f53; background-color: #f8faf9;">
+                    <div class="card-body p-4 text-start">
+                        <div class="d-flex align-items-center mb-4" style="color: #196f53;">
+                            <i class="bi bi-box-arrow-up-right fs-5 me-2"></i>
+                            <span class="fw-bold fs-5">Ovulation</span>
+                        </div>
+                        <h3 class="fw-bold mb-2">@ovulationDate.ToString("dd.MM.yyyy")</h3>
+                        <div style="color: #e38234;">@Model.OvulationDistanceString</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legends & Arrows -->
+        <div class="d-flex align-items-center justify-content-center w-100">
+            <a asp-action="Index" asp-controller="PeriodTracker" asp-route-monthOffset="@(Model.MonthOffset - 1)" 
+               class="btn text-white me-4" style="background-color: #3b7b65; border-radius: 4px; padding: 5px 15px;">&lt;</a>
+
+            <div class="d-flex flex-column gap-3 text-start fs-5">
+                <div class="d-flex align-items-center">
+                    <div class="me-2 rounded-1" style="width: 14px; height: 14px; background-color: #e82a4d;"></div>
+                    <span style="color: #e82a4d; font-weight: 600;">Period Days: @Model.PeriodIntervalText</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="me-2 rounded-1" style="width: 14px; height: 14px; background-color: #27a256;"></div>
+                    <span style="color: #27a256; font-weight: 600;">Low Fertility Days: @Model.LowFertilityIntervalText</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="me-2 rounded-1" style="width: 14px; height: 14px; background-color: #1ca2cc;"></div>
+                    <span style="color: #1ca2cc; font-weight: 600;">Ovulation Days: @Model.OvulationIntervalText</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="me-2 rounded-1" style="width: 14px; height: 14px; background-color: #f16912;"></div>
+                    <span style="color: #f16912; font-weight: 600;">PMS Days: @Model.PmsIntervalText</span>
+                </div>
+            </div>
+
+            <a asp-action="Index" asp-controller="PeriodTracker" asp-route-monthOffset="@(Model.MonthOffset + 1)" 
+               class="btn text-white ms-4" style="background-color: #3b7b65; border-radius: 4px; padding: 5px 15px;">&gt;</a>
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-muted py-5 w-100 border rounded bg-light">
+            <p class="mb-1">No tracker configured yet.</p>
+            <span class="small">Save your cycle configuration to see the period statistics.</span>
+        </div>
+    }
+</div>

@@ -55,11 +55,17 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         // POST: PeriodTracker/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(PeriodTrackerViewModel model)
+        public IActionResult Create([Bind("StartPeriodDate,CycleDays,PeriodLasts,PMSOption")] PeriodTrackerViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (model.StartPeriodDate == default || model.CycleDays < 20 || model.CycleDays > 45 || model.PeriodLasts < 1 || model.PeriodLasts > 9 || model.PMSOption < 0 || model.PMSOption > 3)
             {
-                return View(model);
+                var state = _periodTrackerService.GetTrackerState();
+                var fullModel = ToViewModel(state);
+                fullModel.StartPeriodDate = model.StartPeriodDate == default ? DateOnly.FromDateTime(DateTime.Today) : model.StartPeriodDate;
+                fullModel.CycleDays = model.CycleDays;
+                fullModel.PeriodLasts = model.PeriodLasts;
+                fullModel.PMSOption = model.PMSOption;
+                return View("Index", fullModel);
             }
 
             _periodTrackerService.UpdatePeriodTracker(model.StartPeriodDate.ToDateTime(TimeOnly.MinValue), model.CycleDays, model.PeriodLasts, model.PMSOption);
@@ -83,11 +89,17 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         // POST: PeriodTracker/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(PeriodTrackerViewModel model)
+        public IActionResult Edit([Bind("StartPeriodDate,CycleDays,PeriodLasts,PMSOption")] PeriodTrackerViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (model.StartPeriodDate == default || model.CycleDays < 20 || model.CycleDays > 45 || model.PeriodLasts < 1 || model.PeriodLasts > 9 || model.PMSOption < 0 || model.PMSOption > 3)
             {
-                return View(model);
+                var state = _periodTrackerService.GetTrackerState();
+                var fullModel = ToViewModel(state);
+                fullModel.StartPeriodDate = model.StartPeriodDate == default ? DateOnly.FromDateTime(DateTime.Today) : model.StartPeriodDate;
+                fullModel.CycleDays = model.CycleDays;
+                fullModel.PeriodLasts = model.PeriodLasts;
+                fullModel.PMSOption = model.PMSOption;
+                return View("Index", fullModel);
             }
 
             _periodTrackerService.UpdatePeriodTracker(model.StartPeriodDate.ToDateTime(TimeOnly.MinValue), model.CycleDays, model.PeriodLasts, model.PMSOption);
@@ -129,7 +141,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         /* Standard Sub-Actions used by the view forms */
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateNote(string noteBody)
+        public IActionResult CreateNote([FromForm] string noteBody)
         {
             _periodTrackerService.AddNote(noteBody ?? "New Entry");
             _periodTrackerService.SaveCurrentUser();
@@ -138,7 +150,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditNote(int noteId, string noteBody, bool isDone)
+        public IActionResult EditNote([FromForm] int noteId, [FromForm] string noteBody, [FromForm] bool isDone = false)
         {
             _periodTrackerService.UpdateNote(noteId, noteBody ?? string.Empty, isDone);
             _periodTrackerService.SaveCurrentUser();
@@ -147,7 +159,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult RemoveNote(int noteId)
+        public IActionResult RemoveNote([FromForm] int noteId)
         {
             _periodTrackerService.DeleteNote(noteId);
             _periodTrackerService.SaveCurrentUser();
