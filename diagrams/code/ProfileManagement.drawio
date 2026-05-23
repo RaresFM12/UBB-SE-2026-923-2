@@ -1,0 +1,229 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Profile Management" id="profile-1">
+    <mxGraphModel dx="2002" dy="1273" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lifeline-user" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;participant=umlActor;" value="User" vertex="1">
+          <mxGeometry height="1650" width="20" x="40" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="view-edit" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;" value="UserAccounts&#xa;Edit View" vertex="1">
+          <mxGeometry height="1650" width="180" x="160" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="controller" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;" value="UserAccountsController" vertex="1">
+          <mxGeometry height="1650" width="180" x="420" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="service" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;" value="UserAccountService" vertex="1">
+          <mxGeometry height="1650" width="180" x="680" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="http-repo" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;" value="HttpUsersRepository" vertex="1">
+          <mxGeometry height="1650" width="180" x="940" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="api-controller" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;" value="UsersController (API)" vertex="1">
+          <mxGeometry height="1650" width="180" x="1200" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sql-repo" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;" value="SQLUsersRepository" vertex="1">
+          <mxGeometry height="1650" width="180" x="1460" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="dbcontext" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;" value="AppDbContext" vertex="1">
+          <mxGeometry height="1650" width="140" x="1720" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="database" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;" value="Database" vertex="1">
+          <mxGeometry height="1650" width="140" x="1940" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="msg1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="click Edit Profile">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="50" y="200" as="sourcePoint" />
+            <mxPoint x="250" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="GET /UserAccounts/Edit/{id}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="250" y="250" as="sourcePoint" />
+            <mxPoint x="510" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="LoadCurrentUser(id)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="300" as="sourcePoint" />
+            <mxPoint x="770" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg4" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="GetUserById(id)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="350" as="sourcePoint" />
+            <mxPoint x="1030" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg5" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="GET api/users/{id}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1030" y="400" as="sourcePoint" />
+            <mxPoint x="1290" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg6" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="GetUserById(id)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1290" y="450" as="sourcePoint" />
+            <mxPoint x="1550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg7" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="Users.Find(id)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1550" y="500" as="sourcePoint" />
+            <mxPoint x="1790" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg8" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="SELECT * FROM Users WHERE Id={id}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1790" y="550" as="sourcePoint" />
+            <mxPoint x="2010" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="User row">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2010" y="600" as="sourcePoint" />
+            <mxPoint x="1790" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="User">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1790" y="640" as="sourcePoint" />
+            <mxPoint x="1550" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="User">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1550" y="680" as="sourcePoint" />
+            <mxPoint x="1290" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret4" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="200 OK + User">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1290" y="720" as="sourcePoint" />
+            <mxPoint x="1030" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret5" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="User">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1030" y="760" as="sourcePoint" />
+            <mxPoint x="770" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret6" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="User">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="800" as="sourcePoint" />
+            <mxPoint x="510" y="800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret7" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="Render Edit View(user)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="840" as="sourcePoint" />
+            <mxPoint x="250" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ret8" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="Display Edit Form">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="250" y="880" as="sourcePoint" />
+            <mxPoint x="50" y="880" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post0" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="submit form">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="50" y="970" as="sourcePoint" />
+            <mxPoint x="250" y="970" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="POST /UserAccounts/Edit">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="250" y="1020" as="sourcePoint" />
+            <mxPoint x="510" y="1020" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="UpdateProfile(newUsername, newPhone)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="1070" as="sourcePoint" />
+            <mxPoint x="770" y="1070" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="UpdateUser(user)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="1120" as="sourcePoint" />
+            <mxPoint x="1030" y="1120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post4" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="PUT api/users/{id}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1030" y="1170" as="sourcePoint" />
+            <mxPoint x="1290" y="1170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post5" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="UpdateUser(user)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1290" y="1220" as="sourcePoint" />
+            <mxPoint x="1550" y="1220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post6" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="Users.Update(user)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1550" y="1270" as="sourcePoint" />
+            <mxPoint x="1790" y="1270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post7" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" value="SaveChanges()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1790" y="1320" as="sourcePoint" />
+            <mxPoint x="2010" y="1320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pret1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="rows affected">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2010" y="1370" as="sourcePoint" />
+            <mxPoint x="1790" y="1370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pret2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1790" y="1400" as="sourcePoint" />
+            <mxPoint x="1550" y="1400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pret3" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1550" y="1430" as="sourcePoint" />
+            <mxPoint x="1290" y="1430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pret4" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="204 No Content">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1290" y="1460" as="sourcePoint" />
+            <mxPoint x="1030" y="1460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pret5" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1030" y="1490" as="sourcePoint" />
+            <mxPoint x="770" y="1490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pret6" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="1520" as="sourcePoint" />
+            <mxPoint x="510" y="1520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pret7" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="RedirectToAction(Edit, id)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="1550" as="sourcePoint" />
+            <mxPoint x="250" y="1550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pret8" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;" value="Redirect → Edit page">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="250" y="1590" as="sourcePoint" />
+            <mxPoint x="50" y="1590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
