@@ -56,7 +56,9 @@
 
                 this.OrderItems.Add(
                     new ItemDetail(currentItem.Id, alteredImagePath, itemDescription,
-                                    itemQuantity, itemTotalPrice));
+                                    itemQuantity, itemTotalPrice,
+                                    currentItem.Name, currentItem.Producer));
+                this.OrderItems[this.OrderItems.Count - 1].PropertyChanged += this.OnItemPropertyChanged;
 
                 totalPrice += itemTotalPrice;
             }
@@ -68,9 +70,19 @@
 
         private void RemoveItemFromUnsavedOrder(ItemDetail itemToRemove)
         {
+            itemToRemove.PropertyChanged -= this.OnItemPropertyChanged;
             this.OrderItems.Remove(itemToRemove);
 
             this.UpdateTotalPrice();
+        }
+
+        private void OnItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ItemDetail.ItemFinalPrice) ||
+                e.PropertyName == nameof(ItemDetail.ItemQuantity))
+            {
+                this.UpdateTotalPrice();
+            }
         }
 
         private void UpdateTotalPrice()

@@ -1,9 +1,7 @@
 @model OrderResubmitViewModel
 @{
-    ViewData["Title"] = $"Resubmit Order #{Model.Id}";
+    ViewData["Title"] = "Resubmit Order";
 }
-
-<h2 class="mb-4">Resubmit Order#@Model.Id</h2>
 
 <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
@@ -13,12 +11,19 @@
 
     <partial name="_OrderLinesTable" model="Model.Items" />
 
+    <div class="d-flex justify-content-end mb-3">
+        <div class="fs-5">
+            <span class="text-muted">Total price:</span>
+            <strong>@Model.Total.ToString("F2") RON</strong>
+        </div>
+    </div>
+
     <div class="mb-3 col-md-4">
         <label asp-for="PickUpDate" class="form-label">New pickup date</label>
         <input asp-for="PickUpDate" type="date" class="form-control" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
         <span asp-validation-for="PickUpDate" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Place Order</button>
+    <button type="submit" class="btn btn-primary">Resubmit Order</button>
     <a asp-action="Index" class="btn btn-outline-secondary ms-1">Cancel</a>
 </form>

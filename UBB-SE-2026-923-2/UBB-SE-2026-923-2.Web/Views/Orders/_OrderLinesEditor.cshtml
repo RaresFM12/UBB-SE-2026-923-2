@@ -14,7 +14,8 @@
         <tbody>
             @for (int index = 0; index < Model.Count; index++)
             {
-                <tr>
+                float unitFinalPrice = Model[index].Quantity > 0 ? Model[index].FinalPrice / Model[index].Quantity : 0f;
+                <tr class="order-line-row" data-unit-price="@unitFinalPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)">
                     <td>
                         @Model[index].Name
                         <input type="hidden" name="Items[@index].ItemId" value="@Model[index].ItemId" />
@@ -22,12 +23,12 @@
                         <input type="hidden" name="Items[@index].Producer" value="@Model[index].Producer" />
                     </td>
                     <td>@Model[index].Producer</td>
-                    <td><input class="form-control" type="number" min="0" name="Items[@index].Quantity" value="@Model[index].Quantity" /></td>
+                    <td><input class="form-control line-quantity" type="number" min="0" name="Items[@index].Quantity" value="@Model[index].Quantity" /></td>
                     <td>
-                        @Model[index].FinalPrice.ToString("F2") RON
-                        <input type="hidden" name="Items[@index].FinalPrice" value="@Model[index].FinalPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                        <span class="line-final-price-text">@Model[index].FinalPrice.ToString("F2") RON</span>
+                        <input class="line-final-price-input" type="hidden" name="Items[@index].FinalPrice" value="@Model[index].FinalPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                     </td>
-                    <td><span class="text-muted">Set quantity to 0</span></td>
+                    <td><button type="button" class="btn btn-outline-danger btn-sm delete-line">Delete</button></td>
                 </tr>
             }
         </tbody>

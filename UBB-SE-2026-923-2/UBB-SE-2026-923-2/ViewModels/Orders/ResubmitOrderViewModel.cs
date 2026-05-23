@@ -35,7 +35,9 @@
                         alteredImagePath,
                         currentItem.Name + " - " + currentItem.Producer,
                         orderItemEntry.Value.Item1,
-                        orderItemEntry.Value.Item2);
+                        orderItemEntry.Value.Item2,
+                        currentItem.Name,
+                        currentItem.Producer);
 
                 this.OrderItems.Add(itemRepresentation);
             }

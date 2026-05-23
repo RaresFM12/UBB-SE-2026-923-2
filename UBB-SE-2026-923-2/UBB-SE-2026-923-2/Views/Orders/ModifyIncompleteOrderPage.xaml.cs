@@ -59,13 +59,21 @@ namespace UBB_SE_2026_923_2.Views.Orders
 
             foreach (var entry in this.ViewModel.OrderItems)
             {
-                updatedQuantities.Add(entry.ItemID, new Tuple<int, float>(entry.ItemQuantity, entry.ItemFinalPrice));
+                if (entry.ItemQuantity > 0)
+                {
+                    updatedQuantities.Add(entry.ItemID, new Tuple<int, float>(entry.ItemQuantity, entry.ItemFinalPrice));
+                }
             }
 
             DateOnly selectedDate = DateOnly.FromDateTime(PickUpDateSelector.SelectedDates[PickUpDateSelector.SelectedDates.Count - 1].Date);
 
             try
             {
+                if (updatedQuantities.Count == 0)
+                {
+                    throw new ArgumentException("The order must contain at least one item.");
+                }
+
                 this.orderService.ModifyIncompleteOrder(this.ViewModel.CurrentOrderID, updatedQuantities, selectedDate);
 
                 ContentDialog confirmationMessage = new ContentDialog();

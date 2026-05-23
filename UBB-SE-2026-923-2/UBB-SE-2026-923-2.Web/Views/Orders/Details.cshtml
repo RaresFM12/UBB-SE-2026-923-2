@@ -1,9 +1,7 @@
 @model OrderDetailsViewModel
 @{
-    ViewData["Title"] = $"Order #{Model.Id}";
+    ViewData["Title"] = "Order Details";
 }
-
-<h2 class="mb-4">Order#@Model.Id</h2>
 
 @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
 {
@@ -25,23 +23,34 @@
             <dd class="col-sm-9">@Model.ExpirationDateString</dd>
             <dt class="col-sm-3">Status</dt>
             <dd class="col-sm-9">@Model.Status</dd>
+            <dt class="col-sm-3">Total price</dt>
+            <dd class="col-sm-9">@Model.Total.ToString("F2") RON</dd>
         </dl>
     </div>
 </div>
 
+<partial name="_OrderLinesTable" model="Model.Items" />
+
 @if (Model.AdminView && !Model.IsCompleted && !Model.IsExpired)
 {
-    <form asp-action="Complete" method="post">
+    <form asp-action="Complete" method="post" class="d-inline">
         @Html.AntiForgeryToken()
         <input asp-for="Id" type="hidden" />
-        <partial name="_OrderLinesEditor" model="Model.Items" />
+        @for (int index = 0; index < Model.Items.Count; index++)
+        {
+            <input type="hidden" name="Items[@index].ItemId" value="@Model.Items[index].ItemId" />
+            <input type="hidden" name="Items[@index].Name" value="@Model.Items[index].Name" />
+            <input type="hidden" name="Items[@index].Producer" value="@Model.Items[index].Producer" />
+            <input type="hidden" name="Items[@index].Quantity" value="@Model.Items[index].Quantity" />
+            <input type="hidden" name="Items[@index].FinalPrice" value="@Model.Items[index].FinalPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+        }
+
         <button type="submit" class="btn btn-success">Complete</button>
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary ms-1">Modify</a>
-        <a asp-action="Manage" class="btn btn-outline-secondary ms-1">Back</a>
     </form>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary ms-1">Modify</a>
+    <a asp-action="Manage" class="btn btn-outline-secondary ms-1">Back</a>
 }
 else
 {
-    <partial name="_OrderLinesTable" model="Model.Items" />
     <a asp-action="@(Model.AdminView ? "Manage" : "Index")" class="btn btn-outline-secondary">Back</a>
 }

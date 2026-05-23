@@ -189,6 +189,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             if (!this.ModelState.IsValid)
             {
                 viewModel.AdminView = this.User.IsInRole("Admin");
+                viewModel.Total = viewModel.Items.Sum(item => item.FinalPrice);
                 return this.View(viewModel);
             }
 
@@ -202,6 +203,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             {
                 this.ModelState.AddModelError(string.Empty, exception.Message);
                 viewModel.AdminView = this.User.IsInRole("Admin");
+                viewModel.Total = viewModel.Items.Sum(item => item.FinalPrice);
                 return this.View(viewModel);
             }
         }
@@ -394,22 +396,26 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         private OrderEditViewModel MapEdit(Order order, bool adminView)
         {
+            List<OrderLineItemViewModel> items = this.MapLineItems(order);
             return new OrderEditViewModel
             {
                 Id = order.Id,
                 PickUpDate = order.PickUpDate,
                 AdminView = adminView,
-                Items = this.MapLineItems(order),
+                Items = items,
+                Total = items.Sum(item => item.FinalPrice),
             };
         }
 
         private OrderResubmitViewModel MapResubmit(Order order)
         {
+            List<OrderLineItemViewModel> items = this.MapLineItems(order);
             return new OrderResubmitViewModel
             {
                 Id = order.Id,
                 PickUpDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
-                Items = this.MapLineItems(order),
+                Items = items,
+                Total = items.Sum(item => item.FinalPrice),
             };
         }
 

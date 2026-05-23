@@ -1,9 +1,9 @@
 @model OrderEditViewModel
 @{
-    ViewData["Title"] = $"Modify Order #{Model.Id}";
+    ViewData["Title"] = "Modify Order";
 }
 
-<h2 class="mb-4">Modify Order#@Model.Id</h2>
+<h2 class="mb-4">Modify Order</h2>
 
 <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
@@ -12,14 +12,61 @@
     <input asp-for="Id" type="hidden" />
     <input asp-for="AdminView" type="hidden" />
 
+    <partial name="_OrderLinesEditor" model="Model.Items" />
+
+    <div class="d-flex justify-content-end mb-3">
+        <div class="fs-5">
+            <span class="text-muted">Total price:</span>
+            <strong id="order-total">@Model.Total.ToString("F2") RON</strong>
+        </div>
+    </div>
+
     <div class="mb-3 col-md-4">
         <label asp-for="PickUpDate" class="form-label">Pickup date</label>
         <input asp-for="PickUpDate" type="date" class="form-control" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
         <span asp-validation-for="PickUpDate" class="text-danger"></span>
     </div>
 
-    <partial name="_OrderLinesEditor" model="Model.Items" />
-
     <button type="submit" class="btn btn-primary">Save changes</button>
     <a asp-action="Details" asp-route-id="@Model.Id" asp-route-adminView="@Model.AdminView" class="btn btn-outline-secondary ms-1">Cancel</a>
 </form>
+
+@section Scripts {
+    <script>
+        (() => {
+            const rows = document.querySelectorAll(".order-line-row");
+            const totalElement = document.getElementById("order-total");
+
+            const formatPrice = value => `${value.toFixed(2)} RON`;
+
+            const recalculate = () => {
+                let total = 0;
+
+                rows.forEach(row => {
+                    const quantityInput = row.querySelector(".line-quantity");
+                    const finalPriceInput = row.querySelector(".line-final-price-input");
+                    const finalPriceText = row.querySelector(".line-final-price-text");
+                    const quantity = Math.max(0, parseInt(quantityInput.value || "0", 10));
+                    const unitPrice = parseFloat(row.dataset.unitPrice || "0");
+                    const linePrice = quantity * unitPrice;
+
+                    quantityInput.value = quantity;
+                    finalPriceInput.value = linePrice.toFixed(2);
+                    finalPriceText.textContent = formatPrice(linePrice);
+                    total += linePrice;
+                });
+
+                totalElement.textContent = formatPrice(total);
+            };
+
+            rows.forEach(row => {
+                row.querySelector(".line-quantity").addEventListener("input", recalculate);
+                row.querySelector(".delete-line").addEventListener("click", () => {
+                    row.querySelector(".line-quantity").value = "0";
+                    row.hidden = true;
+                    recalculate();
+                });
+            });
+        })();
+    </script>
+}
