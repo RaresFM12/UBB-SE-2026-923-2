@@ -25,7 +25,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         [Authorize(Roles = "Client,Admin")]
         [HttpGet]
-        public IActionResult Index(bool showExpired = false)
+        public IActionResult Index(bool showExpiredOnly = false)
         {
             User? currentUser = this.LoadCurrentUser();
             if (currentUser == null)
@@ -35,7 +35,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             this.orderService.ExpireOverdueOrders();
             List<OrderListItemViewModel> orders = this.orderService.OrdersRepository.GetOrdersOfClient(currentUser.Id)
-                .Where(order => showExpired || !order.IsExpired)
+                .Where(order => !showExpiredOnly || order.IsExpired)
                 .OrderByDescending(order => order.PickUpDate)
                 .ThenByDescending(order => order.Id)
                 .Select(this.MapOrderListItem)
@@ -44,7 +44,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             var viewModel = new OrdersIndexViewModel
             {
                 Orders = orders,
-                ShowExpired = showExpired,
+                ShowExpiredOnly = showExpiredOnly,
                 SuccessMessage = this.ReadTempData("SuccessMessage"),
                 ErrorMessage = this.ReadTempData("ErrorMessage"),
             };

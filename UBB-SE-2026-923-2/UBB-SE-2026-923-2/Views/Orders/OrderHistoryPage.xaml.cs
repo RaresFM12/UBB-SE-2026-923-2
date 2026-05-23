@@ -33,6 +33,7 @@ namespace UBB_SE_2026_923_2.Views.Orders
             this.DataContext = this.ViewModel;
 
             this.ViewModel.RedirectToDetailRequested += this.RedirectToDetailPage;
+            this.ViewModel.RedirectToModifyRequested += this.RedirectToModifyPage;
             this.ViewModel.CancelConfirmationRequested += this.AskCancelOrderConfirmation;
             this.ViewModel.RedirectToResubmitRequested += this.RedirectToResubmitPage;
         }
@@ -44,12 +45,20 @@ namespace UBB_SE_2026_923_2.Views.Orders
             if (this.ViewModel != null)
             {
                 this.ViewModel.RedirectToDetailRequested -= this.RedirectToDetailPage;
+                this.ViewModel.RedirectToModifyRequested -= this.RedirectToModifyPage;
                 this.ViewModel.CancelConfirmationRequested -= this.AskCancelOrderConfirmation;
                 this.ViewModel.RedirectToResubmitRequested -= this.RedirectToResubmitPage;
             }
         }
 
         private void RedirectToDetailPage(int orderId)
+        {
+            this.Frame.Navigate(
+                typeof(UBB_SE_2026_923_2.Views.Orders.NonEditableOrderDetailPage),
+                        new Tuple<IOrderService, int>(this.currentOrderService, orderId));
+        }
+
+        private void RedirectToModifyPage(int orderId)
         {
             this.Frame.Navigate(
                 typeof(UBB_SE_2026_923_2.Views.Orders.ModifyIncompleteOrderPage),

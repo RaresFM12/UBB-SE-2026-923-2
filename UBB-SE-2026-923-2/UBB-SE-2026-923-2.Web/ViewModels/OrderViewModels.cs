@@ -9,7 +9,7 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
     {
         public List<OrderListItemViewModel> Orders { get; set; } = new();
 
-        public bool ShowExpired { get; set; }
+        public bool ShowExpiredOnly { get; set; }
 
         public string? SuccessMessage { get; set; }
 
