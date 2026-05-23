@@ -2,97 +2,122 @@
 @using UBB_SE_2026_923_2.Models
 
 @{
-    ViewData["Title"] = "My Pharmacy Schedule";
+    ViewData["Title"] = "Pharmacy Schedule";
     var pharmacists = ViewBag.Pharmacists as List<Pharmacyst> ?? new List<Pharmacyst>();
     var isAdmin = ViewBag.IsAdmin as bool? ?? false;
     var selectedPharmacistId = ViewBag.SelectedPharmacistId as int?;
+    var mode = ViewBag.Mode as string ?? "Daily";
+    var selectedDate = ViewBag.SelectedDate as string ?? DateTime.Today.ToString("yyyy-MM-dd");
+    var selectedDateText = ViewBag.SelectedDateText as string ?? DateTime.Today.ToString("dd MMM yyyy");
+    var previousButtonText = ViewBag.PreviousButtonText as string ?? "Previous";
+    var nextButtonText = ViewBag.NextButtonText as string ?? "Next";
+    var isEmpty = Model == null || !Model.Any();
 }
 
-<h2>My Pharmacy Schedule</h2>
-
-@if (isAdmin)
-{
-    <div class="card mb-4">
-        <div class="card-body">
-            <form asp-action="Index" method="get" class="row g-3 align-items-end">
-                <div class="col-auto">
-                    <label class="form-label">Select Pharmacist</label>
-                    <select name="selectedPharmacistId" class="form-select" onchange="this.form.submit()">
-                        <option value="">-- Select pharmacist --</option>
-                        @foreach (var p in pharmacists)
-                        {
-                            <option value="@p.StaffID" selected="@(selectedPharmacistId == p.StaffID ? "selected" : null)">
-                                @p.FirstName @p.LastName
-                            </option>
-                        }
-                    </select>
-                </div>
-            </form>
-        </div>
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h2 class="mb-0">Pharmacy Schedule</h2>
+        <span class="text-muted">@selectedDateText</span>
     </div>
-}
 
-@if (!string.IsNullOrEmpty(ViewBag.StatusMessage as string))
-{
-    <div class="alert alert-warning">@ViewBag.StatusMessage</div>
-}
+    @if (isAdmin)
+    {
+        <form asp-action="Index" method="get">
+            <input type="hidden" name="selectedDate" value="@selectedDate" />
+            <input type="hidden" name="mode" value="@mode" />
+            <select name="selectedPharmacistId" class="form-select" style="width:220px" onchange="this.form.submit()">
+                <option value="">-- Select pharmacist --</option>
+                @foreach (var p in pharmacists)
+                {
+                    <option value="@p.StaffID" selected="@(selectedPharmacistId == p.StaffID ? "selected" : null)">
+                        @p.FirstName @p.LastName
+                    </option>
+                }
+            </select>
+        </form>
+    }
+</div>
+
+<div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+    <a asp-action="Index"
+       asp-route-selectedPharmacistId="@selectedPharmacistId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="@mode"
+       asp-route-nav="prev"
+       class="btn btn-outline-secondary">@previousButtonText</a>
+
+    <a asp-action="Index"
+       asp-route-selectedPharmacistId="@selectedPharmacistId"
+       asp-route-selectedDate="@DateTime.Today.ToString("yyyy-MM-dd")"
+       asp-route-mode="@mode"
+       asp-route-nav="today"
+       class="btn btn-outline-secondary">Today</a>
+
+    <a asp-action="Index"
+       asp-route-selectedPharmacistId="@selectedPharmacistId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="@mode"
+       asp-route-nav="next"
+       class="btn btn-outline-secondary">@nextButtonText</a>
+
+    <form asp-action="Index" method="get" class="d-flex align-items-center gap-2">
+        <input type="hidden" name="selectedPharmacistId" value="@selectedPharmacistId" />
+        <input type="hidden" name="mode" value="@mode" />
+        <input type="date" name="selectedDate" class="form-control" style="width:180px" value="@selectedDate" onchange="this.form.submit()" />
+    </form>
+
+    <a asp-action="Index"
+       asp-route-selectedPharmacistId="@selectedPharmacistId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="Daily"
+       class="btn @(mode == "Daily" ? "btn-primary" : "btn-outline-primary")">Daily</a>
+
+    <a asp-action="Index"
+       asp-route-selectedPharmacistId="@selectedPharmacistId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="Weekly"
+       class="btn @(mode == "Weekly" ? "btn-primary" : "btn-outline-primary")">Weekly</a>
+
+    <a asp-action="Index"
+       asp-route-selectedPharmacistId="@selectedPharmacistId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="@mode"
+       class="btn btn-outline-secondary">Refresh</a>
+</div>
 
 @if (!isAdmin || selectedPharmacistId.HasValue)
 {
-    <div class="card mb-4">
-        <div class="card-body">
-            <form asp-action="Index" method="get" class="row g-3 align-items-end">
-                @if (selectedPharmacistId.HasValue)
-                {
-                    <input type="hidden" name="selectedPharmacistId" value="@selectedPharmacistId" />
-                }
-                <div class="col-auto">
-                    <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" class="form-control" id="startDate" name="startDate" value="@ViewBag.StartDate">
-                </div>
-                <div class="col-auto">
-                    <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" class="form-control" id="endDate" name="endDate" value="@ViewBag.EndDate">
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">Filter</button>
-                </div>
-            </form>
+    @if (isEmpty)
+    {
+        <div class="text-center py-5">
+            <p class="fs-5">No shifts in this period.</p>
+            <p class="text-muted">Try Previous/Next, change the period, or Refresh.</p>
         </div>
-    </div>
-
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Location</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var shift in Model!)
             {
-                foreach (var shift in Model)
-                {
-                    var badgeClass = shift.Status.ToString() == "SCHEDULED" ? "bg-primary" :
-                                     shift.Status.ToString() == "ACTIVE" ? "bg-success" : "bg-secondary";
-                    <tr>
-                        <td>@shift.Location</td>
-                        <td>@shift.StartTime.ToString("g")</td>
-                        <td>@shift.EndTime.ToString("g")</td>
-                        <td><span class="badge @badgeClass">@shift.Status</span></td>
-                    </tr>
-                }
+                var badgeClass = shift.Status.ToString() == "SCHEDULED" ? "bg-primary" :
+                                 shift.Status.ToString() == "ACTIVE" ? "bg-success" : "bg-secondary";
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="fs-5 fw-semibold">@shift.Location</span>
+                            <span class="badge @badgeClass fs-6">@shift.Status</span>
+                        </div>
+                        <div class="text-muted small mb-1">
+                            @shift.StartTime.ToString("HH:mm") - @shift.EndTime.ToString("HH:mm")
+                        </div>
+                        <div class="text-muted small">
+                            @shift.StartTime.ToString("dddd, dd MMM yyyy")
+                        </div>
+                    </div>
+                </div>
             }
-            else
-            {
-                <tr>
-                    <td colspan="4" class="text-center">No shifts found for the selected date range.</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        </div>
+    }
 }
 else
 {
