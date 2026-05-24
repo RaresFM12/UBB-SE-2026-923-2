@@ -192,7 +192,7 @@
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void LoadInitialState()
+        public void LoadInitialState()
         {
             PeriodTrackerState trackerState = this.periodTrackerService.GetTrackerState();
 
