@@ -6,7 +6,6 @@ using UBB_SE_2026_923_2.Services;
 
 namespace UBB_SE_2026_923_2.Web.Controllers
 {
-    // Restricting to Pharmacists and Admins as per standard pharmacy scheduling logic
     [Authorize(Roles = "Pharmacist,Admin")]
     public class PharmacyScheduleController : Controller
     {
@@ -17,18 +16,20 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             _scheduleService = scheduleService;
         }
 
-        // Helper to get the logged-in Pharmacist's ID, matching Paul's style
         private int? GetCurrentPharmacistId()
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(userEmail)) return null;
-
             var pharmacists = _scheduleService.GetPharmacists();
-            var matchingPharmacist = pharmacists.FirstOrDefault(p => p.Email == userEmail); // ← was ContactInfo
+            var matchingPharmacist = pharmacists.FirstOrDefault(p => p.Email == userEmail);
             return matchingPharmacist?.StaffID;
         }
 
-        public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate, int? selectedPharmacistId)
+        public async Task<IActionResult> Index(
+            int? selectedPharmacistId,
+            DateTime? selectedDate,
+            string mode = "Daily",
+            string nav = null)
         {
             var pharmacists = _scheduleService.GetPharmacists();
             ViewBag.Pharmacists = pharmacists;
@@ -43,20 +44,40 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             ViewBag.SelectedPharmacistId = effectiveStaffId;
 
-            if (effectiveStaffId == null)
+            var baseDate = selectedDate ?? DateTime.Today;
+
+            if (nav == "prev")
+                baseDate = mode == "Weekly" ? baseDate.AddDays(-7) : baseDate.AddDays(-1);
+            else if (nav == "next")
+                baseDate = mode == "Weekly" ? baseDate.AddDays(7) : baseDate.AddDays(1);
+            else if (nav == "today")
+                baseDate = DateTime.Today;
+
+            DateTime rangeStart, rangeEnd;
+            if (mode == "Weekly")
             {
-                ViewBag.StartDate = DateTime.Now.ToString("yyyy-MM-dd");
-                ViewBag.EndDate = DateTime.Now.AddMonths(1).ToString("yyyy-MM-dd");
-                return View(new List<Shift>());
+                int diff = (7 + (baseDate.DayOfWeek - DayOfWeek.Monday)) % 7;
+                rangeStart = baseDate.AddDays(-diff).Date;
+                rangeEnd = rangeStart.AddDays(6);
+            }
+            else
+            {
+                rangeStart = baseDate.Date;
+                rangeEnd = baseDate.Date;
             }
 
-            var rangeStart = startDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            var rangeEnd = endDate ?? rangeStart.AddMonths(1).AddDays(-1);
+            ViewBag.SelectedDate = baseDate.ToString("yyyy-MM-dd");
+            ViewBag.SelectedDateText = mode == "Weekly"
+                ? $"{rangeStart:dd MMM} - {rangeEnd:dd MMM yyyy}"
+                : baseDate.ToString("dd MMM yyyy");
+            ViewBag.Mode = mode;
+            ViewBag.PreviousButtonText = mode == "Weekly" ? "Previous Week" : "Previous";
+            ViewBag.NextButtonText = mode == "Weekly" ? "Next Week" : "Next";
 
-            ViewBag.StartDate = rangeStart.ToString("yyyy-MM-dd");
-            ViewBag.EndDate = rangeEnd.ToString("yyyy-MM-dd");
+            if (effectiveStaffId == null)
+                return View(new List<Shift>());
 
-            var shifts = await _scheduleService.GetShiftsAsync(effectiveStaffId.Value, rangeStart, rangeEnd);
+            var shifts = await _scheduleService.GetShiftsAsync(effectiveStaffId.Value, rangeStart, rangeEnd.AddDays(1).AddSeconds(-1));
             return View(shifts);
         }
     }

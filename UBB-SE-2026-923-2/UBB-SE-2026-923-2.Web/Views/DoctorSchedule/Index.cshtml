@@ -5,41 +5,83 @@
     ViewData["Title"] = "Doctor Schedule";
     var doctors = ViewBag.Doctors as List<Doctor> ?? new List<Doctor>();
     var selectedDoctorId = ViewBag.SelectedDoctorId as int?;
+    var mode = ViewBag.Mode as string ?? "Daily";
+    var selectedDate = ViewBag.SelectedDate as string ?? DateTime.Today.ToString("yyyy-MM-dd");
+    var selectedDateText = ViewBag.SelectedDateText as string ?? DateTime.Today.ToString("dd MMM yyyy");
+    var previousButtonText = ViewBag.PreviousButtonText as string ?? "Previous";
+    var nextButtonText = ViewBag.NextButtonText as string ?? "Next";
+    var isEmpty = ViewBag.IsEmpty as bool? ?? false;
 }
 
-<h2>Doctor Schedule</h2>
-
-<div class="card mb-4">
-    <div class="card-body">
-        <form asp-action="Index" method="get" class="row g-3 align-items-end">
-            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
-            {
-                <div class="col-auto">
-                    <label class="form-label">Select Doctor</label>
-                    <select name="selectedDoctorId" class="form-select" onchange="this.form.submit()">
-                        <option value="">-- Select doctor --</option>
-                        @foreach (var doctor in doctors)
-                        {
-                            <option value="@doctor.StaffID" selected="@(selectedDoctorId == doctor.StaffID ? "selected" : null)">
-                                @doctor.FirstName @doctor.LastName
-                            </option>
-                        }
-                    </select>
-                </div>
-            }
-            <div class="col-auto">
-                <label for="startDate" class="form-label">Start Date</label>
-                <input type="date" class="form-control" id="startDate" name="startDate" value="@ViewBag.StartDate">
-            </div>
-            <div class="col-auto">
-                <label for="endDate" class="form-label">End Date</label>
-                <input type="date" class="form-control" id="endDate" name="endDate" value="@ViewBag.EndDate">
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </div>
-        </form>
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h2 class="mb-0">Doctor Schedule</h2>
+        <span class="text-muted">@selectedDateText</span>
     </div>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <form asp-action="Index" method="get">
+            <input type="hidden" name="selectedDate" value="@selectedDate" />
+            <input type="hidden" name="mode" value="@mode" />
+            <select name="selectedDoctorId" class="form-select" style="width:220px" onchange="this.form.submit()">
+                <option value="">-- Select doctor --</option>
+                @foreach (var doctor in doctors)
+                {
+                    <option value="@doctor.StaffID" selected="@(selectedDoctorId == doctor.StaffID ? "selected" : null)">
+                        @doctor.FirstName @doctor.LastName
+                    </option>
+                }
+            </select>
+        </form>
+    }
+</div>
+
+<div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+    <a asp-action="Index"
+       asp-route-selectedDoctorId="@selectedDoctorId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="@mode"
+       asp-route-nav="prev"
+       class="btn btn-outline-secondary">@previousButtonText</a>
+
+    <a asp-action="Index"
+       asp-route-selectedDoctorId="@selectedDoctorId"
+       asp-route-selectedDate="@DateTime.Today.ToString("yyyy-MM-dd")"
+       asp-route-mode="@mode"
+       asp-route-nav="today"
+       class="btn btn-outline-secondary">Today</a>
+
+    <a asp-action="Index"
+       asp-route-selectedDoctorId="@selectedDoctorId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="@mode"
+       asp-route-nav="next"
+       class="btn btn-outline-secondary">@nextButtonText</a>
+
+    <form asp-action="Index" method="get" class="d-flex align-items-center gap-2">
+        <input type="hidden" name="selectedDoctorId" value="@selectedDoctorId" />
+        <input type="hidden" name="mode" value="@mode" />
+        <input type="date" name="selectedDate" class="form-control" style="width:180px" value="@selectedDate" onchange="this.form.submit()" />
+    </form>
+
+    <a asp-action="Index"
+       asp-route-selectedDoctorId="@selectedDoctorId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="Daily"
+       class="btn @(mode == "Daily" ? "btn-primary" : "btn-outline-primary")">Daily</a>
+
+    <a asp-action="Index"
+       asp-route-selectedDoctorId="@selectedDoctorId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="Weekly"
+       class="btn @(mode == "Weekly" ? "btn-primary" : "btn-outline-primary")">Weekly</a>
+
+    <a asp-action="Index"
+       asp-route-selectedDoctorId="@selectedDoctorId"
+       asp-route-selectedDate="@selectedDate"
+       asp-route-mode="@mode"
+       class="btn btn-outline-secondary">Refresh</a>
 </div>
 
 @if (!selectedDoctorId.HasValue)
@@ -47,71 +89,68 @@
     <div class="alert alert-secondary">Select a doctor to see their schedule.</div>
 }
 
-@if (selectedDoctorId.HasValue)
+@if (selectedDoctorId.HasValue && isEmpty)
 {
-    <h4>Upcoming Shifts</h4>
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Location</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Shifts.Any())
-            {
-                foreach (var shift in Model.Shifts)
-                {
-                    var badgeClass = shift.Status.ToString() == "SCHEDULED" ? "bg-primary" :
-                                     shift.Status.ToString() == "ACTIVE" ? "bg-success" : "bg-secondary";
-                    <tr>
-                        <td>@shift.Location</td>
-                        <td>@shift.StartTime.ToString("g")</td>
-                        <td>@shift.EndTime.ToString("g")</td>
-                        <td><span class="badge @badgeClass">@shift.Status</span></td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr><td colspan="4" class="text-center">No shifts found for the selected date range.</td></tr>
-            }
-        </tbody>
-    </table>
+    <div class="text-center py-5">
+        <p class="fs-5">No appointments or shifts for this period.</p>
+        <p class="text-muted">Try Previous/Next, click date, or Refresh.</p>
+    </div>
+}
 
-    <h4 class="mt-4">Upcoming Appointments</h4>
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Patient</th>
-                <th>Date</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Appointments.Any())
+@if (selectedDoctorId.HasValue && !isEmpty)
+{
+    <h5 class="text-primary fw-semibold mb-3">Appointments</h5>
+
+    @if (Model.Appointments.Any())
+    {
+        <div class="d-flex flex-column gap-3 mb-4">
+            @foreach (var appointment in Model.Appointments)
             {
-                foreach (var appointment in Model.Appointments)
-                {
-                    var badgeClass = appointment.Status.ToString() == "SCHEDULED" ? "bg-primary" :
-                                     appointment.Status.ToString() == "ACTIVE" ? "bg-success" : "bg-secondary";
-                    <tr>
-                        <td>@appointment.PatientName</td>
-                        <td>@appointment.Date.ToString("dd MMM yyyy")</td>
-                        <td>@appointment.StartTime.ToString(@"hh\:mm")</td>
-                        <td>@appointment.EndTime.ToString(@"hh\:mm")</td>
-                        <td><span class="badge @badgeClass">@appointment.Status</span></td>
-                    </tr>
-                }
+                <div class="card border shadow-sm">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted mb-1">@appointment.Date.ToString("dd MMM yyyy")</div>
+                            <div class="fw-semibold fs-5">@appointment.StartTime.ToString(@"hh\:mm") - @appointment.EndTime.ToString(@"hh\:mm")</div>
+                            <div class="text-muted">@appointment.Status</div>
+                        </div>
+                        <a asp-controller="DoctorAppointments"
+                           asp-action="Details"
+                           asp-route-id="@appointment.Id"
+                           class="btn btn-primary btn-sm">Details</a>
+                    </div>
+                </div>
             }
-            else
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info mb-4">No appointments for this period.</div>
+    }
+
+    <h5 class="text-primary fw-semibold mb-3">Shifts</h5>
+
+    @if (Model.Shifts.Any())
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var shift in Model.Shifts)
             {
-                <tr><td colspan="5" class="text-center">No appointments found for the selected date range.</td></tr>
+                var badgeClass = shift.Status.ToString() == "SCHEDULED" ? "bg-primary" :
+                                 shift.Status.ToString() == "ACTIVE" ? "bg-success" : "bg-secondary";
+                <div class="card border shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="fs-5 fw-semibold">@shift.Location</span>
+                            <span class="badge @badgeClass fs-6">@shift.Status</span>
+                        </div>
+                        <div class="fw-semibold">@shift.StartTime.ToString("HH:mm") - @shift.EndTime.ToString("HH:mm")</div>
+                        <div class="text-muted small">@shift.StartTime.ToString("dddd, dd MMM yyyy")</div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">No shifts for this period.</div>
+    }
 }

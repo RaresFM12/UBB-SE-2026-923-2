@@ -28,7 +28,11 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             return matchingDoctor?.StaffID;
         }
 
-        public async Task<IActionResult> Index(int? selectedDoctorId, DateTime? startDate, DateTime? endDate)
+        public async Task<IActionResult> Index(
+            int? selectedDoctorId,
+            DateTime? selectedDate,
+            string mode = "Daily",
+            string nav = null)
         {
             var doctors = _shiftSwapService.GetAllDoctors();
             ViewBag.Doctors = doctors;
@@ -39,21 +43,53 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             ViewBag.SelectedDoctorId = effectiveDoctorId;
 
-            var rangeStart = startDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            var rangeEnd = endDate ?? rangeStart.AddMonths(1).AddDays(-1);
+            var baseDate = selectedDate ?? DateTime.Today;
 
-            ViewBag.StartDate = rangeStart.ToString("yyyy-MM-dd");
-            ViewBag.EndDate = rangeEnd.ToString("yyyy-MM-dd");
+            if (nav == "prev")
+                baseDate = mode == "Weekly" ? baseDate.AddDays(-7) : baseDate.AddDays(-1);
+            else if (nav == "next")
+                baseDate = mode == "Weekly" ? baseDate.AddDays(7) : baseDate.AddDays(1);
+            else if (nav == "today")
+                baseDate = DateTime.Today;
+
+            DateTime rangeStart, rangeEnd;
+            if (mode == "Weekly")
+            {
+                int diff = (7 + (baseDate.DayOfWeek - DayOfWeek.Monday)) % 7;
+                rangeStart = baseDate.AddDays(-diff).Date;
+                rangeEnd = rangeStart.AddDays(6);
+            }
+            else
+            {
+                rangeStart = baseDate.Date;
+                rangeEnd = baseDate.Date;
+            }
+
+            ViewBag.SelectedDate = baseDate.ToString("yyyy-MM-dd");
+            ViewBag.SelectedDateText = mode == "Weekly"
+                ? $"{rangeStart:dd MMM} - {rangeEnd:dd MMM yyyy}"
+                : baseDate.ToString("dd MMM yyyy");
+            ViewBag.Mode = mode;
+            ViewBag.PreviousButtonText = mode == "Weekly" ? "Previous Week" : "Previous";
+            ViewBag.NextButtonText = mode == "Weekly" ? "Next Week" : "Next";
 
             if (!effectiveDoctorId.HasValue)
                 return View(new DoctorScheduleViewModel());
 
             var shifts = _shiftSwapService.GetFutureShiftsForStaff(effectiveDoctorId.Value);
-            var appointments = await _appointmentService.GetAppointmentsInRangeAsync(effectiveDoctorId.Value, rangeStart, rangeEnd);
+            var appointments = await _appointmentService.GetAppointmentsInRangeAsync(
+                effectiveDoctorId.Value, rangeStart, rangeEnd.AddDays(1).AddSeconds(-1));
+
+            var filteredShifts = shifts
+                .Where(s => s.StartTime.Date >= rangeStart && s.StartTime.Date <= rangeEnd)
+                .ToList();
+
+            var isEmpty = !filteredShifts.Any() && !appointments.Any();
+            ViewBag.IsEmpty = isEmpty;
 
             return View(new DoctorScheduleViewModel
             {
-                Shifts = shifts.Where(s => s.StartTime >= rangeStart && s.StartTime <= rangeEnd).ToList(),
+                Shifts = filteredShifts,
                 Appointments = appointments.ToList()
             });
         }
