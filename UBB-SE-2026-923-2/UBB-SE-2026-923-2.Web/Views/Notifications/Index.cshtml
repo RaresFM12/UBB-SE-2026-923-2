@@ -4,59 +4,44 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">&#128276; Notifications</h2>
-        <span class="badge bg-primary fs-6">
-            @Model.Notifications.Count notification@(Model.Notifications.Count != 1 ? "s" : "")
-        </span>
-    </div>
+    <div class="mx-auto" style="max-width: 500px;">
 
-    @if (!Model.Notifications.Any())
-    {
-        <div class="text-center py-5 bg-white rounded shadow-sm border">
-            <p class="text-muted fs-5 mb-3">You have no notifications at this time.</p>
-            <a asp-controller="ProductCatalogue" asp-action="Index" class="btn btn-primary">Browse Products</a>
-        </div>
-    }
-    else
-    {
-        <div class="list-group shadow-sm">
-            @foreach (var notification in Model.Notifications)
+        @if (!Model.Notifications.Any())
+        {
+            <div class="text-center py-5">
+                <p class="text-muted fs-5">You have no notifications at this time.</p>
+            </div>
+        }
+        else
+        {
+            foreach (var notification in Model.Notifications)
             {
-                <div class="list-group-item border-start border-primary border-3 mb-2 rounded shadow-sm">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1 text-primary fw-bold">@notification.Title</h5>
-                            <p class="mb-2 text-dark">@notification.Body</p>
-                            @if (!string.IsNullOrWhiteSpace(notification.ActionButtonText))
+                <div class="border rounded-3 p-4 mb-3 shadow-sm"
+                     style="border-color: #0d6efd !important;">
+                    <div class="d-flex flex-column gap-3">
+                        <span class="fw-semibold fs-5 text-primary">@notification.Title</span>
+                        <span class="text-dark">@notification.Body</span>
+                        @if (!string.IsNullOrWhiteSpace(notification.ActionButtonText))
+                        {
+                            @if (notification.ActionButtonText.ToLower().Contains("product"))
                             {
-                                @if (notification.ActionButtonText.ToLower().Contains("product"))
-                                {
-                                    <a asp-controller="ProductCatalogue" asp-action="Index"
-                                       class="btn btn-outline-primary btn-sm">
-                                        @notification.ActionButtonText
-                                    </a>
-                                }
-                                else if (notification.ActionButtonText.ToLower().Contains("dashboard")
-                                      || notification.ActionButtonText.ToLower().Contains("fix"))
-                                {
-                                    <a asp-controller="Items" asp-action="Index"
-                                       class="btn btn-outline-danger btn-sm">
-                                        @notification.ActionButtonText
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a asp-controller="ProductCatalogue" asp-action="Index"
-                                       class="btn btn-outline-primary btn-sm">
-                                        @notification.ActionButtonText
-                                    </a>
-                                }
+                                <a asp-controller="ProductCatalogue" asp-action="Index"
+                                   class="btn btn-secondary align-self-start mt-2">
+                                    @notification.ActionButtonText
+                                </a>
                             }
-                        </div>
+                            else
+                            {
+                                <a asp-controller="Items" asp-action="Index"
+                                   class="btn btn-secondary align-self-start mt-2">
+                                    @notification.ActionButtonText
+                                </a>
+                            }
+                        }
                     </div>
                 </div>
             }
-        </div>
-    }
+        }
+
+    </div>
 </div>

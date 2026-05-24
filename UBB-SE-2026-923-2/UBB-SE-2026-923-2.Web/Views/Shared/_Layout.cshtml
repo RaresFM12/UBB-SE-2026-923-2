@@ -155,10 +155,9 @@
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            @if (User.IsInRole("Client"))
-                            {
-                                @await Component.InvokeAsync("Notifications")
-                            }
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a>
+                            </li>
                             <li class="nav-item">
                                 <span class="navbar-text me-3">Signed in as <strong>@User.Identity!.Name</strong></span>
                             </li>
