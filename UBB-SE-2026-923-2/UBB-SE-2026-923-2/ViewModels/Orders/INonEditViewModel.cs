@@ -12,10 +12,16 @@
 
         string TotalPriceString { get; }
 
+        string UserEmail { get; }
+
         string StatusString { get; }
 
         DateOnly PickUpDate { get; }
 
         string PickUpDateString { get; }
+
+        DateOnly ExpirationDate { get; }
+
+        string ExpirationDateString { get; }
     }
 }

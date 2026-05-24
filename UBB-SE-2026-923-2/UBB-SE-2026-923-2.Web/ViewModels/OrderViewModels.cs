@@ -9,7 +9,7 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
     {
         public List<OrderListItemViewModel> Orders { get; set; } = new();
 
-        public bool ShowExpired { get; set; }
+        public bool ShowExpiredOnly { get; set; }
 
         public string? SuccessMessage { get; set; }
 
@@ -131,6 +131,8 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
         public bool AdminView { get; set; }
 
         public List<OrderLineItemViewModel> Items { get; set; } = new();
+
+        public float Total { get; set; }
     }
 
     public class OrderResubmitViewModel
@@ -142,6 +144,8 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
         public DateOnly PickUpDate { get; set; } = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
 
         public List<OrderLineItemViewModel> Items { get; set; } = new();
+
+        public float Total { get; set; }
     }
 
     public class OrderLineItemViewModel

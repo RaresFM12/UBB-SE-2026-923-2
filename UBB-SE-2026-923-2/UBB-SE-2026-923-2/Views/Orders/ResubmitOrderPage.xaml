@@ -9,82 +9,88 @@
     mc:Ignorable="d">
 
     <Grid Padding="20"
-          ColumnDefinitions="*, Auto"
+          ColumnDefinitions="*, 340"
+          ColumnSpacing="20"
           Background="{StaticResource AppBackgroundBrush}">
 
-        <ListView Grid.Row="0"
-                  Grid.Column="0"
-                  ItemsSource="{x:Bind viewModel.OrderItems}">
+        <Grid Grid.Column="0"
+              RowDefinitions="Auto, *">
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="2*, 2*, *, *"
+                  Background="{StaticResource AppAccentBrush}"
+                  Padding="12,10">
+                <TextBlock Grid.Column="0" Text="Medicine" FontWeight="SemiBold" Foreground="White"/>
+                <TextBlock Grid.Column="1" Text="Producer" FontWeight="SemiBold" Foreground="White"/>
+                <TextBlock Grid.Column="2" Text="Quantity" FontWeight="SemiBold" Foreground="White"/>
+                <TextBlock Grid.Column="3" Text="Final price" FontWeight="SemiBold" Foreground="White"/>
+            </Grid>
 
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="localModel:ItemDetail">
-                    <Grid ColumnDefinitions="Auto, *, Auto">
-                        <Image Grid.Row="0"
-                               Grid.Column="0"
-                               Source="{x:Bind ItemThumbnailImagePath, Mode=OneTime}"
-                               Width="150"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
+            <ListView Grid.Row="1"
+                      ItemsSource="{x:Bind viewModel.OrderItems}"
+                      SelectionMode="None">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
 
-                        <TextBlock Grid.Row="0"
-                                   Grid.Column="1"
-                                   Text="{x:Bind ItemDescription, Mode=OneTime}"
-                                   VerticalAlignment="Center"
-                                   FontWeight="Bold"
-                                   FontSize="15"
-                                   Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="localModel:ItemDetail">
+                        <Grid ColumnDefinitions="2*, 2*, *, *"
+                              Padding="12,10"
+                              Background="{StaticResource AppSurfaceBrush}">
+                            <TextBlock Grid.Column="0" Text="{x:Bind MedicineName}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="1" Text="{x:Bind Producer}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="2" Text="{x:Bind ItemQuantity}" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Grid.Column="3" Text="{x:Bind ItemFinalPriceString}" FontWeight="SemiBold" Foreground="{StaticResource AppErrorBrush}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
-                        <StackPanel Grid.Row="0"
-                                    Grid.Column="2"
-                                    Orientation="Vertical"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Spacing="10">
+        <Border Grid.Column="1"
+                Background="{StaticResource AppSurfaceBrush}"
+                BorderBrush="{StaticResource AppAccentBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="16">
+            <StackPanel Spacing="14">
+                <StackPanel>
+                    <TextBlock Text="Total price"
+                               FontSize="15"
+                               Foreground="{StaticResource AppTextSecondaryBrush}"/>
+                    <TextBlock Text="{x:Bind viewModel.TotalPriceString}"
+                               FontSize="30"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AppErrorBrush}"/>
+                </StackPanel>
 
-                            <TextBlock Text="{x:Bind ItemQuantityString, Mode=OneTime}"
-                                       Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                            <TextBlock Text="{x:Bind ItemFinalPriceString, Mode=OneTime}"
-                                       FontWeight="Bold" Foreground="{StaticResource AppErrorBrush}"/>
-                        </StackPanel>
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                <TextBlock Text="Pick-up date"
+                           FontSize="15"
+                           Foreground="{StaticResource AppTextSecondaryBrush}"/>
+                <CalendarView Name="PickUpDateSelector"
+                              SelectionMode="Single"
+                              IsGroupLabelVisible="True"
+                              Language="en"
+                              CalendarIdentifier="GregorianCalendar"
+                              Loaded="SetDefaultPickUpDate"
+                              SelectedDatesChanged="CheckUnselectedDate"/>
 
-        <ListView Grid.Row="0"
-                  Grid.Column="1">
-
-            <TextBlock Text="Total price:"
-                       FontSize="15"
-                       Foreground="{StaticResource AppTextSecondaryBrush}"/>
-            <TextBlock Text="{x:Bind viewModel.TotalPriceString}"
-                       FontSize="30"
-                       FontWeight="Bold"
-                       Foreground="{StaticResource AppErrorBrush}"
-                       Padding="15"/>
-
-            <CalendarView Name="PickUpDateSelector"
-                          SelectionMode="Single"
-                          IsGroupLabelVisible="True"
-                          Language="en"
-                          CalendarIdentifier="GregorianCalendar"
-                          Loaded="SetDefaultPickUpDate"
-                          SelectedDatesChanged="CheckUnselectedDate"/>
-
-            <StackPanel Orientation="Horizontal"
-                        Padding="15"
-                        Spacing="10">
-
-                <Button Content="Resubmit order"
-                        Click="ResubmitOrder"/>
-                <Button Content="Go back"
-                        Click="NavigateToOrderHistory"
-                        Background="Transparent"
-                        Foreground="{StaticResource AppAccentBrush}"
-                        BorderBrush="{StaticResource AppAccentBrush}"
-                        BorderThickness="1"/>
-
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10">
+                    <Button Content="Resubmit"
+                            Click="ResubmitOrder"/>
+                    <Button Content="Cancel"
+                            Click="NavigateToOrderHistory"
+                            Background="Transparent"
+                            Foreground="{StaticResource AppAccentBrush}"
+                            BorderBrush="{StaticResource AppAccentBrush}"
+                            BorderThickness="1"/>
+                </StackPanel>
             </StackPanel>
-        </ListView>
+        </Border>
     </Grid>
 </Page>

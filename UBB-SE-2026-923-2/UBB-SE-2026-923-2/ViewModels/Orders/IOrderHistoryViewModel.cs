@@ -17,11 +17,15 @@
 
         ICommand GoToDetailPageCommand { get; }
 
+        ICommand ModifyCommand { get; }
+
         ObservableCollection<Order> OrderHistory { get; }
 
         bool IsExpiredCheckbox { get; set; }
 
         event Action<int> RedirectToDetailRequested;
+
+        event Action<int> RedirectToModifyRequested;
 
         event Action<Order> CancelConfirmationRequested;
 

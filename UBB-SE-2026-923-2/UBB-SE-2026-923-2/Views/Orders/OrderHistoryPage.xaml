@@ -31,6 +31,12 @@
                         <TextBlock Text="Completed" Foreground="{StaticResource AppAccentBrush}" FontWeight="SemiBold"/>
                     </StackPanel>
                 </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="Details"
+                            Command="{Binding DataContext.GoToDetailPageCommand, ElementName=PageRoot}"
+                            CommandParameter="{Binding}"/>
+                </StackPanel>
             </Grid>
         </DataTemplate>
 
@@ -54,8 +60,15 @@
                     </StackPanel>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="Resubmit Order"
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Button Content="Details"
+                            Command="{Binding DataContext.GoToDetailPageCommand, ElementName=PageRoot}"
+                            CommandParameter="{Binding}"
+                            Background="Transparent"
+                            Foreground="{StaticResource AppAccentBrush}"
+                            BorderBrush="{StaticResource AppAccentBrush}"
+                            BorderThickness="1"/>
+                    <Button Content="Resubmit"
                             Command="{Binding DataContext.ResubmitCommand, ElementName=PageRoot}"
                             CommandParameter="{Binding}" 
                             Background="{StaticResource AppErrorBrush}" 
@@ -85,6 +98,13 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Button Content="Details"
+                            Command="{Binding DataContext.GoToDetailPageCommand, ElementName=PageRoot}"
+                            CommandParameter="{Binding}"
+                            Background="Transparent"
+                            Foreground="{StaticResource AppAccentBrush}"
+                            BorderBrush="{StaticResource AppAccentBrush}"
+                            BorderThickness="1"/>
                     <Button Content="Cancel Order"
                             Command="{Binding DataContext.CancelCommand, ElementName=PageRoot}"
                             CommandParameter="{Binding}" 
@@ -92,8 +112,8 @@
                             Foreground="{StaticResource AppErrorBrush}" 
                             BorderBrush="{StaticResource AppErrorBrush}" 
                             BorderThickness="1"/>
-                    <Button Content="Modify Order"
-                            Command="{Binding DataContext.GoToDetailPageCommand, ElementName=PageRoot}"
+                    <Button Content="Modify"
+                            Command="{Binding DataContext.ModifyCommand, ElementName=PageRoot}"
                             CommandParameter="{Binding}"/>
                 </StackPanel>
             </Grid>

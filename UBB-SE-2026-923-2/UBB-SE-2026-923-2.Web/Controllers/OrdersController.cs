@@ -25,7 +25,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         [Authorize(Roles = "Client,Admin")]
         [HttpGet]
-        public IActionResult Index(bool showExpired = false)
+        public IActionResult Index(bool showExpiredOnly = false)
         {
             User? currentUser = this.LoadCurrentUser();
             if (currentUser == null)
@@ -35,7 +35,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             this.orderService.ExpireOverdueOrders();
             List<OrderListItemViewModel> orders = this.orderService.OrdersRepository.GetOrdersOfClient(currentUser.Id)
-                .Where(order => showExpired || !order.IsExpired)
+                .Where(order => !showExpiredOnly || order.IsExpired)
                 .OrderByDescending(order => order.PickUpDate)
                 .ThenByDescending(order => order.Id)
                 .Select(this.MapOrderListItem)
@@ -44,7 +44,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             var viewModel = new OrdersIndexViewModel
             {
                 Orders = orders,
-                ShowExpired = showExpired,
+                ShowExpiredOnly = showExpiredOnly,
                 SuccessMessage = this.ReadTempData("SuccessMessage"),
                 ErrorMessage = this.ReadTempData("ErrorMessage"),
             };
@@ -189,6 +189,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             if (!this.ModelState.IsValid)
             {
                 viewModel.AdminView = this.User.IsInRole("Admin");
+                viewModel.Total = viewModel.Items.Sum(item => item.FinalPrice);
                 return this.View(viewModel);
             }
 
@@ -202,6 +203,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             {
                 this.ModelState.AddModelError(string.Empty, exception.Message);
                 viewModel.AdminView = this.User.IsInRole("Admin");
+                viewModel.Total = viewModel.Items.Sum(item => item.FinalPrice);
                 return this.View(viewModel);
             }
         }
@@ -394,22 +396,26 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         private OrderEditViewModel MapEdit(Order order, bool adminView)
         {
+            List<OrderLineItemViewModel> items = this.MapLineItems(order);
             return new OrderEditViewModel
             {
                 Id = order.Id,
                 PickUpDate = order.PickUpDate,
                 AdminView = adminView,
-                Items = this.MapLineItems(order),
+                Items = items,
+                Total = items.Sum(item => item.FinalPrice),
             };
         }
 
         private OrderResubmitViewModel MapResubmit(Order order)
         {
+            List<OrderLineItemViewModel> items = this.MapLineItems(order);
             return new OrderResubmitViewModel
             {
                 Id = order.Id,
                 PickUpDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
-                Items = this.MapLineItems(order),
+                Items = items,
+                Total = items.Sum(item => item.FinalPrice),
             };
         }
 

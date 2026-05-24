@@ -20,6 +20,8 @@
 
         public ICommand GoToDetailPageCommand { get; private set; }
 
+        public ICommand ModifyCommand { get; private set; }
+
         public ObservableCollection<Order> OrderHistory { get; private set; }
 
         private bool isExpiredCheckbox;
@@ -36,6 +38,8 @@
 
         public event Action<int> RedirectToDetailRequested;
 
+        public event Action<int> RedirectToModifyRequested;
+
         public event Action<Order> CancelConfirmationRequested;
 
         public event Action<int> RedirectToResubmitRequested;
@@ -46,6 +50,7 @@
             this.CancelCommand = new RelayCommandWithOneParameter<Order>(this.CancelOrderCommand);
             this.ResubmitCommand = new RelayCommandWithOneParameter<Order>(this.ResubmitExpiredOrderCommand);
             this.GoToDetailPageCommand = new RelayCommandWithOneParameter<Order>(this.DisplayOrderDetailCommand);
+            this.ModifyCommand = new RelayCommandWithOneParameter<Order>(this.ModifyOrderCommand);
             this.OrderHistory = new ObservableCollection<Order>();
             this.baseOrderList = new List<Order>();
 
@@ -62,7 +67,7 @@
             this.orderService.ExpireOverdueOrders();
             int clientId = this.orderService.ActiveUser.Id;
             List<Order> userOrders = this.orderService.OrdersRepository.GetOrdersOfClient(clientId);
-            foreach (Order currentOrder in userOrders)
+            foreach (Order currentOrder in SortOrders(userOrders))
             {
                 this.OrderHistory.Add(currentOrder);
                 this.baseOrderList.Add(currentOrder);
@@ -84,6 +89,11 @@
             this.RedirectToDetailRequested?.Invoke(orderToModify.Id);
         }
 
+        private void ModifyOrderCommand(Order orderToModify)
+        {
+            this.RedirectToModifyRequested?.Invoke(orderToModify.Id);
+        }
+
         private void ReapplyFilters()
         {
             List<Order> intermediateFilteredOrderList = new List<Order>(this.baseOrderList);
@@ -96,7 +106,7 @@
             }
 
             this.OrderHistory.Clear();
-            foreach (Order resultOrder in intermediateFilteredOrderList)
+            foreach (Order resultOrder in SortOrders(intermediateFilteredOrderList))
             {
                 this.OrderHistory.Add(resultOrder);
             }
@@ -116,6 +126,14 @@
             }
 
             this.ReapplyFilters();
+        }
+
+        private static List<Order> SortOrders(IEnumerable<Order> orders)
+        {
+            return orders
+                .OrderByDescending(order => order.PickUpDate)
+                .ThenByDescending(order => order.Id)
+                .ToList();
         }
     }
 }
