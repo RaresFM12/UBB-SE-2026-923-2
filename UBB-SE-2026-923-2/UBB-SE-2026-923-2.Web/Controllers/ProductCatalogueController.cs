@@ -100,7 +100,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         public IActionResult Details(int id)
         {
             var item = _catalogueService.GetItems(null, null, null, null, null, null, true, 0, int.MaxValue)
-                                        .FirstOrDefault(i => i.Id == id);
+                                        .FirstOrDefault(item => item.Id == id);
 
             if (item == null) return NotFound();
 
