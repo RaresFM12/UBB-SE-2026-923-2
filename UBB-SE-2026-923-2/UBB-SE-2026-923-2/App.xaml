@@ -43,6 +43,13 @@
                 <Setter Property="CornerRadius" Value="6"/>
                 <Setter Property="BorderBrush" Value="{StaticResource AppAccentBrush}"/>
                 <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}"/>
+                <Setter Property="PlaceholderForeground" Value="{StaticResource AppTextSecondaryBrush}"/>
+            </Style>
+
+            <Style TargetType="ComboBoxItem">
+                <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}"/>
+                <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}"/>
             </Style>
 
         </ResourceDictionary>
