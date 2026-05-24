@@ -1,0 +1,23 @@
+@model OrderDetailsViewModel
+@{
+    ViewData["Title"] = $"Cancel Order #{Model.Id}";
+}
+
+<h2 class="mb-4">Cancel Order#@Model.Id</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to cancel this order? It will be marked as expired and will no longer be editable.
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Pickup date</dt>
+    <dd class="col-sm-9">@Model.PickUpDateString</dd>
+    <dt class="col-sm-3">Expiration date</dt>
+    <dd class="col-sm-9">@Model.ExpirationDateString</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">Cancel Order</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" asp-route-adminView="@Model.AdminView" class="btn btn-outline-secondary ms-1">Back</a>
+</form>

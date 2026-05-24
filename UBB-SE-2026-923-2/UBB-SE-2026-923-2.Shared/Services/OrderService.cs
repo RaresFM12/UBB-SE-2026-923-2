@@ -98,22 +98,21 @@ namespace UBB_SE_2026_923_2.Services
         {
             if (string.IsNullOrWhiteSpace(originalPath))
             {
-                return "ms-appx:///Assets/logo.png";
+                return "/images/product-placeholder.svg";
             }
 
             if (originalPath.StartsWith("ms-appx://", StringComparison.OrdinalIgnoreCase))
             {
-                return originalPath;
+                return "/images/product-placeholder.svg";
             }
 
-            int assetsIndex = originalPath.IndexOf("\\Assets", StringComparison.OrdinalIgnoreCase);
-            if (assetsIndex != NotFoundIndex)
+            string normalizedPath = originalPath.Replace("\\", "/").TrimStart('.', '/');
+            if (!string.IsNullOrWhiteSpace(normalizedPath))
             {
-                string backwardSlashedPath = originalPath.Substring(assetsIndex);
-                return "ms-appx://" + backwardSlashedPath.Replace("\\", "/");
+                return "/" + normalizedPath;
             }
 
-            return "ms-appx:///Assets/logo.png";
+            return "/images/product-placeholder.svg";
         }
 
         private BasketItemViewModel BuildBasketItemViewModel(int itemId, BasketEntry basketEntry)

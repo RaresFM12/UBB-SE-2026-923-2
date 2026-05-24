@@ -1,4 +1,4 @@
-﻿@model UBB_SE_2026_923_2.Web.Models.CatalogueItemViewModel
+@model UBB_SE_2026_923_2.Web.ViewModels.CatalogueItemViewModel
 @{
     ViewData["Title"] = Model.Name;
 }
@@ -17,7 +17,7 @@
 
     <div class="row bg-white rounded shadow-sm p-4 border-top border-primary border-3">
         <div class="col-md-5 text-center p-4 d-flex align-items-center justify-content-center bg-light rounded border">
-            <img src="~/@Model.ImagePath" class="img-fluid" alt="@Model.Name" style="max-height: 350px; object-fit: contain;">
+            <img src="~/@Model.ImagePath" class="img-fluid" alt="@Model.Name" style="max-height: 350px; object-fit: contain;" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';">
         </div>
 
         <div class="col-md-7 ps-md-5 mt-4 mt-md-0">
@@ -69,11 +69,23 @@
                     <div class="col">
                         <label class="form-label d-block">&nbsp;</label>
                         <button type="submit" class="btn btn-primary fw-bold w-100 shadow-sm" @(Model.CanAddToCart ? "" : "disabled")>
-                            @(Model.CanAddToCart ? "🛒 Add to Basket" : "❌ Out of Stock")
+                            @(Model.CanAddToCart ? "?? Add to Basket" : "? Out of Stock")
                         </button>
                     </div>
                 </div>
             </form>
+
+            @if (Model.ShowStockAlertButton)
+            {
+                <form asp-action="ToggleStockAlert" method="post" class="mb-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit"
+                            class="btn btn-warning fw-bold w-100 shadow-sm @(Model.IsStockAlertActive ? "btn-secondary" : "btn-warning")">
+                        &#128276; @Model.StockAlertButtonText
+                    </button>
+                </form>
+            }
 
             <div class="mt-4">
                 <h6 class="fw-bold border-bottom pb-2 text-secondary">Product Description</h6>

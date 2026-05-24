@@ -1,0 +1,25 @@
+@model OrderEditViewModel
+@{
+    ViewData["Title"] = $"Modify Order #{Model.Id}";
+}
+
+<h2 class="mb-4">Modify Order#@Model.Id</h2>
+
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="AdminView" type="hidden" />
+
+    <div class="mb-3 col-md-4">
+        <label asp-for="PickUpDate" class="form-label">Pickup date</label>
+        <input asp-for="PickUpDate" type="date" class="form-control" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="PickUpDate" class="text-danger"></span>
+    </div>
+
+    <partial name="_OrderLinesEditor" model="Model.Items" />
+
+    <button type="submit" class="btn btn-primary">Save changes</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" asp-route-adminView="@Model.AdminView" class="btn btn-outline-secondary ms-1">Cancel</a>
+</form>

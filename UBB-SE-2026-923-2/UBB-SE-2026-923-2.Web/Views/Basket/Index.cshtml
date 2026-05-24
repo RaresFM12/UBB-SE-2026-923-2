@@ -1,0 +1,107 @@
+@model BasketViewModel
+@{
+    ViewData["Title"] = "Basket";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <h2 class="mb-2">Basket</h2>
+    <a asp-controller="Orders" asp-action="Create" class="btn btn-primary @(Model.Items.Any() ? string.Empty : "disabled")">Checkout</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        @if (!Model.Items.Any())
+        {
+            <div class="alert alert-info">Your basket is empty.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Image</th>
+                            <th>Producer</th>
+                            <th>Discount</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@item.ItemName</strong>
+                                </td>
+                                <td>
+                                    <img src="@item.ItemThumbnailImagePath" class="rounded border bg-white p-1" alt="@item.ItemName" style="width: 72px; height: 72px; object-fit: contain;" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';">
+                                </td>
+                                <td>@item.ItemProducer</td>
+                                <td>
+                                    <span class="text-muted">@item.ItemDiscountString</span>
+                                    <span class="text-muted ms-1">@item.ItemUserDiscountString</span>
+                                </td>
+                                <td style="max-width: 160px;">
+                                    <form asp-action="UpdateQuantity" method="post" class="d-flex gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="ItemId" value="@item.ItemId" />
+                                        <input class="form-control" type="number" min="0" name="Quantity" value="@item.ItemQuantityInBasket" />
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">Save</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="text-muted text-decoration-line-through">@item.FinalPriceBeforeDiscount.ToString("F2") RON</div>
+                                    <strong>@item.FinalPriceAfterDiscount.ToString("F2") RON</strong>
+                                </td>
+                                <td class="text-end">
+                                    <form asp-action="Remove" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="itemId" value="@item.ItemId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Prescription</h5>
+                <form asp-action="ApplyPrescription" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label asp-for="PrescriptionId" class="form-label">Prescription ID</label>
+                        <input asp-for="PrescriptionId" class="form-control" placeholder="Enter prescription ID" />
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">Add Products</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total</h5>
+                <div class="text-muted text-decoration-line-through">@Model.TotalBeforeDiscount.ToString("F2") RON</div>
+                <div class="display-6">@Model.TotalAfterDiscount.ToString("F2") RON</div>
+                <a asp-controller="Orders" asp-action="Create" class="btn btn-primary mt-3 @(Model.Items.Any() ? string.Empty : "disabled")">Checkout</a>
+            </div>
+        </div>
+    </div>
+</div>

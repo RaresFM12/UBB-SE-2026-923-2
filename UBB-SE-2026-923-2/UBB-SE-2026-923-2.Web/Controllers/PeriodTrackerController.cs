@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.Web.Models;
+using UBB_SE_2026_923_2.Web.ViewModels;
 
 namespace UBB_SE_2026_923_2.Web.Controllers
 {
@@ -55,20 +55,21 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         // POST: PeriodTracker/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("StartPeriodDate,CycleDays,PeriodLasts,PMSOption")] PeriodTrackerViewModel model)
+        public IActionResult Create(PeriodTrackerInputModel input)
         {
             if (model.StartPeriodDate == default || model.CycleDays < 20 || model.CycleDays > 45 || model.PeriodLasts < 1 || model.PeriodLasts > 9 || model.PMSOption < 0 || model.PMSOption > 3)
             {
-                var state = _periodTrackerService.GetTrackerState();
-                var fullModel = ToViewModel(state);
-                fullModel.StartPeriodDate = model.StartPeriodDate == default ? DateOnly.FromDateTime(DateTime.Today) : model.StartPeriodDate;
-                fullModel.CycleDays = model.CycleDays;
-                fullModel.PeriodLasts = model.PeriodLasts;
-                fullModel.PMSOption = model.PMSOption;
-                return View("Index", fullModel);
+                // Rebuild the dashboard model strictly for returning the user to the form
+                return View(new PeriodTrackerViewModel
+                {
+                    StartPeriodDate = DateOnly.FromDateTime(input.StartPeriodDate),
+                    CycleDays = input.CycleDays,
+                    PeriodLasts = input.PeriodLasts,
+                    PMSOption = input.PMSOption
+                });
             }
 
-            _periodTrackerService.UpdatePeriodTracker(model.StartPeriodDate.ToDateTime(TimeOnly.MinValue), model.CycleDays, model.PeriodLasts, model.PMSOption);
+            _periodTrackerService.UpdatePeriodTracker(input.StartPeriodDate, input.CycleDays, input.PeriodLasts, input.PMSOption);
             _periodTrackerService.SaveCurrentUser();
             return RedirectToAction(nameof(Index));
         }
@@ -89,20 +90,20 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         // POST: PeriodTracker/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([Bind("StartPeriodDate,CycleDays,PeriodLasts,PMSOption")] PeriodTrackerViewModel model)
+        public IActionResult Edit(PeriodTrackerInputModel input)
         {
             if (model.StartPeriodDate == default || model.CycleDays < 20 || model.CycleDays > 45 || model.PeriodLasts < 1 || model.PeriodLasts > 9 || model.PMSOption < 0 || model.PMSOption > 3)
             {
-                var state = _periodTrackerService.GetTrackerState();
-                var fullModel = ToViewModel(state);
-                fullModel.StartPeriodDate = model.StartPeriodDate == default ? DateOnly.FromDateTime(DateTime.Today) : model.StartPeriodDate;
-                fullModel.CycleDays = model.CycleDays;
-                fullModel.PeriodLasts = model.PeriodLasts;
-                fullModel.PMSOption = model.PMSOption;
-                return View("Index", fullModel);
+                return View(new PeriodTrackerViewModel
+                {
+                    StartPeriodDate = DateOnly.FromDateTime(input.StartPeriodDate),
+                    CycleDays = input.CycleDays,
+                    PeriodLasts = input.PeriodLasts,
+                    PMSOption = input.PMSOption
+                });
             }
 
-            _periodTrackerService.UpdatePeriodTracker(model.StartPeriodDate.ToDateTime(TimeOnly.MinValue), model.CycleDays, model.PeriodLasts, model.PMSOption);
+            _periodTrackerService.UpdatePeriodTracker(input.StartPeriodDate, input.CycleDays, input.PeriodLasts, input.PMSOption);
             _periodTrackerService.SaveCurrentUser();
             return RedirectToAction(nameof(Index));
         }
@@ -171,6 +172,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         public IActionResult AddProductToBasket(int itemId, float discountPercentage)
         {
             _basketService.AddToBasket(itemId, 1, discountPercentage);
+            BasketStore.Save(ServiceWrapper.UserAccountService.CurrentUser);
             return RedirectToAction(nameof(Index));
         }
 

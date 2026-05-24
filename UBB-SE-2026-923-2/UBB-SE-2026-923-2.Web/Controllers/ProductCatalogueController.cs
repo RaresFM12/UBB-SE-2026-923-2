@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UBB_SE_2026_923_2.Repositories;
 using UBB_SE_2026_923_2.Services;
-using UBB_SE_2026_923_2.Web.Models;
+using UBB_SE_2026_923_2.Web.ViewModels;
 
 namespace UBB_SE_2026_923_2.Web.Controllers
 {
@@ -12,12 +14,17 @@ namespace UBB_SE_2026_923_2.Web.Controllers
     {
         private readonly IProductCatalogueService _catalogueService;
         private readonly IOrderService _orderService;
+        private readonly IUsersRepository _usersRepository;
         const int ItemsPerPage = 12;
 
-        public ProductCatalogueController(IProductCatalogueService catalogueService, IOrderService orderService)
+        public ProductCatalogueController(
+            IProductCatalogueService catalogueService,
+            IOrderService orderService,
+            IUsersRepository usersRepository)
         {
             _catalogueService = catalogueService;
             _orderService = orderService;
+            _usersRepository = usersRepository;
         }
 
         [AllowAnonymous]
@@ -97,7 +104,54 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             if (item == null) return NotFound();
 
-            return View(MapToViewModel(item));
+            var viewModel = MapToViewModel(item);
+
+            if (item.Quantity == 0 && User.Identity?.IsAuthenticated == true)
+            {
+                var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(idClaim, out int userId))
+                {
+                    var currentUser = _usersRepository.GetUserById(userId);
+                    if (currentUser != null)
+                    {
+                        viewModel.ShowStockAlertButton = true;
+                        viewModel.IsStockAlertActive = currentUser.StockAlerts.Contains(id);
+                    }
+                }
+            }
+
+            return View(viewModel);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleStockAlert(int id)
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idClaim, out int userId))
+            {
+                return this.Forbid();
+            }
+
+            var currentUser = _usersRepository.GetUserById(userId);
+            if (currentUser == null)
+            {
+                return this.Forbid();
+            }
+
+            if (currentUser.StockAlerts.Contains(id))
+            {
+                currentUser.RemoveStockAlertFromUser(id);
+            }
+            else
+            {
+                currentUser.AddStockAlertToUser(id);
+            }
+
+            _usersRepository.UpdateUser(currentUser);
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [Authorize]
@@ -117,6 +171,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             try
             {
                 _orderService.AddToBasket(itemId, quantity);
+                BasketStore.Save(_orderService.ActiveUser);
                 TempData["SuccessMessage"] = "Item added to basket successfully!";
             }
             catch (Exception)

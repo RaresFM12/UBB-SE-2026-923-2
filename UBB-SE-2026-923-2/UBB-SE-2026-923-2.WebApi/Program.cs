@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using UBB_SE_2026_923_2.Data;
@@ -36,6 +37,8 @@ builder.Services.AddSwaggerGen(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("AppDatabase")
     ?? throw new InvalidOperationException("ConnectionStrings:AppDatabase is not configured.");
+var webApiAccessKey = builder.Configuration["WebApiAccessKey"]
+    ?? throw new InvalidOperationException("WebApiAccessKey is not configured.");
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -73,6 +76,26 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/swagger"))
+    {
+        await next();
+        return;
+    }
+
+    if (!context.Request.Headers.TryGetValue("X-Api-Key", out var providedAccessKey) ||
+        !string.Equals(providedAccessKey.ToString(), webApiAccessKey, StringComparison.Ordinal))
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        await context.Response.WriteAsync("Unauthorized");
+        return;
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 app.MapControllers();
 

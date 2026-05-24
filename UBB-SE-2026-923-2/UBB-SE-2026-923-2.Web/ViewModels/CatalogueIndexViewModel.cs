@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace UBB_SE_2026_923_2.Web.Models
+namespace UBB_SE_2026_923_2.Web.ViewModels
 {
     public class CatalogueIndexViewModel
     {
@@ -50,5 +50,13 @@ namespace UBB_SE_2026_923_2.Web.Models
                                          Quantity < 10 ? "text-warning" : "text-success";
 
         public bool CanAddToCart => Quantity > 0;
+
+        public bool ShowStockAlertButton { get; set; }
+
+        public bool IsStockAlertActive { get; set; }
+
+        public string StockAlertButtonText => this.IsStockAlertActive
+            ? "Unsubscribe from stock alert"
+            : "Notify when in stock";
     }
 }

@@ -1,0 +1,56 @@
+@model OrderCheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h2 class="mb-4">Checkout</h2>
+
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">Your basket is empty.</div>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+}
+else
+{
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="table-responsive mb-3">
+            <table class="table table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Producer</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.ItemName</td>
+                            <td>@item.ItemProducer</td>
+                            <td>@item.ItemQuantityInBasket</td>
+                            <td>@item.FinalPriceAfterDiscount.ToString("F2") RON</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mb-3">
+            <strong>Total:</strong> @Model.TotalAfterDiscount.ToString("F2") RON
+        </div>
+
+        <div class="mb-3 col-md-4">
+            <label asp-for="PickUpDate" class="form-label">Pickup date</label>
+            <input asp-for="PickUpDate" type="date" class="form-control" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="PickUpDate" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Place Order</button>
+        <a asp-action="Index" class="btn btn-outline-secondary ms-1">Cancel</a>
+    </form>
+}

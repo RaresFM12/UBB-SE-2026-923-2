@@ -8,12 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Services;
 
-[Authorize(Roles = AllowedRoles)]
+[Authorize]
 public class ShiftManagementController : Controller
 {
     public const string DefaultDateTimeFormat = "g";
 
-    private const string AllowedRoles = "Admin,Manager";
+    private const string AdminManagerRoles = "Admin,Manager";
+    private const string SalaryRoles = "Admin,Manager,Pharmacist,Doctor";
 
     private readonly IShiftManagementService shiftManagementService;
     private readonly ISalaryComputationService salaryComputationService;
@@ -27,6 +28,7 @@ public class ShiftManagementController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Index()
     {
         var shifts = this.salaryComputationService.GetAllShifts();
@@ -34,6 +36,7 @@ public class ShiftManagementController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Create()
     {
         this.ViewBag.StaffList = this.salaryComputationService.GetAllStaff();
@@ -41,6 +44,7 @@ public class ShiftManagementController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Details(int shiftId)
     {
         bool IsMatchingShift(Shift shift) => shift.Id == shiftId;
@@ -55,6 +59,7 @@ public class ShiftManagementController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Edit(int shiftId)
     {
         bool IsMatchingShift(Shift shift) => shift.Id == shiftId;
@@ -70,6 +75,7 @@ public class ShiftManagementController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Delete(int shiftId)
     {
         bool IsMatchingShift(Shift shift) => shift.Id == shiftId;
@@ -85,6 +91,7 @@ public class ShiftManagementController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Create(int staffId, DateTime startTime, DateTime endTime, string location)
     {
         bool IsMatchingStaff(IStaff staffMember) => staffMember.StaffID == staffId;
@@ -110,6 +117,7 @@ public class ShiftManagementController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Cancel(int shiftId)
     {
         this.shiftManagementService.CancelShift(shiftId);
@@ -118,6 +126,7 @@ public class ShiftManagementController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Activate(int shiftId)
     {
         this.shiftManagementService.SetShiftActive(shiftId);
@@ -125,6 +134,7 @@ public class ShiftManagementController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = SalaryRoles)]
     public IActionResult Salary()
     {
         this.ViewBag.StaffList = this.salaryComputationService.GetAllStaff();
@@ -133,6 +143,7 @@ public class ShiftManagementController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = SalaryRoles)]
     public async Task<IActionResult> ComputeSalary(int staffId, int month, int year)
     {
         this.ViewBag.StaffList = this.salaryComputationService.GetAllStaff();

@@ -6,7 +6,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
     using Microsoft.AspNetCore.Mvc;
     using UBB_SE_2026_923_2.Models;
     using UBB_SE_2026_923_2.Services;
-    using UBB_SE_2026_923_2.Web.Models;
+    using UBB_SE_2026_923_2.Web.ViewModels;
 
     [Authorize(Roles = "Admin")]
     public class SubstancesController : Controller

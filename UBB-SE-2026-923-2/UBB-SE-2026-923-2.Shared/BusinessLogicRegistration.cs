@@ -13,7 +13,7 @@ namespace UBB_SE_2026_923_2.Shared
     /// </summary>
     public static class BusinessLogicRegistration
     {
-        public static IServiceCollection AddBusinessLogic(this IServiceCollection services, Uri webApiBaseAddress)
+        public static IServiceCollection AddBusinessLogic(this IServiceCollection services, Uri webApiBaseAddress, string webApiAccessKey)
         {
             if (services is null)
             {
@@ -25,18 +25,29 @@ namespace UBB_SE_2026_923_2.Shared
                 throw new ArgumentNullException(nameof(webApiBaseAddress));
             }
 
-            RegisterHttpClient(services, webApiBaseAddress);
+            if (string.IsNullOrWhiteSpace(webApiAccessKey))
+            {
+                throw new ArgumentException("Web API access key is required.", nameof(webApiAccessKey));
+            }
+
+            RegisterHttpClient(services, webApiBaseAddress, webApiAccessKey);
             RegisterRepositories(services);
             RegisterServices(services);
 
             return services;
         }
 
-        private static void RegisterHttpClient(IServiceCollection services, Uri baseAddress)
+        private static void RegisterHttpClient(IServiceCollection services, Uri baseAddress, string webApiAccessKey)
         {
-            services.AddSingleton<HttpClient>(_ => new HttpClient
+            services.AddSingleton<HttpClient>(_ =>
             {
-                BaseAddress = baseAddress,
+                var httpClient = new HttpClient
+                {
+                    BaseAddress = baseAddress,
+                };
+
+                httpClient.DefaultRequestHeaders.Add("X-Api-Key", webApiAccessKey);
+                return httpClient;
             });
         }
 
