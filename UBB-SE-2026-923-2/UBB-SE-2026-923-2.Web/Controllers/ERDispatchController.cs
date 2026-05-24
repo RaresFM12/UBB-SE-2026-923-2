@@ -1,10 +1,13 @@
 namespace UBB_SE_2026_923_2.Web.Controllers
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using UBB_SE_2026_923_2.Models;
     using UBB_SE_2026_923_2.Services;
     using UBB_SE_2026_923_2.Web.ViewModels;
 
@@ -24,6 +27,8 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         private const string AssignedStatus = "ASSIGNED";
         private const string UnmatchedStatus = "UNMATCHED";
         private const string CancelledStatus = "CANCELLED";
+        private const string DashboardStateTempDataKey = "ERDispatchDashboardState";
+        private const string UnknownDoctorName = "Unknown";
 
         private readonly IERDispatchService dispatchService;
 
@@ -33,17 +38,17 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? selectedRequestId = null)
         {
-            var allRequests = await this.dispatchService.GetAllRequestsAsync();
-
-            var dashboard = new ErDispatchDashboardViewModel
+            var dashboard = this.LoadDashboardState();
+            if (selectedRequestId.HasValue)
             {
-                Pending = allRequests.Where(request => IsStatus(request.Status, PendingStatus)).ToList(),
-                Assigned = allRequests.Where(request => IsStatus(request.Status, AssignedStatus)).ToList(),
-                Unmatched = allRequests.Where(request => IsStatus(request.Status, UnmatchedStatus)).ToList(),
-                Cancelled = allRequests.Where(request => IsStatus(request.Status, CancelledStatus)).ToList(),
-            };
+                dashboard.SelectedRequestId = selectedRequestId;
+            }
+
+            await this.LoadOverrideCandidatesAsync(dashboard);
+            this.SaveDashboardState(dashboard);
+            this.TempData.Keep(DashboardStateTempDataKey);
 
             return this.View(dashboard);
         }
@@ -154,7 +159,10 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         public async Task<IActionResult> Simulate()
         {
             var createdIds = await this.dispatchService.SimulateIncomingRequestsAsync(SimulatedRequestCount);
-            this.TempData["StatusMessage"] = $"Simulated {createdIds.Count} incoming ER request(s).";
+            var dashboard = this.LoadDashboardState();
+            dashboard.StatusMessage = $"Simulated {createdIds.Count} incoming request(s) from Clinical Team. Click Run Dispatch.";
+            dashboard.ManualInterventionHint = "Incoming ER requests were added as PENDING.";
+            this.SaveDashboardState(dashboard);
             return this.RedirectToAction(nameof(this.Index));
         }
 
@@ -163,8 +171,29 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         public async Task<IActionResult> DispatchAll()
         {
             var results = await this.dispatchService.DispatchAllPendingAsync();
-            var matched = results.Count(result => result.IsSuccess);
-            this.TempData["StatusMessage"] = $"{matched} matched, {results.Count - matched} unmatched.";
+            var dashboard = new ErDispatchDashboardViewModel
+            {
+                StatusMessage = "Dispatching...",
+                ManualInterventionHint = "Manual override accepts near-end IN_EXAMINATION doctors only.",
+                SessionMatches = results
+                    .Where(result => result.IsSuccess)
+                    .Select(ToSuccessfulMatch)
+                    .ToList(),
+                SessionUnmatched = results
+                    .Where(result => !result.IsSuccess && result.Request != null)
+                    .Select(ToUnmatchedRequest)
+                    .ToList(),
+            };
+
+            dashboard.StatusMessage = $"{dashboard.SessionMatches.Count} matched, {dashboard.SessionUnmatched.Count} unmatched";
+            dashboard.SelectedRequestId = dashboard.SessionUnmatched.FirstOrDefault()?.RequestId;
+            if (dashboard.SelectedRequestId == null)
+            {
+                dashboard.ManualInterventionHint = "No unmatched requests. Override not needed.";
+            }
+
+            await this.LoadOverrideCandidatesAsync(dashboard);
+            this.SaveDashboardState(dashboard);
             return this.RedirectToAction(nameof(this.Index));
         }
 
@@ -201,11 +230,105 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         public async Task<IActionResult> Override(int id, int selectedDoctorId)
         {
             var result = await this.dispatchService.ManualOverrideAsync(id, selectedDoctorId, NearEndMinutes);
-            this.TempData["StatusMessage"] = result.Message;
+            var dashboard = this.LoadDashboardState();
+
+            if (result.IsSuccess && result.Request != null)
+            {
+                dashboard.SessionUnmatched = dashboard.SessionUnmatched
+                    .Where(request => request.RequestId != id)
+                    .ToList();
+
+                var matches = dashboard.SessionMatches.ToList();
+                matches.Add(ToSuccessfulMatch(result));
+                dashboard.SessionMatches = matches;
+                dashboard.StatusMessage = $"{dashboard.SessionMatches.Count} matched, {dashboard.SessionUnmatched.Count} unmatched";
+            }
+
+            dashboard.ManualInterventionHint = result.Message;
+            dashboard.SelectedRequestId = dashboard.SessionUnmatched.FirstOrDefault()?.RequestId;
+            dashboard.SelectedDoctorId = null;
+            if (dashboard.SessionUnmatched.Count == 0 && result.IsSuccess)
+            {
+                dashboard.ManualInterventionHint = "Override applied. No unmatched requests left.";
+            }
+
+            await this.LoadOverrideCandidatesAsync(dashboard);
+            this.SaveDashboardState(dashboard);
             return this.RedirectToAction(nameof(this.Index));
         }
 
         private static bool IsStatus(string? actual, string expected) =>
             string.Equals((actual ?? string.Empty).Trim(), expected, StringComparison.OrdinalIgnoreCase);
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Refresh()
+        {
+            this.TempData.Remove(DashboardStateTempDataKey);
+            return this.RedirectToAction(nameof(this.Index));
+        }
+
+        private ErDispatchDashboardViewModel LoadDashboardState()
+        {
+            if (this.TempData.TryGetValue(DashboardStateTempDataKey, out var serializedState)
+                && serializedState is string stateJson
+                && !string.IsNullOrWhiteSpace(stateJson))
+            {
+                return JsonSerializer.Deserialize<ErDispatchDashboardViewModel>(stateJson) ?? new ErDispatchDashboardViewModel();
+            }
+
+            return new ErDispatchDashboardViewModel();
+        }
+
+        private void SaveDashboardState(ErDispatchDashboardViewModel dashboard)
+        {
+            this.TempData[DashboardStateTempDataKey] = JsonSerializer.Serialize(dashboard);
+        }
+
+        private async Task LoadOverrideCandidatesAsync(ErDispatchDashboardViewModel dashboard)
+        {
+            dashboard.OverrideCandidates = new List<OverrideCandidateViewModel>();
+            dashboard.SelectedDoctorId = null;
+
+            if (dashboard.SelectedRequestId == null)
+            {
+                return;
+            }
+
+            var selectedRequestExists = dashboard.SessionUnmatched.Any(request => request.RequestId == dashboard.SelectedRequestId);
+            if (!selectedRequestExists)
+            {
+                dashboard.SelectedRequestId = dashboard.SessionUnmatched.FirstOrDefault()?.RequestId;
+            }
+
+            if (dashboard.SelectedRequestId == null)
+            {
+                return;
+            }
+
+            var candidates = await this.dispatchService.GetManualOverrideCandidatesAsync(dashboard.SelectedRequestId.Value, NearEndMinutes);
+            dashboard.OverrideCandidates = candidates.Select(OverrideCandidateViewModel.From).ToList();
+            dashboard.ManualInterventionHint = dashboard.OverrideCandidates.Count == 0
+                ? "No eligible override doctor found (need near-end IN_EXAMINATION doctor)."
+                : $"Found {dashboard.OverrideCandidates.Count} eligible override candidate(s).";
+        }
+
+        private static UnmatchedERRequestViewModel ToUnmatchedRequest(ERDispatchResult result) =>
+            new UnmatchedERRequestViewModel
+            {
+                RequestId = result.Request.Id,
+                RequestSpecialization = result.Request.Specialization,
+                RequestLocation = result.Request.Location,
+                NoMatchReason = result.Message,
+            };
+
+        private static SuccessfulERMatchViewModel ToSuccessfulMatch(ERDispatchResult result) =>
+            new SuccessfulERMatchViewModel
+            {
+                RequestId = result.Request.Id,
+                AssignedDoctor = result.MatchedDoctorName ?? UnknownDoctorName,
+                Specialization = result.Request.Specialization,
+                MatchReason = result.MatchReason,
+            };
     }
 }

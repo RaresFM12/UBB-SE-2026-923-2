@@ -1,12 +1,14 @@
 ﻿namespace UBB_SE_2026_923_2.Web.Controllers;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UBB_SE_2026_923_2.Models;
 using UBB_SE_2026_923_2.Services;
+using UBB_SE_2026_923_2.Web.ViewModels;
 
 [Authorize]
 public class ShiftManagementController : Controller
@@ -15,6 +17,18 @@ public class ShiftManagementController : Controller
 
     private const string AdminManagerRoles = "Admin,Manager";
     private const string SalaryRoles = "Admin,Manager,Pharmacist,Doctor";
+    private static readonly IReadOnlyList<string> ShiftLocations = new[]
+    {
+        "ER",
+        "Ward A",
+        "Ward B",
+        "Cardiology",
+        "Surgery",
+        "Neurology",
+        "Pediatry",
+        "Oncology",
+        "Pharmacy",
+    };
 
     private readonly IShiftManagementService shiftManagementService;
     private readonly ISalaryComputationService salaryComputationService;
@@ -37,10 +51,9 @@ public class ShiftManagementController : Controller
 
     [HttpGet]
     [Authorize(Roles = AdminManagerRoles)]
-    public IActionResult Create()
+    public IActionResult Create(string? location = null, string? qualification = null)
     {
-        this.ViewBag.StaffList = this.salaryComputationService.GetAllStaff();
-        return this.View();
+        return this.View(this.BuildShiftCreationViewModel(location, qualification));
     }
 
     [HttpGet]
@@ -92,27 +105,50 @@ public class ShiftManagementController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = AdminManagerRoles)]
-    public IActionResult Create(int staffId, DateTime startTime, DateTime endTime, string location)
+    public IActionResult Create(
+        int staffId,
+        DateTime? shiftDate,
+        TimeSpan? startTime,
+        TimeSpan? endTime,
+        string location,
+        string? qualification)
     {
+        var model = this.BuildShiftCreationViewModel(location, qualification);
+
+        if (staffId == 0 || string.IsNullOrWhiteSpace(location) || !shiftDate.HasValue || !startTime.HasValue || !endTime.HasValue)
+        {
+            this.ModelState.AddModelError(string.Empty, "Please fill all the fields of the form!");
+            return this.View(model);
+        }
+
+        if (!this.shiftManagementService.ValidateShiftTimes(startTime.Value, endTime.Value))
+        {
+            this.ModelState.AddModelError(string.Empty, "Error: End hour must be chronologically after the start hour!");
+            return this.View(model);
+        }
+
         bool IsMatchingStaff(IStaff staffMember) => staffMember.StaffID == staffId;
-        var staff = this.salaryComputationService.GetAllStaff().FirstOrDefault(IsMatchingStaff);
+        var staff = model.QualifiedStaff.FirstOrDefault(IsMatchingStaff);
 
         if (staff == null)
         {
             this.ModelState.AddModelError(string.Empty, "Staff member not found.");
-            this.ViewBag.StaffList = this.salaryComputationService.GetAllStaff();
-            return this.View();
+            return this.View(model);
         }
 
-        bool isSuccess = this.shiftManagementService.TryAddShift(staff, startTime, endTime, location);
+        var date = shiftDate.Value.Date;
+        var startDateTime = date.Add(startTime.Value);
+        var endDateTime = date.Add(endTime.Value);
+
+        bool isSuccess = this.shiftManagementService.TryAddShift(staff, startDateTime, endDateTime, location);
         if (!isSuccess)
         {
             this.ModelState.AddModelError(string.Empty, "Failed to add shift. Staff might be overlapping shifts.");
-            this.ViewBag.StaffList = this.salaryComputationService.GetAllStaff();
-            return this.View();
+            return this.View(model);
         }
 
-        return this.RedirectToAction(nameof(Index));
+        this.TempData["ShiftStatusMessage"] = "The shift was scheduled successfuly!";
+        return this.RedirectToAction(nameof(Create));
     }
 
     [HttpPost]
@@ -127,10 +163,55 @@ public class ShiftManagementController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = AdminManagerRoles)]
+    public IActionResult CancelFromCreate(int shiftId)
+    {
+        this.shiftManagementService.CancelShift(shiftId);
+        this.TempData["ShiftStatusMessage"] = $"The shift #{shiftId} was cancelled.";
+        return this.RedirectToAction(nameof(Create));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AdminManagerRoles)]
     public IActionResult Activate(int shiftId)
     {
         this.shiftManagementService.SetShiftActive(shiftId);
         return this.RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AdminManagerRoles)]
+    public IActionResult ActivateFromCreate(int shiftId)
+    {
+        this.shiftManagementService.SetShiftActive(shiftId);
+        this.TempData["ShiftStatusMessage"] = $"The shift #{shiftId} was marked as active.";
+        return this.RedirectToAction(nameof(Create));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AdminManagerRoles)]
+    public IActionResult AutoReassignFromCreate(int shiftId)
+    {
+        bool IsMatchingShift(Shift shift) => shift.Id == shiftId;
+        var shift = this.shiftManagementService.GetDailyShifts(DateTime.Today).FirstOrDefault(IsMatchingShift)
+            ?? this.shiftManagementService.GetWeeklyShifts(DateTime.Today).FirstOrDefault(IsMatchingShift);
+
+        if (shift != null)
+        {
+            var replacement = this.shiftManagementService.FindStaffReplacements(shift).FirstOrDefault();
+            if (replacement != null && this.shiftManagementService.ReassignShift(shift, replacement))
+            {
+                this.TempData["ShiftStatusMessage"] = "The automatic searching of a replacement has been triggered.";
+            }
+            else
+            {
+                this.TempData["ShiftStatusMessage"] = "No eligible replacement was found.";
+            }
+        }
+
+        return this.RedirectToAction(nameof(Create));
     }
 
     [HttpGet]
@@ -180,5 +261,26 @@ public class ShiftManagementController : Controller
         this.ViewBag.SelectedStaffName = $"{staff.FirstName} {staff.LastName}";
 
         return this.View("Salary");
+    }
+
+    private ShiftCreationViewModel BuildShiftCreationViewModel(string? location, string? qualification)
+    {
+        var qualifications = string.IsNullOrWhiteSpace(location)
+            ? new List<string>()
+            : this.shiftManagementService.GetSpecializationsAndCertificationsForLocation(location);
+
+        var staff = !string.IsNullOrWhiteSpace(location) && !string.IsNullOrWhiteSpace(qualification)
+            ? this.shiftManagementService.GetFilteredStaff(location, qualification)
+            : new List<IStaff>();
+
+        return new ShiftCreationViewModel
+        {
+            SelectedLocation = location,
+            SelectedQualification = qualification,
+            Locations = ShiftLocations,
+            Qualifications = qualifications,
+            QualifiedStaff = staff,
+            TodayShifts = this.shiftManagementService.GetDailyShifts(DateTime.Today).OrderBy(shift => shift.StartTime).ToList(),
+        };
     }
 }
