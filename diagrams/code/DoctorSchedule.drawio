@@ -1,0 +1,409 @@
+<mxfile host="app.diagrams.net" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36">
+  <diagram name="Page-1" id="2YBvvXClWsGukQMizWep">
+    <mxGraphModel dx="2336" dy="842" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="qnbgVaAnc087ggRjWniS-1" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;" value="" vertex="1">
+          <mxGeometry height="730" width="20" x="-250" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-2" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="&lt;font&gt;DoctorScheduleController&lt;/font&gt;" vertex="1">
+          <mxGeometry height="730" width="140" x="170" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-3" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="ShiftSwapService" vertex="1">
+          <mxGeometry height="710" width="110" x="380" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-5" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="DoctorAppointmentService" vertex="1">
+          <mxGeometry height="710" width="170" x="520" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-6" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="HttpStaffRepository" vertex="1">
+          <mxGeometry height="710" width="110" x="730" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-7" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="HttpShiftRepository" vertex="1">
+          <mxGeometry height="700" width="110" x="910" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-8" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="StaffController" vertex="1">
+          <mxGeometry height="730" width="250" x="1310" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-9" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="HospitalDatabase" vertex="1">
+          <mxGeometry height="745" width="100" x="2980" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-11" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" value="GET Index(selectedDoctorId, startDate, endDate)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="160" y="140" />
+            </Array>
+            <mxPoint x="-45.452380952380736" y="140" as="sourcePoint" />
+            <mxPoint x="239.5" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-14" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-2" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" target="qnbgVaAnc087ggRjWniS-3" value="GetAllDoctors()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="320" y="150" />
+            </Array>
+            <mxPoint x="250" y="150" as="sourcePoint" />
+            <mxPoint x="330" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-15" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-3" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" target="qnbgVaAnc087ggRjWniS-6" value="LoadAllStaff()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="610" y="170" />
+            </Array>
+            <mxPoint x="460" y="170" as="sourcePoint" />
+            <mxPoint x="540" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-16" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-6" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" target="qnbgVaAnc087ggRjWniS-8" value="GET api/staff">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="180" />
+            </Array>
+            <mxPoint x="810" y="180" as="sourcePoint" />
+            <mxPoint x="890" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-17" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-8" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" target="P9zYAbFV8xlh7ttZnjbC-1" value="GetAll()">
+          <mxGeometry relative="1" width="80" x="-0.1477" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1450" y="190" />
+            </Array>
+            <mxPoint x="1380" y="200" as="sourcePoint" />
+            <mxPoint x="1460" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-23" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" value="List of json objects">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1195.37" y="260" />
+              <mxPoint x="1085.37" y="260" />
+              <mxPoint x="965.37" y="260" />
+            </Array>
+            <mxPoint x="1429.8700000000003" y="260" as="sourcePoint" />
+            <mxPoint x="780.0004347826085" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-24" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-6" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" target="qnbgVaAnc087ggRjWniS-3" value="List&amp;lt;Staff&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="270" />
+            </Array>
+            <mxPoint x="760" y="250" as="sourcePoint" />
+            <mxPoint x="680" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-25" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-3" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" target="qnbgVaAnc087ggRjWniS-2" value="List&amp;lt;Doctor&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="280" />
+            </Array>
+            <mxPoint x="400" y="240" as="sourcePoint" />
+            <mxPoint x="320" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-26" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-2" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" target="qnbgVaAnc087ggRjWniS-3" value="GetFutureShiftsForStaff(doctorId)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="340" />
+            </Array>
+            <mxPoint x="240" y="290" as="sourcePoint" />
+            <mxPoint x="320" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-27" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" value="GetAllShifts()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="350" />
+            </Array>
+            <mxPoint x="434.25" y="350" as="sourcePoint" />
+            <mxPoint x="964.4999999999995" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-28" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-7" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" target="P9zYAbFV8xlh7ttZnjbC-6" value="GET&amp;nbsp; api/shifts">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="1055.75" y="370" />
+            </Array>
+            <mxPoint x="980" y="370" as="sourcePoint" />
+            <mxPoint x="1430.2499999999995" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-29" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" target="P9zYAbFV8xlh7ttZnjbC-7" value="GetAll()">
+          <mxGeometry relative="1" width="80" x="-0.0321" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1710" y="380" />
+              <mxPoint x="1920" y="380" />
+            </Array>
+            <mxPoint x="1689.4473684210525" y="380" as="sourcePoint" />
+            <mxPoint x="2239.5" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-30" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" value="List of json objects">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1330" y="460" />
+              <mxPoint x="970" y="460" />
+            </Array>
+            <mxPoint x="1689.5" y="460" as="sourcePoint" />
+            <mxPoint x="963.6818181818189" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-31" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" value="List&amp;lt;Shift&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="630" y="470" />
+            </Array>
+            <mxPoint x="964.5" y="469.9999999999998" as="sourcePoint" />
+            <mxPoint x="433.68181818181847" y="469.9999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-34" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" value="List&amp;lt;Shift&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="480" />
+            </Array>
+            <mxPoint x="434.5" y="479.9999999999998" as="sourcePoint" />
+            <mxPoint x="238.68181818181847" y="479.9999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-35" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" value="GetAppointmentsInRangeAsync(doctorId, fromDate, toDate)">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="530" />
+            </Array>
+            <mxPoint x="238.68181818181847" y="529.9999999999998" as="sourcePoint" />
+            <mxPoint x="604.5" y="529.9999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-36" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" value="GetAllAppointmentsAsync()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="550" />
+            </Array>
+            <mxPoint x="603.6818181818185" y="549.9999999999998" as="sourcePoint" />
+            <mxPoint x="1154.5" y="549.9999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-37" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="HttpAppointmentRepository" vertex="1">
+          <mxGeometry height="710" width="170" x="1070" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-38" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;labelBackgroundColor=none;" target="P9zYAbFV8xlh7ttZnjbC-12" value="GET api/appointments">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="1260" y="570" />
+            </Array>
+            <mxPoint x="1153.681818181819" y="569.9999999999998" as="sourcePoint" />
+            <mxPoint x="1434.5" y="569.9999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-40" edge="1" parent="1" source="P9zYAbFV8xlh7ttZnjbC-12" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" target="qnbgVaAnc087ggRjWniS-37" value="List of json objects">
+          <mxGeometry relative="1" x="0.012" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1595.37" y="660" />
+              <mxPoint x="1585.37" y="660" />
+              <mxPoint x="1285.37" y="660" />
+              <mxPoint x="1245.37" y="660" />
+            </Array>
+            <mxPoint x="1909.8700000000003" y="660" as="sourcePoint" />
+            <mxPoint x="1150.0004347826084" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-41" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" value="List&amp;lt;Appointment&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+            <mxPoint x="1154.5" y="669.9999999999998" as="sourcePoint" />
+            <mxPoint x="603.6818181818185" y="669.9999999999998" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-42" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" value="List&amp;lt;Appointment&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="443.32" y="710" />
+            </Array>
+            <mxPoint x="607.82" y="710" as="sourcePoint" />
+            <mxPoint x="242.00181818181846" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-43" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" target="3z9_3O-_jL3hibh811vi-13" value="ViewBag.Doctors">
+          <mxGeometry relative="1" x="-0.1412" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="150" y="290" />
+              <mxPoint x="110" y="290" />
+            </Array>
+            <mxPoint x="239.5" y="290" as="sourcePoint" />
+            <mxPoint x="-85.36956521739148" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qnbgVaAnc087ggRjWniS-44" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-2" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;labelBackgroundColor=none;" target="3z9_3O-_jL3hibh811vi-13" value="View(DoctorScheduleViewModel(Shifts, Appointments))">
+          <mxGeometry relative="1" x="-0.0535" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="155.27" y="730" />
+            </Array>
+            <mxPoint x="234.77" y="730" as="sourcePoint" />
+            <mxPoint x="-49.99923076923072" y="730" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3z9_3O-_jL3hibh811vi-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Admin" vertex="1">
+          <mxGeometry height="30" width="90" x="-285" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="3z9_3O-_jL3hibh811vi-13" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="DoctorScheduleView" vertex="1">
+          <mxGeometry height="730" width="250" x="-170" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="3z9_3O-_jL3hibh811vi-14" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="Display schedule">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-100" y="740" />
+            </Array>
+            <mxPoint x="-45.5" y="740" as="sourcePoint" />
+            <mxPoint x="-241.31818181818153" y="740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-1" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="StaffRepository" vertex="1">
+          <mxGeometry height="735" width="100" x="2160" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-2" edge="1" parent="1" source="P9zYAbFV8xlh7ttZnjbC-1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" target="qnbgVaAnc087ggRjWniS-9" value="SELECT * FROM Staff">
+          <mxGeometry relative="1" width="80" x="0.1474" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="2230" y="200" />
+            </Array>
+            <mxPoint x="2030" y="200" as="sourcePoint" />
+            <mxPoint x="2110" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-3" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-9" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" target="P9zYAbFV8xlh7ttZnjbC-1" value="All Staff records">
+          <mxGeometry relative="1" x="0.1423" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="2230" y="230" />
+            </Array>
+            <mxPoint x="2480" y="230" as="sourcePoint" />
+            <mxPoint x="2400" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-4" edge="1" parent="1" source="P9zYAbFV8xlh7ttZnjbC-1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" target="qnbgVaAnc087ggRjWniS-8" value="List&amp;lt;IStaff&amp;gt;">
+          <mxGeometry relative="1" x="-0.1704" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1580" y="250" />
+            </Array>
+            <mxPoint x="1670" y="240" as="sourcePoint" />
+            <mxPoint x="1590" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-6" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="ShiftsController" vertex="1">
+          <mxGeometry height="730" width="100" x="1640" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-7" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="ShiftRepository" vertex="1">
+          <mxGeometry height="745" width="100" x="2480" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-8" edge="1" parent="1" source="P9zYAbFV8xlh7ttZnjbC-7" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" target="qnbgVaAnc087ggRjWniS-9" value="SELECT * FROM Shifts">
+          <mxGeometry relative="1" width="80" x="-0.1729" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="2550" y="410" />
+            </Array>
+            <mxPoint x="2209.4473684210525" y="410" as="sourcePoint" />
+            <mxPoint x="2839.5" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-9" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-9" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" target="P9zYAbFV8xlh7ttZnjbC-7" value="All Shifts records">
+          <mxGeometry relative="1" x="0.1424" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="2680" y="440" />
+            </Array>
+            <mxPoint x="2810" y="440" as="sourcePoint" />
+            <mxPoint x="2730" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-10" edge="1" parent="1" source="P9zYAbFV8xlh7ttZnjbC-7" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" target="P9zYAbFV8xlh7ttZnjbC-6" value="List&amp;lt;Shift&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1900" y="450" />
+            </Array>
+            <mxPoint x="1900" y="450" as="sourcePoint" />
+            <mxPoint x="1820" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-12" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="AppointmentsController" vertex="1">
+          <mxGeometry height="720" width="170" x="1830" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-13" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fillColor=none;" value="AppointmentRepository" vertex="1">
+          <mxGeometry height="745" width="160" x="2730" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-14" edge="1" parent="1" source="P9zYAbFV8xlh7ttZnjbC-12" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" target="P9zYAbFV8xlh7ttZnjbC-13" value="GetAll()">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="2360" y="590" />
+            </Array>
+            <mxPoint x="1970" y="590" as="sourcePoint" />
+            <mxPoint x="2050" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-15" edge="1" parent="1" source="P9zYAbFV8xlh7ttZnjbC-13" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" target="qnbgVaAnc087ggRjWniS-9" value="SELECT * FROM Appointments">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="2920" y="610" />
+            </Array>
+            <mxPoint x="2860" y="600" as="sourcePoint" />
+            <mxPoint x="2940" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-21" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-5" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" target="qnbgVaAnc087ggRjWniS-5" value="filter by doctor and date range">
+          <mxGeometry relative="1" width="80" x="0.1809" y="-30" as="geometry">
+            <mxPoint x="30" y="30" as="offset" />
+            <Array as="points">
+              <mxPoint x="650" y="680" />
+              <mxPoint x="650" y="700" />
+            </Array>
+            <mxPoint x="630" y="690" as="sourcePoint" />
+            <mxPoint x="710" y="690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-22" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" target="3z9_3O-_jL3hibh811vi-13" value="Click on Doctor Schedule">
+          <mxGeometry relative="1" width="80" as="geometry">
+            <Array as="points">
+              <mxPoint x="-140" y="130" />
+            </Array>
+            <mxPoint x="-200" y="130" as="sourcePoint" />
+            <mxPoint x="-120" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-23" edge="1" parent="1" source="3z9_3O-_jL3hibh811vi-13" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" target="qnbgVaAnc087ggRjWniS-1" value="Display doctors selector">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-150" y="310" />
+            </Array>
+            <mxPoint x="-70" y="300" as="sourcePoint" />
+            <mxPoint x="-150" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-24" edge="1" parent="1" source="qnbgVaAnc087ggRjWniS-9" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" target="P9zYAbFV8xlh7ttZnjbC-13" value="All Appointments records">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2940" y="640" />
+            </Array>
+            <mxPoint x="2980" y="630" as="sourcePoint" />
+            <mxPoint x="2900" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P9zYAbFV8xlh7ttZnjbC-25" edge="1" parent="1" source="P9zYAbFV8xlh7ttZnjbC-13" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" target="P9zYAbFV8xlh7ttZnjbC-12" value="List&amp;lt;Appointment&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2380" y="650" />
+            </Array>
+            <mxPoint x="2030" y="620" as="sourcePoint" />
+            <mxPoint x="1950" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -96,7 +96,7 @@
                                 <Button Click="OnProductClicked" Background="Transparent" BorderThickness="0" Padding="0">
                                     <Border Width="220" Margin="10" Padding="10" CornerRadius="10" Background="{StaticResource AppSurfaceBrush}" BorderBrush="{StaticResource AppAccentBrush}" BorderThickness="1">
                                         <StackPanel Spacing="8">
-                                            <Image Source="{Binding Image}" Height="120" Stretch="UniformToFill"/>
+                                            <Image Source="{Binding Image}" Height="120" Stretch="UniformToFill" ImageFailed="OnProductImageFailed"/>
                                             <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}" TextWrapping="WrapWholeWords"/>
 
                                             <StackPanel Orientation="Horizontal" Spacing="6">

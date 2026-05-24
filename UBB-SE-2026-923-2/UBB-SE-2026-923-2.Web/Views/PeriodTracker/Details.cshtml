@@ -1,11 +1,11 @@
-﻿@model UBB_SE_2026_923_2.Web.Models.PeriodTrackerViewModel
+@model UBB_SE_2026_923_2.Web.ViewModels.PeriodTrackerViewModel
 @{
     ViewData["Title"] = "Period Tracker Dashboard";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <h2 class="text-primary mb-0">🌸 Period Tracker Center</h2>
+        <h2 class="text-primary mb-0">?? Period Tracker Center</h2>
         <div>
             @if (Model.HasPeriodTracker)
             {
@@ -68,7 +68,7 @@
                 <div class="col-lg-6 mb-4">
                     <div class="card shadow-sm border-0 h-100">
                         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center fw-bold">
-                            <span>📋 Daily Symptom Notes</span>
+                            <span>?? Daily Symptom Notes</span>
                         @if (Model.CanAddNote)
                         {
                                     <button type="button" class="btn btn-sm btn-light text-success fw-bold py-0 px-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#addNoteModal">+</button>
@@ -108,11 +108,11 @@
         @if (Model.ShopItems.Any())
         {
                     <div class="mt-4 pt-3 border-top">
-                        <h4 class="text-secondary mb-3">📦 Recommended Related Wellness Items</h4>
+                        <h4 class="text-secondary mb-3">?? Recommended Related Wellness Items</h4>
                 @if (Model.IsInMenstrualPhase)
                 {
                                 <div class="alert alert-warning py-2 small fw-bold text-dark mb-3">
-                                    ✨ Menstrual Phase active detected! A 20% discount has been calculated on all suggested items below.
+                                    ? Menstrual Phase active detected! A 20% discount has been calculated on all suggested items below.
                                 </div>
                 }
                         <div class="row row-cols-2 row-cols-md-4 g-3">

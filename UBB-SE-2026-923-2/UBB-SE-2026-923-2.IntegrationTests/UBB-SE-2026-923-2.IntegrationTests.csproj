@@ -11,6 +11,53 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="AdminWebApplicationFactory.cs" />
+    <Compile Remove="AppointmentsControllerAdditionalTests.cs" />
+    <Compile Remove="AppointmentsControllerIntegrationTests.cs" />
+    <Compile Remove="CustomWebApplicationFactory.cs" />
+    <Compile Remove="DoctorAppointmentsControllerIntegrationTests.cs" />
+    <Compile Remove="ErDispatchControllerIntegrationTests.cs" />
+    <Compile Remove="ErDispatchWebApplicationFactory.cs" />
+    <Compile Remove="ERRequestsControllerAdditionalTests.cs" />
+    <Compile Remove="ERRequestsControllerIntegrationTests.cs" />
+    <Compile Remove="EvaluationsControllerAdditionalTests.cs" />
+    <Compile Remove="EvaluationsControllerIntegrationTests.cs" />
+    <Compile Remove="FatigueAuditControllerTests.cs" />
+    <Compile Remove="HangoutParticipantsControllerIntegrationTests.cs" />
+    <Compile Remove="HangoutsControllerAdditionalTests.cs" />
+    <Compile Remove="HangoutsControllerIntegrationTests.cs" />
+    <Compile Remove="HangoutsWebApplicationFactory.cs" />
+    <Compile Remove="HangoutsWebControllerIntegrationTests.cs" />
+    <Compile Remove="HighRiskMedicinesControllerIntegrationTests.cs" />
+    <Compile Remove="ItemsControllerAdditionalTests.cs" />
+    <Compile Remove="ItemsControllerIntegrationTests.cs" />
+    <Compile Remove="ItemsWebControllerIntegrationTests.cs" />
+    <Compile Remove="NotificationsControllerAdditionalTests.cs" />
+    <Compile Remove="NotificationsControllerIntegrationTests.cs" />
+    <Compile Remove="OrdersControllerAdditionalTests.cs" />
+    <Compile Remove="OrdersControllerIntegrationTests.cs" />
+    <Compile Remove="PeriodTrackerControllerIntegrationTest.cs" />
+    <Compile Remove="PeriodTrackerWebApplicationFactory.cs" />
+    <Compile Remove="PharmacyHandoversControllerIntegrationTests.cs" />
+    <Compile Remove="PrescriptionsControllerIntegrationTests.cs" />
+    <Compile Remove="PrescriptionsWebApplicationFactory.cs" />
+    <Compile Remove="ShiftsControllerAdditionalTests.cs" />
+    <Compile Remove="ShiftsControllerIntegrationTests.cs" />
+    <Compile Remove="ShiftSwapsControllerAdditionalTests.cs" />
+    <Compile Remove="ShiftSwapsControllerIntegrationTests.cs" />
+    <Compile Remove="StaffControllerAdditionalTests.cs" />
+    <Compile Remove="StaffControllerIntegrationTests.cs" />
+    <Compile Remove="SubstancesControllerAdditionalTests.cs" />
+    <Compile Remove="SubstancesControllerIntegrationTests.cs" />
+    <Compile Remove="SubstancesWebControllerIntegrationTests.cs" />
+    <Compile Remove="TestAuthHandler.cs" />
+    <Compile Remove="UserAccountsControllerIntegrationTests.cs" />
+    <Compile Remove="UsersControllerAdditionalTests.cs" />
+    <Compile Remove="UsersControllerIntegrationTests.cs" />
+    <Compile Remove="WebMvcApplicationFactory.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.11" />

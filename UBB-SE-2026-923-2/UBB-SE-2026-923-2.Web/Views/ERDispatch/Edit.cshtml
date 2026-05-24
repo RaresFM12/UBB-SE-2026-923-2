@@ -1,4 +1,4 @@
-@model UBB_SE_2026_923_2.Web.Models.EditERRequestStatusViewModel
+@model UBB_SE_2026_923_2.Web.ViewModels.EditERRequestStatusViewModel
 @{
     ViewData["Title"] = $"Edit ER Request #{Model.Id}";
 }
@@ -26,7 +26,7 @@
             <div class="mb-3">
                 <label asp-for="Status" class="form-label"></label>
                 <select asp-for="Status" class="form-select">
-                    @foreach (var status in UBB_SE_2026_923_2.Web.Models.EditERRequestStatusViewModel.AvailableStatuses)
+                    @foreach (var status in UBB_SE_2026_923_2.Web.ViewModels.EditERRequestStatusViewModel.AvailableStatuses)
                     {
                         <option value="@status">@status</option>
                     }

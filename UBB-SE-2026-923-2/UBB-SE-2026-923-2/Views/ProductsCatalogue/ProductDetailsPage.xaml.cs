@@ -46,6 +46,11 @@ namespace UBB_SE_2026_923_2.Views.ProductsCatalogue
             }
         }
 
+        private void OnProductImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            ProductImage.Source = new BitmapImage(new Uri("ms-appx:///Assets/StoreLogo.png"));
+        }
+
         private void OnAddToBasket(object sender, RoutedEventArgs e)
         {
             var (success, navigateToLogin) = this.ViewModel.TryAddToBasket(QuantityBox.Text);

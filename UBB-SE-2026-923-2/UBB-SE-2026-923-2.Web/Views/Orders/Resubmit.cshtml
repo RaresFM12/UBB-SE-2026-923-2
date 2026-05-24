@@ -1,0 +1,24 @@
+@model OrderResubmitViewModel
+@{
+    ViewData["Title"] = $"Resubmit Order #{Model.Id}";
+}
+
+<h2 class="mb-4">Resubmit Order#@Model.Id</h2>
+
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+<form asp-action="Resubmit" method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
+    <partial name="_OrderLinesTable" model="Model.Items" />
+
+    <div class="mb-3 col-md-4">
+        <label asp-for="PickUpDate" class="form-label">New pickup date</label>
+        <input asp-for="PickUpDate" type="date" class="form-control" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="PickUpDate" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Place Order</button>
+    <a asp-action="Index" class="btn btn-outline-secondary ms-1">Cancel</a>
+</form>

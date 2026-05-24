@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using UBB_SE_2026_923_2.Models;
 
-namespace UBB_SE_2026_923_2.Web.Models
+namespace UBB_SE_2026_923_2.Web.ViewModels
 {
     public class PeriodTrackerViewModel
     {
@@ -55,5 +55,12 @@ namespace UBB_SE_2026_923_2.Web.Models
         public Item RawItem { get; set; }
         public float DisplayPrice { get; set; }
         public bool HasDiscountApplied { get; set; }
+    }
+    public class PeriodTrackerInputModel
+    {
+        public DateTime StartPeriodDate { get; set; }
+        public int CycleDays { get; set; }
+        public int PeriodLasts { get; set; }
+        public int PMSOption { get; set; }
     }
 }

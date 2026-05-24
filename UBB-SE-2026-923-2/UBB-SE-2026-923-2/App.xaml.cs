@@ -58,7 +58,7 @@ namespace UBB_SE_2026_923_2
             // All HTTP-backed repositories and business services live in the
             // Shared class library and are registered through a single
             // extension method so the web project can reuse them.
-            services.AddBusinessLogic(new Uri(AppSettings.WebApiBaseUrl));
+            services.AddBusinessLogic(new Uri(AppSettings.WebApiBaseUrl), AppSettings.WebApiAccessKey);
 
             services.AddSingleton<DialogPresenter>();
 

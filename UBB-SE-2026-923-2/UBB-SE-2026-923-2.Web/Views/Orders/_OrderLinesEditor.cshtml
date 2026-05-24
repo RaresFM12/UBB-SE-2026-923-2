@@ -1,0 +1,35 @@
+@model List<OrderLineItemViewModel>
+
+<div class="table-responsive mb-3">
+    <table class="table table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Medicine</th>
+                <th>Producer</th>
+                <th>Quantity</th>
+                <th>Final price</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int index = 0; index < Model.Count; index++)
+            {
+                <tr>
+                    <td>
+                        @Model[index].Name
+                        <input type="hidden" name="Items[@index].ItemId" value="@Model[index].ItemId" />
+                        <input type="hidden" name="Items[@index].Name" value="@Model[index].Name" />
+                        <input type="hidden" name="Items[@index].Producer" value="@Model[index].Producer" />
+                    </td>
+                    <td>@Model[index].Producer</td>
+                    <td><input class="form-control" type="number" min="0" name="Items[@index].Quantity" value="@Model[index].Quantity" /></td>
+                    <td>
+                        @Model[index].FinalPrice.ToString("F2") RON
+                        <input type="hidden" name="Items[@index].FinalPrice" value="@Model[index].FinalPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                    </td>
+                    <td><span class="text-muted">Set quantity to 0</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
