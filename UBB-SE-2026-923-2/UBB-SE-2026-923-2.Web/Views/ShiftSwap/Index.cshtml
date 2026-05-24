@@ -12,6 +12,20 @@
             <div class="card-body">
                 <h4 class="card-title text-primary fw-semibold mb-3">My Future Shifts</h4>
 
+                <form asp-action="ChangeTestDoctor" method="get" class="mb-3">
+                    <label class="form-label text-muted">Select doctor (test mode)</label>
+                    <select name="doctorId" class="form-select" onchange="this.form.submit()">
+                        <option value="">Select doctor</option>
+                        @if (ViewBag.Doctors != null)
+                        {
+                            foreach (var doc in ViewBag.Doctors)
+                            {
+                                <option value="@doc.StaffID">@doc.FirstName @doc.LastName</option>
+                            }
+                        }
+                    </select>
+                </form>
+
                 @if (!Model.FutureShifts.Any())
                 {
                     <div class="alert alert-info">
@@ -20,13 +34,13 @@
                 }
                 else
                 {
-                    <div class="list-group">
+                    <div class="list-group" style="min-height: 300px;">
                         @foreach (var shift in Model.FutureShifts)
                         {
                             var isSelected = Model.SelectedShiftId == shift.Id;
                             var isPending = Model.PendingShiftIds.Contains(shift.Id);
                             <a href="?selectedShiftId=@shift.Id"
-                                   class="list-group-item list-group-item-action @(isSelected ? "active border-primary" : "")">
+                               class="list-group-item list-group-item-action @(isSelected ? "active border-primary" : "")">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
                                         <div class="fw-semibold">@shift.StartTime.ToString("dd MMM yyyy")</div>
@@ -59,13 +73,6 @@
                 <h4 class="card-title text-primary fw-semibold mb-1">Request Shift Swap</h4>
                 <p class="text-muted small mb-3">Choose colleague (same role/profile)</p>
 
-                @if (!string.IsNullOrEmpty(Model.StatusMessage))
-                {
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-1"></i> @Model.StatusMessage
-                    </div>
-                }
-
                 @if (!Model.SelectedShiftId.HasValue)
                 {
                     <div class="alert alert-secondary">
@@ -91,9 +98,8 @@
                         <input type="hidden" name="shiftId" value="@Model.SelectedShiftId" />
 
                         <div class="mb-3">
-                            <label class="form-label text-muted">Select colleague</label>
                             <select name="colleagueId" class="form-select" required>
-                                <option value="">-- Select colleague --</option>
+                                <option value="">Select colleague</option>
                                 @foreach (var colleague in Model.EligibleColleagues)
                                 {
                                     var staff = colleague as Staff;
@@ -104,8 +110,15 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Request Swap</button>
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Request Swap</button>
                     </form>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                {
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-1"></i> @Model.StatusMessage
+                    </div>
                 }
             </div>
         </div>
