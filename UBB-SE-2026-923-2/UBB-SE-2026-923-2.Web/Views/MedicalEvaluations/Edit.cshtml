@@ -13,26 +13,35 @@
         <input type="hidden" asp-for="PatientId" />
 
         <div class="form-group mb-3">
-            <label class="control-label fw-bold">Patient ID (Read-Only)</label>
-            <input class="form-control" value="@Model.PatientId" disabled />
+            <label class="control-label fw-bold text-muted">Active Patient ID (Read-Only)</label>
+            <input class="form-control bg-light" value="@Model.PatientId" readonly />
         </div>
 
         <div class="form-group mb-3">
-            <label class="control-label fw-bold">Symptoms / Diagnosis</label>
-            <textarea asp-for="Symptoms" class="form-control" rows="3"></textarea>
+            <label class="control-label fw-bold">Symptoms</label>
+            <textarea asp-for="Symptoms" class="form-control" rows="4" placeholder="Enter symptoms..." maxlength="500"></textarea>
         </div>
 
         <div class="form-group mb-3">
-            <label class="control-label fw-bold">Prescribed Medications</label>
-            <input asp-for="MedicationsList" class="form-control" />
+            <label class="control-label fw-bold">Meds List</label>
+            <textarea asp-for="MedicationsList" class="form-control" rows="2" placeholder="Enter medications..." maxlength="200"></textarea>
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" value="true" name="IsRiskAssumed" id="riskCheckEdit">
+            <label class="form-check-label fw-bold text-danger" for="riskCheckEdit">
+                I assume clinical risk for this prescription
+            </label>
         </div>
 
         <div class="form-group mb-4">
             <label class="control-label fw-bold">Doctor Notes</label>
-            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+            <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Write justification here..." maxlength="1000"></textarea>
         </div>
 
-        <button type="submit" class="btn btn-warning">Update Evaluation</button>
-        <a asp-action="Index" asp-route-doctorId="@Model.Evaluator?.StaffID" class="btn btn-secondary ms-2">Cancel</a>
+        <button type="submit" class="btn btn-primary w-100 mb-2">Save Diagnosis</button>
+
+        <a asp-action="Delete" asp-route-evaluationId="@Model.EvaluationID" class="btn btn-danger w-100 mb-2">Delete Diagnosis</a>
+        <a asp-action="Index" asp-route-doctorId="@Model.Evaluator?.StaffID" class="btn btn-outline-primary w-100">Cancel Selection</a>
     </form>
 </div>
