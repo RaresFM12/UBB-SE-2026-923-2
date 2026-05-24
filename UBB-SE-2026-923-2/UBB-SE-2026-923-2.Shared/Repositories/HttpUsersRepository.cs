@@ -6,6 +6,7 @@ namespace UBB_SE_2026_923_2.Repositories
     using System.Net.Http;
     using System.Net.Http.Json;
     using UBB_SE_2026_923_2.Models;
+    using UBB_SE_2026_923_2.Shared;
 
     /// <summary>
     /// HTTP-backed implementation of <see cref="IUsersRepository"/>.
@@ -15,6 +16,12 @@ namespace UBB_SE_2026_923_2.Repositories
         private const string BasePath = "api/users";
 
         private readonly HttpClient httpClient;
+        
+        private static readonly System.Text.Json.JsonSerializerOptions jsonOptions = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new TupleStringBoolConverter() }
+        };
 
         public HttpUsersRepository(HttpClient httpClient)
         {
@@ -24,13 +31,13 @@ namespace UBB_SE_2026_923_2.Repositories
         public bool UserExists(string email)
         {
             var requestUrl = $"{BasePath}/exists?email={Uri.EscapeDataString(email)}";
-            return this.httpClient.GetFromJsonAsync<bool>(requestUrl).GetAwaiter().GetResult();
+            return this.httpClient.GetFromJsonAsync<bool>(requestUrl, jsonOptions).GetAwaiter().GetResult();
         }
 
         public bool UserExists(int userId)
         {
             return this.httpClient
-                .GetFromJsonAsync<bool>($"{BasePath}/{userId}/exists")
+                .GetFromJsonAsync<bool>($"{BasePath}/{userId}/exists", jsonOptions)
                 .GetAwaiter().GetResult();
         }
 
@@ -43,7 +50,7 @@ namespace UBB_SE_2026_923_2.Repositories
             }
 
             httpResponse.EnsureSuccessStatusCode();
-            var user = httpResponse.Content.ReadFromJsonAsync<User>().GetAwaiter().GetResult();
+            var user = httpResponse.Content.ReadFromJsonAsync<User>(jsonOptions).GetAwaiter().GetResult();
             return user!;
         }
 
@@ -57,7 +64,7 @@ namespace UBB_SE_2026_923_2.Repositories
             }
 
             httpResponse.EnsureSuccessStatusCode();
-            var user = httpResponse.Content.ReadFromJsonAsync<User>().GetAwaiter().GetResult();
+            var user = httpResponse.Content.ReadFromJsonAsync<User>(jsonOptions).GetAwaiter().GetResult();
             return user!;
         }
 
@@ -77,28 +84,28 @@ namespace UBB_SE_2026_923_2.Repositories
                 Role = role,
             };
 
-            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload).GetAwaiter().GetResult();
+            var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, requestPayload, jsonOptions).GetAwaiter().GetResult();
             httpResponse.EnsureSuccessStatusCode();
         }
 
         public void UpdateUser(User user)
         {
             var httpResponse = this.httpClient
-                .PutAsJsonAsync($"{BasePath}/{user.Id}", user)
+                .PutAsJsonAsync($"{BasePath}/{user.Id}", user, jsonOptions)
                 .GetAwaiter().GetResult();
             httpResponse.EnsureSuccessStatusCode();
         }
 
         public List<User> GetAllUsers()
         {
-            var users = this.httpClient.GetFromJsonAsync<List<User>>(BasePath).GetAwaiter().GetResult();
+            var users = this.httpClient.GetFromJsonAsync<List<User>>(BasePath, jsonOptions).GetAwaiter().GetResult();
             return users ?? new List<User>();
         }
 
         public bool UserHasPeriodTracker(int userId)
         {
             return this.httpClient
-                .GetFromJsonAsync<bool>($"{BasePath}/{userId}/period-tracker")
+                .GetFromJsonAsync<bool>($"{BasePath}/{userId}/period-tracker", jsonOptions)
                 .GetAwaiter().GetResult();
         }
     }

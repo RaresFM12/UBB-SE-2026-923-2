@@ -1,0 +1,54 @@
+@model UBB_SE_2026_923_2.Web.Models.PeriodTrackerViewModel
+
+@if (Model.HasPeriodTracker && Model.ShopItems.Any())
+{
+    <div class="mt-4 pt-4 border-top">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0 text-secondary">Recommended related wellness items</h2>
+            @if (Model.IsInMenstrualPhase)
+            {
+                <span class="badge text-bg-warning text-dark">20% discount active</span>
+            }
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+            @foreach (var shopItem in Model.ShopItems)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 border-top border-primary">
+                        <div class="card-body text-center">
+                            <h3 class="h6 text-truncate mb-1">@shopItem.RawItem.Name</h3>
+                            <div class="text-muted small mb-2">@shopItem.RawItem.Producer</div>
+
+                            @if (shopItem.HasDiscountApplied || shopItem.RawItem.DiscountPercentage > 0)
+                            {
+                                float catalogDiscount = shopItem.RawItem.DiscountPercentage;
+                                float finalPrice = shopItem.HasDiscountApplied
+                                    ? shopItem.DisplayPrice
+                                    : (float)shopItem.RawItem.Price * (1f - (catalogDiscount / 100f));
+
+                                        <div class="small text-danger text-decoration-line-through">@shopItem.RawItem.Price Lei</div>
+                                        <div class="fw-semibold text-success">@finalPrice.ToString("0.00") Lei</div>
+                            }
+                            else
+                            {
+                                        <div class="fw-semibold">@shopItem.RawItem.Price Lei</div>
+                            }
+                        </div>
+
+
+                        <div class="card-footer bg-transparent border-0 pt-0">
+                            <form asp-action="AddProductToBasket" asp-controller="PeriodTracker" method="post">
+                                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="itemId" value="@shopItem.RawItem.Id" />
+
+                                <input type="hidden" name="discountPercentage" value="@(shopItem.HasDiscountApplied ? 20.0f : shopItem.RawItem.DiscountPercentage)" />
+                                <button type="submit" class="btn btn-outline-primary w-100">Add to basket</button>
+                            </form>
+                       </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
