@@ -84,11 +84,11 @@ namespace UBB_SE_2026_923_2.Views.Orders
                 CloseButtonText = "Ok",
             };
 
-            this.Frame.Navigate(
-                typeof(ProductsCatalogue.HomePage),
-                new ProductCatalogueService(App.Services.GetRequiredService<IItemsRepository>()));
-
             await confirmationMessage.ShowAsync();
+
+            this.Frame.Navigate(
+                typeof(OrderHistoryPage),
+                this.currentOrderService);
         }
 
         private async void OnOrderFailure(string errorMessage)

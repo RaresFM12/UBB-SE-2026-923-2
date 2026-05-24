@@ -57,7 +57,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(PeriodTrackerInputModel input)
         {
-            if (model.StartPeriodDate == default || model.CycleDays < 20 || model.CycleDays > 45 || model.PeriodLasts < 1 || model.PeriodLasts > 9 || model.PMSOption < 0 || model.PMSOption > 3)
+            if (input.StartPeriodDate == default || input.CycleDays < 20 || input.CycleDays > 45 || input.PeriodLasts < 1 || input.PeriodLasts > 9 || input.PMSOption < 0 || input.PMSOption > 3)
             {
                 // Rebuild the dashboard model strictly for returning the user to the form
                 return View(new PeriodTrackerViewModel
@@ -92,7 +92,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(PeriodTrackerInputModel input)
         {
-            if (model.StartPeriodDate == default || model.CycleDays < 20 || model.CycleDays > 45 || model.PeriodLasts < 1 || model.PeriodLasts > 9 || model.PMSOption < 0 || model.PMSOption > 3)
+            if (input.StartPeriodDate == default || input.CycleDays < 20 || input.CycleDays > 45 || input.PeriodLasts < 1 || input.PeriodLasts > 9 || input.PMSOption < 0 || input.PMSOption > 3)
             {
                 return View(new PeriodTrackerViewModel
                 {
