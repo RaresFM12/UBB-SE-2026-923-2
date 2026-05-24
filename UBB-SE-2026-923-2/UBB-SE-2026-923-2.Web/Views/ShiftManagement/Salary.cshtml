@@ -8,11 +8,11 @@
 <div class="row mt-4">
     <div class="col-md-5">
         <div class="card p-4">
-            <form asp-action="ComputeSalary" method="post">
+            <form asp-action="ComputeSalary" method="post" id="salaryForm" onsubmit="showLoading()">
                 <div asp-validation-summary="All" class="text-danger"></div>
 
                 <div class="form-group mb-3">
-                    <label class="control-label">Staff Member</label>
+                    <label class="control-label fw-bold">Staff Member</label>
                     <select name="staffId" class="form-select" required>
                         <option value="">-- Select Staff --</option>
                         @if (staffList != null)
@@ -26,33 +26,47 @@
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="control-label">Month</label>
-                    <select name="month" class="form-select" required>
-                        @for (int i = 1; i <= 12; i++)
-                        {
-                            <option value="@i">@System.Globalization.DateTimeFormatInfo.CurrentInfo.GetMonthName(i)</option>
-                        }
-                    </select>
+                    <label class="control-label fw-bold">Month (1-12)</label>
+                    <input type="number" name="month" class="form-control" min="1" max="12" value="@DateTime.Now.Month" required />
                 </div>
 
                 <div class="form-group mb-4">
-                    <label class="control-label">Year</label>
-                    <input type="number" name="year" class="form-control" value="@DateTime.Now.Year" required />
+                    <label class="control-label fw-bold">Year</label>
+                    <input type="number" name="year" class="form-control" value="@DateTime.Now.Year" min="2000" max="2100" required />
                 </div>
 
-                <button type="submit" class="btn btn-success">Calculate Salary</button>
+                <button type="submit" class="btn btn-success w-100" id="calcBtn">Calculate Salary</button>
             </form>
         </div>
+
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger mt-3">
+                @ViewBag.ErrorMessage
+            </div>
+        }
     </div>
 
     <div class="col-md-7">
+        <div id="loadingSpinner" class="text-center mt-5" style="display:none;">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Computing...</p>
+        </div>
+
         @if (ViewBag.CalculatedSalary != null)
         {
-            <div class="alert alert-success mt-0 h-100 d-flex flex-column justify-content-center align-items-center">
+            <div class="alert alert-success h-100 d-flex flex-column justify-content-center align-items-center">
                 <h4 class="mb-3">Salary Calculation Result</h4>
-                <p class="fs-5 text-center">The calculated salary for <strong>@ViewBag.SelectedStaffName</strong> is:</p>
-                <h1 class="display-4 fw-bold">$@Math.Round((double)ViewBag.CalculatedSalary, 2)</h1>
+                <p class="fs-5">The calculated salary for <strong>@ViewBag.SelectedStaffName</strong> is:</p>
+                <h1 class="display-4 fw-bold text-success">$@Math.Round((double)ViewBag.CalculatedSalary, 2)</h1>
             </div>
         }
     </div>
 </div>
+
+<script>
+    function showLoading() {
+        document.getElementById('calcBtn').disabled = true;
+        document.getElementById('loadingSpinner').style.display = 'block';
+    }
+</script>

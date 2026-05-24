@@ -21,6 +21,7 @@ namespace UBB_SE_2026_923_2.Views.PeriodTracker
             {
                 this.ViewModel = periodTrackerViewModel;
                 this.DataContext = this.ViewModel;
+                this.ViewModel.LoadInitialState();
                 Bindings.Update();
             }
         }

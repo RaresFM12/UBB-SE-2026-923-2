@@ -55,21 +55,22 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         // POST: PeriodTracker/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(PeriodTrackerInputModel input)
+        public IActionResult Create(PeriodTrackerInputModel inputModel)
         {
-            if (input.StartPeriodDate == default || input.CycleDays < 20 || input.CycleDays > 45 || input.PeriodLasts < 1 || input.PeriodLasts > 9 || input.PMSOption < 0 || input.PMSOption > 3)
+
+            if (inputModel.StartPeriodDate == default || inputModel.CycleDays < 20 || inputModel.CycleDays > 45 || inputModel.PeriodLasts < 1 || inputModel.PeriodLasts > 9 || inputModel.PMSOption < 0 || inputModel.PMSOption > 3)
             {
                 // Rebuild the dashboard model strictly for returning the user to the form
                 return View(new PeriodTrackerViewModel
                 {
-                    StartPeriodDate = DateOnly.FromDateTime(input.StartPeriodDate),
-                    CycleDays = input.CycleDays,
-                    PeriodLasts = input.PeriodLasts,
-                    PMSOption = input.PMSOption
+                    StartPeriodDate = DateOnly.FromDateTime(inputModel.StartPeriodDate),
+                    CycleDays = inputModel.CycleDays,
+                    PeriodLasts = inputModel.PeriodLasts,
+                    PMSOption = inputModel.PMSOption
                 });
             }
 
-            _periodTrackerService.UpdatePeriodTracker(input.StartPeriodDate, input.CycleDays, input.PeriodLasts, input.PMSOption);
+            _periodTrackerService.UpdatePeriodTracker(inputModel.StartPeriodDate, inputModel.CycleDays, inputModel.PeriodLasts, inputModel.PMSOption);
             _periodTrackerService.SaveCurrentUser();
             return RedirectToAction(nameof(Index));
         }
@@ -90,20 +91,20 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         // POST: PeriodTracker/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(PeriodTrackerInputModel input)
+        public IActionResult Edit(PeriodTrackerInputModel inputModel)
         {
-            if (input.StartPeriodDate == default || input.CycleDays < 20 || input.CycleDays > 45 || input.PeriodLasts < 1 || input.PeriodLasts > 9 || input.PMSOption < 0 || input.PMSOption > 3)
+            if (inputModel.StartPeriodDate == default || inputModel.CycleDays < 20 || inputModel.CycleDays > 45 || inputModel.PeriodLasts < 1 || inputModel.PeriodLasts > 9 || inputModel.PMSOption < 0 || inputModel.PMSOption > 3)
             {
                 return View(new PeriodTrackerViewModel
                 {
-                    StartPeriodDate = DateOnly.FromDateTime(input.StartPeriodDate),
-                    CycleDays = input.CycleDays,
-                    PeriodLasts = input.PeriodLasts,
-                    PMSOption = input.PMSOption
+                    StartPeriodDate = DateOnly.FromDateTime(inputModel.StartPeriodDate),
+                    CycleDays = inputModel.CycleDays,
+                    PeriodLasts = inputModel.PeriodLasts,
+                    PMSOption = inputModel.PMSOption
                 });
             }
 
-            _periodTrackerService.UpdatePeriodTracker(input.StartPeriodDate, input.CycleDays, input.PeriodLasts, input.PMSOption);
+            _periodTrackerService.UpdatePeriodTracker(inputModel.StartPeriodDate, inputModel.CycleDays, inputModel.PeriodLasts, inputModel.PMSOption);
             _periodTrackerService.SaveCurrentUser();
             return RedirectToAction(nameof(Index));
         }

@@ -3,64 +3,50 @@
     ViewData["Title"] = "Schedule Hangout";
 }
 
-<h2 class="mb-4">Schedule Hangout</h2>
+<h2>Create Hangout</h2>
 
 <div class="row">
     <div class="col-md-6">
         <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <div class="mb-3">
+                <label class="form-label">Select Doctor (Organizer)</label>
+                <select asp-for="SelectedDoctorId" class="form-select">
+                    @foreach (var doctor in Model.Doctors)
+                    {
+                        <option value="@doctor.DoctorId">@doctor.DoctorName</option>
+                    }
+                </select>
+            </div>
 
             <div class="mb-3">
                 <label asp-for="Title" class="form-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+                <input asp-for="Title" class="form-control" maxlength="25" />
             </div>
 
             <div class="mb-3">
                 <label asp-for="Description" class="form-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <textarea asp-for="Description" class="form-control" rows="3" maxlength="100"></textarea>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Date" class="form-label"></label>
-                <input asp-for="Date" class="form-control" type="datetime-local" />
-                <span asp-validation-for="Date" class="text-danger"></span>
+                <input asp-for="Date" class="form-control" type="date" />
             </div>
 
             <div class="mb-3">
-                <label asp-for="MaxParticipantsCount" class="form-label"></label>
-                <input asp-for="MaxParticipantsCount" class="form-control" type="number" />
-                <span asp-validation-for="MaxParticipantsCount" class="text-danger"></span>
+                <label asp-for="MaxParticipantsCount" class="form-label">Max Participants</label>
+                <select asp-for="MaxParticipantsCount" class="form-select">
+                    @for (int i = 2; i <= 20; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Organiser</label>
-                @if (!Model.Doctors.Any())
-                {
-                    <p class="text-muted">No doctors available.</p>
-                }
-                else
-                {
-                    <select asp-for="SelectedDoctorId" class="form-select">
-                        <option value="">— select a doctor —</option>
-                        @foreach (DoctorOptionViewModel doctor in Model.Doctors)
-                        {
-                            <option value="@doctor.DoctorId">@doctor.DoctorName</option>
-                        }
-                    </select>
-                }
-                <span asp-validation-for="SelectedDoctorId" class="text-danger"></span>
-            </div>
+            <button type="submit" class="btn btn-primary">Create Hangout</button>
 
-            <div class="mt-3">
-                <button type="submit" class="btn btn-primary me-2">Schedule</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-            </div>
+            <div class="mt-3 text-danger">@ViewBag.ErrorMessage</div>
+            <div class="mt-3 text-success">@ViewBag.SuccessMessage</div>
         </form>
     </div>
 </div>
-
-@section Scripts {
-    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
-}

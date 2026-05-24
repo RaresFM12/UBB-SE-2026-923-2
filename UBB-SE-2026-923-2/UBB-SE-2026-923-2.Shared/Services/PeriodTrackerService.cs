@@ -44,6 +44,22 @@
 
         public PeriodTrackerState GetTrackerState()
         {
+            var cachedUser = this.currentUserService.RaresCurrentUser;
+            if (cachedUser != null)
+            {
+                var freshUser = this.usersRepository.GetUserById(cachedUser.Id);
+                if (freshUser != null)
+                {
+                    cachedUser.PeriodNotes = freshUser.PeriodNotes;
+
+                    cachedUser.SetPeriodTracker(
+                        freshUser.StartPeriodDate,
+                        Convert.ToInt32(freshUser.CycleDays),
+                        Convert.ToInt32(freshUser.PeriodLasts),
+                        freshUser.PremenstrualSyndromeOption);
+                }
+            }
+
             User currentUser = this.GetCurrentUser();
 
             if (currentUser == null)
@@ -65,6 +81,21 @@
 
         public PeriodTrackerDashboardSnapshot GetDashboardSnapshot(int monthOffset)
         {
+            var cachedUser = this.currentUserService.RaresCurrentUser;
+            if (cachedUser != null)
+            {
+                var freshUser = this.usersRepository.GetUserById(cachedUser.Id);
+                if (freshUser != null)
+                {
+                    cachedUser.PeriodNotes = freshUser.PeriodNotes;
+                    cachedUser.SetPeriodTracker(
+                        freshUser.StartPeriodDate,
+                        freshUser.CycleDays,
+                        freshUser.PeriodLasts,
+                        freshUser.PremenstrualSyndromeOption);
+                }
+            }
+
             PeriodTrackerState trackerState = this.GetTrackerState();
             PeriodTrackerDashboardSnapshot snapshot = new PeriodTrackerDashboardSnapshot
             {

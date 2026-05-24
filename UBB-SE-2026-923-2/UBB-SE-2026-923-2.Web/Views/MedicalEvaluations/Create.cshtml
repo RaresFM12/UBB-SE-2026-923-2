@@ -2,73 +2,76 @@
 @{
     ViewData["Title"] = "New Evaluation";
     var doctorList = ViewBag.DoctorList as IEnumerable<UBB_SE_2026_923_2.Models.Doctor>;
-    var wellnessItems = ViewBag.WellnessItems as IEnumerable<UBB_SE_2026_923_2.Models.Item>;
+    // You may need to pass this from your controller if it isn't already!
+    var appointmentList = ViewBag.AvailableAppointments as IEnumerable<UBB_SE_2026_923_2.Models.Appointment>;
 }
 
 <h2>Create Medical Evaluation</h2>
 
 <div class="row mt-4">
-    <div class="col-md-7">
+    <div class="col-md-8">
         <div class="card p-4">
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                 <div class="form-group mb-3">
-                    <label class="control-label fw-bold">Doctor (Evaluator)</label>
+                    <label class="control-label fw-bold">Current Staff (Evaluator)</label>
                     <select name="Evaluator.StaffID" class="form-select" required>
                         <option value="">-- Select Doctor --</option>
                         @if (doctorList != null)
                         {
                             foreach (var doctor in doctorList)
                             {
-                                <option value="@doctor.StaffID">@doctor.FirstName @doctor.LastName</option>
+                                <option value="@doctor.StaffID">Dr. @doctor.FirstName @doctor.LastName - ID: @doctor.StaffID</option>
                             }
                         }
                     </select>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="control-label fw-bold">Patient ID</label>
-                    <input asp-for="PatientId" class="form-control" required />
+                    <label class="control-label fw-bold text-muted">Select Patient from Schedule</label>
+                    <select class="form-select" id="appointmentSelect" onchange="document.getElementById('patientIdField').value = this.value;">
+                        <option value="">Choose a patient...</option>
+                        @if (appointmentList != null)
+                        {
+                            foreach (var appt in appointmentList)
+                            {
+                                <option value="@appt.ExternalRefId">@appt.StartTime - @appt.PatientName (@appt.Notes)</option>
+                            }
+                        }
+                    </select>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="control-label fw-bold">Symptoms / Diagnosis (Add '[RISK]' if high risk)</label>
-                    <textarea asp-for="Symptoms" class="form-control" rows="3"></textarea>
+                    <label class="control-label fw-bold">Active Patient ID</label>
+                    <input asp-for="PatientId" class="form-control bg-light" id="patientIdField" readonly required />
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="control-label fw-bold">Prescribed Medications (Comma separated)</label>
-                    <input asp-for="MedicationsList" class="form-control" />
+                    <label class="control-label fw-bold">Symptoms</label>
+                    <textarea asp-for="Symptoms" class="form-control" rows="4" placeholder="Enter symptoms..." maxlength="500"></textarea>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label fw-bold">Meds List</label>
+                    <textarea asp-for="MedicationsList" class="form-control" rows="2" placeholder="Enter medications..." maxlength="200"></textarea>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="true" name="IsRiskAssumed" id="riskCheck">
+                    <label class="form-check-label fw-bold text-danger" for="riskCheck">
+                        I assume clinical risk for this prescription
+                    </label>
                 </div>
 
                 <div class="form-group mb-4">
                     <label class="control-label fw-bold">Doctor Notes</label>
-                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Write justification here..." maxlength="1000"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Save Evaluation</button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">Back</a>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Save Diagnosis</button>
+                <a asp-action="Index" class="btn btn-outline-primary w-100">Cancel Selection</a>
             </form>
-        </div>
-    </div>
-
-    <div class="col-md-5">
-        <div class="card p-4 bg-light">
-            <h4 class="text-success">Recommended Wellness Items</h4>
-            <p class="text-muted small">Consider suggesting these to the patient during evaluation.</p>
-            <ul class="list-group">
-                @if (wellnessItems != null)
-                {
-                    foreach (var item in wellnessItems)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @item.Name
-                            <span class="badge bg-success rounded-pill">$@item.Price</span>
-                        </li>
-                    }
-                }
-            </ul>
         </div>
     </div>
 </div>

@@ -7,7 +7,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
     using UBB_SE_2026_923_2.Services;
     using UBB_SE_2026_923_2.Web.ViewModels;
 
-    [Authorize(Roles = "Client")]
+    [Authorize]
     public class NotificationsController : Controller
     {
         private readonly IAdminService adminService;
