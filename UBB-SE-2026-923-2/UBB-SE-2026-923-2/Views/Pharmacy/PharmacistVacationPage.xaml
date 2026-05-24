@@ -28,7 +28,7 @@
                 <ComboBox x:Name="PharmacistComboBox"
                           Header="Pharmacist"
                           PlaceholderText="Select pharmacist"
-                          DisplayMemberPath="displayName"
+                          DisplayMemberPath="DisplayName"
                           HorizontalAlignment="Stretch"/>
 
                 <CalendarDatePicker x:Name="StartDatePicker"

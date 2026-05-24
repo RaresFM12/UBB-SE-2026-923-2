@@ -57,7 +57,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(PeriodTrackerInputModel input)
         {
-            if (!ModelState.IsValid)
+            if (model.StartPeriodDate == default || model.CycleDays < 20 || model.CycleDays > 45 || model.PeriodLasts < 1 || model.PeriodLasts > 9 || model.PMSOption < 0 || model.PMSOption > 3)
             {
                 // Rebuild the dashboard model strictly for returning the user to the form
                 return View(new PeriodTrackerViewModel
@@ -92,7 +92,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(PeriodTrackerInputModel input)
         {
-            if (!ModelState.IsValid)
+            if (model.StartPeriodDate == default || model.CycleDays < 20 || model.CycleDays > 45 || model.PeriodLasts < 1 || model.PeriodLasts > 9 || model.PMSOption < 0 || model.PMSOption > 3)
             {
                 return View(new PeriodTrackerViewModel
                 {
@@ -142,7 +142,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         /* Standard Sub-Actions used by the view forms */
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateNote(string noteBody)
+        public IActionResult CreateNote([FromForm] string noteBody)
         {
             _periodTrackerService.AddNote(noteBody ?? "New Entry");
             _periodTrackerService.SaveCurrentUser();
@@ -151,7 +151,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditNote(int noteId, string noteBody, bool isDone)
+        public IActionResult EditNote([FromForm] int noteId, [FromForm] string noteBody, [FromForm] bool isDone = false)
         {
             _periodTrackerService.UpdateNote(noteId, noteBody ?? string.Empty, isDone);
             _periodTrackerService.SaveCurrentUser();
@@ -160,7 +160,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult RemoveNote(int noteId)
+        public IActionResult RemoveNote([FromForm] int noteId)
         {
             _periodTrackerService.DeleteNote(noteId);
             _periodTrackerService.SaveCurrentUser();

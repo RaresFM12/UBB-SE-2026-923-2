@@ -1,0 +1,62 @@
+@model UBB_SE_2026_923_2.Web.Models.PeriodTrackerViewModel
+
+<div class="card shadow-sm border-0 h-100">
+    <div class="card-header bg-success text-white fw-semibold d-flex justify-content-between align-items-center">
+        <span>Daily symptom notes</span>
+        <span class="badge text-bg-light text-dark">@Model.Notes.Count / 4</span>
+    </div>
+    <div class="card-body p-0 d-flex flex-column">
+        <div class="list-group list-group-flush flex-grow-1">
+            @if (!Model.Notes.Any())
+            {
+                <div class="list-group-item text-center text-muted py-4">No logs entered yet.</div>
+            }
+
+            @foreach (var note in Model.Notes)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex gap-2 align-items-start">
+                        <form asp-action="EditNote" asp-controller="PeriodTracker" method="post" class="flex-grow-1">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="noteId" value="@note.NoteId" />
+                            <div class="d-flex gap-2 align-items-start">
+                                @if (note.IsDone)
+                                {
+                                    <input type="checkbox" class="form-check-input mt-2" name="isDone" value="true" checked onchange="this.form.submit()" />
+                                }
+                                else
+                                {
+                                    <input type="checkbox" class="form-check-input mt-2" name="isDone" value="true" onchange="this.form.submit()" />
+                                }
+
+                                <textarea class="form-control form-control-sm @(note.IsDone ? "text-decoration-line-through text-muted" : string.Empty)" name="noteBody" rows="2" onchange="this.form.submit()">@note.NoteBody</textarea>
+                            </div>
+                        </form>
+
+                        <form asp-action="RemoveNote" asp-controller="PeriodTracker" method="post" class="ms-1">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="noteId" value="@note.NoteId" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">&times;</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="border-top p-3 bg-light">
+            @if (Model.CanAddNote)
+            {
+                <form asp-action="CreateNote" asp-controller="PeriodTracker" method="post" class="vstack gap-2">
+                    @Html.AntiForgeryToken()
+                    <label class="form-label small fw-semibold mb-0">Add a new note</label>
+                    <textarea class="form-control" name="noteBody" rows="3" placeholder="Describe symptoms, reminders, or observations" required></textarea>
+                    <button type="submit" class="btn btn-success w-100">Add note</button>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-secondary mb-0 small">Note limit reached. Remove one note before adding another.</div>
+            }
+        </div>
+    </div>
+</div>

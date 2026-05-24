@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using UBB_SE_2026_923_2.Data;
 using UBB_SE_2026_923_2.Repositories;
+using UBB_SE_2026_923_2.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services
         // EF navigation collections form cycles between entities; ignore them
         // rather than letting the serializer throw.
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new TupleStringBoolConverter());
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
