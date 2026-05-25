@@ -36,7 +36,6 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <Button Content="Change Password" Click="OnChangePasswordClick"/>
-                    <Button Content="Order History" Click="OnOrderHistoryClick"/>
                 </StackPanel>
 
                 <TextBlock Text="{Binding ErrorMessage}"

@@ -99,7 +99,6 @@ namespace UBB_SE_2026_923_2.Views
                 case UserRole.Client:
                     this.Add("Product Catalogue", "client-catalogue", typeof(CatalogPage), catalogParameter);
                     this.Add("Shopping Cart", "client-cart", typeof(BasketPage), this.orderService);
-                    this.Add("Order History", "client-orders", typeof(OrderHistoryPage), this.orderService);
                     this.Add("Period Tracker", "client-period-tracker", typeof(PeriodTrackerPage), this.periodTrackerViewModel);
                     this.Add("Notifications", "client-notifications", typeof(Notifications), catalogParameter);
                     break;

@@ -32,7 +32,22 @@ else
         {
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <div class="fw-semibold text-primary mb-1">@user.Email</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <div class="fw-semibold text-primary">@user.Email</div>
+                        @if (user.IsDisabled)
+                        {
+                            <span class="badge bg-secondary">Disabled</span>
+                        }
+                        @if (user.IsAdmin)
+                        {
+                            <span class="badge bg-primary">Admin</span>
+                        }
+                        else if (!user.IsDisabled)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        <span class="badge bg-light text-dark border">@user.DisplayRole</span>
+                    </div>
                     <div class="text-muted small mb-1">@(string.IsNullOrWhiteSpace(user.Username) ? "(no username)" : user.Username)</div>
                     <div class="text-muted small mb-3">@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "(no phone)" : user.PhoneNumber)</div>
 
@@ -50,7 +65,7 @@ else
                                 </div>
                             </form>
                         }
-                        else
+                        else if (user.IsAdmin)
                         {
                             <div class="form-check d-flex align-items-center gap-2 mb-0">
                                 <input class="form-check-input" type="checkbox" checked disabled />

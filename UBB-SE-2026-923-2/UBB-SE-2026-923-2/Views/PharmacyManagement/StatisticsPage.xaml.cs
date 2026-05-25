@@ -14,10 +14,6 @@ public sealed partial class StatisticsPage : Page
 
     public List<KeyValuePair<string, int>> TopSubstances { get; set; }
 
-    public string ItemsWarning { get; set; } = string.Empty;
-
-    public string SubstancesWarning { get; set; } = string.Empty;
-
     private readonly IAdminService adminService;
 
     public StatisticsPage()
@@ -25,16 +21,6 @@ public sealed partial class StatisticsPage : Page
         this.adminService = new AdminService();
         this.TopItems = this.adminService.GetTop30Items();
         this.TopSubstances =[.. this.adminService.GetTop30Substances()];
-
-        if (this.TopItems.Count < 30)
-        {
-            this.ItemsWarning = $"Only {this.TopItems.Count} products were bought last month (fewer than 30).";
-        }
-
-        if (this.TopSubstances.Count < 30)
-        {
-            this.SubstancesWarning = $"Only {this.TopSubstances.Count} active substances found last month (fewer than 30).";
-        }
 
         InitializeComponent();
 

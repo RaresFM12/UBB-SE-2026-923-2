@@ -48,5 +48,9 @@
         public bool ShowDisable => !this.IsAdmin && !this.IsDisabled;
 
         public bool ShowDisabledLabel => this.IsDisabled;
+
+        public bool ShowAdminLabel => this.IsAdmin;
+
+        public bool ShowActiveLabel => !this.IsAdmin && !this.IsDisabled;
     }
 }

@@ -58,6 +58,13 @@
                 return;
             }
 
+            currentUser = this.userAccountService.LoadCurrentUser(currentUser.Id);
+            if (currentUser == null)
+            {
+                return;
+            }
+
+            this.OnPropertyChanged(nameof(this.Email));
             this.Username = currentUser.Username;
             this.PhoneNumber = currentUser.PhoneNumber;
         }

@@ -42,11 +42,6 @@
                            Foreground="{StaticResource AppTextPrimaryBrush}"
                            HorizontalAlignment="Center"/>
 
-                <TextBlock Text="{x:Bind ItemsWarning}"
-                           Foreground="#D97706"
-                           HorizontalAlignment="Center"
-                           FontStyle="Italic"/>
-
                 <Grid Width="600"
                       Height="400"
                       BorderBrush="{StaticResource AppAccentBrush}"
@@ -109,11 +104,6 @@
                            FontWeight="Bold"
                            Foreground="{StaticResource AppTextPrimaryBrush}"
                            HorizontalAlignment="Center"/>
-
-                <TextBlock Text="{x:Bind SubstancesWarning}"
-                           Foreground="#D97706"
-                           HorizontalAlignment="Center"
-                           FontStyle="Italic"/>
 
                 <Grid Width="600"
                       Height="400"

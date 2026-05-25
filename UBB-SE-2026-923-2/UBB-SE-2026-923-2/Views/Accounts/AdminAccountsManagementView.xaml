@@ -79,6 +79,16 @@
                                            FontWeight="Bold"
                                            Visibility="{x:Bind ShowDisabledLabel, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
+                                <TextBlock Text="ADMIN"
+                                           Foreground="{StaticResource AppAccentBrush}"
+                                           FontWeight="Bold"
+                                           Visibility="{x:Bind ShowAdminLabel, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                <TextBlock Text="ACTIVE"
+                                           Foreground="{StaticResource AppAccentBrush}"
+                                           FontWeight="Bold"
+                                           Visibility="{x:Bind ShowActiveLabel, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <CheckBox Content="Admin"
                                               Foreground="{StaticResource AppAccentBrush}"

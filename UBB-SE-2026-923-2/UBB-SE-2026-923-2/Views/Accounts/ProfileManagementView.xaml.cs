@@ -20,6 +20,12 @@ namespace UBB_SE_2026_923_2.Views.Accounts
             this.ProfileManagementViewModel = new ProfileManagementViewModel(this.accountService);
 
             this.DataContext = this.ProfileManagementViewModel;
+            this.Loaded += this.OnProfileLoaded;
+        }
+
+        private void OnProfileLoaded(object sender, RoutedEventArgs e)
+        {
+            this.ProfileManagementViewModel.LoadUserData();
         }
 
         private void OnSaveClick(object sender, RoutedEventArgs e)
@@ -46,11 +52,6 @@ namespace UBB_SE_2026_923_2.Views.Accounts
             dialog.XamlRoot = this.XamlRoot;
 
             await dialog.ShowAsync();
-        }
-
-        private async void OnOrderHistoryClick(object sender, RoutedEventArgs e)
-        {
-            this.Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.Orders.OrderHistoryPage), new OrderService());
         }
     }
 }
