@@ -303,7 +303,7 @@
         background-color: white;
         border-radius: var(--app-border-radius);
         padding: 20px;
-        max-width: 600px;
+        max-width: 860px;
         width: 90%;
         max-height: 90vh;
         overflow-y: auto;
@@ -377,6 +377,74 @@
     .form-row .form-group {
         flex: 1;
         margin-bottom: 0;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .form-grid .form-group.full-width,
+    .collection-section {
+        grid-column: 1 / -1;
+    }
+
+    .collection-section {
+        margin-top: 10px;
+    }
+
+    .collection-list {
+        border: 1px solid var(--app-accent);
+        border-radius: var(--app-border-radius);
+        min-height: 120px;
+        max-height: 170px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+    }
+
+    .collection-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .collection-table th,
+    .collection-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--app-surface);
+        color: var(--app-text-primary);
+        font-size: 14px;
+    }
+
+    .collection-table th {
+        background-color: var(--app-surface);
+        font-weight: 600;
+    }
+
+    .collection-row {
+        cursor: pointer;
+    }
+
+    .collection-row.selected {
+        background-color: #e8f5e9;
+    }
+
+    .inline-builder {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(120px, 180px) auto auto;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .hidden-serialized-field {
+        display: none;
+    }
+
+    @@media (max-width: 760px) {
+        .form-grid,
+        .inline-builder {
+            grid-template-columns: 1fr;
+        }
     }
 
     .modal-buttons {
@@ -526,52 +594,110 @@
             <button class="modal-close" onclick="closeAddModal()">&times;</button>
         </div>
 
-        <form id="addItemForm">
-            <div class="form-group">
-                <label>Name *</label>
-                <input type="text" id="addName" name="Name" required>
-            </div>
+        <form id="addItemForm" asp-controller="Items" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
 
-            <div class="form-group">
-                <label>Producer *</label>
-                <input type="text" id="addProducer" name="Producer" required>
-            </div>
-
-            <div class="form-group">
-                <label>Price *</label>
-                <input type="number" id="addPrice" name="Price" step="0.01" required>
-            </div>
-
-            <div class="form-group">
-                <label>Category *</label>
-                <input type="text" id="addCategory" name="Category" required>
-            </div>
-
-            <div class="form-row">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Number of Pills</label>
-                    <input type="number" id="addNumberOfPills" name="NumberOfPills">
+                    <label>Name *</label>
+                    <input type="text" id="addName" name="Name" placeholder="Enter product name" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Quantity</label>
-                    <input type="number" id="addQuantity" name="Quantity">
+                    <label>Producer *</label>
+                    <input type="text" id="addProducer" name="Producer" placeholder="Enter producer" required>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Label</label>
-                <input type="text" id="addLabel" name="Label">
-            </div>
+                <div class="form-group">
+                    <label>Price *</label>
+                    <input type="number" id="addPrice" name="Price" step="0.01" min="0.01" placeholder="Enter price" required>
+                </div>
 
-            <div class="form-group">
-                <label>Description</label>
-                <textarea id="addDescription" name="Description"></textarea>
-            </div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <input type="text" id="addCategory" name="Category" placeholder="Enter category" required>
+                </div>
 
-            <div class="form-group">
-                <label>Discount (%)</label>
-                <input type="number" id="addDiscount" name="DiscountPercentage" step="0.01">
+                <div class="form-group">
+                    <label>Image Path</label>
+                    <input type="text" id="addImagePath" name="ImagePath" placeholder="Enter image path">
+                </div>
+
+                <div class="form-group">
+                    <label>Number of Pills *</label>
+                    <input type="number" id="addNumberOfPills" name="NumberOfPills" min="1" placeholder="Enter number" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Label</label>
+                    <input type="text" id="addLabel" name="Label" placeholder="Enter label">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Description</label>
+                    <textarea id="addDescription" name="Description" placeholder="Enter description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Discount (%)</label>
+                    <input type="number" id="addDiscount" name="DiscountPercentage" step="0.01" min="0" max="100" placeholder="Enter discount">
+                </div>
+
+                <div class="collection-section">
+                    <div class="form-section-title">Active Substances</div>
+                    <div class="collection-list scrollbar-container">
+                        <table class="collection-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Concentration</th>
+                                </tr>
+                            </thead>
+                            <tbody id="addActiveSubstancesBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="inline-builder">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="addSubstanceName">
+                        </div>
+                        <div class="form-group">
+                            <label>Concentration</label>
+                            <input type="number" id="addConcentration" step="0.01">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addSubstanceToForm('add')">Add Substance</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="removeSubstanceFromForm('add')">Remove Substance</button>
+                    </div>
+                    <textarea id="addSubstancesText" name="SubstancesText" class="hidden-serialized-field"></textarea>
+                </div>
+
+                <div class="collection-section">
+                    <div class="form-section-title">Batches</div>
+                    <div class="collection-list scrollbar-container">
+                        <table class="collection-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Packs</th>
+                                </tr>
+                            </thead>
+                            <tbody id="addBatchesBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="inline-builder">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="addBatchDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Packs</label>
+                            <input type="number" id="addBatchPacks">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addBatchToForm('add')">Add Batch</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="removeBatchFromForm('add')">Remove Batch</button>
+                    </div>
+                    <textarea id="addBatchesText" name="BatchesText" class="hidden-serialized-field"></textarea>
+                </div>
             </div>
 
             <div class="modal-buttons">
@@ -590,62 +716,117 @@
             <button class="modal-close" onclick="closeUpdateModal()">&times;</button>
         </div>
 
-        <form id="updateItemForm">
-            <div class="form-row">
-                <div class="form-group" style="flex: 0.5;">
-                    <label>ID *</label>
-                    <input type="number" id="updateId" name="Id" required>
-                </div>
-                <div style="flex: 0.5;"></div>
-            </div>
+        <form id="updateItemForm" method="post">
+            @Html.AntiForgeryToken()
 
             <button type="button" class="btn btn-primary get-data-button" onclick="getItemData()">Get Item Data</button>
 
-            <div class="form-group">
-                <label>Name *</label>
-                <input type="text" id="updateName" name="Name" required>
-            </div>
-
-            <div class="form-group">
-                <label>Producer *</label>
-                <input type="text" id="updateProducer" name="Producer" required>
-            </div>
-
-            <div class="form-group">
-                <label>Price *</label>
-                <input type="number" id="updatePrice" name="Price" step="0.01" required>
-            </div>
-
-            <div class="form-group">
-                <label>Category *</label>
-                <input type="text" id="updateCategory" name="Category" required>
-            </div>
-
-            <div class="form-row">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Number of Pills</label>
-                    <input type="number" id="updateNumberOfPills" name="NumberOfPills">
+                    <label>Id *</label>
+                    <input type="number" id="updateId" name="Id" placeholder="Enter product id" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Quantity</label>
-                    <input type="number" id="updateQuantity" name="Quantity">
+                    <label>Name *</label>
+                    <input type="text" id="updateName" name="Name" placeholder="Enter product name" required>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Label</label>
-                <input type="text" id="updateLabel" name="Label">
-            </div>
+                <div class="form-group">
+                    <label>Producer *</label>
+                    <input type="text" id="updateProducer" name="Producer" placeholder="Enter producer" required>
+                </div>
 
-            <div class="form-group">
-                <label>Description</label>
-                <textarea id="updateDescription" name="Description"></textarea>
-            </div>
+                <div class="form-group">
+                    <label>Price *</label>
+                    <input type="number" id="updatePrice" name="Price" step="0.01" min="0.01" placeholder="Enter price" required>
+                </div>
 
-            <div class="form-group">
-                <label>Discount (%)</label>
-                <input type="number" id="updateDiscount" name="DiscountPercentage" step="0.01">
+                <div class="form-group">
+                    <label>Category *</label>
+                    <input type="text" id="updateCategory" name="Category" placeholder="Enter category" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Image Path</label>
+                    <input type="text" id="updateImagePath" name="ImagePath" placeholder="Enter image path">
+                </div>
+
+                <div class="form-group">
+                    <label>Number of Pills *</label>
+                    <input type="number" id="updateNumberOfPills" name="NumberOfPills" min="1" placeholder="Enter number" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Label</label>
+                    <input type="text" id="updateLabel" name="Label" placeholder="Enter label">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Description</label>
+                    <textarea id="updateDescription" name="Description" placeholder="Enter description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Discount (%)</label>
+                    <input type="number" id="updateDiscount" name="DiscountPercentage" step="0.01" min="0" max="100" placeholder="Enter discount">
+                </div>
+
+                <div class="collection-section">
+                    <div class="form-section-title">Active Substances</div>
+                    <div class="collection-list scrollbar-container">
+                        <table class="collection-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Concentration</th>
+                                </tr>
+                            </thead>
+                            <tbody id="updateActiveSubstancesBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="inline-builder">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="updateSubstanceName">
+                        </div>
+                        <div class="form-group">
+                            <label>Concentration</label>
+                            <input type="number" id="updateConcentration" step="0.01">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addSubstanceToForm('update')">Add Substance</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="removeSubstanceFromForm('update')">Remove Substance</button>
+                    </div>
+                    <textarea id="updateSubstancesText" name="SubstancesText" class="hidden-serialized-field"></textarea>
+                </div>
+
+                <div class="collection-section">
+                    <div class="form-section-title">Batches</div>
+                    <div class="collection-list scrollbar-container">
+                        <table class="collection-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Packs</th>
+                                </tr>
+                            </thead>
+                            <tbody id="updateBatchesBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="inline-builder">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="updateBatchDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Packs</label>
+                            <input type="number" id="updateBatchPacks">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addBatchToForm('update')">Add Batch</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="removeBatchFromForm('update')">Remove Batch</button>
+                    </div>
+                    <textarea id="updateBatchesText" name="BatchesText" class="hidden-serialized-field"></textarea>
+                </div>
             </div>
 
             <div class="modal-buttons">
@@ -658,7 +839,12 @@
 
 <script>
     let selectedRow = null;
+    let updateItemLoaded = false;
     const allItems = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Items, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore }));
+    const itemFormState = {
+        add: { substances: {}, batches: {}, selectedBatch: null },
+        update: { substances: {}, batches: {}, selectedBatch: null },
+    };
 
     function selectRow(row) {
         if (selectedRow) {
@@ -669,8 +855,9 @@
     }
 
     function openAddModal() {
-        document.getElementById('addModal').classList.add('show');
         document.getElementById('addItemForm').reset();
+        resetItemFormState('add');
+        document.getElementById('addModal').classList.add('show');
     }
 
     function closeAddModal() {
@@ -678,6 +865,9 @@
     }
 
     function openUpdateModal() {
+        document.getElementById('updateItemForm').reset();
+        resetItemFormState('update');
+        updateItemLoaded = false;
         document.getElementById('updateModal').classList.add('show');
         document.getElementById('updateId').focus();
     }
@@ -688,6 +878,184 @@
 
     function submitInventoryFilters() {
         document.getElementById('inventoryFilterForm').submit();
+    }
+
+    function resetItemFormState(mode) {
+        itemFormState[mode].substances = {};
+        itemFormState[mode].batches = {};
+        itemFormState[mode].selectedBatch = null;
+        renderSubstances(mode);
+        renderBatches(mode);
+    }
+
+    function updateSerializedFields(mode) {
+        const state = itemFormState[mode];
+        document.getElementById(`${mode}SubstancesText`).value = Object.entries(state.substances)
+            .map(([name, concentration]) => `${name}:${concentration}`)
+            .join('\n');
+        document.getElementById(`${mode}BatchesText`).value = Object.entries(state.batches)
+            .map(([date, packs]) => `${date}:${packs}`)
+            .join('\n');
+    }
+
+    function renderSubstances(mode) {
+        const body = document.getElementById(`${mode}ActiveSubstancesBody`);
+        const entries = Object.entries(itemFormState[mode].substances);
+        body.innerHTML = entries.length
+            ? entries.map(([name, concentration]) => `
+                <tr class="collection-row" onclick="fillSubstanceInputs('${mode}', '${escapeJs(name)}')">
+                    <td>${escapeHtml(name)}</td>
+                    <td>${escapeHtml(String(concentration))}</td>
+                </tr>`).join('')
+            : '<tr><td colspan="2" class="text-muted">No active substances added.</td></tr>';
+        updateSerializedFields(mode);
+    }
+
+    function renderBatches(mode) {
+        const body = document.getElementById(`${mode}BatchesBody`);
+        const state = itemFormState[mode];
+        const entries = Object.entries(state.batches).sort(([left], [right]) => left.localeCompare(right));
+        body.innerHTML = entries.length
+            ? entries.map(([date, packs]) => `
+                <tr class="collection-row ${state.selectedBatch === date ? 'selected' : ''}" onclick="selectBatch('${mode}', '${date}')">
+                    <td>${escapeHtml(date)}</td>
+                    <td>${escapeHtml(String(packs))}</td>
+                </tr>`).join('')
+            : '<tr><td colspan="2" class="text-muted">No batches added.</td></tr>';
+        updateSerializedFields(mode);
+    }
+
+    function addSubstanceToForm(mode) {
+        const nameInput = document.getElementById(`${mode}SubstanceName`);
+        const concentrationInput = document.getElementById(`${mode}Concentration`);
+        const name = nameInput.value.trim();
+        const concentration = Number.parseFloat(concentrationInput.value);
+
+        if (!name || Number.isNaN(concentration)) {
+            alert('Add a substance name and a valid concentration.');
+            return;
+        }
+
+        itemFormState[mode].substances[name] = concentration;
+        nameInput.value = '';
+        concentrationInput.value = '';
+        renderSubstances(mode);
+    }
+
+    function removeSubstanceFromForm(mode) {
+        const nameInput = document.getElementById(`${mode}SubstanceName`);
+        const name = nameInput.value.trim();
+        if (!name || !Object.prototype.hasOwnProperty.call(itemFormState[mode].substances, name)) {
+            alert('Insert the name of a valid substance to remove it.');
+            return;
+        }
+
+        delete itemFormState[mode].substances[name];
+        nameInput.value = '';
+        document.getElementById(`${mode}Concentration`).value = '';
+        renderSubstances(mode);
+    }
+
+    function fillSubstanceInputs(mode, name) {
+        document.getElementById(`${mode}SubstanceName`).value = name;
+        document.getElementById(`${mode}Concentration`).value = itemFormState[mode].substances[name];
+    }
+
+    function addBatchToForm(mode) {
+        const dateInput = document.getElementById(`${mode}BatchDate`);
+        const packsInput = document.getElementById(`${mode}BatchPacks`);
+        const date = dateInput.value;
+        const packs = Number.parseInt(packsInput.value, 10);
+        const today = new Date().toISOString().slice(0, 10);
+
+        if (!date || Number.isNaN(packs)) {
+            alert('Add a batch date and a valid number of packs.');
+            return;
+        }
+
+        if (date <= today) {
+            alert('The expiration date must be later than the current date.');
+            return;
+        }
+
+        itemFormState[mode].batches[date] = packs;
+        itemFormState[mode].selectedBatch = date;
+        packsInput.value = '';
+        renderBatches(mode);
+    }
+
+    function selectBatch(mode, date) {
+        itemFormState[mode].selectedBatch = date;
+        document.getElementById(`${mode}BatchDate`).value = date;
+        document.getElementById(`${mode}BatchPacks`).value = itemFormState[mode].batches[date];
+        renderBatches(mode);
+    }
+
+    function removeBatchFromForm(mode) {
+        const dateInput = document.getElementById(`${mode}BatchDate`);
+        const date = itemFormState[mode].selectedBatch || dateInput.value;
+        if (!date || !Object.prototype.hasOwnProperty.call(itemFormState[mode].batches, date)) {
+            alert('Select a batch first.');
+            return;
+        }
+
+        delete itemFormState[mode].batches[date];
+        itemFormState[mode].selectedBatch = null;
+        dateInput.value = '';
+        document.getElementById(`${mode}BatchPacks`).value = '';
+        renderBatches(mode);
+    }
+
+    function normalizeSubstances(substances) {
+        const result = {};
+        for (const [name, concentration] of Object.entries(substances || {})) {
+            result[name] = Number.parseFloat(concentration);
+        }
+
+        return result;
+    }
+
+    function normalizeBatches(batches) {
+        const result = {};
+        for (const [rawDate, packs] of Object.entries(batches || {})) {
+            const date = rawDate.slice(0, 10);
+            result[date] = Number.parseInt(packs, 10);
+        }
+
+        return result;
+    }
+
+    function prepareItemForm(mode) {
+        const discountInput = document.getElementById(`${mode}Discount`);
+        if (!discountInput.value.trim()) {
+            discountInput.value = '0';
+        }
+
+        updateSerializedFields(mode);
+        if (Object.keys(itemFormState[mode].substances).length === 0) {
+            alert('Add at least one active substance.');
+            return false;
+        }
+
+        return true;
+    }
+
+    function escapeHtml(value) {
+        return value.replace(/[&<>"']/g, character => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        }[character]));
+    }
+
+    function escapeJs(value) {
+        return value
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/\r?\n/g, ' ');
     }
 
     function getItemData() {
@@ -703,11 +1071,17 @@
             document.getElementById('updateProducer').value = item.Producer || '';
             document.getElementById('updatePrice').value = item.Price || '';
             document.getElementById('updateCategory').value = item.Category || '';
+            document.getElementById('updateImagePath').value = item.ImagePath || '';
             document.getElementById('updateNumberOfPills').value = item.NumberOfPills || '';
-            document.getElementById('updateQuantity').value = item.Quantity || '';
             document.getElementById('updateLabel').value = item.Label || '';
             document.getElementById('updateDescription').value = item.Description || '';
             document.getElementById('updateDiscount').value = item.DiscountPercentage || '';
+            itemFormState.update.substances = normalizeSubstances(item.ActiveSubstances);
+            itemFormState.update.batches = normalizeBatches(item.Batches);
+            itemFormState.update.selectedBatch = null;
+            renderSubstances('update');
+            renderBatches('update');
+            updateItemLoaded = true;
         } else {
             alert('Item not found!');
             console.log('Available items:', allItems);
@@ -740,6 +1114,15 @@
 
     document.getElementById('addItemForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        if (!this.checkValidity()) {
+            this.reportValidity();
+            return;
+        }
+
+        if (!prepareItemForm('add')) {
+            return;
+        }
+
         const formData = new FormData(this);
         try {
             const response = await fetch('/Items/Create', {
@@ -748,6 +1131,8 @@
             });
             if (response.ok) {
                 location.reload();
+            } else {
+                alert('Error adding item.');
             }
         } catch (error) {
             alert('Error adding item: ' + error);
@@ -756,6 +1141,20 @@
 
     document.getElementById('updateItemForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        if (!updateItemLoaded) {
+            alert('Please click "Get Item Data" before changing anything.');
+            return;
+        }
+
+        if (!this.checkValidity()) {
+            this.reportValidity();
+            return;
+        }
+
+        if (!prepareItemForm('update')) {
+            return;
+        }
+
         const formData = new FormData(this);
         const itemId = document.getElementById('updateId').value;
         try {
@@ -765,9 +1164,14 @@
             });
             if (response.ok) {
                 location.reload();
+            } else {
+                alert('Error updating item.');
             }
         } catch (error) {
             alert('Error updating item: ' + error);
         }
     });
+
+    resetItemFormState('add');
+    resetItemFormState('update');
 </script>

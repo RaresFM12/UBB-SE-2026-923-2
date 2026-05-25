@@ -54,14 +54,16 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult Manage(int? userId, int? orderId, bool incompleteOnly = false, bool expiredOnly = false)
+        public IActionResult Manage(string userEmail = "", int? orderId = null, bool incompleteOnly = false, bool expiredOnly = false)
         {
             this.orderService.ExpireOverdueOrders();
             List<Order> orders = this.orderService.OrdersRepository.GetAllOrders();
 
-            if (userId.HasValue)
+            if (!string.IsNullOrWhiteSpace(userEmail))
             {
-                orders = orders.Where(order => this.GetClientId(order) == userId.Value).ToList();
+                orders = orders
+                    .Where(order => this.GetClientEmail(order).Contains(userEmail.Trim(), StringComparison.OrdinalIgnoreCase))
+                    .ToList();
             }
 
             if (orderId.HasValue)
@@ -82,7 +84,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             var viewModel = new OrderManagementViewModel
             {
                 Orders = orders.OrderByDescending(order => order.Id).Select(this.MapOrderListItem).ToList(),
-                UserId = userId,
+                UserEmail = userEmail,
                 OrderId = orderId,
                 IncompleteOnly = incompleteOnly,
                 ExpiredOnly = expiredOnly,

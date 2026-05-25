@@ -20,7 +20,7 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
     {
         public List<OrderListItemViewModel> Orders { get; set; } = new();
 
-        public int? UserId { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
 
         public int? OrderId { get; set; }
 

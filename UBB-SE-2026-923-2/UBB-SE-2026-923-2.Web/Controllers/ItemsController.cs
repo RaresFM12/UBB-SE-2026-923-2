@@ -66,6 +66,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             Dictionary<string, float> activeSubstances = ParseSubstancesText(viewModel.SubstancesText);
             Dictionary<DateOnly, int> batches = ParseBatchesText(viewModel.BatchesText);
+            int quantity = batches.Values.Sum();
 
             var newItem = new Item(
                 viewModel.Name,
@@ -75,7 +76,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                 viewModel.NumberOfPills,
                 activeSubstances,
                 batches,
-                viewModel.Quantity,
+                quantity,
                 viewModel.Label,
                 viewModel.Description,
                 viewModel.ImagePath,
@@ -117,6 +118,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             Dictionary<string, float> activeSubstances = ParseSubstancesText(viewModel.SubstancesText);
             Dictionary<DateOnly, int> batches = ParseBatchesText(viewModel.BatchesText);
+            int quantity = batches.Values.Sum();
 
             var updatedItem = new Item(
                 id,
@@ -129,7 +131,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                 viewModel.Description,
                 viewModel.ImagePath,
                 viewModel.DiscountPercentage,
-                viewModel.Quantity)
+                quantity)
             {
                 ActiveSubstances = activeSubstances,
                 Batches = batches,
