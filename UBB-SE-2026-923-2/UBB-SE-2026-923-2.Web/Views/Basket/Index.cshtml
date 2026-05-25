@@ -3,9 +3,8 @@
     ViewData["Title"] = "Basket";
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-    <h2 class="mb-2">Basket</h2>
-    <a asp-controller="Orders" asp-action="Create" class="btn btn-primary @(Model.Items.Any() ? string.Empty : "disabled")">Checkout</a>
+<div class="mb-4">
+    <h2>Basket</h2>
 </div>
 
 @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
@@ -30,7 +29,6 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Medicine</th>
-                            <th>Image</th>
                             <th>Producer</th>
                             <th>Discount</th>
                             <th>Quantity</th>
@@ -45,20 +43,16 @@
                                 <td>
                                     <strong>@item.ItemName</strong>
                                 </td>
-                                <td>
-                                    <img src="@item.ItemThumbnailImagePath" class="rounded border bg-white p-1" alt="@item.ItemName" style="width: 72px; height: 72px; object-fit: contain;" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';">
-                                </td>
                                 <td>@item.ItemProducer</td>
                                 <td>
                                     <span class="text-muted">@item.ItemDiscountString</span>
                                     <span class="text-muted ms-1">@item.ItemUserDiscountString</span>
                                 </td>
-                                <td style="max-width: 160px;">
-                                    <form asp-action="UpdateQuantity" method="post" class="d-flex gap-2">
+                                <td style="max-width: 120px;">
+                                    <form asp-action="UpdateQuantity" method="post" class="quantity-form">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="ItemId" value="@item.ItemId" />
-                                        <input class="form-control" type="number" min="0" name="Quantity" value="@item.ItemQuantityInBasket" />
-                                        <button type="submit" class="btn btn-outline-primary btn-sm">Save</button>
+                                        <input class="form-control quantity-input" type="number" min="0" name="Quantity" value="@item.ItemQuantityInBasket" />
                                     </form>
                                 </td>
                                 <td>
@@ -84,6 +78,7 @@
         <div class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">Prescription</h5>
+                <p class="text-muted small">If you have a valid prescription on your name, you can automatically put in your medicine.</p>
                 <form asp-action="ApplyPrescription" method="post">
                     @Html.AntiForgeryToken()
                     <div class="mb-3">
@@ -105,3 +100,13 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.quantity-input').forEach(function (input) {
+            input.addEventListener('change', function () {
+                this.closest('.quantity-form').submit();
+            });
+        });
+    </script>
+}

@@ -57,6 +57,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(PeriodTrackerInputModel inputModel)
         {
+
             if (inputModel.StartPeriodDate == default || inputModel.CycleDays < 20 || inputModel.CycleDays > 45 || inputModel.PeriodLasts < 1 || inputModel.PeriodLasts > 9 || inputModel.PMSOption < 0 || inputModel.PMSOption > 3)
             {
                 // Rebuild the dashboard model strictly for returning the user to the form
