@@ -1,20 +1,18 @@
 @model UBB_SE_2026_923_2.Web.ViewModels.UserAccountListViewModel
 @{
-    ViewData["Title"] = "User accounts";
+    ViewData["Title"] = "User Accounts";
 }
 
-<div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-    <h2 class="mb-2">User accounts</h2>
-    <a asp-action="Create" class="btn btn-primary">Add account</a>
+<div class="mb-3">
+    <h2>User Accounts</h2>
 </div>
 
 <form method="get" class="row g-2 mb-3">
     <div class="col-md-8">
-        <input asp-for="Query" class="form-control" placeholder="Search (id:123, username:john, mail:john@company.com)" />
+        <input asp-for="Query" class="form-control" placeholder="Search users..." autocomplete="off" />
     </div>
-    <div class="col-md-4 d-flex gap-2">
+    <div class="col-md-4">
         <button type="submit" class="btn btn-outline-primary">Search</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
     </div>
 </form>
 
@@ -29,45 +27,121 @@
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Email</th>
-                    <th>Username</th>
-                    <th>Phone</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model.Users)
-                {
-                    <tr>
-                        <td>@user.Id</td>
-                        <td>@user.Email</td>
-                        <td>@(string.IsNullOrWhiteSpace(user.Username) ? "(no username)" : user.Username)</td>
-                        <td>@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "(no phone)" : user.PhoneNumber)</td>
-                        <td>@user.DisplayRole</td>
-                        <td>@user.Status</td>
-                        <td class="text-end">
-                            <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary">Details</a>
-                            @if (user.CanDisable)
-                            {
-                                <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger">Disable</a>
-                            }
-                            @if (user.CanPromote)
-                            {
-                                <form asp-action="Promote" asp-route-id="@user.Id" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-outline-primary">Promote</button>
-                                </form>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div class="d-flex flex-column gap-3">
+        @foreach (var user in Model.Users)
+        {
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="fw-semibold text-primary mb-1">@user.Email</div>
+                    <div class="text-muted small mb-1">@(string.IsNullOrWhiteSpace(user.Username) ? "(no username)" : user.Username)</div>
+                    <div class="text-muted small mb-3">@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "(no phone)" : user.PhoneNumber)</div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        @if (user.CanPromote)
+                        {
+                            <form asp-action="Promote" asp-route-id="@user.Id" method="post" class="d-inline" id="promote-form-@user.Id">
+                                @Html.AntiForgeryToken()
+                                <div class="form-check d-flex align-items-center gap-2 mb-0">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="admin-@user.Id"
+                                           onchange="confirmPromote(@user.Id)" />
+                                    <label class="form-check-label" for="admin-@user.Id">Admin</label>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="form-check d-flex align-items-center gap-2 mb-0">
+                                <input class="form-check-input" type="checkbox" checked disabled />
+                                <label class="form-check-label text-muted">Admin</label>
+                            </div>
+                        }
+
+                        @if (user.CanDisable)
+                        {
+                            <form asp-action="Delete" asp-route-id="@user.Id" method="post" class="d-inline" id="disable-form-@user.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="button"
+                                        class="btn btn-primary btn-sm"
+                                        onclick="confirmDisable(@user.Id)">
+                                    Disable Account
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
     </div>
+}
+
+<!-- Promote Warning Modal -->
+<div class="modal fade" id="promoteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h5 class="fw-semibold mb-2">Warning</h5>
+                <p>This action cannot be undone. Proceed?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelPromote()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="promoteConfirmBtn">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Disable Confirm Modal -->
+<div class="modal fade" id="disableModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h5 class="fw-semibold mb-2">Confirm</h5>
+                <p>Disable this account?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" id="disableConfirmBtn">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var currentPromoteId = null;
+        var currentDisableId = null;
+        var promoteModal = new bootstrap.Modal(document.getElementById('promoteModal'));
+        var disableModal = new bootstrap.Modal(document.getElementById('disableModal'));
+
+        function confirmPromote(userId) {
+            currentPromoteId = userId;
+            promoteModal.show();
+        }
+
+        function cancelPromote() {
+            promoteModal.hide();
+            var checkbox = document.getElementById('admin-' + currentPromoteId);
+            if (checkbox) checkbox.checked = false;
+            currentPromoteId = null;
+        }
+
+        document.getElementById('promoteConfirmBtn').addEventListener('click', function () {
+            if (currentPromoteId) {
+                document.getElementById('promote-form-' + currentPromoteId).submit();
+            }
+        });
+
+        function confirmDisable(userId) {
+            currentDisableId = userId;
+            disableModal.show();
+        }
+
+        document.getElementById('disableConfirmBtn').addEventListener('click', function () {
+            if (currentDisableId) {
+                document.getElementById('disable-form-' + currentDisableId).submit();
+            }
+        });
+    </script>
 }

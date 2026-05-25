@@ -199,17 +199,16 @@ namespace UBB_SE_2026_923_2.Services
         public List<User> SearchUsers(string query)
         {
             if (this.CurrentUser == null)
-            {
                 throw new Exception("Not logged in");
-            }
 
             if (!this.CurrentUser.IsAdmin)
-            {
                 throw new Exception($"Current user with id={this.CurrentUser.Id} not an admin");
-            }
 
             query = query.Trim();
             List<User> queriedUsers = this.UsersRepository.GetAllUsers();
+
+            if (string.IsNullOrWhiteSpace(query))
+                return queriedUsers;
 
             if (query.StartsWith(IdSearchPrefix))
             {
@@ -218,9 +217,7 @@ namespace UBB_SE_2026_923_2.Services
                     int id = int.Parse(query.Substring(IdSearchPrefix.Length));
                     return queriedUsers.Where(user => user.Id == id).ToList();
                 }
-                catch (FormatException)
-                {
-                }
+                catch (FormatException) { }
             }
 
             if (query.StartsWith(UsernameSearchPrefix))
@@ -235,9 +232,13 @@ namespace UBB_SE_2026_923_2.Services
                 return queriedUsers.Where(user => user.Email.Contains(mail)).ToList();
             }
 
-            return queriedUsers;
+            // general search across email, username and phone
+            return queriedUsers.Where(user =>
+                user.Email.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                user.Username.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                user.PhoneNumber.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
-
         public void PromoteToAdmin(User client)
         {
             if (this.CurrentUser == null)

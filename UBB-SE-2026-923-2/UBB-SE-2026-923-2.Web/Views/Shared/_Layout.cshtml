@@ -142,22 +142,23 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="PharmacySchedule" asp-action="Index">My Schedule</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="PharmacySchedule" asp-action="Index">See Schedule</a>
                                 </li>
 
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="PharmacyVacation" asp-action="Index">Vacation Window</a>
                                 </li>
                             }
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a>
+                            </li>
                         }
                     </ul>
 
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a>
-                            </li>
                             <li class="nav-item">
                                 <span class="navbar-text me-3">Signed in as <strong>@User.Identity!.Name</strong></span>
                             </li>

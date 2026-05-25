@@ -30,6 +30,7 @@ namespace UBB_SE_2026_923_2.Services
 
         public IPrescriptionService PrescriptionService { get; private set; }
 
+        private IBasketRepository? basketRepository;
         private readonly User injectedActiveUser;
 
         public User ActiveUser
@@ -48,6 +49,7 @@ namespace UBB_SE_2026_923_2.Services
             this.UsersRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IUsersRepository>();
             this.OrdersRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IOrdersRepository>();
             this.EvaluationsRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IEvaluationsRepository>();
+            this.basketRepository = UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetService<IBasketRepository>();
             this.PrescriptionService = new PrescriptionService(this.ItemsRepository, this.EvaluationsRepository);
         }
 
@@ -57,7 +59,8 @@ namespace UBB_SE_2026_923_2.Services
             IUsersRepository usersRepository,
             IOrdersRepository ordersRepository,
             User activeUser,
-            IEvaluationsRepository? evaluationsRepository = null)
+            IEvaluationsRepository? evaluationsRepository = null,
+            IBasketRepository? basketRepository = null)
         {
             this.SubstancesRepository = substancesRepository;
             this.ItemsRepository = itemsRepository;
@@ -66,6 +69,53 @@ namespace UBB_SE_2026_923_2.Services
             this.EvaluationsRepository = evaluationsRepository ?? UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetRequiredService<IEvaluationsRepository>();
             this.PrescriptionService = new PrescriptionService(itemsRepository, this.EvaluationsRepository);
             this.injectedActiveUser = activeUser;
+            this.basketRepository = basketRepository;
+        }
+
+        private IBasketRepository? BasketRepository =>
+            this.basketRepository ??= UBB_SE_2026_923_2.Shared.SharedServiceProvider.Services.GetService<IBasketRepository>();
+
+        private static Dictionary<int, BasketEntry> CloneBasket(Dictionary<int, BasketEntry> basket)
+        {
+            return basket.ToDictionary(
+                entry => entry.Key,
+                entry => new BasketEntry(entry.Value.Quantity, entry.Value.ExtraDiscountPercentage));
+        }
+
+        private void RestoreBasketFromSharedStore()
+        {
+            User activeUser = this.ActiveUser;
+            IBasketRepository? repository = this.BasketRepository;
+            if (activeUser == null || repository == null)
+            {
+                return;
+            }
+
+            activeUser.Basket = CloneBasket(repository.GetBasket(activeUser.Id));
+        }
+
+        private void SaveBasketToSharedStore()
+        {
+            User activeUser = this.ActiveUser;
+            IBasketRepository? repository = this.BasketRepository;
+            if (activeUser == null || repository == null)
+            {
+                return;
+            }
+
+            repository.SaveBasket(activeUser.Id, activeUser.Basket);
+        }
+
+        private void ClearBasketFromSharedStore()
+        {
+            User activeUser = this.ActiveUser;
+            IBasketRepository? repository = this.BasketRepository;
+            if (activeUser == null || repository == null)
+            {
+                return;
+            }
+
+            repository.ClearBasket(activeUser.Id);
         }
 
         private float NormalizeDiscount(float discount)
@@ -151,6 +201,8 @@ namespace UBB_SE_2026_923_2.Services
 
         public void AddItemToBasket(int itemId, int quantityToBuy, float extraDiscountPercentage = NoExtraDiscount)
         {
+            this.RestoreBasketFromSharedStore();
+
             if (this.ActiveUser.Basket.ContainsKey(itemId))
             {
                 this.ActiveUser.Basket[itemId].Quantity += quantityToBuy;
@@ -160,29 +212,39 @@ namespace UBB_SE_2026_923_2.Services
                     this.ActiveUser.Basket[itemId].ExtraDiscountPercentage = extraDiscountPercentage;
                 }
 
+                this.SaveBasketToSharedStore();
                 return;
             }
 
             this.ActiveUser.AddItemToBasket(itemId, quantityToBuy, extraDiscountPercentage);
+            this.SaveBasketToSharedStore();
         }
 
         public void UpdateBasketItemQuantity(int itemId, int newQuantityToBuy)
         {
+            this.RestoreBasketFromSharedStore();
+
             this.ActiveUser.Basket[itemId].Quantity = newQuantityToBuy;
 
             if (this.ActiveUser.Basket[itemId].Quantity <= EmptyQuantity)
             {
                 this.ActiveUser.RemoveItemFromBasket(itemId);
             }
+
+            this.SaveBasketToSharedStore();
         }
 
         public void RemoveFromBasket(int itemIdToRemove)
         {
+            this.RestoreBasketFromSharedStore();
             this.ActiveUser.RemoveItemFromBasket(itemIdToRemove);
+            this.SaveBasketToSharedStore();
         }
 
         public List<BasketItemViewModel> GetBasketItems()
         {
+            this.RestoreBasketFromSharedStore();
+
             List<BasketItemViewModel> basketItems = new();
             List<int> invalidItemIds = new();
 
@@ -206,6 +268,11 @@ namespace UBB_SE_2026_923_2.Services
             foreach (int invalidItemId in invalidItemIds)
             {
                 this.ActiveUser.RemoveItemFromBasket(invalidItemId);
+            }
+
+            if (invalidItemIds.Count > 0)
+            {
+                this.SaveBasketToSharedStore();
             }
 
             return basketItems;
@@ -367,6 +434,8 @@ namespace UBB_SE_2026_923_2.Services
 
         public void PlaceOrderFromBasket(DateOnly chosenPickUpDate)
         {
+            this.RestoreBasketFromSharedStore();
+
             Dictionary<int, Tuple<int, float>> itemInformationForOrder = new Dictionary<int, Tuple<int, float>>();
 
             foreach (KeyValuePair<int, BasketEntry> basketItemEntry in this.ActiveUser.Basket)
@@ -406,6 +475,7 @@ namespace UBB_SE_2026_923_2.Services
 
             this.AddOrderWithItems(this.ActiveUser.Id, chosenPickUpDate, itemInformationForOrder);
             this.ActiveUser.Basket.Clear();
+            this.ClearBasketFromSharedStore();
         }
 
         public void ResubmitExpiredOrder(int orderIdToResubmit, DateOnly chosenPickUpDate)
