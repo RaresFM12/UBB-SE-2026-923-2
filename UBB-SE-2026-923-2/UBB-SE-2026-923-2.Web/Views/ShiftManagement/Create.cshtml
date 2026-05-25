@@ -1,55 +1,155 @@
-﻿@{
+@model UBB_SE_2026_923_2.Web.ViewModels.ShiftCreationViewModel
+@{
     ViewData["Title"] = "Schedule Shift";
-    var staffList = ViewBag.StaffList as IEnumerable<UBB_SE_2026_923_2.Models.IStaff>;
 }
 
-<h2>Schedule a New Shift</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Schedule a New Shift</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">View Shifts Calendar</a>
+</div>
 
-<div class="card p-4 mt-3 col-md-6">
-    <form asp-action="Create" method="post">
-        <div asp-validation-summary="All" class="text-danger"></div>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All" class="alert alert-danger py-2"></div>
+}
 
-        <div class="form-group mb-3">
-            <label class="control-label">Select Staff</label>
-            <select name="staffId" class="form-select" required>
-                <option value="">-- Choose Staff --</option>
-                @if (staffList != null)
-                {
-                    foreach (var staff in staffList)
+@if (TempData["ShiftStatusMessage"] != null)
+{
+    <div class="alert alert-info py-2">@TempData["ShiftStatusMessage"]</div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-5 col-xl-4">
+        <div class="card p-4">
+            <form asp-action="Create" method="get" id="locationForm" class="mb-3">
+                <label for="location" class="form-label">Location / Department</label>
+                <select id="location" name="location" class="form-select" onchange="this.form.submit()">
+                    <option value="">Choose Location</option>
+                    @foreach (var location in Model.Locations)
                     {
-                        <option value="@staff.StaffID">@staff.FirstName @staff.LastName (@staff.GetType().Name)</option>
+                        <option value="@location" selected="@(location == Model.SelectedLocation)">@location</option>
                     }
+                </select>
+            </form>
+
+            <form asp-action="Create" method="get" id="qualificationForm" class="mb-3">
+                <input type="hidden" name="location" value="@Model.SelectedLocation" />
+                <label for="qualification" class="form-label">Specialization / Certification</label>
+                <select id="qualification" name="qualification" class="form-select" onchange="this.form.submit()" disabled="@(string.IsNullOrWhiteSpace(Model.SelectedLocation))">
+                    <option value="">Choose Specialization or Certification</option>
+                    @foreach (var qualification in Model.Qualifications)
+                    {
+                        <option value="@qualification" selected="@(qualification == Model.SelectedQualification)">@qualification</option>
+                    }
+                </select>
+            </form>
+
+            <form asp-action="Create" method="post">
+                <input type="hidden" name="location" value="@Model.SelectedLocation" />
+                <input type="hidden" name="qualification" value="@Model.SelectedQualification" />
+
+                <div class="mb-3">
+                    <label for="staffId" class="form-label">Select the employee</label>
+                    <select id="staffId" name="staffId" class="form-select" disabled="@(Model.QualifiedStaff.Count == 0)">
+                        <option value="">Select an employee for the shift</option>
+                        @foreach (var staff in Model.QualifiedStaff)
+                        {
+                            <option value="@staff.StaffID">@staff.FirstName @staff.LastName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Qualified found staff</label>
+                    <div class="border rounded p-2" style="min-height: 44px; max-height: 140px; overflow-y: auto;">
+                        @if (Model.QualifiedStaff.Count == 0)
+                        {
+                            <span class="text-muted small">No qualified staff loaded.</span>
+                        }
+                        else
+                        {
+                            @foreach (var staff in Model.QualifiedStaff)
+                            {
+                                <div class="small">@staff.FirstName @staff.LastName</div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="shiftDate" class="form-label">Shift Date</label>
+                    <input id="shiftDate" type="date" name="shiftDate" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="startTime" class="form-label">Starting Hour</label>
+                    <input id="startTime" type="time" name="startTime" class="form-control" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="endTime" class="form-label">Ending Hour</label>
+                    <input id="endTime" type="time" name="endTime" class="form-control" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Schedule the Shift</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-7 col-xl-8">
+        <div class="card">
+            <div class="card-header bg-light">
+                Today's Shifts
+                <span class="badge bg-secondary">@Model.TodayShifts.Count</span>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.TodayShifts.Count == 0)
+                {
+                    <p class="text-muted small m-3 mb-0">No shifts scheduled today.</p>
                 }
-            </select>
+                else
+                {
+                    <table class="table table-sm table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th>Staff Name</th>
+                                <th>Location</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var shift in Model.TodayShifts)
+                            {
+                                <tr>
+                                    <td>@shift.AppointedStaff?.FirstName @shift.AppointedStaff?.LastName</td>
+                                    <td>@shift.Location</td>
+                                    <td>@shift.StartTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
+                                    <td>@shift.EndTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
+                                    <td>
+                                        <span class="badge @(shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.ACTIVE ? "bg-success" : (shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.CANCELLED ? "bg-danger" : "bg-secondary"))">
+                                            @shift.Status
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <form asp-action="ActivateFromCreate" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-success">Set Active</button>
+                                        </form>
+                                        <form asp-action="CancelFromCreate" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                        </form>
+                                        <form asp-action="AutoReassignFromCreate" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Auto-Reassign</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
         </div>
-
-        <div class="form-group mb-3">
-            <label class="control-label">Location</label>
-            <select name="location" class="form-select" required>
-                <option value="">-- Choose Location --</option>
-                <option value="ER">ER</option>
-                <option value="Ward A">Ward A</option>
-                <option value="Ward B">Ward B</option>
-                <option value="Cardiology">Cardiology</option>
-                <option value="Surgery">Surgery</option>
-                <option value="Neurology">Neurology</option>
-                <option value="Pediatry">Pediatry</option>
-                <option value="Oncology">Oncology</option>
-                <option value="Pharmacy">Pharmacy</option>
-            </select>
-        </div>
-
-        <div class="form-group mb-3">
-            <label class="control-label">Start Time</label>
-            <input type="datetime-local" name="startTime" class="form-control" required />
-        </div>
-
-        <div class="form-group mb-4">
-            <label class="control-label">End Time</label>
-            <input type="datetime-local" name="endTime" class="form-control" required />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Schedule</button>
-        <a asp-action="Index" class="btn btn-secondary">Back</a>
-    </form>
+    </div>
 </div>

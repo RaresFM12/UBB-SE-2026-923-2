@@ -1,57 +1,138 @@
-@using UBB_SE_2026_923_2.Web.ViewModels
 @model UBB_SE_2026_923_2.Web.ViewModels.ErDispatchDashboardViewModel
 @{
     ViewData["Title"] = "ER Dispatch";
-
-    var pendingTable = new ErDispatchTableViewModel
-    {
-        Title = "Pending",
-        HeaderCss = "bg-warning-subtle",
-        Kind = "pending",
-        Rows = Model.Pending,
-    };
-    var unmatchedTable = new ErDispatchTableViewModel
-    {
-        Title = "Unmatched — needs manual override",
-        HeaderCss = "bg-danger-subtle",
-        Kind = "unmatched",
-        Rows = Model.Unmatched,
-    };
-    var assignedTable = new ErDispatchTableViewModel
-    {
-        Title = "Assigned",
-        HeaderCss = "bg-success-subtle",
-        Kind = "assigned",
-        Rows = Model.Assigned,
-    };
-    var cancelledTable = new ErDispatchTableViewModel
-    {
-        Title = "Cancelled",
-        HeaderCss = "bg-secondary-subtle",
-        Kind = "cancelled",
-        Rows = Model.Cancelled,
-    };
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3 mb-0">Automated ER Dispatch &amp; Doctor Status Management</h1>
     <div class="d-flex gap-2">
         <form asp-action="Simulate" method="post" class="d-inline">
-            <button type="submit" class="btn btn-outline-secondary btn-sm">Simulate Incoming (3)</button>
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Simulate Incoming</button>
+        </form>
+        <form asp-action="Refresh" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Refresh</button>
         </form>
         <form asp-action="DispatchAll" method="post" class="d-inline">
-            <button type="submit" class="btn btn-primary btn-sm">Run Dispatch (all pending)</button>
+            <button type="submit" class="btn btn-primary btn-sm">Run Dispatch</button>
         </form>
-        <a asp-action="Create" class="btn btn-success btn-sm">New ER Request</a>
     </div>
 </div>
 
-@if (TempData["StatusMessage"] != null)
-{
-    <div class="alert alert-info py-2">@TempData["StatusMessage"]</div>
-}
+<div class="alert alert-info py-2">
+    <strong>Dispatch Status:</strong> @Model.StatusMessage
+</div>
 
-<partial name="_RequestTable" model="pendingTable" />
-<partial name="_RequestTable" model="unmatchedTable" />
-<partial name="_RequestTable" model="assignedTable" />
-<partial name="_RequestTable" model="cancelledTable" />
+<div class="card mb-4">
+    <div class="card-body">
+        <p class="mb-3">Click 'Run Dispatch' to process pending ER requests and automatically assign doctors.</p>
+
+        <form asp-action="Override" asp-route-id="@Model.SelectedRequestId" method="post" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label for="selectedRequestId" class="form-label">Unmatched request</label>
+                <select id="selectedRequestId" name="selectedRequestId" class="form-select"
+                        onchange="if (this.value) window.location.href='@Url.Action("Index", "ERDispatch")?selectedRequestId=' + encodeURIComponent(this.value);">
+                    <option value="">Select unmatched request</option>
+                    @foreach (var request in Model.SessionUnmatched)
+                    {
+                        <option value="@request.RequestId" selected="@(request.RequestId == Model.SelectedRequestId)">
+                            @request.RequestLabel
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-5">
+                <label for="selectedDoctorId" class="form-label">Eligible override doctor</label>
+                <select id="selectedDoctorId" name="selectedDoctorId" class="form-select">
+                    <option value="">Select near-end IN_EXAMINATION doctor</option>
+                    @foreach (var candidate in Model.OverrideCandidates)
+                    {
+                        <option value="@candidate.DoctorId">@candidate.DisplayLabel</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100" disabled="@(Model.SelectedRequestId == null || Model.OverrideCandidates.Count == 0)">
+                    Apply Override
+                </button>
+            </div>
+        </form>
+
+        <p class="text-muted small mb-0 mt-2">@Model.ManualInterventionHint</p>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-danger-subtle">
+        Unmatched Requests (Manual Intervention Required)
+        <span class="badge bg-light text-dark">@Model.SessionUnmatched.Count</span>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.SessionUnmatched.Count == 0)
+        {
+            <p class="text-muted small m-3 mb-0">No unmatched requests.</p>
+        }
+        else
+        {
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Specialization</th>
+                        <th>Location</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model.SessionUnmatched)
+                    {
+                        <tr>
+                            <td>@request.RequestId</td>
+                            <td>@request.RequestSpecialization</td>
+                            <td>@request.RequestLocation</td>
+                            <td class="text-danger">@request.NoMatchReason</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-success-subtle">
+        Successful Matches (Doctor Assigned)
+        <span class="badge bg-light text-dark">@Model.SessionMatches.Count</span>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.SessionMatches.Count == 0)
+        {
+            <p class="text-muted small m-3 mb-0">No successful matches.</p>
+        }
+        else
+        {
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Assigned Doctor</th>
+                        <th>Specialization</th>
+                        <th>Match Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var match in Model.SessionMatches)
+                    {
+                        <tr>
+                            <td>@match.RequestId</td>
+                            <td>@match.AssignedDoctor</td>
+                            <td>@match.Specialization</td>
+                            <td>@match.MatchReason</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
