@@ -137,6 +137,39 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             return this.View(model);
         }
 
+        [Authorize(Roles = "Admin,Doctor")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Finish(int id)
+        {
+            var appointment = await this.appointmentService.GetAppointmentDetailsAsync(id);
+            if (appointment == null)
+            {
+                return this.NotFound();
+            }
+
+            if (this.User.IsInRole("Doctor"))
+            {
+                int? doctorId = await this.GetCurrentDoctorIdAsync();
+                if (!doctorId.HasValue || appointment.Doctor?.StaffID != doctorId.Value)
+                {
+                    return this.Forbid();
+                }
+            }
+
+            try
+            {
+                await this.appointmentService.FinishAppointmentAsync(appointment);
+                this.TempData["DetailsSuccess"] = "Appointment finished successfully! Doctor status updated.";
+            }
+            catch (Exception exception)
+            {
+                this.TempData["DetailsError"] = $"Error: {exception.Message}";
+            }
+
+            return this.RedirectToAction(nameof(this.Details), new { id });
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Create()

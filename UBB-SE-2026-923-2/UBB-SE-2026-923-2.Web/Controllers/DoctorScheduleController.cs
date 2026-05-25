@@ -34,12 +34,26 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             string mode = "Daily",
             string nav = null)
         {
-            var doctors = _shiftSwapService.GetAllDoctors();
+            string errorMessage = null;
+            List<Doctor> doctors = new();
+
+            try
+            {
+                doctors = _shiftSwapService.GetAllDoctors();
+            }
+            catch (Exception exception)
+            {
+                errorMessage = $"Failed to load doctors: {exception.Message}";
+            }
+
             ViewBag.Doctors = doctors;
 
             int? effectiveDoctorId = selectedDoctorId;
             if (!effectiveDoctorId.HasValue && !User.IsInRole("Admin"))
                 effectiveDoctorId = GetCurrentDoctorStaffId();
+
+            if (errorMessage == null && doctors.Count == 0)
+                errorMessage = "No doctors available.";
 
             ViewBag.SelectedDoctorId = effectiveDoctorId;
 
@@ -67,30 +81,41 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             ViewBag.SelectedDate = baseDate.ToString("yyyy-MM-dd");
             ViewBag.SelectedDateText = mode == "Weekly"
-                ? $"{rangeStart:dd MMM} - {rangeEnd:dd MMM yyyy}"
-                : baseDate.ToString("dd MMM yyyy");
+                ? $"Week of {rangeStart:dd MMM yyyy}"
+                : baseDate.ToString("dddd, dd MMM yyyy");
             ViewBag.Mode = mode;
             ViewBag.PreviousButtonText = mode == "Weekly" ? "Previous Week" : "Previous";
             ViewBag.NextButtonText = mode == "Weekly" ? "Next Week" : "Next";
 
-            if (!effectiveDoctorId.HasValue)
-                return View(new DoctorScheduleViewModel());
+            var filteredShifts = new List<Shift>();
+            var appointments = new List<Appointment>();
 
-            var shifts = _shiftSwapService.GetFutureShiftsForStaff(effectiveDoctorId.Value);
-            var appointments = await _appointmentService.GetAppointmentsInRangeAsync(
-                effectiveDoctorId.Value, rangeStart, rangeEnd.AddDays(1).AddSeconds(-1));
+            if (effectiveDoctorId.HasValue && errorMessage == null)
+            {
+                try
+                {
+                    var shifts = _shiftSwapService.GetFutureShiftsForStaff(effectiveDoctorId.Value);
+                    var appointmentsResult = await _appointmentService.GetAppointmentsInRangeAsync(
+                        effectiveDoctorId.Value, rangeStart, rangeEnd.AddDays(1).AddSeconds(-1));
 
-            var filteredShifts = shifts
-                .Where(s => s.StartTime.Date >= rangeStart && s.StartTime.Date <= rangeEnd)
-                .ToList();
+                    appointments = appointmentsResult.ToList();
+                    filteredShifts = shifts
+                        .Where(s => s.StartTime.Date >= rangeStart && s.StartTime.Date <= rangeEnd)
+                        .ToList();
+                }
+                catch (Exception exception)
+                {
+                    errorMessage = $"Failed to load schedule: {exception.Message}";
+                }
+            }
 
-            var isEmpty = !filteredShifts.Any() && !appointments.Any();
-            ViewBag.IsEmpty = isEmpty;
+            ViewBag.ErrorMessage = errorMessage;
+            ViewBag.IsEmpty = string.IsNullOrEmpty(errorMessage) && !filteredShifts.Any() && !appointments.Any();
 
             return View(new DoctorScheduleViewModel
             {
                 Shifts = filteredShifts,
-                Appointments = appointments.ToList()
+                Appointments = appointments
             });
         }
     }
