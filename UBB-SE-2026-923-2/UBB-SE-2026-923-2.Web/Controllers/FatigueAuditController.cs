@@ -69,5 +69,21 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             this.TempData["Success"] = "Shift reassigned successfully.";
             return this.RedirectToAction(nameof(this.Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Publish(DateTime? weekStart)
+        {
+            var effectiveWeekStart = weekStart ?? DateTime.Today;
+            var result = this.fatigueAuditService.RunAutoAudit(effectiveWeekStart);
+            if (!result.CanPublish)
+            {
+                this.TempData["Error"] = "Roster cannot be published while violations exist.";
+                return this.RedirectToAction(nameof(this.Index), new { weekStart = effectiveWeekStart.ToString("yyyy-MM-dd") });
+            }
+
+            this.TempData["Success"] = $"The roster for the week of {effectiveWeekStart:dd MMM yyyy} has been published successfully.";
+            return this.RedirectToAction(nameof(this.Index), new { weekStart = effectiveWeekStart.ToString("yyyy-MM-dd") });
+        }
     }
 }
