@@ -55,6 +55,7 @@ namespace UBB_SE_2026_923_2.Shared
         {
             // Pharmacy-side repositories.
             services.AddSingleton<IUsersRepository, HttpUsersRepository>();
+            services.AddSingleton<IBasketRepository, HttpBasketRepository>();
             services.AddSingleton<IItemsRepository, HttpItemsRepository>();
             services.AddSingleton<IOrdersRepository, HttpOrdersRepository>();
             services.AddSingleton<ISubstancesRepository, HttpSubstancesRepository>();

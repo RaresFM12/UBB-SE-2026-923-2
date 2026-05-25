@@ -101,7 +101,7 @@ namespace UBB_SE_2026_923_2.Views
                     this.Add("Shopping Cart", "client-cart", typeof(BasketPage), this.orderService);
                     this.Add("Order History", "client-orders", typeof(OrderHistoryPage), this.orderService);
                     this.Add("Period Tracker", "client-period-tracker", typeof(PeriodTrackerPage), this.periodTrackerViewModel);
-                    this.Add("Notifications", "client-notifications", typeof(Notifications));
+                    this.Add("Notifications", "client-notifications", typeof(Notifications), catalogParameter);
                     break;
             }
 
