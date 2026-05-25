@@ -437,12 +437,12 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             List<OrderLineItemViewModel> lineItems = new();
             foreach (KeyValuePair<int, Tuple<int, float>> entry in order.ItemQuantitiesWithFinalPrice)
             {
-                Item item = this.orderService.ItemsRepository.GetItemById(entry.Key);
+                Item? item = this.orderService.ItemsRepository.GetItemById(entry.Key);
                 lineItems.Add(new OrderLineItemViewModel
                 {
-                    ItemId = item.Id,
-                    Name = item.Name,
-                    Producer = item.Producer,
+                    ItemId = item?.Id ?? entry.Key,
+                    Name = item?.Name ?? $"Deleted item #{entry.Key}",
+                    Producer = item?.Producer ?? "Unavailable",
                     Quantity = entry.Value.Item1,
                     FinalPrice = entry.Value.Item2,
                 });
@@ -456,6 +456,11 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             if (order.Client != null)
             {
                 return order.Client.Id;
+            }
+
+            if (order.ClientId > 0)
+            {
+                return order.ClientId;
             }
 
             foreach (User user in this.orderService.UsersRepository.GetAllUsers())

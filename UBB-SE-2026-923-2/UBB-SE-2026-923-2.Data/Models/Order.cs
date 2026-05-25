@@ -33,6 +33,8 @@ namespace UBB_SE_2026_923_2.Models
 
         public bool IsExpired { get; set; }
 
+        public int ClientId { get; set; }
+
         // Legacy in-memory view — not persisted. Callers use OrderItemEntries below.
         [NotMapped]
         public Dictionary<int, Tuple<int, float>> ItemQuantitiesWithFinalPrice { get; set; }
@@ -56,6 +58,7 @@ namespace UBB_SE_2026_923_2.Models
         {
             this.Id = identifier;
             this.Client = client;
+            this.ClientId = client.Id;
             this.PickUpDate = pickUpDate;
             this.IsCompleted = isCompleted;
             this.IsExpired = isExpired;

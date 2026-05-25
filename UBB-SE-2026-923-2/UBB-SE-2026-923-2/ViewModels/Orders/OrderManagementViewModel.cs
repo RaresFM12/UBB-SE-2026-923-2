@@ -126,14 +126,39 @@
             this.orderService.ExpireOverdueOrders();
             foreach (Order currOrder in this.orderService.OrdersRepository.GetAllOrders())
             {
-                int userID = this.orderService.OrdersRepository.GetOrder(currOrder.Id).Client.Id;
-                string currUserEmail = this.orderService.UsersRepository.GetUserById(userID).Email;
+                string currUserEmail = this.ResolveClientEmail(currOrder);
 
                 OrderDetail currOrderDetail = new(currOrder, currUserEmail);
 
                 this.baseOrderList.Add(currOrderDetail);
                 this.FilteredOrderList.Add(currOrderDetail);
             }
+        }
+
+        private string ResolveClientEmail(Order order)
+        {
+            int? clientId = order.Client?.Id;
+            if (!clientId.HasValue && order.ClientId > 0)
+            {
+                clientId = order.ClientId;
+            }
+
+            if (!clientId.HasValue)
+            {
+                Order hydratedOrder = this.orderService.OrdersRepository.GetOrder(order.Id);
+                clientId = hydratedOrder?.Client?.Id;
+                if (!clientId.HasValue && hydratedOrder?.ClientId > 0)
+                {
+                    clientId = hydratedOrder.ClientId;
+                }
+            }
+
+            if (!clientId.HasValue)
+            {
+                return "Unknown";
+            }
+
+            return this.orderService.UsersRepository.GetUserById(clientId.Value)?.Email ?? "Unknown";
         }
 
         public event Action<Tuple<IOrderService, OrderDetail>> ClickDetailButton;

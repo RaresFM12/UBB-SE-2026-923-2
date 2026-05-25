@@ -73,6 +73,21 @@ builder.Services.AddScoped<ISubstancesRepository, SQLSubstancesRepository>();
 
 var app = builder.Build();
 
+using (var databaseScope = app.Services.CreateScope())
+{
+    var databaseContextFactory = databaseScope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+    using var databaseContext = databaseContextFactory.CreateDbContext();
+
+    if (databaseContext.Database.IsRelational())
+    {
+        databaseContext.Database.Migrate();
+    }
+    else
+    {
+        databaseContext.Database.EnsureCreated();
+    }
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 

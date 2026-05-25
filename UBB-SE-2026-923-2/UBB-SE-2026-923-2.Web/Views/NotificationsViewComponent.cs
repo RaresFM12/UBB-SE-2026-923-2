@@ -21,13 +21,18 @@ namespace UBB_SE_2026_923_2.Web.Views
         {
             if (this.UserClaimsPrincipal?.Identity?.IsAuthenticated != true)
             {
-                return this.View(new NotificationsDropdownViewModel());
+                return this.Content(string.Empty);
+            }
+
+            if (this.UserClaimsPrincipal.IsInRole("Client") != true)
+            {
+                return this.Content(string.Empty);
             }
 
             var idClaim = this.UserClaimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!int.TryParse(idClaim, out int userId))
             {
-                return this.View(new NotificationsDropdownViewModel());
+                return this.Content(string.Empty);
             }
 
             this.userAccountService.LoadCurrentUser(userId);
@@ -35,7 +40,7 @@ namespace UBB_SE_2026_923_2.Web.Views
 
             if (currentUser == null)
             {
-                return this.View(new NotificationsDropdownViewModel());
+                return this.Content(string.Empty);
             }
 
             var notifications = this.adminService.GetNotificationsForUser(currentUser);

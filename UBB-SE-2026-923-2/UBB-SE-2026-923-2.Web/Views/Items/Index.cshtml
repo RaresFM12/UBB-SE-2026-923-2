@@ -13,12 +13,23 @@
         --app-border-radius: 6px;
     }
 
+    body > .container {
+        max-width: none;
+        width: 100%;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
     .inventory-container {
         padding: 20px;
         background-color: #FFFFFF;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
+        width: 100%;
+        max-width: 1700px;
+        margin: 0 auto;
+        box-sizing: border-box;
     }
 
     .top-bar {
@@ -27,6 +38,11 @@
         align-items: center;
         margin-bottom: 20px;
         gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .inventory-filter-form {
+        display: none;
     }
 
     .left-controls {
@@ -134,7 +150,7 @@
         padding: 8px 12px;
         font-size: 14px;
         width: 100%;
-        max-width: 1300px;
+        max-width: none;
         box-sizing: border-box;
     }
 
@@ -191,22 +207,26 @@
         display: flex;
         flex-direction: column;
         margin-bottom: 20px;
-        max-width: 1300px;
+        width: 100%;
+        max-width: none;
         margin-left: auto;
         margin-right: auto;
-        align-self: center;
+        align-self: stretch;
     }
 
     .table-scroll-container {
         max-height: 500px;
         overflow-y: auto;
         overflow-x: auto;
+        width: 100%;
     }
 
     .table {
         margin: 0;
         border-collapse: collapse;
         width: 100%;
+        min-width: 1420px;
+        table-layout: fixed;
     }
 
     .table thead {
@@ -414,6 +434,8 @@
 </style>
 
 <div class="inventory-container">
+    <form id="inventoryFilterForm" asp-controller="Items" asp-action="Index" method="get" class="inventory-filter-form"></form>
+
     <!-- Top Bar with Statistics and Toggle -->
     <div class="top-bar">
         <div class="left-controls">
@@ -422,7 +444,7 @@
         <div class="right-controls">
             <span style="color: var(--app-text-primary); font-weight: 500;">Show expired items</span>
             <div class="toggle-switch">
-                <input type="checkbox" id="showExpiredToggle" onchange="filterItems()">
+                <input type="checkbox" id="showExpiredToggle" name="showExpiredOnly" value="true" form="inventoryFilterForm" @(Model.ShowExpiredOnly ? "checked" : string.Empty) onchange="submitInventoryFilters()">
             </div>
         </div>
     </div>
@@ -431,13 +453,13 @@
     <div class="nav-tabs-center">
         <button class="btn btn-primary">Items</button>
         <a asp-controller="Substances" asp-action="Index" class="btn btn-secondary">Substances</a>
-        <a asp-controller="Orders" asp-action="Index" class="btn btn-secondary">Orders</a>
+        <a asp-controller="Orders" asp-action="Manage" class="btn btn-secondary">Orders</a>
     </div>
 
     <!-- Search Bar -->
     <div class="search-container">
         <label class="search-label">Search by name</label>
-        <input type="text" id="searchInput" class="search-input" placeholder="Enter name..." onkeyup="filterItems()">
+        <input type="text" id="searchInput" name="searchQuery" value="@Model.SearchQuery" form="inventoryFilterForm" class="search-input" placeholder="Enter name..." oninput="filterItems()">
     </div>
 
     <!-- Table -->
@@ -455,15 +477,15 @@
                     <thead>
                         <tr>
                             <th style="width: 50px;">ID</th>
-                            <th style="width: 150px;">Name</th>
-                            <th style="width: 150px;">Producer</th>
-                            <th style="width: 70px;">Price</th>
+                            <th style="width: 170px;">Name</th>
+                            <th style="width: 170px;">Producer</th>
+                            <th style="width: 90px;">Price</th>
                             <th style="width: 150px;">Category</th>
-                            <th style="width: 250px;">Description</th>
-                            <th style="width: 70px;">Pills</th>
-                            <th style="width: 80px;">Quantity</th>
-                            <th style="width: 150px;">Label</th>
-                            <th style="width: 70px;">Discount</th>
+                            <th style="width: 360px;">Description</th>
+                            <th style="width: 80px;">Pills</th>
+                            <th style="width: 90px;">Quantity</th>
+                            <th style="width: 170px;">Label</th>
+                            <th style="width: 90px;">Discount</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -662,6 +684,10 @@
 
     function closeUpdateModal() {
         document.getElementById('updateModal').classList.remove('show');
+    }
+
+    function submitInventoryFilters() {
+        document.getElementById('inventoryFilterForm').submit();
     }
 
     function getItemData() {

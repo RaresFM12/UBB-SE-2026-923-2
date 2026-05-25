@@ -186,6 +186,11 @@
                 return shownOrder.Client.Email;
             }
 
+            if (shownOrder.ClientId > 0)
+            {
+                return this.orderService.UsersRepository.GetUserById(shownOrder.ClientId)?.Email ?? "Unknown";
+            }
+
             if (this.orderService.ActiveUser != null)
             {
                 bool activeUserOwnsOrder = this.orderService.OrdersRepository
