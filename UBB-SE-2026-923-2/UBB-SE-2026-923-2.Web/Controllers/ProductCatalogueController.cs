@@ -160,7 +160,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         public IActionResult AddToCart(int itemId, int quantity)
         {
             var item = _catalogueService.GetItems(null, null, null, null, null, null, true, 0, int.MaxValue)
-                                        .FirstOrDefault(i => i.Id == itemId);
+                                        .FirstOrDefault(itemNew => itemNew.Id == itemId);
 
             if (item == null || quantity <= 0 || quantity > 50 || quantity > item.Quantity)
             {

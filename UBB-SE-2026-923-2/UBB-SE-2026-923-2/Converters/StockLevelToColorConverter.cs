@@ -17,7 +17,7 @@
                     StockLevel.OutOfStock => new SolidColorBrush(Colors.Red),
                     StockLevel.LowStock => new SolidColorBrush(Colors.Orange),
                     StockLevel.InStock => new SolidColorBrush(Colors.Green),
-                    _ => new SolidColorBrush(Colors.Gray),
+                    var stock => new SolidColorBrush(Colors.Gray),
                 };
             }
 

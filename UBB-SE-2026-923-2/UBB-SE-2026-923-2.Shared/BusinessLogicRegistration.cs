@@ -62,15 +62,15 @@ namespace UBB_SE_2026_923_2.Shared
 
             // Staff: one HTTP-backed instance forwarded to all three staff-repository interfaces.
             services.AddSingleton<HttpStaffRepository>();
-            services.AddSingleton<IStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
-            services.AddSingleton<IShiftManagementStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
-            services.AddSingleton<IPharmacyStaffRepository>(sp => sp.GetRequiredService<HttpStaffRepository>());
+            services.AddSingleton<IStaffRepository>(serviceProvider=> serviceProvider.GetRequiredService<HttpStaffRepository>());
+            services.AddSingleton<IShiftManagementStaffRepository>(serviceProvider=> serviceProvider.GetRequiredService<HttpStaffRepository>());
+            services.AddSingleton<IPharmacyStaffRepository>(serviceProvider=> serviceProvider.GetRequiredService<HttpStaffRepository>());
 
             // Shifts: one HTTP-backed instance forwarded to all three shift-repository interfaces.
             services.AddSingleton<HttpShiftRepository>();
-            services.AddSingleton<IShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
-            services.AddSingleton<IShiftManagementShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
-            services.AddSingleton<IPharmacyShiftRepository>(sp => sp.GetRequiredService<HttpShiftRepository>());
+            services.AddSingleton<IShiftRepository>(serviceProvider=> serviceProvider.GetRequiredService<HttpShiftRepository>());
+            services.AddSingleton<IShiftManagementShiftRepository>(serviceProvider=> serviceProvider.GetRequiredService<HttpShiftRepository>());
+            services.AddSingleton<IPharmacyShiftRepository>(serviceProvider => serviceProvider.GetRequiredService<HttpShiftRepository>());
 
             services.AddSingleton<IPharmacyHandoverRepository, HttpPharmacyHandoverRepository>();
             services.AddSingleton<IShiftSwapRepository, HttpShiftSwapRepository>();
@@ -115,10 +115,10 @@ namespace UBB_SE_2026_923_2.Shared
             // is constructed inside OrderService and also registered for direct use.
             services.AddSingleton<IOrderService, OrderService>();
             services.AddSingleton<IBasketService, BasketService>();
-            services.AddSingleton<IPrescriptionService>(sp =>
+            services.AddSingleton<IPrescriptionService>(serviceProvider=>
                 new PrescriptionService(
-                    sp.GetRequiredService<IItemsRepository>(),
-                    sp.GetRequiredService<IEvaluationsRepository>()));
+                    serviceProvider.GetRequiredService<IItemsRepository>(),
+                    serviceProvider.GetRequiredService<IEvaluationsRepository>()));
 
             services.AddSingleton<IPeriodTrackerService, PeriodTrackerService>();
             services.AddSingleton<IPeriodTrackerServiceFactory, PeriodTrackerServiceFactory>();

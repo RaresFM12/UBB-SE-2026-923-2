@@ -225,9 +225,9 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockShiftSwapRepository.Setup(repository => repository.GetAllShiftSwapRequests())
                 .Returns(swapRequests);
 
-            var result = this.service.GetAllShiftSwapRequests();
+            var results = this.service.GetAllShiftSwapRequests();
 
-            Assert.That(result.Select(r => r.SwapId), Is.EquivalentTo(new[] { 10, 20 }));
+            Assert.That(results.Select(result => result.SwapId), Is.EquivalentTo(new[] { 10, 20 }));
         }
 
         [Test]

@@ -57,9 +57,9 @@ namespace UBB_SE_2026_923_2.Repositories
                 SwapId = d.SwapId,
                 RequestedAt = d.RequestedAt,
                 Status = d.Status,
-                Shift = shifts.FirstOrDefault(s => s.Id == d.ShiftId) ?? new Shift(),
-                Requester = staff.FirstOrDefault(s => s.StaffID == d.RequesterId) as Staff ?? new Staff(),
-                Colleague = staff.FirstOrDefault(s => s.StaffID == d.ColleagueId) as Staff ?? new Staff()
+                Shift = shifts.FirstOrDefault(shiftNew => shiftNew.Id == d.ShiftId) ?? new Shift(),
+                Requester = staff.FirstOrDefault(staffNew => staffNew.StaffID == d.RequesterId) as Staff ?? new Staff(),
+                Colleague = staff.FirstOrDefault(staffNew => staffNew.StaffID == d.ColleagueId) as Staff ?? new Staff()
             }).ToList();
         }
 

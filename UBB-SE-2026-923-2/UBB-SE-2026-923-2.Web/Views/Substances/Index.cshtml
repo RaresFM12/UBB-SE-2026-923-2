@@ -454,7 +454,7 @@
             return;
         }
 
-        const substance = allSubstances.find(s => s.Name.toLowerCase() === substanceName.toLowerCase());
+        const substance = allSubstances.find(substanceNew => substanceNew.Name.toLowerCase() === substanceName.toLowerCase());
         if (substance) {
             document.getElementById('updateLethalDose').value = substance.LethalDose || '';
             document.getElementById('updateDescription').value = substance.Description || '';

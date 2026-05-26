@@ -1065,7 +1065,7 @@
             return;
         }
 
-        const item = allItems.find(i => i.Id == itemId);
+        const item = allItems.find(itemNew => itemNew.Id == itemId);
         if (item) {
             document.getElementById('updateName').value = item.Name || '';
             document.getElementById('updateProducer').value = item.Producer || '';

@@ -206,7 +206,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.service.RaiseFatigueIntervention(1, "Dr. John");
 
             this.mockNotificationRepository.Verify(repo => repo.AddNotification(0, "Fatigue Intervention Required",
-                It.Is<string>(msg => msg.Contains("Dr. John") && msg.Contains("exceeded the 12h duty limit"))), Times.Once);
+                It.Is<string>(message => message.Contains("Dr. John") && message.Contains("exceeded the 12h duty limit"))), Times.Once);
         }
 
         // --- DeleteEvaluation ---

@@ -23,7 +23,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             if (string.IsNullOrEmpty(userEmail)) return null;
 
             var doctors = _shiftSwapService.GetAllDoctors();
-            var matchingDoctor = doctors.FirstOrDefault(d => d.Email == userEmail);
+            var matchingDoctor = doctors.FirstOrDefault(doctor => doctor.Email == userEmail);
             return matchingDoctor?.StaffID;
         }
 
@@ -41,8 +41,8 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                 SelectedShiftId = selectedShiftId,
                 StatusMessage = TempData["StatusMessage"]?.ToString() ?? string.Empty,
                 PendingShiftIds = allSwaps
-                    .Where(s => s.Requester?.StaffID == staffId.Value && s.Status == ShiftSwapRequestStatus.PENDING)
-                    .Select(s => s.Shift?.Id ?? 0)
+                    .Where(shift => shift.Requester?.StaffID == staffId.Value && shift.Status == ShiftSwapRequestStatus.PENDING)
+                    .Select(shift => shift.Shift?.Id ?? 0)
                     .ToHashSet()
             };
 

@@ -29,13 +29,13 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         {
             var effectiveWeekStart = weekStart ?? DateTime.Today;
             var result = this.fatigueAuditService.RunAutoAudit(effectiveWeekStart);
-            var violation = result.Violations.FirstOrDefault(v => v.ShiftId == id);
+            var violation = result.Violations.FirstOrDefault(violationNew => violationNew.ShiftId == id);
             if (violation == null)
             {
                 return this.NotFound();
             }
 
-            var suggestion = result.Suggestions.FirstOrDefault(s => s.ShiftId == id);
+            var suggestion = result.Suggestions.FirstOrDefault(suggestionNew => suggestionNew.ShiftId == id);
             this.ViewBag.Suggestion = suggestion;
             this.ViewBag.WeekStart = effectiveWeekStart;
             return this.View(violation);
@@ -46,7 +46,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         {
             var effectiveWeekStart = weekStart ?? DateTime.Today;
             var result = this.fatigueAuditService.RunAutoAudit(effectiveWeekStart);
-            var suggestion = result.Suggestions.FirstOrDefault(s => s.ShiftId == shiftId);
+            var suggestion = result.Suggestions.FirstOrDefault(suggestionNew => suggestionNew.ShiftId == shiftId);
             if (suggestion == null)
             {
                 return this.NotFound();

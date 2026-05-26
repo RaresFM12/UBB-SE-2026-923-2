@@ -21,7 +21,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(userEmail)) return null;
             var pharmacists = _scheduleService.GetPharmacists();
-            var matchingPharmacist = pharmacists.FirstOrDefault(p => p.Email == userEmail);
+            var matchingPharmacist = pharmacists.FirstOrDefault(pharmacistNew => pharmacistNew.Email == userEmail);
             return matchingPharmacist?.StaffID;
         }
 

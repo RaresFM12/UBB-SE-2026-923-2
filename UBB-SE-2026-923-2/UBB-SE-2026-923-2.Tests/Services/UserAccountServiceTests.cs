@@ -42,7 +42,7 @@
 
         private void LoginAs(User user)
         {
-            this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(user.Email)).Returns(true);
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectEmailFormat(user.Email)).Returns(true);
             this.mockUsersRepository.Setup(repository => repository.GetUserByEmail(user.Email)).Returns(user);
             this.mockSecurityService.Setup(service => service.VerifyPassword(It.IsAny<string>(), user.PasswordHash)).Returns(true);
             this.userAccountService.Login(user.Email, "any_password");
@@ -52,7 +52,7 @@
         public void Login_ValidCredentials_SetsCurrentUser()
         {
             var user = CreateUser(email: "paul@gmail.com", hash: "abc123");
-            this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat("paul@gmail.com")).Returns(true);
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectEmailFormat("paul@gmail.com")).Returns(true);
             this.mockUsersRepository.Setup(repository => repository.GetUserByEmail("paul@gmail.com")).Returns(user);
             this.mockSecurityService.Setup(service => service.VerifyPassword("abc123", "abc123")).Returns(true);
 
@@ -68,7 +68,7 @@
         public void Login_FailedScenarios_ThrowsException(string scenario, string expectedMessage)
         {
             var user = CreateUser(isDisabled: scenario == "disabled");
-            this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(It.IsAny<string>())).Returns(scenario != "invalid");
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectEmailFormat(It.IsAny<string>())).Returns(scenario != "invalid");
             this.mockUsersRepository.Setup(repository => repository.GetUserByEmail(It.IsAny<string>())).Returns(user);
             this.mockSecurityService.Setup(service => service.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(scenario != "wrongpass");
 
@@ -80,10 +80,10 @@
         public void Register_ValidData_AddsToRepository()
         {
             // CONFIGURARE: Acum am adăugat și validarea pentru telefon!
-            this.mockUserValidationService.Setup(v => v.IsCorrectEmailFormat(It.IsAny<string>())).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat(It.IsAny<string>())).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat(It.IsAny<string>())).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat(It.IsAny<string>())).Returns(true); // <--- FIX
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectEmailFormat(It.IsAny<string>())).Returns(true);
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectPasswordFormat(It.IsAny<string>())).Returns(true);
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectUsernameFormat(It.IsAny<string>())).Returns(true);
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectPhoneNumberFormat(It.IsAny<string>())).Returns(true); // <--- FIX
             this.mockUsersRepository.Setup(repository => repository.GetUserByEmail("new@test.com")).Returns((User?)null);
 
             this.userAccountService.Register("new@test.com", "Pass123!", "Pass123!", "user", "0700");
@@ -105,8 +105,8 @@
         {
             var user = CreateUser();
             this.LoginAs(user);
-            this.mockUserValidationService.Setup(v => v.IsCorrectUsernameFormat(It.IsAny<string>())).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectPhoneNumberFormat(It.IsAny<string>())).Returns(true);
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectUsernameFormat(It.IsAny<string>())).Returns(true);
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectPhoneNumberFormat(It.IsAny<string>())).Returns(true);
 
             this.userAccountService.UpdateProfile("newname", "0799");
 
@@ -120,7 +120,7 @@
             var user = CreateUser(hash: "old");
             this.LoginAs(user);
             this.mockSecurityService.Setup(service => service.VerifyPassword(It.IsAny<string>(), "old")).Returns(true);
-            this.mockUserValidationService.Setup(v => v.IsCorrectPasswordFormat(It.IsAny<string>())).Returns(true);
+            this.mockUserValidationService.Setup(validator => validator.IsCorrectPasswordFormat(It.IsAny<string>())).Returns(true);
             this.mockSecurityService.Setup(service => service.HashPassword("new")).Returns("newhash");
 
             this.userAccountService.ChangePassword("old", "new", "new");

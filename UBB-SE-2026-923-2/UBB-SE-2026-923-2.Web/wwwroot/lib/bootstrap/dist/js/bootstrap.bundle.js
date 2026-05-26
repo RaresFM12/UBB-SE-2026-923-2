@@ -960,7 +960,7 @@
       }
 
       const attributes = {};
-      Object.keys(element.dataset).filter(key => key.startsWith('bs')).forEach(key => {
+      Object.keys(element.dataset).filter(keyNew => keyNew.startsWith('bs')).forEach(key => {
         let pureKey = key.replace(/^bs/, '');
         pureKey = pureKey.charAt(0).toLowerCase() + pureKey.slice(1, pureKey.length);
         attributes[pureKey] = normalizeData(element.dataset[key]);

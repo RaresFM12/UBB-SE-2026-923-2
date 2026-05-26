@@ -24,7 +24,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(userEmail)) return null;
             var doctors = _shiftSwapService.GetAllDoctors();
-            var matchingDoctor = doctors.FirstOrDefault(d => d.Email == userEmail);
+            var matchingDoctor = doctors.FirstOrDefault(doctor => doctor.Email == userEmail);
             return matchingDoctor?.StaffID;
         }
 

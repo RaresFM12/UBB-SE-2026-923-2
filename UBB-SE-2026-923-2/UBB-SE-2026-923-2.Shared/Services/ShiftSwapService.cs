@@ -39,7 +39,7 @@ namespace UBB_SE_2026_923_2.Services
                 shift.AppointedStaff.StaffID == staffId && shift.StartTime > DateTime.UtcNow;
             DateTime SortKey(Shift shift) => shift.StartTime;
 
-            return allShifts.Where(IsFutureShiftForStaff).OrderBy(s => s.StartTime).ToList();
+            return allShifts.Where(IsFutureShiftForStaff).OrderBy(shifts => shifts.StartTime).ToList();
         }
 
         private static string NormalizeForComparison(string? text) => (text ?? string.Empty).Trim().ToLowerInvariant();
