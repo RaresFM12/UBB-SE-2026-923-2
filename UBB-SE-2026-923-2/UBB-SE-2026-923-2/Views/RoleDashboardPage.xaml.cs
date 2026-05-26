@@ -88,7 +88,6 @@ namespace UBB_SE_2026_923_2.Views
                     break;
 
                 case UserRole.Doctor:
-                    this.Add("Medical Evaluation", "doctor-medical", typeof(UBB_SE_2026_923_2.Views.MedicalEvaluationView));
                     this.Add("Shift Swap Request", "doctor-shift-swap-request", typeof(MySchedulePage));
                     this.Add("Incoming Swap Requests", "doctor-shift-swap-incoming", typeof(IncomingSwapRequestsPage));
                     this.Add("See Schedule", "doctor-schedule", typeof(DoctorSchedulePage));
