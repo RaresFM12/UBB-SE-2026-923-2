@@ -74,6 +74,7 @@ namespace UBB_SE_2026_923_2.Views
                     this.Add("See Doctor Schedule", "admin-doctor-schedule", typeof(DoctorSchedulePage));
                     this.Add("See Pharmacy Schedule", "admin-pharmacy-schedule", typeof(PharmacySchedulePage));
                     this.Add("Appointments", "admin-appointments", typeof(AppointmentsPage));
+                    this.Add("Book appointment", "admin-book-appointment", typeof(BookAppointmentPage));
                     this.Add("Shift Management", "admin-shift-management", typeof(AdminSchedulePage));
                     this.Add("Auto-Audit", "admin-auto-audit", typeof(FatigueAuditPage));
                     this.Add("ER Dispatch", "admin-er-dispatch", typeof(ERDispatchPage));

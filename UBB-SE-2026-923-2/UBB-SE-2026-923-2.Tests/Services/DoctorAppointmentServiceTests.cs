@@ -175,7 +175,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             this.mockStaffRepository.Setup(repo => repo.GetStaffById(1)).Returns(offDutyDoctor);
 
             var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await this.service.CreateAppointmentAsync("John", 1, DateTime.Now, TimeSpan.FromHours(10)));
+                await this.service.CreateAppointmentAsync("123", 1, DateTime.Now, TimeSpan.FromHours(10)));
 
             Assert.That(ex.Message, Does.Contain("OFF_DUTY"));
         }
@@ -186,7 +186,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var onDutyDoctor = new Doctor { StaffID = 1, DoctorStatus = DoctorStatus.AVAILABLE };
             this.mockStaffRepository.Setup(repo => repo.GetStaffById(1)).Returns(onDutyDoctor);
 
-            await this.service.CreateAppointmentAsync("John", 1, DateTime.Now, TimeSpan.FromHours(10));
+            await this.service.CreateAppointmentAsync("123", 1, DateTime.Now, TimeSpan.FromHours(10));
 
             this.mockAppointmentRepository.Verify(repo => repo.AddAppointmentAsync(
                 It.IsAny<int>(), 1, It.IsAny<DateTime>(), It.IsAny<DateTime>(), "Scheduled"), Times.Once);
@@ -213,7 +213,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var appointmentToBook = new Appointment
             {
-                PatientName = "TestPatient",
+                PatientName = "123",
                 Doctor = new Doctor { StaffID = 1 },
                 Date = DateTime.Now,
                 StartTime = TimeSpan.FromHours(9),
@@ -230,7 +230,7 @@ namespace UBB_SE_2026_923_2.Tests.Services
 
             var appointmentToBook = new Appointment
             {
-                PatientName = "TestPatient",
+                PatientName = "123",
                 Doctor = new Doctor { StaffID = 1 },
                 Date = DateTime.Now,
                 StartTime = TimeSpan.FromHours(9),

@@ -339,8 +339,34 @@ namespace UBB_SE_2026_923_2.Services
 
         private static int ParsePatientId(string? patientName)
         {
-            string rawPatientInput = patientName?.Replace(PatientNamePrefix, string.Empty).Trim() ?? DefaultPatientIdString;
-            return int.TryParse(rawPatientInput, out int patientId) ? patientId : DefaultPatientId;
+            string rawPatientInput = NormalizePatientId(patientName);
+            if (!int.TryParse(rawPatientInput, out int patientId) || patientId <= DefaultPatientId)
+            {
+                throw new InvalidOperationException("Patient id must be numeric, for example 123 or PAT-123.");
+            }
+
+            return patientId;
+        }
+
+        private static string NormalizePatientId(string? patientName)
+        {
+            if (string.IsNullOrWhiteSpace(patientName))
+            {
+                return string.Empty;
+            }
+
+            string trimmed = patientName.Trim();
+            if (trimmed.StartsWith(PatientNamePrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return trimmed.Substring(PatientNamePrefix.Length).Trim();
+            }
+
+            if (trimmed.StartsWith("PAT -", StringComparison.OrdinalIgnoreCase))
+            {
+                return trimmed.Substring("PAT -".Length).Trim();
+            }
+
+            return trimmed;
         }
 
         private static Appointment ToDomainAppointment(Appointment appointment)

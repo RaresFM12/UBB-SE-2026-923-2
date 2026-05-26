@@ -37,6 +37,7 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
     public sealed class DoctorAppointmentCreateViewModel
     {
         [Required(ErrorMessage = "Patient id is required.")]
+        [RegularExpression(@"^(PAT\s*-\s*)?\d+$", ErrorMessage = "Patient id must be numeric, for example 123 or PAT-123.")]
         [Display(Name = "Patient id")]
         public string PatientName { get; set; } = string.Empty;
 
