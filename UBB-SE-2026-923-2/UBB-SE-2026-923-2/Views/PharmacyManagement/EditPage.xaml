@@ -71,44 +71,49 @@
                          PlaceholderText="Enter name..."
                          TextChanged="SearchBox_TextChanged"/>
 
-                <Grid Width="1300"
-                      Height="400"
-                      BorderBrush="{StaticResource AppAccentBrush}"
-                      BorderThickness="1"
-                      CornerRadius="8">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+                <ScrollViewer HorizontalScrollMode="Enabled"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollMode="Disabled"
+                              VerticalScrollBarVisibility="Disabled"
+                              MaxWidth="1100">
+                    <Grid Width="1300"
+                          Height="400"
+                          BorderBrush="{StaticResource AppAccentBrush}"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0" Background="{StaticResource AppSurfaceBrush}" Padding="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="70"/>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="300"/>
-                            <ColumnDefinition Width="70"/>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="70"/>
-                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Background="{StaticResource AppSurfaceBrush}" Padding="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="300"/>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="70"/>
+                            </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="ID" Grid.Column="0" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Name" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Producer" Grid.Column="2" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Price" Grid.Column="3" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Category" Grid.Column="4" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Description" Grid.Column="5" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Pills" Grid.Column="6" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Quantity" Grid.Column="7" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Label" Grid.Column="8" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                        <TextBlock Text="Discount" Grid.Column="9" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
-                    </Grid>
+                            <TextBlock Text="ID" Grid.Column="0" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Name" Grid.Column="1" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Producer" Grid.Column="2" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Price" Grid.Column="3" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Category" Grid.Column="4" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Description" Grid.Column="5" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Pills" Grid.Column="6" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Quantity" Grid.Column="7" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Label" Grid.Column="8" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                            <TextBlock Text="Discount" Grid.Column="9" FontWeight="Bold" Foreground="{StaticResource AppTextPrimaryBrush}"/>
+                        </Grid>
 
-                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto">
                         <ListView x:Name="ItemList"
+                                  Grid.Row="1"
                                   ItemsSource="{x:Bind ViewModel.Items}">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="models:Item">
@@ -144,8 +149,8 @@
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                    </ScrollViewer>
-                </Grid>
+                    </Grid>
+                </ScrollViewer>
             </StackPanel>
 
             <Grid x:Name="ItemBottomButtons"

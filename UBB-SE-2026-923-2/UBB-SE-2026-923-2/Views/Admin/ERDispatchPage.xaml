@@ -85,7 +85,7 @@
                                   x:Name="OverrideDoctorCombo"
                                   ItemsSource="{Binding OverrideCandidates}"
                                   DisplayMemberPath="DisplayLabel"
-                                  PlaceholderText="Select near-end IN_EXAMINATION doctor"
+                                  PlaceholderText="Select IN_EXAMINATION doctor ending within 3 days"
                                   HorizontalAlignment="Stretch"/>
 
                         <Button Grid.Column="2"

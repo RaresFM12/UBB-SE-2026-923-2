@@ -105,6 +105,24 @@ namespace UBB_SE_2026_923_2.Tests.Services
             Assert.That(result.IsSuccess, Is.False);
         }
 
+        [Test]
+        public async Task DispatchERRequestAsync_SurgeonRequest_MatchesSurgeryDoctor()
+        {
+            var pendingRequest = new ERRequest { Id = 1, Status = "PENDING", Specialization = "Surgeon", Location = "Ward A", CreatedAt = DateTime.Now };
+            var doctor = new Doctor(42, "Nora", "Avram", "0712000042", true, "Surgery", "MD-SURG-4242", DoctorStatus.AVAILABLE, 9);
+            var shift = new Shift(1, doctor, "Ward A", DateTime.Now.AddMinutes(-15), DateTime.Now.AddHours(2), ShiftStatus.ACTIVE);
+
+            this.mockRequestRepository.Setup(repository => repository.GetAllRequests()).Returns(new List<ERRequest> { pendingRequest });
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor });
+            this.mockStaffRepository.Setup(repository => repository.UpdateStatusAsync(42, DoctorStatus.IN_EXAMINATION.ToString())).Returns(Task.CompletedTask);
+
+            var result = await this.service.DispatchERRequestAsync(1);
+
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.MatchedDoctorId, Is.EqualTo(42));
+        }
+
         // --- GetManualOverrideCandidatesAsync ---
         [Test]
         public async Task GetManualOverrideCandidatesAsync_RequestNotFound_ReturnsEmptyList()
@@ -127,6 +145,23 @@ namespace UBB_SE_2026_923_2.Tests.Services
             var result = await this.service.GetManualOverrideCandidatesAsync(1, 30);
 
             Assert.That(result.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task GetManualOverrideCandidatesAsync_SurgeonRequest_ReturnsSurgeryDoctor()
+        {
+            var existingRequest = new ERRequest { Id = 1, Status = "PENDING", Specialization = "Surgeon", Location = "Ward A" };
+            var doctor = new Doctor(42, "Nora", "Avram", "0712000042", true, "Surgery", "MD-SURG-4242", DoctorStatus.IN_EXAMINATION, 9);
+            var shift = new Shift(1, doctor, "Surgery Bay", DateTime.Now.AddMinutes(-15), DateTime.Now.AddDays(1), ShiftStatus.ACTIVE);
+
+            this.mockRequestRepository.Setup(repository => repository.GetRequestById(1)).Returns(existingRequest);
+            this.mockShiftRepository.Setup(repository => repository.GetAllShifts()).Returns(new List<Shift> { shift });
+            this.mockStaffRepository.Setup(repository => repository.LoadAllStaff()).Returns(new List<IStaff> { doctor });
+
+            var result = await this.service.GetManualOverrideCandidatesAsync(1, 3 * 24 * 60);
+
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0].DoctorId, Is.EqualTo(42));
         }
 
         // --- ManualOverrideAsync ---

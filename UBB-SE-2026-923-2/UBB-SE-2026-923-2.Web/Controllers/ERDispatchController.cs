@@ -20,7 +20,10 @@ namespace UBB_SE_2026_923_2.Web.Controllers
     [Authorize(Roles = "Admin")]
     public class ERDispatchController : Controller
     {
-        private const int NearEndMinutes = 30;
+        private const int OverrideWindowDays = 3;
+        private const int MinutesPerHour = 60;
+        private const int HoursPerDay = 24;
+        private const int NearEndMinutes = OverrideWindowDays * HoursPerDay * MinutesPerHour;
         private const int SimulatedRequestCount = 3;
 
         private const string PendingStatus = "PENDING";
@@ -29,6 +32,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         private const string CancelledStatus = "CANCELLED";
         private const string DashboardStateTempDataKey = "ERDispatchDashboardState";
         private const string UnknownDoctorName = "Unknown";
+        private const string ManualOverrideHintText = "Manual override accepts IN_EXAMINATION doctors whose active shift ends within 3 days.";
 
         private readonly IERDispatchService dispatchService;
 
@@ -174,7 +178,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             var dashboard = new ErDispatchDashboardViewModel
             {
                 StatusMessage = "Dispatching...",
-                ManualInterventionHint = "Manual override accepts near-end IN_EXAMINATION doctors only.",
+                ManualInterventionHint = ManualOverrideHintText,
                 SessionMatches = results
                     .Where(result => result.IsSuccess)
                     .Select(ToSuccessfulMatch)
@@ -220,7 +224,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             {
                 RequestId = request.Id,
                 RequestSummary = $"#{request.Id} - {request.Specialization} @ {request.Location}",
-                Candidates = candidates,
+                Candidates = candidates.Select(OverrideCandidateViewModel.From).ToList(),
             };
             return this.View(model);
         }
@@ -309,7 +313,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             var candidates = await this.dispatchService.GetManualOverrideCandidatesAsync(dashboard.SelectedRequestId.Value, NearEndMinutes);
             dashboard.OverrideCandidates = candidates.Select(OverrideCandidateViewModel.From).ToList();
             dashboard.ManualInterventionHint = dashboard.OverrideCandidates.Count == 0
-                ? "No eligible override doctor found (need near-end IN_EXAMINATION doctor)."
+                ? "No eligible override doctor found (need IN_EXAMINATION doctor ending within 3 days)."
                 : $"Found {dashboard.OverrideCandidates.Count} eligible override candidate(s).";
         }
 

@@ -42,15 +42,29 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
         private void Refresh_Click(object sender, RoutedEventArgs eventArgs)
         {
-            this.viewModel.Violations.Clear();
-            this.viewModel.Suggestions.Clear();
+            this.viewModel.RunAutoAudit();
         }
 
         private async void ApplyReassignment_Click(object sender, RoutedEventArgs eventArgs)
         {
-            if (sender is Button button && button.Tag is int shiftId)
+            if (sender is Button button && button.Tag is FatigueShiftAuditViewModel.AutoSuggestRow suggestion)
             {
-                var result = this.viewModel.ApplyReassignment(shiftId);
+                var confirmationDialog = new ContentDialog
+                {
+                    Title = "Confirm Shift Reassignment",
+                    Content = CreateReassignmentConfirmationContent(suggestion),
+                    PrimaryButtonText = "Confirm Reassignment",
+                    CloseButtonText = "Cancel",
+                    XamlRoot = this.Content.XamlRoot,
+                };
+
+                var confirmationResult = await confirmationDialog.ShowAsync();
+                if (confirmationResult != ContentDialogResult.Primary)
+                {
+                    return;
+                }
+
+                var result = this.viewModel.ApplyReassignment(suggestion.ShiftId);
 
                 var dialog = new ContentDialog
                 {
@@ -61,6 +75,25 @@ namespace UBB_SE_2026_923_2.Views.Admin
                 };
                 await dialog.ShowAsync();
             }
+        }
+
+        private static StackPanel CreateReassignmentConfirmationContent(FatigueShiftAuditViewModel.AutoSuggestRow suggestion)
+        {
+            var panel = new StackPanel
+            {
+                Spacing = 8,
+            };
+
+            panel.Children.Add(new TextBlock { Text = $"Shift ID: {suggestion.ShiftId}" });
+            panel.Children.Add(new TextBlock { Text = $"Current Staff: {suggestion.OriginalStaffDisplay}" });
+            panel.Children.Add(new TextBlock { Text = $"Suggested Staff: {suggestion.SuggestedStaffDisplay}" });
+            panel.Children.Add(new TextBlock
+            {
+                Text = $"Reason: {suggestion.Reason}",
+                TextWrapping = TextWrapping.Wrap,
+            });
+
+            return panel;
         }
 
         private void PublishRoster_Click(object sender, RoutedEventArgs eventArgs)

@@ -9,7 +9,7 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
     {
         public string StatusMessage { get; set; } = "Ready";
 
-        public string ManualInterventionHint { get; set; } = "Manual override accepts near-end IN_EXAMINATION doctors only.";
+        public string ManualInterventionHint { get; set; } = "Manual override accepts IN_EXAMINATION doctors whose active shift ends within 3 days.";
 
         public int? SelectedRequestId { get; set; }
 
@@ -103,6 +103,10 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
 
     public class OverrideCandidateViewModel
     {
+        private const int MinutesPerHour = 60;
+        private const int HoursPerDay = 24;
+        private const int MinutesPerDay = HoursPerDay * MinutesPerHour;
+
         public int DoctorId { get; set; }
 
         public string FullName { get; set; } = string.Empty;
@@ -110,8 +114,30 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
         public int MinutesToEnd { get; set; }
 
         public string DisplayLabel => this.MinutesToEnd >= 0
-            ? $"{this.FullName} (ends in {this.MinutesToEnd} min)"
+            ? $"{this.FullName} (ends in {this.TimeRemainingText})"
             : this.FullName;
+
+        private string TimeRemainingText
+        {
+            get
+            {
+                if (this.MinutesToEnd >= MinutesPerDay)
+                {
+                    var days = this.MinutesToEnd / MinutesPerDay;
+                    var hours = (this.MinutesToEnd % MinutesPerDay) / MinutesPerHour;
+                    return $"{days}d {hours}h";
+                }
+
+                if (this.MinutesToEnd >= MinutesPerHour)
+                {
+                    var hours = this.MinutesToEnd / MinutesPerHour;
+                    var minutes = this.MinutesToEnd % MinutesPerHour;
+                    return $"{hours}h {minutes}m";
+                }
+
+                return $"{this.MinutesToEnd} min";
+            }
+        }
 
         public static OverrideCandidateViewModel From(DoctorProfile candidate) =>
             new OverrideCandidateViewModel
@@ -130,6 +156,6 @@ namespace UBB_SE_2026_923_2.Web.ViewModels
 
         public int SelectedDoctorId { get; set; }
 
-        public IReadOnlyList<DoctorProfile> Candidates { get; init; } = new List<DoctorProfile>();
+        public IReadOnlyList<OverrideCandidateViewModel> Candidates { get; init; } = new List<OverrideCandidateViewModel>();
     }
 }

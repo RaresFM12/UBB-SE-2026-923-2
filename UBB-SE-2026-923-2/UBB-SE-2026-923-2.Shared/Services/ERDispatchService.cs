@@ -167,7 +167,7 @@ namespace UBB_SE_2026_923_2.Services
             }
 
             bool MatchesRequestSpecialization(DoctorProfile doctor) =>
-                IsSameValue(doctor.Specialization, request.Specialization);
+                IsSameSpecialization(doctor.Specialization, request.Specialization);
 
             int ByDoctorId(DoctorProfile doctor) => doctor.DoctorId;
             DoctorProfile FirstInGroup(IGrouping<int, DoctorProfile> doctorGroup) => doctorGroup.First();
@@ -213,7 +213,7 @@ namespace UBB_SE_2026_923_2.Services
                     {
                         Request = request,
                         IsSuccess = false,
-                        Message = $"Manual override blocked. Doctor must be IN_EXAMINATION within {nearEndMinutes} min of end_time.",
+                        Message = $"Manual override blocked. Doctor must be IN_EXAMINATION within {FormatOverrideWindow(nearEndMinutes)} of end_time.",
                     };
                 }
 
@@ -295,7 +295,7 @@ namespace UBB_SE_2026_923_2.Services
             var availableDoctors = GetAvailableDoctors(this.GetDoctorRosterForDispatch());
 
             bool IsMatchingAvailableDoctor(DoctorProfile doctor) =>
-                IsSameValue(doctor.Specialization, request.Specialization)
+                IsSameSpecialization(doctor.Specialization, request.Specialization)
                 && doctor.Status == DoctorStatus.AVAILABLE
                 && IsSameValue(doctor.Location, request.Location);
 
@@ -380,5 +380,44 @@ namespace UBB_SE_2026_923_2.Services
 
         private static bool IsSameValue(string leftOperator, string rightOperator) =>
             string.Equals((leftOperator ?? string.Empty).Trim(), (rightOperator ?? string.Empty).Trim(), StringComparison.OrdinalIgnoreCase);
+
+        private static bool IsSameSpecialization(string leftSpecialization, string rightSpecialization) =>
+            string.Equals(NormalizeSpecialization(leftSpecialization), NormalizeSpecialization(rightSpecialization), StringComparison.OrdinalIgnoreCase);
+
+        private static string NormalizeSpecialization(string specialization)
+        {
+            var normalizedSpecialization = (specialization ?? string.Empty).Trim().ToLowerInvariant();
+            return normalizedSpecialization switch
+            {
+                "surgeon" => "surgery",
+                "cardiologist" => "cardiology",
+                "cardio" => "cardiology",
+                "cariology" => "cardiology",
+                "pediatric" => "pediatrics",
+                "pediatrician" => "pediatrics",
+                _ => normalizedSpecialization,
+            };
+        }
+
+        private static string FormatOverrideWindow(int minutes)
+        {
+            const int minutesPerHour = 60;
+            const int hoursPerDay = 24;
+            const int minutesPerDay = minutesPerHour * hoursPerDay;
+
+            if (minutes >= minutesPerDay && minutes % minutesPerDay == 0)
+            {
+                var days = minutes / minutesPerDay;
+                return $"{days} day{(days == 1 ? string.Empty : "s")}";
+            }
+
+            if (minutes >= minutesPerHour && minutes % minutesPerHour == 0)
+            {
+                var hours = minutes / minutesPerHour;
+                return $"{hours} hour{(hours == 1 ? string.Empty : "s")}";
+            }
+
+            return $"{minutes} minute{(minutes == 1 ? string.Empty : "s")}";
+        }
     }
 }

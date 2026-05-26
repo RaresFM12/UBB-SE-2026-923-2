@@ -11,9 +11,14 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
 
     public sealed class ERDispatchViewModel : ObservableObject
     {
-        private const int NearEndMinutesThreshold = 30;
+        private const int OverrideWindowDays = 3;
+        private const int MinutesPerHour = 60;
+        private const int HoursPerDay = 24;
+        private const int MinutesPerDay = HoursPerDay * MinutesPerHour;
+        private const int NearEndMinutesThreshold = OverrideWindowDays * MinutesPerDay;
         private const int DefaultSimulatedRequestCount = 3;
         private const string UnknownDoctorName = "Unknown";
+        private const string ManualOverrideHintText = "Manual override accepts IN_EXAMINATION doctors whose active shift ends within 3 days.";
         private readonly IERDispatchService dispatchService;
 
         public ObservableCollection<UnmatchedRequestRow> UnmatchedRequests { get; } = new ObservableCollection<UnmatchedRequestRow>();
@@ -30,7 +35,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
             private set => this.SetProperty(ref this.statusMessage, value);
         }
 
-        private string manualInterventionHint = "Manual override accepts near-end IN_EXAMINATION doctors only.";
+        private string manualInterventionHint = ManualOverrideHintText;
 
         public string ManualInterventionHint
         {
@@ -71,7 +76,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
             this.SuccessfulMatches.Clear();
             this.OverrideCandidates.Clear();
             this.StatusMessage = "Ready";
-            this.ManualInterventionHint = "Manual override accepts near-end IN_EXAMINATION doctors only.";
+            this.ManualInterventionHint = ManualOverrideHintText;
         }
 
         public async Task SimulateIncomingAsync(int requestCount)
@@ -94,7 +99,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
             this.SuccessfulMatches.Clear();
             this.OverrideCandidates.Clear();
             this.StatusMessage = "Dispatching...";
-            this.ManualInterventionHint = "Manual override accepts near-end IN_EXAMINATION doctors only.";
+            this.ManualInterventionHint = ManualOverrideHintText;
 
             try
             {
@@ -128,7 +133,7 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
             this.OverrideCandidates.ReplaceWith(overrideCandidateDoctors.Select(OverrideCandidateRow.From));
 
             this.ManualInterventionHint = this.OverrideCandidates.Count == 0
-                ? "No eligible override doctor found (need near-end IN_EXAMINATION doctor)."
+                ? "No eligible override doctor found (need IN_EXAMINATION doctor ending within 3 days)."
                 : $"Found {this.OverrideCandidates.Count} eligible override candidate(s).";
         }
 
@@ -244,8 +249,30 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
             private bool HasKnownTimeRemaining => this.MinutesToEnd >= 0;
 
             public string DisplayLabel => this.HasKnownTimeRemaining
-                ? $"{this.FullName} (ends in {this.MinutesToEnd} min)"
+                ? $"{this.FullName} (ends in {this.TimeRemainingText})"
                 : this.FullName;
+
+            private string TimeRemainingText
+            {
+                get
+                {
+                    if (this.MinutesToEnd >= MinutesPerDay)
+                    {
+                        var days = this.MinutesToEnd / MinutesPerDay;
+                        var hours = this.MinutesToEnd % MinutesPerDay / MinutesPerHour;
+                        return $"{days}d {hours}h";
+                    }
+
+                    if (this.MinutesToEnd >= MinutesPerHour)
+                    {
+                        var hours = this.MinutesToEnd / MinutesPerHour;
+                        var minutes = this.MinutesToEnd % MinutesPerHour;
+                        return $"{hours}h {minutes}m";
+                    }
+
+                    return $"{this.MinutesToEnd} min";
+                }
+            }
 
             public static OverrideCandidateRow From(DoctorProfile candidate) =>
                 new OverrideCandidateRow

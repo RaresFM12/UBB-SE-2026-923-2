@@ -106,9 +106,8 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
                 this.Suggestions.Add(new AutoSuggestRow
                 {
                     ShiftId = suggestion.ShiftId,
-                    ReassignmentLabel = suggestion.SuggestedStaffId.HasValue
-                        ? $"Shift #{suggestion.ShiftId}: {suggestion.OriginalStaffName} -> {suggestion.SuggestedStaffName}"
-                        : $"Shift #{suggestion.ShiftId}: no replacement candidate",
+                    OriginalStaffId = suggestion.OriginalStaffId,
+                    OriginalStaffName = suggestion.OriginalStaffName,
                     Reason = suggestion.Reason,
                     SuggestedStaffId = suggestion.SuggestedStaffId,
                     SuggestedStaffName = suggestion.SuggestedStaffName,
@@ -177,13 +176,23 @@ namespace UBB_SE_2026_923_2.ViewModels.Admin
         {
             public int ShiftId { get; set; }
 
-            public string ReassignmentLabel { get; set; } = string.Empty;
+            public int OriginalStaffId { get; set; }
+
+            public string OriginalStaffName { get; set; } = string.Empty;
 
             public string Reason { get; set; } = string.Empty;
 
             public int? SuggestedStaffId { get; set; }
 
             public string SuggestedStaffName { get; set; } = string.Empty;
+
+            public bool HasSuggestedStaff => this.SuggestedStaffId.HasValue;
+
+            public string OriginalStaffDisplay => $"{this.OriginalStaffName} (ID {this.OriginalStaffId})";
+
+            public string SuggestedStaffDisplay => this.HasSuggestedStaff
+                ? $"{this.SuggestedStaffName} (ID {this.SuggestedStaffId})"
+                : "None available";
         }
     }
 }

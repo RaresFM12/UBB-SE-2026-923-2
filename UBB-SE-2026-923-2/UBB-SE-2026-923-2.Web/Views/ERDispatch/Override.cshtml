@@ -1,4 +1,3 @@
-@using UBB_SE_2026_923_2.Models
 @model UBB_SE_2026_923_2.Web.ViewModels.OverrideViewModel
 @{
     ViewData["Title"] = "Manual Override";
@@ -9,7 +8,7 @@
 
 <div class="alert alert-secondary small">
     Manual override only accepts doctors who are currently
-    <strong>IN_EXAMINATION</strong> and within 30 minutes of their shift end.
+    <strong>IN_EXAMINATION</strong> and within 3 days of their shift end.
 </div>
 
 @if (Model.Candidates.Count == 0)
@@ -25,10 +24,10 @@ else
                 <div class="mb-3">
                     <label for="selectedDoctorId" class="form-label">Eligible doctor</label>
                     <select id="selectedDoctorId" name="selectedDoctorId" class="form-select">
-                        @foreach (DoctorProfile candidate in Model.Candidates)
+                        @foreach (var candidate in Model.Candidates)
                         {
                             <option value="@candidate.DoctorId">
-                                @candidate.FullName (ends in @candidate.MinutesToEnd min)
+                                @candidate.DisplayLabel
                             </option>
                         }
                     </select>

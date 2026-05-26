@@ -6,6 +6,7 @@
 
     <Page.Resources>
         <converters:BoolToPublishStatusBrushConverter x:Key="PublishStatusBrushConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Page.Resources>
 
     <ScrollViewer Background="{StaticResource AppBackgroundBrush}">
@@ -213,49 +214,105 @@
                                    FontSize="12"/>
                     </StackPanel>
 
-                    <ListView Grid.Row="1"
-                              ItemsSource="{Binding Suggestions}"
-                              Background="Transparent"
-                              SelectionMode="None"
-                              Margin="0,8,0,0">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{StaticResource AppAccentBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Padding="10"
-                                        Margin="0,0,0,8"
-                                        Background="{StaticResource AppBackgroundBrush}">
-                                    <Grid RowSpacing="6">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                    <Grid Grid.Row="1"
+                          Margin="0,8,0,0"
+                          RowSpacing="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                                        <TextBlock Text="{Binding ReassignText}"
-                                                   Foreground="{StaticResource AppTextPrimaryBrush}"
-                                                   FontSize="14"
-                                                   FontWeight="SemiBold"
-                                                   TextWrapping="Wrap"/>
+                        <Border Background="{StaticResource AppBackgroundBrush}"
+                                BorderBrush="{StaticResource AppAccentBrush}"
+                                BorderThickness="1"
+                                Padding="10">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="130"/>
+                                </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Row="1"
-                                                   Text="{Binding Reason}"
-                                                   Foreground="{StaticResource AppTextSecondaryBrush}"
-                                                   FontSize="12"
-                                                   TextWrapping="Wrap"/>
+                                <TextBlock Text="Shift ID"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="Current Staff"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="2"
+                                           Text="Suggested Staff"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="3"
+                                           Text="Reason"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="4"
+                                           Text="Action"
+                                           Foreground="{StaticResource AppTextSecondaryBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"/>
+                            </Grid>
+                        </Border>
 
-                                        <Button Grid.Row="2"
-                                                Content="Apply Reassignment"
-                                                Click="ApplyReassignment_Click"
-                                                Tag="{Binding ShiftId}"
-                                                Width="200"
-                                                HorizontalAlignment="Left"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                        <ListView Grid.Row="1"
+                                  ItemsSource="{Binding Suggestions}"
+                                  Background="Transparent"
+                                  SelectionMode="None">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{StaticResource AppAccentBrush}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="10"
+                                            Background="{StaticResource AppBackgroundBrush}">
+                                        <Grid ColumnSpacing="12"
+                                              VerticalAlignment="Center">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="3*"/>
+                                                <ColumnDefinition Width="130"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="{Binding ShiftId}"
+                                                       Foreground="{StaticResource AppTextPrimaryBrush}"
+                                                       FontSize="13"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding OriginalStaffDisplay}"
+                                                       Foreground="{StaticResource AppTextPrimaryBrush}"
+                                                       FontSize="13"
+                                                       TextWrapping="WrapWholeWords"/>
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding SuggestedStaffDisplay}"
+                                                       Foreground="{StaticResource AppTextPrimaryBrush}"
+                                                       FontSize="13"
+                                                       TextWrapping="WrapWholeWords"/>
+                                            <TextBlock Grid.Column="3"
+                                                       Text="{Binding Reason}"
+                                                       Foreground="{StaticResource AppTextSecondaryBrush}"
+                                                       FontSize="12"
+                                                       TextWrapping="WrapWholeWords"/>
+
+                                            <Button Grid.Column="4"
+                                                    Content="Reassign"
+                                                    Click="ApplyReassignment_Click"
+                                                    Tag="{Binding}"
+                                                    Visibility="{Binding HasSuggestedStaff, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                    HorizontalAlignment="Left"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
                 </Grid>
             </Border>
 

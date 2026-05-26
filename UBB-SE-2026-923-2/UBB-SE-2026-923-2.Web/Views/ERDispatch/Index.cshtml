@@ -44,7 +44,7 @@
             <div class="col-md-5">
                 <label for="selectedDoctorId" class="form-label">Eligible override doctor</label>
                 <select id="selectedDoctorId" name="selectedDoctorId" class="form-select">
-                    <option value="">Select near-end IN_EXAMINATION doctor</option>
+                    <option value="">Select IN_EXAMINATION doctor ending within 3 days</option>
                     @foreach (var candidate in Model.OverrideCandidates)
                     {
                         <option value="@candidate.DoctorId">@candidate.DisplayLabel</option>
