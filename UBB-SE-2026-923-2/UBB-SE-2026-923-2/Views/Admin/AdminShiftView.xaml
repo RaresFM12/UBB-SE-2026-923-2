@@ -90,9 +90,9 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Orientation="Vertical" Spacing="20" Margin="0,0,0,20" VerticalAlignment="Center">
-                <TextBlock Text="Today's Shifts and Calendar" Foreground="{StaticResource AppAccentBrush}" FontSize="24" FontWeight="SemiBold"/>
+                <TextBlock Text="Today's Shifts" Foreground="{StaticResource AppAccentBrush}" FontSize="24" FontWeight="SemiBold"/>
 
-                <Button Content="View Shifts Calendar" 
+                <Button Content="Back to Shift Management"
                         Click="OpenSchedule_Click" 
                         Background="#0288D1"/>
             </StackPanel>

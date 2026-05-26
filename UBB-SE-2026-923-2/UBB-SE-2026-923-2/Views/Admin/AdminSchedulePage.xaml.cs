@@ -3,7 +3,6 @@ namespace UBB_SE_2026_923_2.Views.Admin
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.UI.Xaml;
     using Microsoft.UI.Xaml.Controls;
-    using Microsoft.UI.Xaml.Controls.Primitives;
     using Microsoft.UI.Xaml.Navigation;
     using UBB_SE_2026_923_2.Configuration;
     using UBB_SE_2026_923_2.Models;
@@ -34,18 +33,20 @@ namespace UBB_SE_2026_923_2.Views.Admin
 
             this.initialized = true;
 
+            this.AdminShiftViewModel.IsWeeklyView = false;
+            this.AdminShiftViewModel.SelectedDepartment = "All Departments";
             this.AdminShiftViewModel.LoadAndFilterShifts();
-            DateCalendar.SelectedDates.Add(System.DateTime.Today);
+            ShiftDatePicker.Date = System.DateTimeOffset.Now;
         }
 
-        private void DateCalendar_SelectedDatesChanged(CalendarView sender, CalendarViewSelectedDatesChangedEventArgs eventArgs)
+        private void ShiftDatePicker_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
         {
-            if (sender.SelectedDates == null || sender.SelectedDates.Count == 0)
+            if (!args.NewDate.HasValue)
             {
                 return;
             }
 
-            var picked = sender.SelectedDates[0].Date;
+            var picked = args.NewDate.Value.Date;
 
             if (picked >= AppSettings.SqlMinimumDate)
             {
@@ -53,28 +54,14 @@ namespace UBB_SE_2026_923_2.Views.Admin
             }
         }
 
-        private void DepartmentFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CreateShift_Click(object sender, RoutedEventArgs e)
         {
-            if (DepartmentFilterComboBox.SelectedItem is string selectedDept && this.initialized)
-            {
-                this.AdminShiftViewModel.SelectedDepartment = selectedDept;
-            }
+            this.Frame.Navigate(typeof(AdminShiftView));
         }
 
-        private void ViewMode_Click(object sender, RoutedEventArgs e)
+        private void ComputeSalary_Click(object sender, RoutedEventArgs e)
         {
-            if (ReferenceEquals(sender, DailyBtn))
-            {
-                DailyBtn.IsChecked = true;
-                WeeklyBtn.IsChecked = false;
-                this.AdminShiftViewModel.IsWeeklyView = false;
-            }
-            else if (ReferenceEquals(sender, WeeklyBtn))
-            {
-                WeeklyBtn.IsChecked = true;
-                DailyBtn.IsChecked = false;
-                this.AdminShiftViewModel.IsWeeklyView = true;
-            }
+            this.Frame.Navigate(typeof(UBB_SE_2026_923_2.Views.SalaryPlaceholderPage));
         }
 
         private void SetActive_Click(object sender, RoutedEventArgs e)
@@ -109,11 +96,6 @@ namespace UBB_SE_2026_923_2.Views.Admin
             StatusInfoBar.Message = message;
             StatusInfoBar.Severity = severity;
             StatusInfoBar.IsOpen = true;
-        }
-
-        private void Back_Click(object sender, RoutedEventArgs e)
-        {
-            this.Frame.Navigate(typeof(AdminShiftView));
         }
     }
 }

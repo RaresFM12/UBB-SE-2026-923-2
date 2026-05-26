@@ -1,54 +1,80 @@
 ﻿@model IEnumerable<UBB_SE_2026_923_2.Models.Shift>
 @{
     ViewData["Title"] = "Shift Management";
+    var selectedShiftDate = ViewBag.SelectedShiftDate as string ?? DateTime.Today.ToString("yyyy-MM-dd");
 }
 
-<h2>Shift Management</h2>
-
-<div class="mb-3">
-    <a asp-action="Create" class="btn btn-primary">Schedule New Shift</a>
-    <a asp-action="Salary" class="btn btn-success">Compute Salaries</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Shift Management</h2>
+    <div class="d-flex gap-2">
+        <a asp-action="Create" class="btn btn-primary">Create Shift</a>
+        <a asp-action="Salary" class="btn btn-success">Compute Salary</a>
+    </div>
 </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Staff Name</th>
-            <th>Location</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var shift in Model)
-        {
-            <tr>
-                <td>@(shift.AppointedStaff?.FirstName) @(shift.AppointedStaff?.LastName)</td>
-                <td>@shift.Location</td>
-                <td>@shift.StartTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
-                <td>@shift.EndTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
-                <td>
-                    <span class="badge @(shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.ACTIVE ? "bg-success" : (shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.CANCELLED ? "bg-danger" : "bg-secondary"))">
-                        @shift.Status
-                    </span>
-                </td>
-                <td>
-                    @if (shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.SCHEDULED)
-                    {
-                        <form asp-action="Activate" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-success">Activate</button>
-                        </form>
-                    }
-                    @if (shift.Status != UBB_SE_2026_923_2.Models.ShiftStatus.CANCELLED)
-                    {
-                        <form asp-action="Cancel" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this shift?');">Cancel</button>
-                        </form>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+@if (TempData["ShiftStatusMessage"] != null)
+{
+    <div class="alert alert-info py-2">@TempData["ShiftStatusMessage"]</div>
+}
+
+<form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-sm-6 col-md-4 col-lg-3">
+        <label for="shiftDate" class="form-label">Shift Date</label>
+        <input id="shiftDate" type="date" name="shiftDate" value="@selectedShiftDate" class="form-control" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Show Shifts</button>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-light border">No shifts scheduled for the selected date.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Staff Name</th>
+                    <th>Location</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var shift in Model)
+                {
+                    <tr>
+                        <td>@(shift.AppointedStaff?.FirstName) @(shift.AppointedStaff?.LastName)</td>
+                        <td>@shift.Location</td>
+                        <td>@shift.StartTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
+                        <td>@shift.EndTime.ToString(UBB_SE_2026_923_2.Web.Controllers.ShiftManagementController.DefaultDateTimeFormat)</td>
+                        <td>
+                            <span class="badge @(shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.ACTIVE ? "bg-success" : (shift.Status == UBB_SE_2026_923_2.Models.ShiftStatus.CANCELLED ? "bg-danger" : "bg-secondary"))">
+                                @shift.Status
+                            </span>
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <form asp-action="Activate" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
+                                <input type="hidden" name="shiftDate" value="@selectedShiftDate" />
+                                <button type="submit" class="btn btn-sm btn-outline-success">Set Active</button>
+                            </form>
+                            <form asp-action="Cancel" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
+                                <input type="hidden" name="shiftDate" value="@selectedShiftDate" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this shift?');">Cancel</button>
+                            </form>
+                            <form asp-action="AutoReassign" asp-route-shiftId="@shift.Id" method="post" class="d-inline">
+                                <input type="hidden" name="shiftDate" value="@selectedShiftDate" />
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Auto-Reassign</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

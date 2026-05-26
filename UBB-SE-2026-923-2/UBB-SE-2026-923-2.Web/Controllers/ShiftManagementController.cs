@@ -43,9 +43,13 @@ public class ShiftManagementController : Controller
 
     [HttpGet]
     [Authorize(Roles = AdminManagerRoles)]
-    public IActionResult Index()
+    public IActionResult Index(DateTime? shiftDate)
     {
-        var shifts = this.salaryComputationService.GetAllShifts();
+        var selectedDate = shiftDate?.Date ?? DateTime.Today;
+        ViewBag.SelectedShiftDate = selectedDate.ToString("yyyy-MM-dd");
+        var shifts = this.shiftManagementService.GetDailyShifts(selectedDate)
+            .OrderBy(shift => shift.StartTime)
+            .ToList();
         return this.View(shifts);
     }
 
@@ -154,10 +158,11 @@ public class ShiftManagementController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = AdminManagerRoles)]
-    public IActionResult Cancel(int shiftId)
+    public IActionResult Cancel(int shiftId, DateTime? shiftDate)
     {
         this.shiftManagementService.CancelShift(shiftId);
-        return this.RedirectToAction(nameof(Index));
+        this.TempData["ShiftStatusMessage"] = $"The shift #{shiftId} was cancelled.";
+        return this.RedirectToShiftIndex(shiftDate);
     }
 
     [HttpPost]
@@ -173,10 +178,40 @@ public class ShiftManagementController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = AdminManagerRoles)]
-    public IActionResult Activate(int shiftId)
+    public IActionResult Activate(int shiftId, DateTime? shiftDate)
     {
         this.shiftManagementService.SetShiftActive(shiftId);
-        return this.RedirectToAction(nameof(Index));
+        this.TempData["ShiftStatusMessage"] = $"The shift #{shiftId} was marked as active.";
+        return this.RedirectToShiftIndex(shiftDate);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AdminManagerRoles)]
+    public IActionResult AutoReassign(int shiftId, DateTime? shiftDate)
+    {
+        var selectedDate = shiftDate?.Date ?? DateTime.Today;
+        bool IsMatchingShift(Shift shift) => shift.Id == shiftId;
+        var shift = this.shiftManagementService.GetDailyShifts(selectedDate).FirstOrDefault(IsMatchingShift)
+            ?? this.salaryComputationService.GetAllShifts().FirstOrDefault(IsMatchingShift);
+
+        if (shift == null)
+        {
+            this.TempData["ShiftStatusMessage"] = "Shift not found.";
+            return this.RedirectToShiftIndex(shiftDate);
+        }
+
+        var replacement = this.shiftManagementService.FindStaffReplacements(shift).FirstOrDefault();
+        if (replacement != null && this.shiftManagementService.ReassignShift(shift, replacement))
+        {
+            this.TempData["ShiftStatusMessage"] = "The automatic searching of a replacement has been triggered.";
+        }
+        else
+        {
+            this.TempData["ShiftStatusMessage"] = "No eligible replacement was found.";
+        }
+
+        return this.RedirectToShiftIndex(shiftDate);
     }
 
     [HttpPost]
@@ -282,5 +317,11 @@ public class ShiftManagementController : Controller
             QualifiedStaff = staff,
             TodayShifts = this.shiftManagementService.GetDailyShifts(DateTime.Today).OrderBy(shift => shift.StartTime).ToList(),
         };
+    }
+
+    private IActionResult RedirectToShiftIndex(DateTime? shiftDate)
+    {
+        var selectedDate = shiftDate?.Date ?? DateTime.Today;
+        return this.RedirectToAction(nameof(Index), new { shiftDate = selectedDate.ToString("yyyy-MM-dd") });
     }
 }
