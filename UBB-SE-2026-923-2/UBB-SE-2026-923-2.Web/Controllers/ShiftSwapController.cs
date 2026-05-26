@@ -20,30 +20,58 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         private int? GetCurrentStaffId()
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(userEmail)) return null;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return null;
+            }
 
             var doctors = _shiftSwapService.GetAllDoctors();
             var matchingDoctor = doctors.FirstOrDefault(doctor => doctor.Email == userEmail);
             return matchingDoctor?.StaffID;
         }
 
-        public ActionResult Index(int? selectedShiftId)
+        private int? ResolveSelectedDoctorId(int? selectedDoctorId, IReadOnlyList<Doctor> doctors)
         {
-            var staffId = GetCurrentStaffId();
-            if (staffId == null)
-                return View(new ShiftSwapIndexViewModel());
+            if (selectedDoctorId.HasValue && doctors.Any(doctor => doctor.StaffID == selectedDoctorId.Value))
+            {
+                return selectedDoctorId.Value;
+            }
 
-            var allSwaps = _shiftSwapService.GetAllShiftSwapRequests(); // you need to expose this
+            var currentStaffId = GetCurrentStaffId();
+            if (currentStaffId.HasValue && doctors.Any(doctor => doctor.StaffID == currentStaffId.Value))
+            {
+                return currentStaffId.Value;
+            }
+
+            return doctors.FirstOrDefault()?.StaffID;
+        }
+
+        public ActionResult Index(int? selectedDoctorId, int? selectedShiftId)
+        {
+            var doctors = _shiftSwapService.GetAllDoctors();
+            var staffId = ResolveSelectedDoctorId(selectedDoctorId, doctors);
+            if (staffId == null)
+            {
+                return View(new ShiftSwapIndexViewModel
+                {
+                    Doctors = doctors,
+                    StatusMessage = "No doctors found in database.",
+                });
+            }
+
+            var allSwaps = _shiftSwapService.GetAllShiftSwapRequests();
 
             var shiftSwapIndexViewModel = new ShiftSwapIndexViewModel
             {
+                Doctors = doctors,
                 FutureShifts = _shiftSwapService.GetFutureShiftsForStaff(staffId.Value),
+                SelectedDoctorId = staffId.Value,
                 SelectedShiftId = selectedShiftId,
                 StatusMessage = TempData["StatusMessage"]?.ToString() ?? string.Empty,
                 PendingShiftIds = allSwaps
                     .Where(shift => shift.Requester?.StaffID == staffId.Value && shift.Status == ShiftSwapRequestStatus.PENDING)
                     .Select(shift => shift.Shift?.Id ?? 0)
-                    .ToHashSet()
+                    .ToHashSet(),
             };
 
             if (selectedShiftId.HasValue)
@@ -61,7 +89,9 @@ namespace UBB_SE_2026_923_2.Web.Controllers
                         .GetEligibleSwapColleaguesForShift(staffId.Value, selectedShiftId.Value, out var error);
 
                     if (!string.IsNullOrEmpty(error))
+                    {
                         shiftSwapIndexViewModel.StatusMessage = error;
+                    }
                 }
             }
 
@@ -70,9 +100,10 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult RequestSwap(int shiftId, int colleagueId)
+        public ActionResult RequestSwap(int? selectedDoctorId, int shiftId, int colleagueId)
         {
-            var staffId = GetCurrentStaffId();
+            var doctors = _shiftSwapService.GetAllDoctors();
+            var staffId = ResolveSelectedDoctorId(selectedDoctorId, doctors);
             if (staffId == null)
             {
                 TempData["StatusMessage"] = "Could not find your staff profile.";
@@ -81,28 +112,38 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             _shiftSwapService.RequestShiftSwap(staffId.Value, shiftId, colleagueId, out var message);
             TempData["StatusMessage"] = message;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { selectedDoctorId = staffId.Value, selectedShiftId = shiftId });
         }
 
-        public ActionResult Incoming()
+        public ActionResult Incoming(int? selectedDoctorId)
         {
-            var staffId = GetCurrentStaffId();
+            var doctors = _shiftSwapService.GetAllDoctors();
+            var staffId = ResolveSelectedDoctorId(selectedDoctorId, doctors);
             if (staffId == null)
             {
-                ViewBag.StatusMessage = "Could not find your staff profile.";
-                return View(new List<ShiftSwapRequest>());
+                return View(new IncomingSwapRequestsViewModel
+                {
+                    Doctors = doctors,
+                    StatusMessage = "No doctors found in database.",
+                });
             }
 
-            ViewBag.StatusMessage = TempData["StatusMessage"]?.ToString() ?? string.Empty;
             var requests = _shiftSwapService.GetIncomingSwapRequests(staffId.Value);
-            return View(requests);
+            return View(new IncomingSwapRequestsViewModel
+            {
+                Doctors = doctors,
+                Requests = requests,
+                SelectedDoctorId = staffId.Value,
+                StatusMessage = TempData["StatusMessage"]?.ToString() ?? string.Empty,
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Accept(int swapId, int? selectedDoctorId)
         {
-            var staffId = GetCurrentStaffId();
+            var doctors = _shiftSwapService.GetAllDoctors();
+            var staffId = ResolveSelectedDoctorId(selectedDoctorId, doctors);
             if (staffId == null || swapId <= 0)
             {
                 TempData["StatusMessage"] = "Invalid request.";
@@ -118,7 +159,8 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Reject(int swapId, int? selectedDoctorId)
         {
-            var staffId = GetCurrentStaffId();
+            var doctors = _shiftSwapService.GetAllDoctors();
+            var staffId = ResolveSelectedDoctorId(selectedDoctorId, doctors);
             if (staffId == null || swapId <= 0)
             {
                 TempData["StatusMessage"] = "Invalid request.";

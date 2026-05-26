@@ -16,7 +16,7 @@ namespace UBB_SE_2026_923_2.Migrations
         
                     INSERT INTO dbo.Staff (StaffID, Email, PasswordHash, Role, Department, FirstName, LastName, ContactInfo, Available, LicenseNumber, Specialization, Status, Certification, YearsOfExperience, HourlyRate) VALUES
                     (1, N'house@hospital.local',  N'hash', N'Doctor',     N'Diagnostics',  N'Gregory', N'House',  N'555-0101', 1, N'LIC-1001', N'Diagnostician', N'AVAILABLE', N'Board Certified', 10, 150.0),
-                    (2, N'wilson@hospital.local', N'hash', N'Doctor',     N'Oncology',     N'James',   N'Wilson', N'555-0102', 1, N'LIC-1002', N'Oncology',      N'AVAILABLE', N'Board Certified',  8, 140.0),
+                    (2, N'wilson@hospital.local', N'hash', N'Doctor',     N'Oncology',     N'James',   N'Wilson', N'555-0102', 1, N'LIC-1002', N'Diagnostician', N'AVAILABLE', N'Board Certified',  8, 140.0),
                     (3, N'cuddy@hospital.local',  N'hash', N'Doctor',     N'Admin',        N'Lisa',    N'Cuddy',  N'555-0103', 1, N'LIC-1003', N'Surgery',       N'AVAILABLE', N'Board Certified', 12, 160.0),
                     (4, N'jamie@hospital.local',  N'hash', N'Pharmacist', N'Pharmacy',     N'Jamie',   N'Chen',   N'555-0104', 1, N'LIC-1004', N'Nurse',         N'AVAILABLE', N'Compounding',      4,  80.0),
                     (5, N'pat@hospital.local',    N'hash', N'Pharmacist', N'Pharmacy',     N'Pat',     N'Moore',  N'555-0105', 1, N'LIC-1005', N'Doctor',        N'AVAILABLE', N'Hospital',         6,  85.0);
@@ -43,13 +43,13 @@ namespace UBB_SE_2026_923_2.Migrations
                 -- Shifts
                 IF NOT EXISTS (SELECT 1 FROM dbo.Shifts)
                 BEGIN
-                    DECLARE @TodayStart DATETIME2 = CAST(CAST(SYSDATETIME() AS DATE) AS DATETIME2);
+                    DECLARE @TomorrowStart DATETIME2 = DATEADD(DAY, 1, CAST(CAST(SYSDATETIME() AS DATE) AS DATETIME2));
                     INSERT INTO dbo.Shifts (StaffId, Location, StartTime, EndTime, Status) VALUES
-                    (1, N'Clinic',   @TodayStart, DATEADD(HOUR,8,@TodayStart), N'ACTIVE'),
-                    (2, N'ER',       @TodayStart, DATEADD(HOUR,8,@TodayStart), N'SCHEDULED'),
-                    (3, N'ER',       @TodayStart, DATEADD(HOUR,8,@TodayStart), N'SCHEDULED'),
-                    (4, N'Pharmacy', @TodayStart, DATEADD(HOUR,8,@TodayStart), N'ACTIVE'),
-                    (5, N'Pharmacy', @TodayStart, DATEADD(HOUR,8,@TodayStart), N'SCHEDULED');
+                    (1, N'Clinic',   DATEADD(HOUR, 9, @TomorrowStart), DATEADD(HOUR, 17, @TomorrowStart), N'SCHEDULED'),
+                    (2, N'ER',       DATEADD(HOUR, 18, @TomorrowStart), DATEADD(HOUR, 23, @TomorrowStart), N'SCHEDULED'),
+                    (3, N'ER',       DATEADD(HOUR, 9, @TomorrowStart), DATEADD(HOUR, 17, @TomorrowStart), N'SCHEDULED'),
+                    (4, N'Pharmacy', DATEADD(HOUR, 9, @TomorrowStart), DATEADD(HOUR, 17, @TomorrowStart), N'SCHEDULED'),
+                    (5, N'Pharmacy', DATEADD(HOUR, 18, @TomorrowStart), DATEADD(HOUR, 23, @TomorrowStart), N'SCHEDULED');
                 END
 
                -- Substances

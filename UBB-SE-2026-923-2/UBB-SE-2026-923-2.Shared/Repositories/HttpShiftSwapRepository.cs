@@ -29,7 +29,9 @@ namespace UBB_SE_2026_923_2.Repositories
             {
                 ShiftId = request.Shift.Id,
                 RequesterId = request.Requester.StaffID,
-                ColleagueId = request.Colleague.StaffID
+                ColleagueId = request.Colleague.StaffID,
+                RequestedAt = request.RequestedAt == default ? DateTime.UtcNow : request.RequestedAt,
+                Status = request.Status,
             };
 
             var httpResponse = this.httpClient.PostAsJsonAsync(BasePath, payload).GetAwaiter().GetResult();

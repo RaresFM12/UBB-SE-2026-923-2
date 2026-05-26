@@ -26,7 +26,7 @@ public class ShiftSwapsController : ControllerBase
             r.Status,
             ShiftId = r.Shift.Id,
             RequesterId = r.Requester.StaffID,
-            ColleagueId = r.Colleague.StaffID
+            ColleagueId = r.Colleague.StaffID,
         });
         return Ok(result);
     }
@@ -36,7 +36,9 @@ public class ShiftSwapsController : ControllerBase
     {
         var swap = this.repository.GetShiftSwapRequestById(swapId);
         if (swap is null)
+        {
             return this.NotFound();
+        }
 
         return this.Ok(new
         {
@@ -45,19 +47,20 @@ public class ShiftSwapsController : ControllerBase
             swap.Status,
             ShiftId = swap.Shift.Id,
             RequesterId = swap.Requester.StaffID,
-            ColleagueId = swap.Colleague.StaffID
+            ColleagueId = swap.Colleague.StaffID,
         });
     }
 
     [HttpPost]
     public ActionResult<int> Create([FromBody] CreateShiftSwapRequest request)
     {
+        var requestedAt = request.RequestedAt == default ? DateTime.UtcNow : request.RequestedAt;
         var shiftSwapRequest = new ShiftSwapRequest
         {
             Shift = new Shift { Id = request.ShiftId },
             Requester = new Staff { StaffID = request.RequesterId },
             Colleague = new Staff { StaffID = request.ColleagueId },
-            RequestedAt = request.RequestedAt,
+            RequestedAt = requestedAt,
             Status = request.Status,
         };
         var id = this.repository.AddShiftSwapRequest(shiftSwapRequest);

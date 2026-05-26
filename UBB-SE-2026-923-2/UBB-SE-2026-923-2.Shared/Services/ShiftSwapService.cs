@@ -34,10 +34,10 @@ namespace UBB_SE_2026_923_2.Services
         public List<Shift> GetFutureShiftsForStaff(int staffId)
         {
             var allShifts = this.shiftRepository.GetAllShifts();
+            var now = DateTime.Now;
 
             bool IsFutureShiftForStaff(Shift shift) =>
-                shift.AppointedStaff.StaffID == staffId && shift.StartTime > DateTime.UtcNow;
-            DateTime SortKey(Shift shift) => shift.StartTime;
+                shift.AppointedStaff.StaffID == staffId && shift.StartTime > now;
 
             return allShifts.Where(IsFutureShiftForStaff).OrderBy(shifts => shifts.StartTime).ToList();
         }
