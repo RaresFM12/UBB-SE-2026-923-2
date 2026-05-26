@@ -7,9 +7,9 @@
     var pageTitle = isAdmin ? "Pharmacy Schedule" : "See Schedule";
     ViewData["Title"] = pageTitle;
     var selectedPharmacistId = ViewBag.SelectedPharmacistId as int?;
-    var mode = ViewBag.Mode as string ?? "Daily";
+    var mode = ViewBag.Mode as string ?? "Weekly";
     var selectedDate = ViewBag.SelectedDate as string ?? DateTime.Today.ToString("yyyy-MM-dd");
-    var selectedDateText = ViewBag.SelectedDateText as string ?? DateTime.Today.ToString("dd MMM yyyy");
+    var selectedDateText = ViewBag.SelectedDateText as string ?? $"Week of {DateTime.Today:dd MMM yyyy}";
     var previousButtonText = ViewBag.PreviousButtonText as string ?? "Previous";
     var nextButtonText = ViewBag.NextButtonText as string ?? "Next";
     var isEmpty = Model == null || !Model.Any();

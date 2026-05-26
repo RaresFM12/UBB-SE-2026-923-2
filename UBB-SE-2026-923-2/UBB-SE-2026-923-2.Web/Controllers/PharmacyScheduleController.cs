@@ -28,7 +28,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
         public async Task<IActionResult> Index(
             int? selectedPharmacistId,
             DateTime? selectedDate,
-            string mode = "Daily",
+            string mode = "Weekly",
             string nav = null)
         {
             var pharmacists = _scheduleService.GetPharmacists();
@@ -37,10 +37,18 @@ namespace UBB_SE_2026_923_2.Web.Controllers
 
             int? effectiveStaffId;
 
-            if (User.IsInRole("Admin") || User.IsInRole("Pharmacist"))
-                effectiveStaffId = selectedPharmacistId ?? GetCurrentPharmacistId();
+            if (selectedPharmacistId.HasValue)
+            {
+                effectiveStaffId = selectedPharmacistId;
+            }
+            else if (User.IsInRole("Admin"))
+            {
+                effectiveStaffId = pharmacists.FirstOrDefault()?.StaffID;
+            }
             else
+            {
                 effectiveStaffId = GetCurrentPharmacistId();
+            }
 
             ViewBag.SelectedPharmacistId = effectiveStaffId;
 
@@ -58,17 +66,17 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             {
                 int diff = (7 + (baseDate.DayOfWeek - DayOfWeek.Monday)) % 7;
                 rangeStart = baseDate.AddDays(-diff).Date;
-                rangeEnd = rangeStart.AddDays(6);
+                rangeEnd = rangeStart.AddDays(7);
             }
             else
             {
                 rangeStart = baseDate.Date;
-                rangeEnd = baseDate.Date;
+                rangeEnd = rangeStart.AddDays(1);
             }
 
             ViewBag.SelectedDate = baseDate.ToString("yyyy-MM-dd");
             ViewBag.SelectedDateText = mode == "Weekly"
-                ? $"{rangeStart:dd MMM} - {rangeEnd:dd MMM yyyy}"
+                ? $"Week of {rangeStart:dd MMM yyyy}"
                 : baseDate.ToString("dd MMM yyyy");
             ViewBag.Mode = mode;
             ViewBag.PreviousButtonText = mode == "Weekly" ? "Previous Week" : "Previous";
@@ -77,7 +85,7 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             if (effectiveStaffId == null)
                 return View(new List<Shift>());
 
-            var shifts = await _scheduleService.GetShiftsAsync(effectiveStaffId.Value, rangeStart, rangeEnd.AddDays(1).AddSeconds(-1));
+            var shifts = await _scheduleService.GetShiftsAsync(effectiveStaffId.Value, rangeStart, rangeEnd);
             return View(shifts);
         }
     }

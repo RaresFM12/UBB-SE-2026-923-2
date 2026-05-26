@@ -49,8 +49,12 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             ViewBag.Doctors = doctors;
 
             int? effectiveDoctorId = selectedDoctorId;
-            if (!effectiveDoctorId.HasValue && !User.IsInRole("Admin"))
-                effectiveDoctorId = GetCurrentDoctorStaffId();
+            if (!effectiveDoctorId.HasValue)
+            {
+                effectiveDoctorId = User.IsInRole("Admin")
+                    ? doctors.FirstOrDefault()?.StaffID
+                    : GetCurrentDoctorStaffId();
+            }
 
             if (errorMessage == null && doctors.Count == 0)
                 errorMessage = "No doctors available.";
@@ -71,12 +75,12 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             {
                 int diff = (7 + (baseDate.DayOfWeek - DayOfWeek.Monday)) % 7;
                 rangeStart = baseDate.AddDays(-diff).Date;
-                rangeEnd = rangeStart.AddDays(6);
+                rangeEnd = rangeStart.AddDays(7);
             }
             else
             {
                 rangeStart = baseDate.Date;
-                rangeEnd = baseDate.Date;
+                rangeEnd = rangeStart.AddDays(1);
             }
 
             ViewBag.SelectedDate = baseDate.ToString("yyyy-MM-dd");
@@ -94,14 +98,17 @@ namespace UBB_SE_2026_923_2.Web.Controllers
             {
                 try
                 {
-                    var shifts = _shiftSwapService.GetFutureShiftsForStaff(effectiveDoctorId.Value);
+                    var shifts = await _appointmentService.GetShiftsForStaffInRangeAsync(
+                        effectiveDoctorId.Value,
+                        rangeStart,
+                        rangeEnd);
                     var appointmentsResult = await _appointmentService.GetAppointmentsInRangeAsync(
-                        effectiveDoctorId.Value, rangeStart, rangeEnd.AddDays(1).AddSeconds(-1));
+                        effectiveDoctorId.Value,
+                        rangeStart,
+                        rangeEnd);
 
                     appointments = appointmentsResult.ToList();
-                    filteredShifts = shifts
-                        .Where(s => s.StartTime.Date >= rangeStart && s.StartTime.Date <= rangeEnd)
-                        .ToList();
+                    filteredShifts = shifts.ToList();
                 }
                 catch (Exception exception)
                 {
